@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-kpqRvVcJNgX8yjWpcwUoNXRyasS3djPBh3TCCcJsnic='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-iYAvGACPGCOqw1sZ7sxa9XVLmwjOIEduSG/LmwJRieY='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Places of Worship | Guyana Research Map</title>
+  <title>religionmap.org · Guyana</title>
   <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet" integrity="sha384-p5cy4wHtKSqjnLUNjQ+8ffCwUp0vlLS+6lg1lc3qqXax2E1EmVCMCAimU+R0MOZH" crossorigin="anonymous">
   <link href="../../shared/map-shell.css?v=20260904a" rel="stylesheet">
   <link href="../../global/styles/maplibre-flat.css?v=20261015e" rel="stylesheet">
@@ -45,7 +45,7 @@
     // contributors, represented year 2017, joined one-to-one by ISO 3166-2 code.
     window.REGION_CONFIG = {
       countryCode: "GY",
-      title: "Places of Worship | Guyana Research Map",
+      title: "religionmap.org · Guyana",
       // guyana spans lon -61.41..-56.47 by lat 1.17..8.53 across the ten
       // regions; centre on the regions and open at a zoom that fits the full
       // extent beside the census panels
@@ -109,7 +109,7 @@
         ]
       },
       wordmarkLinks: [
-        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+        { id: "wordmark-global", label: "religionmap.org", href: "../../global/", title: "Open the global map" }
       ],
       censusSourceAttribution: 'Census religion © <a href="https://statisticsguyana.gov.gy/" target="_blank" rel="noopener">Bureau of Statistics, Guyana</a>, 2012 Population and Housing Census, Final Compendium 2 (Population Composition), Table 2.19. Reused under the BoS Open Licence Agreement. This table was adapted from the Bureau of Statistics, Guyana, which is licenced under the Central Statistical Office\'s Open Licence Agreement. &middot; Boundaries © <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries</a> GUY ADM1 (Open Data Commons Open Database License 1.0, ODbL), source OpenStreetMap contributors',
       censusFlagNote: "* Values are the source's published counts and shares from the 2012 Census Compendium 2 Table 2.19 (integer counts, thirteen categories, closing exactly at both national margins to 746,955). The table carries no Not Stated line: the Bureau of Statistics prorated the Not-Stated, No-Contact, and Institutional persons across the thirteen categories, and the affiliation and no-religion shares therefore sum to 100 by construction. Single wave (2012), region level; no change metric. Census reuse under the BoS Open Licence Agreement."

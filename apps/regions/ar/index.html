@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-dCz3lXuSlwzVGJUnoKZNiwnmW0iPh5GU3pEdYOEtj8o='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-dS6Qu5x3tHjifgGCJdfW0zAOtM/3Rb8h37MyfEMxC6M='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Places of Worship | Argentina Research Map</title>
+  <title>religionmap.org · Argentina</title>
   <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet" integrity="sha384-p5cy4wHtKSqjnLUNjQ+8ffCwUp0vlLS+6lg1lc3qqXax2E1EmVCMCAimU+R0MOZH" crossorigin="anonymous">
   <link href="../../shared/map-shell.css?v=20260904a" rel="stylesheet">
   <link href="../../global/styles/maplibre-flat.css?v=20261015e" rel="stylesheet">
@@ -64,7 +64,7 @@
     // Aires partidos and Centro takes the rest of Buenos Aires province.
     window.REGION_CONFIG = {
       countryCode: "AR",
-      title: "Places of Worship | Argentina Research Map",
+      title: "religionmap.org · Argentina",
       dataNoun: "Survey",
       // boundary bbox verified numerically from the six-feature layer:
       // lon -73.57..-53.64, lat -55.06..-21.78; centre on [-63.6, -38.4].
@@ -136,7 +136,7 @@
         ]
       },
       wordmarkLinks: [
-        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+        { id: "wordmark-global", label: "religionmap.org", href: "../../global/", title: "Open the global map" }
       ],
       censusSourceAttribution: 'Survey religion &copy; <a href="https://www.ceil-conicet.gov.ar/2019/11/segunda-encuesta-nacional-sobre-creencias-y-actitudes-religiosas-en-la-argentina/" target="_blank" rel="noopener">CEIL-CONICET</a>, Encuesta Nacional sobre Creencias y Actitudes Religiosas en Argentina &mdash; Primera Encuesta 2008 and Segunda Encuesta 2019 (Informe n&ordm; 25). The 2019 regional table is reused under Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0) via the peer-reviewed article <a href="https://www.redalyc.org/journal/3872/387266813004/" target="_blank" rel="noopener">Mallimaci, Esquivel &amp; Gim&eacute;nez B&eacute;liveau (2020)</a>, <em>Sociedad y Religi&oacute;n</em> 30(55), CONICET. CEIL-CONICET confirmed reuse of both Informes on 2026-07-13 (Programa Sociedad, Cultura y Religi&oacute;n coordination), requesting this citation: Mallimaci, F., Gim&eacute;nez B&eacute;liveau, V., Esquivel, J. C., &amp; Irraz&aacute;bal, G. (2019). Sociedad y religi&oacute;n en movimiento. Segunda Encuesta Nacional sobre Creencias y Actitudes Religiosas en la Argentina. <em>Informe de Investigaci&oacute;n</em>, 25, 1-72. &middot; Boundaries &copy; <a href="https://data.humdata.org/dataset/cod-ab-arg" target="_blank" rel="noopener">COD-AB Argentina ADM2</a> (UNHCR 2017, source Instituto Geogr&aacute;fico Nacional), CC BY-IGO, custom dissolve to six macro-regions. &middot; Project work Creative Commons Attribution-NonCommercial-ShareAlike 4.0 (CC BY-NC-SA 4.0)',
       censusFlagNote: "* These are CEIL-CONICET survey percentages with sampling error, not census counts. The national margin is +/- 2% at 95% (Total País only); each region rests on a subsample of roughly 400 and carries a larger, unpublished margin. Both waves publish one-decimal percentages only, no counts. For 2019 the affiliation share is a disclosed lower bound (the source chart prints only values above 2%), so the two 2019 shares need not sum to 100. Two waves (2008, 2019), each a separate cross-section; no change metric (the frames differ and the 2019 affiliation is a lower bound). The 2019 reuse is CC BY-NC-SA 4.0 via the peer-reviewed article, aligned with the project's own CC BY-NC-SA 4.0 licence; CEIL-CONICET confirmed reuse of both waves on 2026-07-13, requesting the Mallimaci, Giménez Béliveau, Esquivel & Irrazábal (2019) Informe 25 citation carried in the attribution. Boundaries are COD-AB Argentina ADM2 (UNHCR 2017), CC BY-IGO."

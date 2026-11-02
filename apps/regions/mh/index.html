@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-ZxVKGlpTBk+PEyNPuwWgySTZk92oTCwUBInN4hmSuQs='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-AWvt/VmOYKM6DrsA9hLkBzyPKQT8XpyoYxrPBHveQKU='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Places of Worship | Marshall Islands Research Map</title>
+  <title>religionmap.org · Marshall Islands</title>
   <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet" integrity="sha384-p5cy4wHtKSqjnLUNjQ+8ffCwUp0vlLS+6lg1lc3qqXax2E1EmVCMCAimU+R0MOZH" crossorigin="anonymous">
   <link href="../../shared/map-shell.css?v=20260904a" rel="stylesheet">
   <link href="../../global/styles/maplibre-flat.css?v=20261015e" rel="stylesheet">
@@ -69,7 +69,7 @@
     // Islands place-of-worship snapshot ships with the product.
     window.REGION_CONFIG = {
       countryCode: "MH",
-      title: "Places of Worship | Marshall Islands Research Map",
+      title: "religionmap.org · Marshall Islands",
       // extent lon 160.9..172.2E (Enewetak to Mili), lat 4.6..14.6N (Ebon to the
       // northern atolls); wholly east-positive, no dateline handling. camera on
       // the extent midpoint to frame both the Ralik and Ratak chains beside the
@@ -134,7 +134,7 @@
         ]
       },
       wordmarkLinks: [
-        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+        { id: "wordmark-global", label: "religionmap.org", href: "../../global/", title: "Open the global map" }
       ],
       // the 2021 Census Volume 1 carries an explicit EPPSO/SPC
       // partial-reproduction-with-acknowledgement clause; derived atoll summaries

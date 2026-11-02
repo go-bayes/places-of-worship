@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-2uder0YMkeDzBzrxw6qoeNmxrWnlf17ksF8AH1/azn0='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-hjMi5uxzzR/Q87ZAHJYecgJYS+3CtnqqGtx61mqRwJs='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Places of Worship | Switzerland Research Map</title>
+  <title>religionmap.org · Switzerland</title>
   <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet" integrity="sha384-p5cy4wHtKSqjnLUNjQ+8ffCwUp0vlLS+6lg1lc3qqXax2E1EmVCMCAimU+R0MOZH" crossorigin="anonymous">
   <link href="../../shared/map-shell.css?v=20260904a" rel="stylesheet">
   <link href="../../global/styles/maplibre-flat.css?v=20261015e" rel="stylesheet">
@@ -32,7 +32,7 @@
     // cells (see the flag note); those cantons render grey for that metric.
     window.REGION_CONFIG = {
       countryCode: "CH",
-      title: "Places of Worship | Switzerland Research Map",
+      title: "religionmap.org · Switzerland",
       center: [8.23, 46.8],
       initialZoom: 6.7,
       censusLevels: {
@@ -103,7 +103,7 @@
         ]
       },
       wordmarkLinks: [
-        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+        { id: "wordmark-global", label: "religionmap.org", href: "../../global/", title: "Open the global map" }
       ],
       censusSourceAttribution: 'Religious affiliation from the <a href="https://www.bfs.admin.ch/" target="_blank" rel="noopener">Swiss Federal Statistical Office (FSO)</a>: federal population census, 1970&ndash;2000, and structural survey, 2010&ndash;2024 &middot; Boundaries from <a href="https://www.swisstopo.admin.ch/" target="_blank" rel="noopener">swisstopo swissBOUNDARIES3D</a> cantons (2026)',
       censusFlagNote: "* Two instruments ship on separate geography levels for the same affiliation construct. The 1970–2000 census level is a full-count federal census; the source reports all years on its current 26-canton frame, and Jura appears in the 1970 row before the 1979 canton creation as a source-provided current-frame roll-up. The 2010–2024 structural survey level is a weighted sample estimate for the permanent resident population aged 15+, with category confidence intervals in the source workbook that the legacy row schema cannot carry; affiliation is null where the source suppresses unknown-affiliation cells for a canton-year. No change metric is shown because no single change label describes both a decennial census and an annual survey. The two levels form separate time series."

@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-wlcfGbbiEEaWBie+ba1hjqRnrCAJAAl4EPL7uXZvh4o='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-hfn9S0TNtWngMQM1nVfNAchNhaJE6KtGqFlmxo/QmBk='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Places of Worship | Kosovo Research Map</title>
+  <title>religionmap.org · Kosovo</title>
   <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet" integrity="sha384-p5cy4wHtKSqjnLUNjQ+8ffCwUp0vlLS+6lg1lc3qqXax2E1EmVCMCAimU+R0MOZH" crossorigin="anonymous">
   <link href="../../shared/map-shell.css?v=20260904a" rel="stylesheet">
   <link href="../../global/styles/maplibre-flat.css?v=20261015e" rel="stylesheet">
@@ -51,7 +51,7 @@
     // boundary is the project's derivation and carries the same share-alike.
     window.REGION_CONFIG = {
       countryCode: "XK",
-      title: "Places of Worship | Kosovo Research Map",
+      title: "religionmap.org · Kosovo",
       // kosovo spans lon 20.01..21.79 by lat 41.86..43.27 across the 38
       // municipalities; centre on the frame and open at a zoom that fits the
       // full extent beside the census panels
@@ -116,7 +116,7 @@
         ]
       },
       wordmarkLinks: [
-        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+        { id: "wordmark-global", label: "religionmap.org", href: "../../global/", title: "Open the global map" }
       ],
       censusSourceAttribution: 'Census religion &copy; <a href="https://ask.rks-gov.net/" target="_blank" rel="noopener">Kosovo Agency of Statistics (KAS)</a>, 2011 and 2024 Population and Housing Census (ASKdata census2024_10, usually resident population). Open reuse grant: "Reuse is authorised provided the source is acknowledged." &middot; Boundaries &copy; <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries</a> XKX ADM2 (Creative Commons Attribution-ShareAlike 2.0, CC BY-SA 2.0), source OpenStreetMap contributors; the simplified municipality boundary is the project\'s derivation and is redistributed under the same CC BY-SA 2.0 share-alike',
       censusFlagNote: "* Universe: usually resident population, all ages, in both waves. The six census categories (Islam, Orthodox, Catholic, Others, No religious affiliation, Prefers not to answer) are identical across waves; religious affiliation % sums Islam, Orthodox, Catholic, and Others, no religion % is the single No-religious-affiliation line, and Prefers not to answer stays in the denominator and in neither slot; the two shares therefore need not sum to 100. Each wave reconciles exactly at both margins (2011 national 1,739,825 on 34 enumerated municipalities; 2024 national 1,585,566 on all 38). The four northern Serb-majority municipalities (Leposaviq, Zubin Potok, Zveqan, North Mitrovica) are unenumerated in 2011 (boycott; North Mitrovica was carved from Mitrovica in 2013 and did not yet exist as a separate municipality), rendered as no-data, never as zero, and only partially enumerated in 2024 (continued boycott), rendered as published. No cross-wave municipal change is claimed across this coverage break. Census data ship under the KAS open reuse grant with source acknowledgement; boundaries are geoBoundaries XKX ADM2 (CC BY-SA 2.0, source OpenStreetMap contributors), the simplified boundary carrying the same share-alike."

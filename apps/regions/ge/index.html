@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-fJ28fIEY4hLfyOAvDUHTjOo0nbGtjAFlT6thWwBndOk='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-MpaUBhgG08pgkSlujNqQ/eahpOrV9Z5Q2U3e5QMBqKw='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Places of Worship | Georgia Research Map</title>
+  <title>religionmap.org · Georgia</title>
   <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet" integrity="sha384-p5cy4wHtKSqjnLUNjQ+8ffCwUp0vlLS+6lg1lc3qqXax2E1EmVCMCAimU+R0MOZH" crossorigin="anonymous">
   <link href="../../shared/map-shell.css?v=20260904a" rel="stylesheet">
   <link href="../../global/styles/maplibre-flat.css?v=20261015e" rel="stylesheet">
@@ -71,7 +71,7 @@
     // level.
     window.REGION_CONFIG = {
       countryCode: "GE",
-      title: "Places of Worship | Georgia Research Map",
+      title: "religionmap.org · Georgia",
       // boundary bbox verified numerically from the 12-feature layer:
       // lon 40.007..46.736, lat 41.055..43.587; centre on [43.40, 42.15].
       // the ~6.7 deg lon / ~2.5 deg lat extent fits all twelve regions at z7.
@@ -136,7 +136,7 @@
         ]
       },
       wordmarkLinks: [
-        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+        { id: "wordmark-global", label: "religionmap.org", href: "../../global/", title: "Open the global map" }
       ],
       censusSourceAttribution: 'Census religion &copy; <a href="https://www.geostat.ge/" target="_blank" rel="noopener">National Statistics Office of Georgia (Geostat)</a>, General Population Censuses 2002 and 2014 and 2024 Population Census (region religion tables). Geostat Terms of Use open reuse grant; users should indicate Geostat as a source of information when using data of GEOSTAT. &middot; Boundaries &copy; <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries</a> GEO ADM1 (Creative Commons Attribution 3.0 License, CC BY 3.0), boundary source geoBoundaries, Wikimedia',
       censusFlagNote: "* The construct is census affiliation (each resident's reported religion, whole enumerated population, all ages); it does not measure belief, practice, attendance, or membership. Category frames differ across the three waves and are never merged; no cross-wave category change is claimed, and the comparable spine is the five great-tradition shares. For 2002 the affiliation share is a recorded lower bound (the five named religions only, the 'other religion' residual excluded) and no religion is null (the residual folds no-religion and other-religion together inseparably). For 2014 and 2024, Refusal and Not stated stay in the denominator and in neither share, and the two shares need not sum to 100; the 2014 wave carries verbatim …(≤10) suppression on small affiliation sub-categories, and the two headline shares stay exact. Territorial scope: Geostat does not enumerate Abkhazia or the Tskhinvali Region / former South Ossetia; the 2002 Abkhazia figure is a 1,956-person enumerated fraction, not representative of Abkhazia, 2014 and 2024 exclude the occupied territories, and Shida Kartli is enumerated in its Georgian-controlled part only against a polygon drawn to the full administrative extent. Census reuse under the Geostat Terms of Use open reuse grant."

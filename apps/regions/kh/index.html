@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-IH0UWq4FG3Myx/ud8olRTcE7VGxb7UtqBf0EDjd7ywU='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-qjrRx5CCiPzyxZIKzqNEyqJvbTCU2GyLPW8FFEa9NdQ='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Places of Worship | Cambodia Research Map</title>
+  <title>religionmap.org · Cambodia</title>
   <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet" integrity="sha384-p5cy4wHtKSqjnLUNjQ+8ffCwUp0vlLS+6lg1lc3qqXax2E1EmVCMCAimU+R0MOZH" crossorigin="anonymous">
   <link href="../../shared/map-shell.css?v=20260904a" rel="stylesheet">
   <link href="../../global/styles/maplibre-flat.css?v=20261015e" rel="stylesheet">
@@ -54,7 +54,7 @@
     // note for the runtime caveat.
     window.REGION_CONFIG = {
       countryCode: "KH",
-      title: "Places of Worship | Cambodia Research Map",
+      title: "religionmap.org · Cambodia",
       // boundary bbox verified numerically from the 25-feature layer:
       // lon 102.3338..107.6277, lat 9.9134..14.6902; centroid ≈ [104.98, 12.30].
       // centre on that centroid; the ~5.3 deg lon / ~4.8 deg lat extent fits
@@ -128,7 +128,7 @@
         ]
       },
       wordmarkLinks: [
-        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+        { id: "wordmark-global", label: "religionmap.org", href: "../../global/", title: "Open the global map" }
       ],
       censusSourceAttribution: 'Census religion &copy; <a href="https://nis.gov.kh/" target="_blank" rel="noopener">National Institute of Statistics (NIS)</a>, Ministry of Planning, General Population Census of Cambodia 2019, final report Table 2.5.1, derived summaries reproduced with attribution &middot; Boundaries from <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries</a> KHM ADM1 (ODbL, &copy; OpenStreetMap contributors), represented year 2017',
       censusFlagNote: "* NIS Table 2.5.1 publishes a four-category religion frame (Buddhist, Muslims, Christians, Other) re-based to 100 percent, excluding the count table's Not Stated column; the frame sums to 100 percent by construction. The map shades the reference-group (Buddhist) share and its exact complement, the minority share; the no-religion slot label carries the minority share and no no-religion meaning. The printed one-decimal cells reconcile to 100 within the derived 0.20 pp rounding bound (deviations of ±0.1 pp recorded per row), and no percentage is altered. 2008 is NIS's retabulation onto the current 25-province frame; both waves share one geometry. The change metric is withheld for Mondul Kiri and Ratanak Kiri, which render as no-data on the change view; the report attributes their large 2008→2019 shifts in the Other (highland indigenous) share to reclassification. NIS asserts all rights reserved; the derived category summaries are reproduced with NIS attribution under the project-lead ruling of 2026-07-11 (PI task 9). Boundaries are geoBoundaries KHM ADM1, ODbL with attribution and share-alike."

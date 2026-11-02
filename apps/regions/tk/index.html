@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-QpbaxjwwFIasvhv1XjVdNBKjHkwWxDuhfgbgJ2f6cwg='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-ygIuTnhDS0zNzd8NHwtzQz4T+7isi7EPi9MHju0wPq8='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Places of Worship | Tokelau Research Map</title>
+  <title>religionmap.org · Tokelau</title>
   <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet" integrity="sha384-p5cy4wHtKSqjnLUNjQ+8ffCwUp0vlLS+6lg1lc3qqXax2E1EmVCMCAimU+R0MOZH" crossorigin="anonymous">
   <link href="../../shared/map-shell.css?v=20260904a" rel="stylesheet">
   <link href="../../global/styles/maplibre-flat.css?v=20261015e" rel="stylesheet">
@@ -46,7 +46,7 @@
       pulotuCultures: {
         data: "../_shared/data/pulotu_cultures.geojson?v=20260711c"
       },
-      title: "Places of Worship | Tokelau Research Map",
+      title: "religionmap.org · Tokelau",
       // boundary bbox lon -172.52..-171.18, lat -9.443..-8.533; the three
       // atolls sit about 90-100 km apart across a contiguous west-longitude
       // frame (no antimeridian handling). centre on the boundary centroid and
@@ -110,7 +110,7 @@
         ]
       },
       wordmarkLinks: [
-        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+        { id: "wordmark-global", label: "religionmap.org", href: "../../global/", title: "Open the global map" }
       ],
       censusSourceAttribution: 'Census religion by atoll from the <a href="https://www.tokelau.org.nz/Tokelau+Government/Statistics.html" target="_blank" rel="noopener">Tokelau National Statistics Office (TNSO)</a> and Stats NZ, 2006, 2011 and 2016 &middot; This work is based on/includes Stats NZ\'s data which are licensed by Stats NZ for reuse under the Creative Commons Attribution 4.0 International licence; derived atoll summaries acknowledge TNSO and Stats NZ &middot; Boundaries from <a href="https://www.geoboundaries.org/api/current/gbOpen/TKL/ADM0/" target="_blank" rel="noopener">geoBoundaries</a> TKL ADM0 (CC BY 4.0), Sentinel-2 10m land cover, longitude-clustered to three atoll footprints',
       censusFlagNote: "* Percentages use each atoll's present usual residents from the census religion table (present in Tokelau on census night, not the absentee-inclusive usual-resident total). Religious affiliation sums every named denomination plus Spiritualism and New Age religions; No religion and Not stated stay in the denominator and outside both headline numerators, and the two shares do not add to 100. Affiliation is near 100 percent in every atoll and wave (the national no-religion count is 0, 0 and 1 across 2006, 2011 and 2016), and the near-flat headline is genuine. The substantive subnational structure is denominational (Congregational Christian dominates Atafu and Fakaofo, Roman Catholic dominates Nukunonu), documented in the source census tables and the build manifest and not carried by these headline metrics. In 2006 Nukunonu the Presbyterian and Not Stated cells print as `~` confidentiality suppressions, forced to zero by the printed atoll and national margins and never estimated. Census content is licensed under CC BY 4.0 (Stats NZ and TNSO); the boundary is geoBoundaries TKL ADM0 under CC BY 4.0."

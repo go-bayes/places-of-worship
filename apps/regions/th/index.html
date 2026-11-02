@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-/7jbSWa58gWzVljmbSQWq2cm4ZD01b10xSDv+XC1wzw='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-qWr450Zrg/z9L0rK0DB5lUdp5VAMMvDsh84oPsG+KXA='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Places of Worship | Thailand Research Map</title>
+  <title>religionmap.org · Thailand</title>
   <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet" integrity="sha384-p5cy4wHtKSqjnLUNjQ+8ffCwUp0vlLS+6lg1lc3qqXax2E1EmVCMCAimU+R0MOZH" crossorigin="anonymous">
   <link href="../../shared/map-shell.css?v=20260904a" rel="stylesheet">
   <link href="../../global/styles/maplibre-flat.css?v=20261015e" rel="stylesheet">
@@ -82,7 +82,7 @@
     // 76-unit 2010 frame.
     window.REGION_CONFIG = {
       countryCode: "TH",
-      title: "Places of Worship | Thailand Research Map",
+      title: "religionmap.org · Thailand",
       // Thailand spans lon 97.34..105.64 by lat 5.61..20.46 across the 76
       // provinces; centre on the country and open at a zoom that fits the full
       // north-south extent beside the census panels
@@ -147,7 +147,7 @@
         ]
       },
       wordmarkLinks: [
-        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+        { id: "wordmark-global", label: "religionmap.org", href: "../../global/", title: "Open the global map" }
       ],
       censusSourceAttribution: 'Census religion © <a href="https://www.nso.go.th" target="_blank" rel="noopener">National Statistical Office of Thailand (NSO)</a>, 2010 Population and Housing Census, provincial final reports, Table 4 (Population by religion, sex and area). No reuse licence is stated on the census report PDFs; the NSO open-data catalogue labels its published datasets "Creative Commons Attributions", which governs the catalogue\'s survey datasets rather than these archived census reports. These derived province summaries carry attribution to the National Statistical Office of Thailand under a build-then-ask posture while a reuse confirmation is pending; the licence is under review. &middot; Boundaries © <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries</a> THA ADM1 (Open Data Commons Open Database License 1.0, ODbL; attribution and share-alike to OpenStreetMap contributors), boundary source OpenStreetMap',
       censusFlagNote: "* Single wave (2010), province level, on the 76-unit 2010 census frame; the 76 province Totals sum to 65,981,653 against the WholeKingdom Table 4 total of 65,981,660 (&minus;7 over 66 million), within the NSO's disclosed independent-rounding residuals, and every category reconciles within &plusmn;14 &mdash; carried verbatim, never repaired. The 2010 enumeration predates Bueng Kan province (created March 2011 from eight Nong Khai districts); the NSO's separate Bueng Kan report re-tabulates those districts; summing all 77 provincial reports therefore double-counts them. The product ships the 76-province 2010 frame with the Bueng Kan polygon unioned into Nong Khai (geometrically exact), the vintage documented per feature. Religious affiliation is the province population minus the No religion and Unknown lines; No religion is the single No religion line; the Unknown non-response line stays in the denominator and in neither slot; the two shares therefore need not sum to 100%. The nine verbatim source categories are preserved in the published data. No reuse licence is stated on the census report PDFs; the summaries ship with attribution to the National Statistical Office of Thailand under a build-then-ask posture (reuse confirmation pending, licence under review). Boundaries: geoBoundaries THA ADM1 (ODbL 1.0), boundary source OpenStreetMap contributors."
