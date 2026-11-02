@@ -1,4 +1,8 @@
 const SEARCH_PARAMS = new URLSearchParams(window.location.search);
+// the public product name (jb ruling 2026-11-03): one name on every tab and
+// header, the country after it, and the surface as a muted sub-line; the
+// batch never names the page (jb 2026-09-20)
+const PRODUCT_NAME = "religionmap.org";
 const DEMO_MODE = SEARCH_PARAMS.get("demo") !== "0";
 const INTAKE_ENABLED = DEMO_MODE;
 const PATH_COUNTRY_PARAM = window.location.pathname.match(/\/regions\/([a-z]{2})\//)?.[1] || "";
@@ -19,7 +23,6 @@ const COUNTRY_CONFIGS = {
         nominationSource: "nz_verification_static_map_nomination",
         defaultAssignmentBatchId: "nz-temporal-ra-workpack-001",
         datedPlaces: "../nz/data/dated_places.geojson",
-        assignmentHeading: "New Zealand source-first test",
         // the pin panel's search and coordinate placeholders
         pinExample: { place: "St Paul's, Wellington", lat: -41.2865, lng: 174.7762 },
         // pure entry only: nz assigned tasks keep the guided form
@@ -49,7 +52,6 @@ const COUNTRY_CONFIGS = {
         mapSource: "vu_verification_static_map_workbench",
         nominationSource: "vu_verification_static_map_nomination",
         defaultAssignmentBatchId: "vu-source-first-test-001",
-        assignmentHeading: "Vanuatu source-first test",
         rapidCurrentEntry: true,
         rapidNominationEntry: true,
         temporalLossAction: {
@@ -78,7 +80,6 @@ const COUNTRY_CONFIGS = {
         nominationSource: "al_verification_static_map_nomination",
         defaultAssignmentBatchId: "al-source-first-test-001",
         datedPlaces: "../al/data/dated_places.geojson",
-        assignmentHeading: "Albania verification tasks",
         temporalLossAction: {
             value: "target_year_loss_or_changed_use",
             label: "Present in one target year, absent in a later target year",
@@ -103,7 +104,6 @@ const COUNTRY_CONFIGS = {
         nominationSource: "au_verification_static_map_nomination",
         defaultAssignmentBatchId: "au-source-first-test-001",
         datedPlaces: "../au/data/dated_places.geojson",
-        assignmentHeading: "Australia verification tasks",
         temporalLossAction: {
             value: "target_year_loss_or_changed_use",
             label: "Present in one target year, absent in a later target year",
@@ -128,7 +128,6 @@ const COUNTRY_CONFIGS = {
         nominationSource: "br_verification_static_map_nomination",
         defaultAssignmentBatchId: "br-source-first-test-001",
         datedPlaces: "../br/data/dated_places.geojson",
-        assignmentHeading: "Brazil verification tasks",
         temporalLossAction: {
             value: "target_year_loss_or_changed_use",
             label: "Present in one target year, absent in a later target year",
@@ -153,7 +152,6 @@ const COUNTRY_CONFIGS = {
         nominationSource: "bs_verification_static_map_nomination",
         defaultAssignmentBatchId: "bs-source-first-test-001",
         datedPlaces: "../bs/data/dated_places.geojson",
-        assignmentHeading: "Bahamas verification tasks",
         // single shipped wave: the loss action reads as closed/changed
         // use by the target year rather than a two-year contrast
         temporalLossAction: {
@@ -179,7 +177,6 @@ const COUNTRY_CONFIGS = {
         nominationSource: "ca_verification_static_map_nomination",
         defaultAssignmentBatchId: "ca-source-first-test-001",
         datedPlaces: "../ca/data/dated_places.geojson",
-        assignmentHeading: "Canada verification tasks",
         temporalLossAction: {
             value: "target_year_loss_or_changed_use",
             label: "Present in one target year, absent in a later target year",
@@ -204,7 +201,6 @@ const COUNTRY_CONFIGS = {
         nominationSource: "cz_verification_static_map_nomination",
         defaultAssignmentBatchId: "cz-source-first-test-001",
         datedPlaces: "../cz/data/dated_places.geojson",
-        assignmentHeading: "Czechia verification tasks",
         // single shipped wave: the loss action reads as closed/changed
         // use by the target year rather than a two-year contrast
         temporalLossAction: {
@@ -230,7 +226,6 @@ const COUNTRY_CONFIGS = {
         nominationSource: "gh_verification_static_map_nomination",
         defaultAssignmentBatchId: "gh-source-first-test-001",
         datedPlaces: "../gh/data/dated_places.geojson",
-        assignmentHeading: "Ghana verification tasks",
         // single shipped wave: the loss action reads as closed/changed
         // use by the target year rather than a two-year contrast
         temporalLossAction: {
@@ -256,7 +251,6 @@ const COUNTRY_CONFIGS = {
         nominationSource: "ie_verification_static_map_nomination",
         defaultAssignmentBatchId: "ie-source-first-test-001",
         datedPlaces: "../ie/data/dated_places.geojson",
-        assignmentHeading: "Ireland verification tasks",
         temporalLossAction: {
             value: "target_year_loss_or_changed_use",
             label: "Present in one target year, absent in a later target year",
@@ -281,7 +275,6 @@ const COUNTRY_CONFIGS = {
         nominationSource: "in_verification_static_map_nomination",
         defaultAssignmentBatchId: "in-source-first-test-001",
         datedPlaces: "../in/data/dated_places.geojson",
-        assignmentHeading: "India verification tasks",
         temporalLossAction: {
             value: "target_year_loss_or_changed_use",
             label: "Present in one target year, absent in a later target year",
@@ -306,7 +299,6 @@ const COUNTRY_CONFIGS = {
         nominationSource: "ke_verification_static_map_nomination",
         defaultAssignmentBatchId: "ke-source-first-test-001",
         datedPlaces: "../ke/data/dated_places.geojson",
-        assignmentHeading: "Kenya verification tasks",
         // single shipped wave: the loss action reads as closed/changed
         // use by the target year rather than a two-year contrast
         temporalLossAction: {
@@ -332,7 +324,6 @@ const COUNTRY_CONFIGS = {
         nominationSource: "kr_verification_static_map_nomination",
         defaultAssignmentBatchId: "kr-source-first-test-001",
         datedPlaces: "../kr/data/dated_places.geojson",
-        assignmentHeading: "South Korea verification tasks",
         temporalLossAction: {
             value: "target_year_loss_or_changed_use",
             label: "Present in one target year, absent in a later target year",
@@ -356,7 +347,6 @@ const COUNTRY_CONFIGS = {
         mapSource: "mw_verification_static_map_workbench",
         nominationSource: "mw_verification_static_map_nomination",
         defaultAssignmentBatchId: "mw-source-first-test-001",
-        assignmentHeading: "Malawi verification tasks",
         // single shipped wave: the loss action reads as closed/changed
         // use by the target year rather than a two-year contrast
         temporalLossAction: {
@@ -382,7 +372,6 @@ const COUNTRY_CONFIGS = {
         nominationSource: "mx_verification_static_map_nomination",
         defaultAssignmentBatchId: "mx-source-first-test-001",
         datedPlaces: "../mx/data/dated_places.geojson",
-        assignmentHeading: "Mexico verification tasks",
         temporalLossAction: {
             value: "target_year_loss_or_changed_use",
             label: "Present in one target year, absent in a later target year",
@@ -407,7 +396,6 @@ const COUNTRY_CONFIGS = {
         nominationSource: "pt_verification_static_map_nomination",
         defaultAssignmentBatchId: "pt-source-first-test-001",
         datedPlaces: "../pt/data/dated_places.geojson",
-        assignmentHeading: "Portugal verification tasks",
         temporalLossAction: {
             value: "target_year_loss_or_changed_use",
             label: "Present in one target year, absent in a later target year",
@@ -432,7 +420,6 @@ const COUNTRY_CONFIGS = {
         nominationSource: "ro_verification_static_map_nomination",
         defaultAssignmentBatchId: "ro-source-first-test-001",
         datedPlaces: "../ro/data/dated_places.geojson",
-        assignmentHeading: "Romania verification tasks",
         temporalLossAction: {
             value: "target_year_loss_or_changed_use",
             label: "Present in one target year, absent in a later target year",
@@ -456,7 +443,6 @@ const COUNTRY_CONFIGS = {
         mapSource: "rw_verification_static_map_workbench",
         nominationSource: "rw_verification_static_map_nomination",
         defaultAssignmentBatchId: "rw-source-first-test-001",
-        assignmentHeading: "Rwanda verification tasks",
         temporalLossAction: {
             value: "target_year_loss_or_changed_use",
             label: "Present in one target year, absent in a later target year",
@@ -481,7 +467,6 @@ const COUNTRY_CONFIGS = {
         nominationSource: "sk_verification_static_map_nomination",
         defaultAssignmentBatchId: "sk-source-first-test-001",
         datedPlaces: "../sk/data/dated_places.geojson",
-        assignmentHeading: "Slovakia verification tasks",
         // single shipped wave: the loss action reads as closed/changed
         // use by the target year rather than a two-year contrast
         temporalLossAction: {
@@ -507,7 +492,6 @@ const COUNTRY_CONFIGS = {
         nominationSource: "uk_verification_static_map_nomination",
         defaultAssignmentBatchId: "uk-source-first-test-001",
         datedPlaces: "../uk/data/dated_places.geojson",
-        assignmentHeading: "United Kingdom verification tasks",
         temporalLossAction: {
             value: "target_year_loss_or_changed_use",
             label: "Present in one target year, absent in a later target year",
@@ -532,7 +516,6 @@ const COUNTRY_CONFIGS = {
         nominationSource: "us_verification_static_map_nomination",
         defaultAssignmentBatchId: "us-source-first-test-001",
         datedPlaces: "../us/data/dated_places.geojson",
-        assignmentHeading: "United States verification tasks",
         temporalLossAction: {
             value: "target_year_loss_or_changed_use",
             label: "Present in one target year, absent in a later target year",
@@ -557,7 +540,6 @@ const COUNTRY_CONFIGS = {
         nominationSource: "za_verification_static_map_nomination",
         defaultAssignmentBatchId: "za-source-first-test-001",
         datedPlaces: "../za/data/dated_places.geojson",
-        assignmentHeading: "South Africa verification tasks",
         temporalLossAction: {
             value: "target_year_loss_or_changed_use",
             label: "Present in one target year, absent in a later target year",
@@ -581,7 +563,6 @@ const COUNTRY_CONFIGS = {
         mapSource: "zm_verification_static_map_workbench",
         nominationSource: "zm_verification_static_map_nomination",
         defaultAssignmentBatchId: "zm-source-first-test-001",
-        assignmentHeading: "Zambia verification tasks",
         temporalLossAction: {
             value: "target_year_loss_or_changed_use",
             label: "Present in one target year, absent in a later target year",
@@ -624,7 +605,6 @@ function registryCountryConfig(entry) {
         nominationSource: `${code}_verification_static_map_nomination`,
         defaultAssignmentBatchId: `manual-${code}`,
         assignmentsOffered: false,
-        assignmentHeading: `${name} evidence`,
         rapidCurrentEntry: true,
         rapidNominationEntry: true,
         fromRegistry: true,
@@ -991,6 +971,8 @@ const PANE_STACK_KEY = "pow-pane-stack";
 const PANE_COLS_KEY = "pow-pane-split-cols";
 // whether the map data panel is folded to its bar (per device)
 const MAP_DATA_FOLD_KEY = "pow-map-data-folded";
+// a phone width, where the panel opens folded until the contributor chooses
+const MAP_DATA_PHONE_QUERY = "(max-width: 700px)";
 const SIDEBAR_W_DEFAULT = 420;
 const SIDEBAR_W_MIN = 320;
 const SIDEBAR_W_MAX_SHARE = 0.6;
@@ -2256,7 +2238,9 @@ class NzVerificationMap {
                     ${this.backendLastError ? `<span class="copy-status${this.signedOutDeliberately ? "" : " error"}">${escapeHtml(this.backendLastError)}</span>` : ""}
                 </div>
             `;
-            this.backend.renderSignInButton(document.getElementById("googleSignInButton"), {
+            const signInHost = document.getElementById("googleSignInButton");
+            this.backend.renderSignInButton(signInHost, {
+                width: this.signInButtonWidth(signInHost),
                 initials: this.getRaInitials(),
                 onSignedIn: user => this.onBackendSignedIn(user),
                 onError: error => {
@@ -2336,6 +2320,16 @@ class NzVerificationMap {
         if (this.transportBusy) return this.transportBusy;
         if (this.backendLastError && !this.signedOutDeliberately) return "error";
         return this.backendUser ? "ready" : "signed_out";
+    }
+
+    // the google button takes a width in pixels and never reflows. on a
+    // phone it shares a row with contact to join, so it takes its cell's
+    // width, within the 200 to 300 the button reads well at; elsewhere the
+    // 300 it has always had
+    signInButtonWidth(host) {
+        if (!window.matchMedia?.(MAP_DATA_PHONE_QUERY)?.matches) return 300;
+        const cell = Math.floor(host?.getBoundingClientRect?.().width || 0);
+        return cell > 0 ? Math.max(200, Math.min(300, cell)) : 300;
     }
 
     transportDotHtml() {
@@ -3717,13 +3711,17 @@ class NzVerificationMap {
         return true;
     }
 
-    // the map data panel folds to its bar; the choice is kept per device
+    // the map data panel folds to its bar; the choice is kept per device.
+    // with no choice yet a phone opens it folded (jb 2026-11-03), since the
+    // open panel sits under the attribution and hides its own toggle
     mapDataFoldedOnDevice() {
         try {
-            return localStorage.getItem(MAP_DATA_FOLD_KEY) === "1";
+            const stored = localStorage.getItem(MAP_DATA_FOLD_KEY);
+            if (stored === "1" || stored === "0") return stored === "1";
         } catch (error) {
-            return false;
+            // storage unavailable: fall through to the width default
         }
+        return Boolean(window.matchMedia?.(MAP_DATA_PHONE_QUERY)?.matches);
     }
 
     setMapDataFolded(folded, { chosen = false } = {}) {
@@ -5143,12 +5141,10 @@ class NzVerificationMap {
 
     setupPageMode() {
         document.body.classList.toggle("assignment-mode", ASSIGNMENT_MODE);
-        document.title = `${COUNTRY_CONFIG.countryName} Verification Tasks`;
+        document.title = `${PRODUCT_NAME} · ${COUNTRY_CONFIG.countryName} · Contributor portal`;
         const title = document.querySelector(".sidebar-header h1");
         if (title) {
-            title.textContent = ASSIGNMENT_MODE
-                ? (COUNTRY_CONFIG.assignmentHeading || `${COUNTRY_CONFIG.countryName} source-first test`)
-                : `${COUNTRY_CONFIG.countryName} OSM Verification`;
+            title.textContent = `${PRODUCT_NAME} · ${COUNTRY_CONFIG.countryName}`;
         }
 
         this.renderModeNotice();
