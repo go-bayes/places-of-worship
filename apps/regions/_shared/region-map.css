@@ -326,6 +326,11 @@
 @media (min-width: 641px) {
   .map-chrome.has-census #onboard { top: calc(var(--safe-top) + 112px); }
 }
+/* below 1150px the census row drops 52px (see #top-center-controls), so the
+   card drops with it */
+@media (min-width: 641px) and (max-width: 1150px) {
+  .map-chrome.has-census #onboard { top: calc(var(--safe-top) + 164px); }
+}
 /* each wrap anchors its own drop-down panel */
 #key-wrap { position: relative; }
 #census-wrap { position: relative; }
