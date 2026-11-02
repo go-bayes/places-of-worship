@@ -118,6 +118,9 @@ assert.doesNotMatch(form, /value="relocation"/);
 // the linked place field and its client check, mirroring convex/lib/identityLinks.ts
 assert.match(form, /<label for="linkedSiteIds">Linked place<\/label>/);
 assert.match(form, /<input id="linkedSiteIds" name="linkedSiteIds" type="text"/);
+// the help names the identifier forms the server resolves, and what it stores
+assert.match(form, /site or candidate identifier, its task identifier, a source record, or an OpenStreetMap reference such as osm:node\/123/);
+assert.match(form, /in any country, and the decision records its site identifier/);
 assert.deepEqual([...portal.parseLinkedSiteIds(" nz-a ,\n nz-b,, ")], ["nz-a", "nz-b"]);
 assert.deepEqual([...portal.parseLinkedSiteIds(undefined)], []);
 for (const basis of ["successor_at_new_site", "end_and_new_foundation", "split", "merge"]) {

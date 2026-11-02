@@ -2140,7 +2140,7 @@ function human(value) {
                 <div>
                     <label for="linkedSiteIds">Linked place</label>
                     <input id="linkedSiteIds" name="linkedSiteIds" type="text" maxlength="2200" autocomplete="off" ${canDecide ? "" : "disabled"}>
-                    <small class="muted">The identifier of the other place, as shown on the map or its task; separate several with commas. Required for a successor at a new site, an end and new foundation, a split or a merge; optional for a duplicate or an uncertain decision.</small>
+                    <small class="muted">The other place's site or candidate identifier, its task identifier, a source record, or an OpenStreetMap reference such as osm:node/123; separate several with commas. The place must already be in the portal, in any country, and the decision records its site identifier. Required for a successor at a new site, an end and new foundation, a split or a merge; optional for a duplicate or an uncertain decision.</small>
                 </div>
                 ${hasOriginalPoint ? `
                     <div>
