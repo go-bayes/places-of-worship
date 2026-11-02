@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-xSnmBY3zu92d4TErmxKWAAb5sI60fb2aUx36M55UkQs='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-mf20V4t+tXxwgQLv/jHRy4S2p29WEnz4tCI8GM3MUv4='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Places of Worship | MapLibre Flat Prototype</title>
+  <title>religionmap.org</title>
   <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet" integrity="sha384-p5cy4wHtKSqjnLUNjQ+8ffCwUp0vlLS+6lg1lc3qqXax2E1EmVCMCAimU+R0MOZH" crossorigin="anonymous">
   <link href="../shared/map-shell.css?v=20260904a" rel="stylesheet">
   <link href="styles/maplibre-flat.css?v=20261015e" rel="stylesheet">
@@ -20,7 +20,7 @@
     // global world map: homeless config — no countryCode, no census, no
     // geocode bias. path bases point one level shallower than country pages.
     window.REGION_CONFIG = {
-      title: "Places of Worship | MapLibre Flat Prototype",
+      title: "religionmap.org",
       // the default camera, used when the visitor's timezone names no
       // country in the table or a shared link carries its own #map=
       center: [174.7762, -41.2865],

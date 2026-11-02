@@ -110,7 +110,7 @@
     };
 
     function setupPageLabel() {
-        document.title = `${countryName} submitted evidence | Places of Worship`;
+        document.title = `religionmap.org · ${countryName} · Review evidence`;
         const heading = document.querySelector("header h1");
         const intro = document.querySelector("header p");
         if (heading) {
