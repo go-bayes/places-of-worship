@@ -82,13 +82,13 @@ test("a new decision refuses relocation and an unlinked successor before writing
   assert.equal(ctx.task.status, "needs_review");
 });
 
-test("a new decision refuses a link that names no known place, before writing", async () => {
+test("a new decision refuses a link that fits no place form and no task carries, before writing", async () => {
   const ctx = context();
   const inspected = await getReviewSnapshot._handler(ctx, { taskId: "task_1", evidenceDraftId: "draft_1" });
   const successor = item(inspected.snapshot_hash);
   successor.decision.identity_decision = "successor_at_new_site";
   successor.decision.linked_site_ids = ["nz-osm-node-1"];
-  await assert.rejects(batchRecordReviewDecisions._handler(ctx, { items: [successor] }), /Linked place "nz-osm-node-1" is not a known place/);
+  await assert.rejects(batchRecordReviewDecisions._handler(ctx, { items: [successor] }), /Linked place "nz-osm-node-1" is not a place identifier/);
   assert.equal(ctx.rows.review_decisions.length, 0);
   assert.equal(ctx.task.status, "needs_review");
 });

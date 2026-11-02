@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { assertIdentityLinks, resolveIdentityLinks, LINK_REQUIRED_BASES, LINK_OPTIONAL_BASES } from "./identityLinks.ts";
+import { assertIdentityLinks, ownIdentifiers, resolveIdentityLinks, LINK_REQUIRED_BASES, LINK_OPTIONAL_BASES } from "./identityLinks.ts";
 
 const task = { task_id: "task_1", matched_current_site_id: "nz-site-1", candidate_site_id: "candidate:nz:b:1" };
 const check = (identity_decision, linked_site_ids) => assertIdentityLinks(task, { identity_decision, linked_site_ids });
@@ -115,12 +115,25 @@ test("an existing osm reference resolves to the site carrying that object, type 
   assert.deepEqual(await resolve(["osm:way/100"]), ["w100"]);
   // an internal-intake place known only by its osm reference keeps it
   assert.deepEqual(await resolve(["osm:way/777"]), ["osm:way/777"]);
-  await assert.rejects(resolve(["osm:relation/100"]), /"osm:relation\/100" is not a known place/);
+  // the bare map spelling finds the same object's tasks
+  assert.deepEqual(await resolve(["n555"]), ["osm:node/555"]);
+  assert.deepEqual(await resolve(["w777"]), ["w777"]);
 });
 
-test("an unknown identifier is refused by name", async () => {
-  await assert.rejects(resolve(["n999"]), /Linked place "n999" is not a known place/);
-  await assert.rejects(resolve(["n100", "nz-osm-node-1"]), /"nz-osm-node-1" is not a known place/);
+test("a well-formed place identifier no task carries is stored as entered", async () => {
+  assert.deepEqual(await resolve(["n999", "w999", "r999"]), ["n999", "w999", "r999"]);
+  assert.deepEqual(await resolve(["osm:relation/100", "osm:way/999"]), ["osm:relation/100", "osm:way/999"]);
+  assert.deepEqual(await resolve(["candidate:au-candidate-1-unknown-place-of-worship", "candidate:vu:batch-1:12"]), ["candidate:au-candidate-1-unknown-place-of-worship", "candidate:vu:batch-1:12"]);
+});
+
+test("an identifier that fits no place form and no task carries is refused by name, with an example", async () => {
+  for (const typo of ["nz-osm-node-1", "N999", "n 999", "n999a", "osm:node/12a", "osm:area/1", "candidate:", "candidate: x", "999"]) {
+    await assert.rejects(resolve(["n100", typo]), (error) => {
+      assert.ok(error.message.includes(`Linked place "${typo}" is not a place identifier`), error.message);
+      assert.match(error.message, /such as n123 or w456.*osm:node\/123.*candidate:nz-candidate-1/);
+      return true;
+    });
+  }
 });
 
 test("a link to a place in another country is accepted", async () => {
@@ -137,11 +150,29 @@ test("a link that resolves to this task's own place is refused", async () => {
   const intake = known.find((row) => row.task_id === "agent-research:k1");
   const other = [...known, { task_id: "nz-workpack-2", source_record_id: "nz-osm-date-tag-way-777", matched_osm_id: "777", osm_object_type: "way" }];
   await assert.rejects(resolve(["nz-osm-date-tag-way-777"], intake, other), /own place \(osm:way\/777\)/);
+  // the bare map spelling of the intake task's osm object is its own place,
+  // by the pure mapping in ownIdentifiers, before any lookup
+  assert.throws(() => assertIdentityLinks(intake, { identity_decision: "successor_at_new_site", linked_site_ids: ["w777"] }), /another place/);
+  await assert.rejects(resolve(["w777"], intake), /this task's own record|own place/);
+  // and a vanuatu site id in osm form is the same place as its bare spelling
+  const vu = known.find((row) => row.task_id === "vu-revise-1");
+  assert.throws(() => assertIdentityLinks(vu, { identity_decision: "split", linked_site_ids: ["n555"] }), /another place/);
+});
+
+test("ownIdentifiers adds the other spelling of each osm object and nothing else", () => {
+  const intake = { task_id: "agent-research:k1", source_record_id: "osm:way/777", matched_osm_id: "777", osm_object_type: "way" };
+  assert.deepEqual(ownIdentifiers(intake).sort(), ["agent-research:k1", "osm:way/777", "w777"]);
+  const nz = { task_id: "nz-verify-r5", matched_current_site_id: "r5", source_record_id: "nz-verify-r5" };
+  assert.deepEqual(ownIdentifiers(nz).sort(), ["nz-verify-r5", "osm:relation/5", "r5"]);
+  const candidate = { task_id: "t", candidate_site_id: "candidate:t" };
+  assert.deepEqual(ownIdentifiers(candidate).sort(), ["candidate:t", "t"]);
 });
 
 test("an ambiguous reference and two links naming one place are refused", async () => {
   await assert.rejects(resolve(["Woodberry (2010)"]), /matches more than one place \(candidate:vu:w:1, candidate:vu:w:2\)/);
   await assert.rejects(resolve(["n100", "osm:node/100"]), /"n100" and "osm:node\/100" name the same place \(n100\)/);
+  // two spellings of one object no task carries are one place too
+  await assert.rejects(resolve(["n999", "osm:node/999"]), /"n999" and "osm:node\/999" name the same place \(osm:node\/999\)/);
 });
 
 test("resolution reads only through the five task indexes", async () => {
