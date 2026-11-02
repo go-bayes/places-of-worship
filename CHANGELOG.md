@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### 2026-11-03 (linked places resolved to known sites)
+
+- Behaviour change for reviewers (JB ruling, option b, on #206). Each `linked_site_ids` entry on a new review decision must now name a place a task in the deployment already carries, in any country, since definition 0.1.6 permits a successor across a border. `reviews:applyReviewDecision` resolves a current or candidate site id as entered, and resolves a task id, a source record id or an `osm:<type>/<id>` reference to the site id of the place that carries it (an OSM reference with no site id behind it stays the reference). The stored link is that canonical identifier, still outside `decision_hash`. A link naming no known place, more than one place, or the task's own place, and two links naming one place, are refused with the identifier entered (`resolveIdentityLinks` in `convex/lib/identityLinks.ts`; the table in `docs/convex-task-layer-spec.md`). Existing `tasks` indexes prove each form; no index or schema field is added. A map site without a seeded task cannot yet be linked.
+- Review portal and PI guide. The *Linked place* help text and `apps/guides/pi.html` name the accepted forms and say the decision records the site identifier; the client check is unchanged and the server's refusal is shown as returned, with no new public query. Stamp: `review-portal.js` is `?v=20261103a` (pinned in `tiles-v2-client.test.cjs`); no inline script changed.
+- Tests: `convex/lib/identityLinks.node-test.mjs` (an existing current and candidate site, source record, task id and OSM reference, an unknown id refused, a link to Vanuatu accepted from a New Zealand task, a link resolving to the task's own place refused, an ambiguous reference and a repeated place refused, and the five index reads), `convex/reviews-batch.node-test.mjs` (a task id stored as its site id; an unknown id refused before writing) and `review-state-dom.test.cjs` (the help text).
+
 ### 2026-10-22 (1989 scan request for Guy)
 
 - Guy's task list (`docs/people/guy/README.md`) asks for scans of the 1989 census map-volume pages behind his Area Council → Enumeration Area → named-place lookup, so the project can draft the lookup from them for him to check.

@@ -530,6 +530,34 @@ Fields:
   `matched_current_site_id`, `candidate_site_id`, `source_record_id`, or the
   `osm:<type>/<id>` reference) (`convex/lib/identityLinks.ts`). Stored outside `decision_hash`,
   like `evidence_version_hash`, until a version 2 envelope names it.
+  Each link must name a known place (JB ruling, option b, before #206
+  merged). Convex holds no master site table, so the `tasks` table is the
+  register of known places, in every country: a successor across a border is
+  accepted, as definition 0.1.6 permits. `reviews:applyReviewDecision` resolves
+  each link through the existing task indexes, with no new index:
+
+  | Entered | Proved by | Stored as |
+  | --- | --- | --- |
+  | current site id (`n123`, `w123`; `osm:node/123` in Vanuatu) | `by_matched_site` | as entered |
+  | candidate site id (`candidate:...`) | `by_candidate_site` | as entered |
+  | `osm:<type>/<id>` reference | `by_osm`, with the object type checked | the site id of the tasks carrying the object, else the reference |
+  | task id | `by_task_id` | the site id of that task, else its OSM reference, else the task id |
+  | source record id | `by_source_record_id` | as for a task id |
+
+  A site id (current, then candidate) found on a task is taken as entered and
+  checked first; any other identifier is a record reference, stored as the
+  site id of the place that carries it, so a stored link names a place and
+  never a document. Where some tasks holding a reference carry a site id and
+  others do not, the site id stands. The decision is refused, naming the
+  identifier entered, when a link names no known place, when a reference
+  resolves to more than one site id (a source record shared by several
+  candidates, for example), when it resolves to the task's own place (another
+  task on the same site, named by its task id), and when two links resolve to
+  the same place. Each lookup reads at most 25 tasks, so a decision reads under
+  a thousand. A map site that has no task in the deployment is not yet a known
+  place there; link it once its task is seeded. The portal's help text names
+  the accepted forms; the client check stays a string check, and the server's
+  refusal is shown as returned, so no new public query is needed.
 - `target_year_affects`: array of target-year affect objects.
 - `required_follow_up`: optional.
 - `created_at`, `updated_at`.
