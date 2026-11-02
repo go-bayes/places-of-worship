@@ -64,7 +64,7 @@ assert.doesNotMatch(unvalidated, /overviewKeep/);
 // every html page that loads a changed script carries the bumped query
 // one stamp per script: a script's stamp moves only when that script changes
 const stamps = {
-    "region-map.js": "20261015e", // street view resizes from its corner, no expand button
+    "region-map.js": "20261103n", // neighbours' dots recede below zoom 8 on country pages
     "datamaps-switcher.js": "20261013a", // switcher rows prerender; warming waits for activation
     "unvalidated-places.js": "20261013b", // versioned grid places url; us, de and it use the grid tier from zoom 6
     "verification-map.js": "20261019a", // two kinds of move on a period card, successor field (definition 0.1.6)
@@ -96,5 +96,44 @@ pages.forEach(page => {
     });
 });
 assert.ok(checked >= 100, `only ${checked} script tags checked`);
+
+// home country first (ui review item 9): the list of countries whose own
+// overview dots carry country_code is keyed to the overview tileset, so a
+// new tileset turns the outline test back on for every page until the list
+// is re-audited
+{
+  const tileset = runtime.match(/overview: "https:\/\/tiles\.placemap\.org\/([^/]+)\/\{z\}/)[1];
+  const tagged = runtime.match(/const HOME_FIRST_TAGGED = \{\n\s*tileset: "([^"]+)"/);
+  assert.ok(tagged, "the tagged-country list names its tileset");
+  assert.equal(tagged[1], tileset, "the tagged-country list belongs to the overview tileset in use");
+  assert.match(runtime, /const HOME_FIRST_FULL_ZOOM = 8;/);
+  // the receding zoom curve: one home test per stop below zoom 8, bound
+  // once with let, and the plain curve from zoom 8 or with no home test
+  const vm = require("node:vm");
+  const grab = (name) => {
+    const start = runtime.indexOf(`function ${name}(`);
+    return runtime.slice(start, runtime.indexOf("\n}\n", start) + 3);
+  };
+  const sandbox = { HOME_FIRST_FULL_ZOOM: 8, homeDotTest: null };
+  vm.createContext(sandbox);
+  // the sandbox's arrays belong to another realm; compare them as json
+  vm.runInContext(`${grab("zoomCurveAt")}\n${grab("homeFirstCurve")}\nthis.curve = (...args) => JSON.stringify(homeFirstCurve(...args));`, sandbox);
+  const curveOf = (...args) => JSON.parse(sandbox.curve(...args));
+  const stops = [[6, 2], [10, 4]];
+  assert.deepEqual(curveOf(stops, 0.5), ["interpolate", ["linear"], ["zoom"], 6, 2, 10, 4]);
+  sandbox.homeDotTest = ["has", "country_code"];
+  const curve = curveOf(stops, 0.5);
+  assert.equal(curve[0], "let");
+  assert.deepEqual(curve[2], ["has", "country_code"]);
+  const body = curve[3];
+  assert.deepEqual(body.slice(3), [
+    6, ["case", ["var", "home"], 2, 1], 6.001, 2,
+    7, ["case", ["var", "home"], 2.5, 1.25], 7.001, 2.5,
+    8, 3, 10, 4
+  ]);
+  // a layer that stops at zoom 6 carries no receding stop above it
+  const short = curveOf([[0, 1], [6, 3]], 0.5, 6)[3];
+  assert.ok(!short.includes(7), "no stop at zoom 7 for a layer that ends at 6");
+}
 
 console.log(`tiles-v2-client: ${checked} script tags and the wiring checked`);
