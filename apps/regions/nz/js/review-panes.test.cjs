@@ -255,3 +255,80 @@ console.log("review-panes: ok");
     assert.equal(api.activePreset("map", 810), "map");
     console.log("review map resize restoration ok");
 }
+
+// the toolbar (jb ruling 2026-11-03, ui item 6): side by side the named
+// positions sit in a toolbar of segmented buttons above the columns and the
+// column bar is a plain grip; the map's set also stays on the map bar for
+// the stacked layout. a press in either place applies the preset, and
+// every copy of a set shows the same pressed state
+{
+    values.clear();
+    innerHeight = 900;
+    function presetButtons(kinds) {
+        return kinds.map((kind) => ({ kind, attrs: {}, listeners: {},
+            getAttribute(name) { return name === "data-pane-preset" ? this.kind : this.attrs[name] ?? null; },
+            setAttribute(name, value) { this.attrs[name] = value; },
+            addEventListener(type, fn) { (this.listeners[type] ||= []).push(fn); },
+            click() { for (const fn of this.listeners.click || []) fn({ stopPropagation() {} }); } }));
+    }
+    const pressed = (buttons) => buttons.filter((b) => b.attrs["aria-pressed"] === "true").map((b) => b.kind).join(",");
+    const host = (buttons) => ({ querySelectorAll: (selector) => (selector === "[data-pane-preset]" ? buttons : []) });
+    const layout = box({ left: 0, top: 0, width: 1440, height: 900 });
+    const detail = box({ left: 404, top: 124, width: 1036, height: 776 });
+    const mapEl = box({ left: 404, top: 142, width: 1036, height: 440 });
+    // the column bar carries no presets now: a plain grip
+    const sidebarBar = bar();
+    sidebarBar.querySelectorAll = () => [];
+    const mapBar = bar();
+    const barMapPresets = presetButtons(["map", "even", "cards"]);
+    mapBar.querySelectorAll = (selector) => (selector === "[data-pane-preset]" ? barMapPresets : []);
+    const toolbarQueue = presetButtons(["queue", "even", "detail"]);
+    const toolbarMap = presetButtons(["map", "even", "cards"]);
+    const api = panes.setup({ layout, detail, mapEl, sidebarBar, mapBar, sidebarPresets: host(toolbarQueue), mapPresets: host(toolbarMap), onResize() {} });
+    assert.equal(api.presetButtons("sidebar").length, 3, "the queue width set lives in the toolbar alone");
+    assert.equal(api.presetButtons("map").length, 6, "the map height set lives in the toolbar and on the map bar");
+    assert.equal(pressed(toolbarQueue), "", "the default width presses none");
+    toolbarQueue[0].click();
+    assert.equal(layout.styles["--sidebar-w"], "864px", "a toolbar press applies the preset");
+    assert.equal(pressed(toolbarQueue), "queue", "and shows it pressed");
+    assert.equal(toolbarQueue[0].attrs["aria-pressed"], "true");
+    assert.equal(toolbarQueue[1].attrs["aria-pressed"], "false", "the others are explicitly not pressed");
+    toolbarMap[2].click();
+    assert.equal(detail.styles["--map-h"], "200px");
+    assert.equal(pressed(toolbarMap), "cards");
+    assert.equal(pressed(barMapPresets), "cards", "the map bar's copy follows a toolbar press");
+    barMapPresets[1].click();
+    assert.equal(detail.styles["--map-h"], "450px");
+    assert.equal(pressed(toolbarMap), "even", "the toolbar follows a press on the map bar");
+    assert.equal(pressed(barMapPresets), "even");
+    api.setMapHeight(600, { chosen: true });
+    assert.equal(pressed(toolbarMap), "", "a drag between presets clears both copies");
+    assert.equal(pressed(barMapPresets), "");
+    // the choice survives a reload, in the toolbar too
+    const again = panes.setup({ layout, detail, mapEl, sidebarBar, mapBar, sidebarPresets: host(toolbarQueue), mapPresets: host(toolbarMap), onResize() {} });
+    assert.equal(again.activePreset("sidebar", 864), "queue");
+    assert.equal(pressed(toolbarQueue), "queue", "a remembered preset is pressed on load");
+    console.log("review toolbar presets ok");
+}
+
+// the page itself: the toolbar holds both sets as segmented groups, the
+// column bar is a plain grip, and the map bar keeps its set for stacking
+{
+    const html = fs.readFileSync(path.join(__dirname, "..", "review.html"), "utf8");
+    const toolbar = html.match(/<div class="layout-toolbar" role="toolbar"[\s\S]*?\n    <\/div>/)?.[0] || "";
+    assert.ok(toolbar, "a layout toolbar sits above the columns");
+    assert.match(toolbar, /id="queueWidthPresets" role="group"/);
+    assert.match(toolbar, /id="mapHeightPresets" role="group"/);
+    for (const kind of ["queue", "even", "detail", "map", "cards"]) {
+        assert.match(toolbar, new RegExp(`data-pane-preset="${kind}" aria-pressed="false"`));
+    }
+    const columnBar = html.match(/<div id="paneDivider"[\s\S]*?<\/div>/)?.[0] || "";
+    assert.doesNotMatch(columnBar, /data-pane-preset/, "the column bar is a plain grip");
+    assert.doesNotMatch(columnBar, /More queue/);
+    const mapBarHtml = html.match(/<div id="mapDivider"[\s\S]*?\n            <\/div>/)?.[0] || "";
+    assert.match(mapBarHtml, /data-pane-preset="map"/, "stacked, the map bar keeps its set");
+    // side by side the toolbar shows and the map bar's words hide; stacked the reverse
+    assert.match(html, /@media \(min-width: 901px\) and \(orientation: landscape\) \{\s*\.map-divider \.pane-preset,\s*\.map-divider \.pane-grip-text \{\s*display: none;/);
+    assert.match(html, /@media \(max-width: 900px\), \(orientation: portrait\) \{\s*\.layout-toolbar \{\s*display: none;/);
+    console.log("review toolbar markup ok");
+}

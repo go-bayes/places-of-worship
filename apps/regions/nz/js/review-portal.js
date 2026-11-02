@@ -107,17 +107,20 @@
         queueStatusText: document.getElementById("queueStatusText"),
         refreshQueue: document.getElementById("refreshQueue"),
         signInButton: document.getElementById("signInButton"),
+        // ui item 6 (2026-11-03): the account in the header, the rollup in
+        // the queue's header, the queue controls only once signed in
+        headerAccount: document.getElementById("headerAccount"),
+        queueRollup: document.getElementById("queueRollup"),
+        queueControls: document.getElementById("queueControls"),
     };
 
     function setupPageLabel() {
         document.title = `${countryName} submitted evidence | Places of Worship`;
-        const heading = document.querySelector("header h1");
-        const intro = document.querySelector("header p");
+        // the visible header is one line (ui item 6, 2026-11-03): the
+        // surface and the country; its one sentence is the page's own
+        const heading = document.getElementById("pageHeading") || document.querySelector("header h1");
         if (heading) {
-            heading.textContent = `Review ${countryName} submitted evidence`;
-        }
-        if (intro) {
-            intro.innerHTML = `Review ${countryName} task submissions saved in Convex. Decisions recorded here do not update the public map or master data until an export bundle is validated through <code>pow</code>.`;
+            heading.textContent = `Review · ${countryName}`;
         }
     }
 
@@ -170,6 +173,7 @@ function human(value) {
     function setStatus(element, message, kind = "") {
         element.className = `status${kind ? ` ${kind}` : ""}`;
         element.textContent = message;
+        element.hidden = false;
     }
 
     function formatDateTime(value) {
@@ -252,10 +256,12 @@ function human(value) {
         `;
     }
 
-    function taskPills(task, draft, agentReview, latestReview) {
+    // stateLeads: a queue row already leads with its state pill and any
+    // reopen marker (ui item 6, 2026-11-03), so the pill row leaves them out
+    function taskPills(task, draft, agentReview, latestReview, { stateLeads = false } = {}) {
         const pills = [
-            statePillHtml(presentRow(task, latestReview)),
-            reopenFlagPillHtml(task),
+            stateLeads ? "" : statePillHtml(presentRow(task, latestReview)),
+            stateLeads ? "" : reopenFlagPillHtml(task),
             `<span class="pill">${escapeHtml(human(task.task_type))}</span>`,
             `<span class="pill">${escapeHtml(human(task.priority))} priority</span>`,
         ];
@@ -384,12 +390,27 @@ function human(value) {
             .filter((entry) => Number.isFinite(entry.target_year));
     }
 
+    // signed in, the sign-in card gives way: the account, its transport dot
+    // and Sign out sit in the header, and the queue is the first panel
+    // (ui item 6, 2026-11-03); signed out, the card returns and the queue
+    // shows its heading and one line, its controls hidden until they work
+    function showSignedIn(signedIn) {
+        if (els.authPanel) els.authPanel.hidden = signedIn;
+        if (els.queueControls) els.queueControls.hidden = !signedIn;
+        if (els.headerAccount) {
+            els.headerAccount.hidden = !signedIn;
+            if (!signedIn) els.headerAccount.innerHTML = "";
+        }
+    }
+
     function renderAuth() {
         if (!client.configured) {
+            showSignedIn(false);
             setStatus(els.authStatus, "Convex is not configured on this deployment.", "error");
             return;
         }
         if (!state.user) {
+            showSignedIn(false);
             setStatus(els.authStatus, "Sign in to load reviewer-only tasks.");
             client.renderSignInButton(els.signInButton, {
                 onSignedIn: async (user) => {
@@ -408,15 +429,17 @@ function human(value) {
 
         els.signInButton.innerHTML = "";
         els.authStatus.className = "status";
-        els.authStatus.innerHTML = `
-            Signed in as <strong>${escapeHtml(userLabel(state.user))}</strong>
-            <div class="muted">${escapeHtml(rolesLabel(state.user))}</div>
-            <div class="auth-row">
+        els.authStatus.textContent = "";
+        showSignedIn(true);
+        if (els.headerAccount) {
+            els.headerAccount.innerHTML = `
                 <span id="transportDot" class="transport-dot tone-done" aria-live="polite">Connected</span>
+                <span class="account-name" title="Signed in as ${escapeHtml(userLabel(state.user))}">${escapeHtml(userLabel(state.user))}</span>
+                <span class="account-roles">${escapeHtml(rolesLabel(state.user))}</span>
                 <button id="signOut" class="tertiary" type="button">Sign out</button>
-            </div>
-        `;
-        document.getElementById("signOut").addEventListener("click", () => {
+            `;
+        }
+        document.getElementById("signOut")?.addEventListener("click", () => {
             client.signOut({ deliberate: true });
             state.user = null;
             state.queue = [];
@@ -424,6 +447,7 @@ function human(value) {
             reviewMap?.setQueue([], "");
             renderAuth();
             renderQueue();
+            renderQueueRollup();
             renderEmptyDetail("Signed out. Sign in again to review submitted evidence.");
             setStatus(els.queueStatusText, "Sign in to load the queue.");
         });
@@ -434,6 +458,7 @@ function human(value) {
         state.busy = true;
         els.refreshQueue.disabled = true;
         setStatus(els.queueStatusText, "Loading review queue...");
+        clearQueueRollup();
         setTransport("loading");
         try {
             const rows = await client.listReviewQueue({
@@ -450,6 +475,7 @@ function human(value) {
             state.queue = [];
             renderQueue();
             reviewMap?.setQueue([], "");
+            clearQueueRollup();
             setStatus(els.queueStatusText, error.message || "Could not load the review queue.", "error");
             setTransport("error");
         } finally {
@@ -459,11 +485,20 @@ function human(value) {
     }
 
     // the queue line is a rollup, never a count of everything: the most
-    // urgent tone wins and the number counts only the rows in that tone
+    // urgent tone wins and the number counts only the rows in that tone.
+    // since 2026-11-03 (ui item 6) it sits in the queue's header beside the
+    // heading, and the status line under the controls clears once the
+    // queue has loaded; a page without that header keeps it in the line
     function renderQueueRollup() {
-        if (!presentation || state.queue.length === 0) {
-            els.queueStatusText.className = "";
+        const host = els.queueRollup || els.queueStatusText;
+        if (els.queueRollup) {
+            els.queueStatusText.className = "status";
             els.queueStatusText.textContent = "";
+            els.queueStatusText.hidden = true;
+        }
+        if (!presentation || state.queue.length === 0) {
+            host.className = els.queueRollup ? "state-rollup" : "";
+            host.textContent = "";
             return;
         }
         const roll = presentation.rollup(
@@ -471,8 +506,15 @@ function human(value) {
             { viewer: "reviewer" },
         );
         const countInLabel = Number.parseInt(roll.label, 10);
-        els.queueStatusText.className = "state-rollup";
-        els.queueStatusText.innerHTML = `<span class="state-pill tone-${escapeHtml(roll.tone)}">${escapeHtml(roll.label)}</span>${countInLabel === roll.total ? "" : `<span>of ${roll.total} loaded</span>`}`;
+        host.className = "state-rollup";
+        host.innerHTML = `<span class="state-pill tone-${escapeHtml(roll.tone)}">${escapeHtml(roll.label)}</span>${countInLabel === roll.total ? "" : `<span>of ${roll.total} loaded</span>`}`;
+    }
+
+    // the rollup is cleared while a load is in hand or after it failed, so
+    // it never speaks for a queue the page no longer holds
+    function clearQueueRollup() {
+        if (!els.queueRollup) return;
+        els.queueRollup.textContent = "";
     }
 
     function renderQueue() {
@@ -507,9 +549,9 @@ function human(value) {
             <button class="task-button ${state.selected?.task?.task_id === task.task_id ? "active" : ""}"
                 type="button"
                 data-task-id="${escapeHtml(task.task_id)}">
-                <strong>${escapeHtml(task.name)}</strong>
+                <span class="task-row-head">${statePillHtml(presentRow(task, latestReview))}${reopenFlagPillHtml(task)}<strong>${escapeHtml(task.name)}</strong></span>
                 <span class="muted">${escapeHtml(taskSubtitle(task))}</span>
-                <span class="pill-row">${taskPills(task, latestDraft, latestAgentReview, latestReview)}</span>
+                <span class="pill-row">${taskPills(task, latestDraft, latestAgentReview, latestReview, { stateLeads: true })}</span>
                 ${row.review_claimant_label ? `<span class="muted">Claimed by ${row.review_claimed_by_me ? "you" : escapeHtml(row.review_claimant_label)}</span>` : ""}
                 ${row.submitted_by_me ? `<span class="muted">Your submission — another reviewer must decide</span>` : ""}
                 ${opinions ? `<span class="muted">Second opinion requested (${opinions})</span>` : ""}
@@ -2309,7 +2351,7 @@ function human(value) {
     // the dom tests load this file with the flag set and drive the pure-ish
     // renderers directly; the page itself boots as before
     if (window.__POW_TEST_NO_BOOTSTRAP__) {
-        window.__PowReviewPortalTest = { state, els, renderQueue, renderQueueRollup, renderDetail, renderEmptyDetail, decisionForm, wireRevertReopen, wireDecisionForm, setDecisionFormValues, setTransport, renderAuth };
+        window.__PowReviewPortalTest = { state, els, renderQueue, renderQueueRollup, renderDetail, renderEmptyDetail, decisionForm, wireRevertReopen, wireDecisionForm, setDecisionFormValues, setTransport, renderAuth, setupBoundary, setupPageLabel };
     } else {
         init();
     }
