@@ -323,13 +323,24 @@
 }
 /* desktop: on a page with census chrome the onboarding card starts below
    the folded bar's row, so the card and the bar never overlap */
+/* each top offset takes the same amount off the card's maximum height, so
+   the pinned buttons stay on screen (maplibre-flat.css keeps 76px below a
+   card that starts at 52px) */
 @media (min-width: 641px) {
-  .map-chrome.has-census #onboard { top: calc(var(--safe-top) + 112px); }
+  .map-chrome.has-census #onboard {
+    top: calc(var(--safe-top) + 112px);
+    max-height: calc(100vh - var(--safe-top) - var(--safe-bottom) - 188px);
+    max-height: calc(100dvh - var(--safe-top) - var(--safe-bottom) - 188px);
+  }
 }
 /* below 1150px the census row drops 52px (see #top-center-controls), so the
    card drops with it */
 @media (min-width: 641px) and (max-width: 1150px) {
-  .map-chrome.has-census #onboard { top: calc(var(--safe-top) + 164px); }
+  .map-chrome.has-census #onboard {
+    top: calc(var(--safe-top) + 164px);
+    max-height: calc(100vh - var(--safe-top) - var(--safe-bottom) - 240px);
+    max-height: calc(100dvh - var(--safe-top) - var(--safe-bottom) - 240px);
+  }
 }
 /* each wrap anchors its own drop-down panel */
 #key-wrap { position: relative; }
