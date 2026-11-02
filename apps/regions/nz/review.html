@@ -17,6 +17,7 @@
     <script src="../_shared/theme.js?v=20260921a"></script>
     <link rel="stylesheet" href="../_shared/theme.css?v=20261001a">
     <link rel="stylesheet" href="../_shared/state.css?v=20260921a">
+    <link rel="stylesheet" href="../_shared/map-data-panel.css?v=20261103a">
     <style>
         /* colour, type, spacing and radius tokens live in
            ../_shared/theme.css (dark) */
@@ -138,39 +139,163 @@
             outline-offset: 2px;
         }
 
-        header {
+        /* one line (ui item 6, 2026-11-03): the product name and the
+           surface, one sentence, the account once signed in, the guide. on
+           a narrow screen the sentence and the account take a line each */
+        .review-header {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px 16px;
             background: var(--panel);
             border-bottom: 1px solid var(--line);
-            padding: 18px var(--sp-5);
+            padding: 8px var(--sp-5);
+            min-height: 60px;
         }
 
-        header h1 {
+        .review-title {
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+            flex: none;
+        }
+
+        .product-name {
+            color: var(--muted);
+            font-size: var(--fs-sm);
+            font-weight: 600;
+        }
+
+        .review-header h1 {
             margin: 0;
-            font-size: var(--fs-xl);
+            font-size: var(--fs-lg);
             letter-spacing: 0;
+            white-space: nowrap;
         }
 
-        header p {
-            max-width: 960px;
-            margin: 6px 0 0;
+        .review-intro {
+            flex: 1 1 280px;
+            margin: 0;
+            color: var(--muted);
+            font-size: var(--fs-sm);
+        }
+
+        .header-account {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: none;
+            font-size: var(--fs-sm);
+        }
+
+        .header-account[hidden] {
+            display: none;
+        }
+
+        .header-account .account-name {
+            font-weight: 600;
+        }
+
+        .header-account .account-roles {
             color: var(--muted);
         }
 
-        .header-links {
-            display: flex;
-            gap: 14px;
-            margin-top: 10px;
+        .header-account button.tertiary {
+            min-height: 44px;
+            padding: 0 4px;
         }
 
-        .header-links a {
+        /* the guide is a 44 px outline control, the page's button idiom */
+        .header-guide {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 44px;
+            padding: 0 16px;
+            border: 1px solid var(--action);
+            border-radius: var(--r-sm);
+            background: var(--panel);
             color: var(--action);
-            font-size: var(--fs-sm);
             font-weight: 600;
             text-decoration: none;
+            flex: none;
         }
 
-        .header-links a:hover {
-            text-decoration: underline;
+        .header-guide:hover {
+            background: var(--action-soft);
+        }
+
+        @media (max-width: 700px) {
+            .review-header {
+                padding: 8px 16px;
+            }
+
+            /* the title and the guide on the first line, the sentence
+               under them, the account last */
+            .review-title { order: 1; flex: 1 1 0; min-width: 0; flex-wrap: wrap; row-gap: 0; }
+            .header-guide { order: 2; }
+            .review-intro { order: 3; flex-basis: 100%; }
+            .header-account { order: 4; flex-basis: 100%; flex-wrap: wrap; }
+            .header-account .account-roles { display: none; }
+        }
+
+        /* side by side only: the two sets of named positions above the
+           columns, segmented as the basemap switch is, the one in force
+           pressed (jb ruling 2026-11-03, moving r-u7's words off the bars) */
+        .layout-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px 12px;
+            padding: 8px var(--sp-5);
+            background: var(--panel);
+            border-bottom: 1px solid var(--line);
+        }
+
+        .toolbar-label {
+            color: var(--muted);
+            font-size: var(--fs-sm);
+            font-weight: 600;
+        }
+
+        .toolbar-label + .segmented + .toolbar-label {
+            margin-left: 12px;
+        }
+
+        .segmented {
+            display: inline-flex;
+            border: 1px solid var(--control-line);
+            border-radius: var(--r-sm);
+            overflow: hidden;
+        }
+
+        .segmented button {
+            width: auto;
+            min-height: 44px;
+            padding: 0 14px;
+            border: 0;
+            border-radius: 0;
+            background: var(--panel);
+            color: var(--action);
+            font-size: var(--fs-sm);
+        }
+
+        .segmented button + button {
+            border-left: 1px solid var(--control-line);
+        }
+
+        .segmented button:hover:not(:disabled) {
+            border-color: var(--control-line);
+        }
+
+        .segmented button[aria-pressed="true"],
+        .segmented button[aria-pressed="true"]:hover {
+            background: var(--action);
+            color: var(--panel);
+        }
+
+        .segmented button:focus-visible {
+            outline-offset: -3px;
         }
 
         .layout {
@@ -181,7 +306,7 @@
             --divider-w: 18px;
             display: grid;
             grid-template-columns: var(--sidebar-w) var(--divider-w) minmax(0, 1fr);
-            min-height: calc(100vh - 95px);
+            min-height: calc(100vh - 122px);
         }
 
         /* the drag bars, the ra portal's idiom: between the queue and the
@@ -222,8 +347,10 @@
         }
 
         /* r-u7 (jb 2026-09-19: "a drag bar alone is easy to miss"): three
-           named positions on each bar, the one in force pressed; each fills
-           the bar and reaches 8 px past it so the target is 44 px */
+           named positions, the one in force pressed. since 2026-11-03 they
+           sit on the map bar only when stacked (side by side they are in
+           the toolbar above); each fills the bar and reaches 8 px past it
+           so the target is 44 px */
         .pane-preset {
             width: auto;
             flex: none;
@@ -248,16 +375,6 @@
             color: var(--panel);
         }
 
-        .pane-divider[aria-orientation="vertical"] .pane-preset {
-            writing-mode: vertical-rl;
-            padding: 10px 0;
-            min-height: 0;
-        }
-
-        .pane-divider[aria-orientation="vertical"] .pane-preset::before {
-            inset: 0 -13px;
-        }
-
         .pane-divider.pane-dragging,
         .pane-divider:active {
             background: var(--action-soft);
@@ -277,10 +394,25 @@
             flex: none;
         }
 
-        /* side by side the grip reads down the bar */
+        /* side by side the column bar is a plain grip */
         .pane-divider[aria-orientation="vertical"] .pane-grip {
-            writing-mode: vertical-rl;
             padding: 12px 2px;
+        }
+
+        /* side by side the toolbar carries the named positions, so the map
+           bar is a plain grip too; stacked (the complement of the query
+           below) the toolbar hides and the map bar keeps its set */
+        @media (min-width: 901px) and (orientation: landscape) {
+            .map-divider .pane-preset,
+            .map-divider .pane-grip-text {
+                display: none;
+            }
+        }
+
+        @media (max-width: 900px), (orientation: portrait) {
+            .layout-toolbar {
+                display: none;
+            }
         }
 
         /* under the map: a bar the width of the detail, then the cards */
@@ -389,11 +521,40 @@
             resize: vertical;
         }
 
+        /* the queue's header carries its rollup, the one coloured thing on
+           the first screen (ui item 6, 2026-11-03) */
+        .queue-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 6px 10px;
+            margin-bottom: 10px;
+        }
+
+        .queue-head h2 {
+            margin: 0;
+        }
+
+        .queue-head .state-rollup:empty {
+            display: none;
+        }
+
+        .controls[hidden],
+        .status[hidden] {
+            display: none;
+        }
+
         .queue {
             display: grid;
             gap: 8px;
             max-height: calc(100vh - 360px);
             overflow: auto;
+            margin-top: 10px;
+        }
+
+        .queue:empty {
+            margin-top: 0;
         }
 
         .queue-group-header {
@@ -434,6 +595,20 @@
             display: block;
             margin-bottom: 3px;
             font-weight: 600;
+        }
+
+        /* each row leads with its state pill, the name beside it */
+        .task-row-head {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 4px 8px;
+            margin-bottom: 3px;
+        }
+
+        .task-row-head strong {
+            display: inline;
+            margin: 0;
         }
 
         .pill-row {
@@ -732,36 +907,9 @@
             color: var(--panel);
         }
 
-        .points-legend-control {
-            background: var(--veil);
-            border: 1px solid var(--control-line);
-            border-radius: var(--r-sm);
-            padding: 8px 10px;
-            display: grid;
-            gap: 6px;
-            font-size: var(--fs-sm);
-            color: var(--ink);
-            box-shadow: 0 1px 4px var(--shade);
-            max-width: 260px;
-        }
-
-        .points-legend-control select {
-            font-size: var(--fs-sm);
-            height: 40px;
-            min-height: 40px;
-            padding: 6px 8px;
-            border: 1px solid var(--control-line);
-            border-radius: var(--r-sm);
-            background: var(--panel);
-            color: var(--ink);
-        }
-
-        .points-mode-note {
-            font-size: var(--fs-xs);
-            color: var(--muted);
-            line-height: 1.35;
-        }
-
+        /* the map data panel's frame, bar and fold come from
+           ../_shared/map-data-panel.css (2026-11-03); the legend rows and
+           swatches below are this page's */
         .map-legend { display: grid; gap: 3px; }
         .legend-row { display: inline-flex; align-items: center; gap: 6px; }
         .legend-caption { font-weight: 600; color: var(--ink); margin-bottom: 1px; }
@@ -910,6 +1058,16 @@
         .boundary summary h2 {
             display: inline;
             margin: 0;
+        }
+
+        /* the summary says what the block holds, so a closed block still
+           tells a returning reviewer where the rules are */
+        .boundary .summary-line {
+            display: block;
+            margin: 2px 0 0 18px;
+            color: var(--muted);
+            font-size: var(--fs-sm);
+            font-weight: 400;
         }
 
         .boundary[open] summary {
@@ -1072,16 +1230,40 @@
 </style>
 </head>
 <body>
-    <header>
-        <h1>Review submitted evidence</h1>
-        <p>Review task submissions saved in Convex. Decisions recorded here do not update the public map or master data until an export bundle is validated through <code>pow</code>.</p>
-        <nav class="header-links">
-            <a href="https://religionmap.org/apps/guides/pi.html" target="_blank" rel="noopener">Guide</a>
-        </nav>
+    <!-- one line (ui item 6, 2026-11-03): the product name, the surface and
+         the country, one sentence, the account once signed in, the guide -->
+    <header class="review-header">
+        <div class="review-title">
+            <span class="product-name">religionmap.org</span>
+            <h1 id="pageHeading">Review · New Zealand</h1>
+        </div>
+        <p class="review-intro" id="pageIntro">Decisions here reach the public map only after an export bundle passes <code>pow</code> validation.</p>
+        <div id="headerAccount" class="header-account" hidden></div>
+        <a class="header-guide" href="https://religionmap.org/apps/guides/pi.html" target="_blank" rel="noopener">Guide</a>
     </header>
+
+    <!-- r-u7's named positions, side by side only (jb ruling 2026-11-03):
+         a toolbar of segmented buttons above the columns; the bars below
+         stay as plain grips. stacked, this toolbar hides and the map bar
+         carries its own set -->
+    <div class="layout-toolbar" role="toolbar" aria-label="Layout">
+        <span class="toolbar-label" id="queueWidthLabel">Queue width</span>
+        <div class="segmented" id="queueWidthPresets" role="group" aria-labelledby="queueWidthLabel">
+            <button type="button" data-pane-preset="queue" aria-pressed="false" title="Mostly queue">More queue</button>
+            <button type="button" data-pane-preset="even" aria-pressed="false" title="Half and half">Even</button>
+            <button type="button" data-pane-preset="detail" aria-pressed="false" title="Mostly detail">More detail</button>
+        </div>
+        <span class="toolbar-label" id="mapHeightLabel">Map height</span>
+        <div class="segmented" id="mapHeightPresets" role="group" aria-labelledby="mapHeightLabel">
+            <button type="button" data-pane-preset="map" aria-pressed="false" title="Mostly map">More map</button>
+            <button type="button" data-pane-preset="even" aria-pressed="false" title="Half the window">Even</button>
+            <button type="button" data-pane-preset="cards" aria-pressed="false" title="Mostly cards">More cards</button>
+        </div>
+    </div>
 
     <main class="layout">
         <aside class="sidebar">
+            <!-- signed out only: once signed in, the account sits in the header -->
             <section class="panel" id="authPanel">
                 <h2>Sign in</h2>
                 <p class="muted">Use the Google account invited as a reviewer, curator, or admin.</p>
@@ -1089,16 +1271,13 @@
                 <div id="authStatus" class="status">Checking review access...</div>
             </section>
 
-            <details class="panel boundary" id="reviewBoundary" open>
-                <summary><h2>Review boundary</h2></summary>
-                <p>Use <strong>accepted for export</strong> only when the evidence draft is ready for the governed export and <code>pow</code> validation path. Accepting for export records the review snapshot shown on this page; a PI acceptance checks that snapshot again and is refused if the evidence or its confirmed locations changed since you decided. Reload the task and decide again if that happens.</p>
-                <p>Use <strong>unresolved notes</strong> for useful but incomplete RA submissions. An unresolved note keeps the lead open on the task until a reviewer asks for more evidence, defers it, rejects it, or accepts it after review.</p>
-                <p>Use <strong>needs more evidence</strong> when the RA should clarify a source, date, identity match, or lifecycle claim (a dated event in the place's life: worship beginning, ending, moving, or the building changing use).</p>
-            </details>
-
-            <section class="panel">
-                <h2>Queue</h2>
-                <div class="controls">
+            <!-- the queue first, its rollup in its header (ui item 6) -->
+            <section class="panel queue-panel" id="queuePanel" aria-labelledby="queueHeading">
+                <div class="queue-head">
+                    <h2 id="queueHeading">Queue</h2>
+                    <div id="queueRollup" class="state-rollup" aria-live="polite"></div>
+                </div>
+                <div class="controls" id="queueControls">
                     <div>
                         <label for="queueStatus">Task status</label>
                         <select id="queueStatus">
@@ -1133,13 +1312,19 @@
                 <div id="queueStatusText" class="status">Sign in to load the queue.</div>
                 <div class="queue" id="queueList"></div>
             </section>
+
+            <!-- r-d3 (jb 2026-09-04): open on a reviewer's first visit,
+                 closed after; the summary says what it holds -->
+            <details class="panel boundary" id="reviewBoundary" open>
+                <summary><h2>Review boundary</h2> <span class="summary-line">When to accept, keep a note open, or ask for more evidence</span></summary>
+                <p>Use <strong>accepted for export</strong> only when the evidence draft is ready for the governed export and <code>pow</code> validation path. Accepting for export records the review snapshot shown on this page; a PI acceptance checks that snapshot again and is refused if the evidence or its confirmed locations changed since you decided. Reload the task and decide again if that happens.</p>
+                <p>Use <strong>unresolved notes</strong> for useful but incomplete RA submissions. An unresolved note keeps the lead open on the task until a reviewer asks for more evidence, defers it, rejects it, or accepts it after review.</p>
+                <p>Use <strong>needs more evidence</strong> when the RA should clarify a source, date, identity match, or lifecycle claim (a dated event in the place's life: worship beginning, ending, moving, or the building changing use).</p>
+            </details>
         </aside>
 
         <div id="paneDivider" class="pane-divider" role="separator" aria-orientation="vertical" aria-label="Resize the queue and the detail" aria-valuemin="320" aria-valuemax="900" aria-valuenow="390" tabindex="0">
-            <span class="pane-grip">⠿ drag · queue ↔ detail</span>
-            <button type="button" class="pane-preset" data-pane-preset="queue" aria-pressed="false" title="Mostly queue">More queue</button>
-            <button type="button" class="pane-preset" data-pane-preset="even" aria-pressed="false" title="Half and half">Even</button>
-            <button type="button" class="pane-preset" data-pane-preset="detail" aria-pressed="false" title="Mostly detail">More detail</button>
+            <span class="pane-grip" aria-hidden="true">⠿</span>
         </div>
 
         <div class="detail">
@@ -1163,8 +1348,9 @@
     <script src="js/unvalidated-places.js?v=20261013b"></script>
     <script src="js/source-links.js?v=20260904a"></script>
     <script src="js/recentre-control.js?v=20261001a"></script>
-    <script src="js/review-map.js?v=20261013a"></script>
-    <script src="js/review-panes.js?v=20260921c"></script>
+    <script src="js/review-map-data.js?v=20261103a"></script>
+    <script src="js/review-map.js?v=20261103a"></script>
+    <script src="js/review-panes.js?v=20261103a"></script>
     <script src="js/convex-config.js?v=20260523-vanuatu"></script>
     <script src="js/convex-task-client.js?v=20261015d"></script>
     <script src="js/claude-review-panel.js?v=20260825-ai-review"></script>
@@ -1174,6 +1360,6 @@
     <script src="js/occupancy-review.js?v=20261019a"></script>
     <script src="js/review-snapshot-content.js?v=20261001c"></script>
     <script src="js/task-presentation.js?v=20261015c"></script>
-    <script src="js/review-portal.js?v=20261019a"></script>
+    <script src="js/review-portal.js?v=20261103c"></script>
 </body>
 </html>

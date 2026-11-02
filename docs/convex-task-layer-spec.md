@@ -517,9 +517,60 @@ Fields:
   `new_candidate` (a new place with no predecessor), `duplicate`, `split`,
   `merge`, or `uncertain`. The validator still accepts `relocation`, the
   pre-0.1.6 value under which one identifier followed a community to a new
-  site; the review form no longer offers it, and an exported row carrying it
-  is read under the definition in force when it was recorded. The predecessor
-  is named in the decision note until the decision gains a link field.
+  site, so stored rows remain valid; new decisions with it are refused
+  (JB, 2026-10-19), and an exported row carrying it is read under the
+  definition in force when it was recorded.
+- `linked_site_ids`: optional array of the other places an identity basis
+  relates this one to: the predecessor of a successor at a new site, the
+  ended place of an end and new foundation, and the other places of a split or
+  a merge, each of which requires at least one. A duplicate may name the
+  record it repeats and an uncertain decision its alternatives; the other bases
+  refuse links. At most 10 identifiers of at most 200 characters each, trimmed,
+  distinct, and none naming the task's own record (`task_id`,
+  `matched_current_site_id`, `candidate_site_id`, `source_record_id`, the
+  `osm:<type>/<id>` reference, or the other spelling of an OSM object among
+  them, so `w777` for a task carrying only `osm:way/777` and back)
+  (`convex/lib/identityLinks.ts`). Stored outside `decision_hash`,
+  like `evidence_version_hash`, until a version 2 envelope names it.
+  Links are resolved simply (JB, option b and its revision of 2026-11-03:
+  "an academic site, not Fort Knox"). Convex holds no master site table, and
+  a link may name a place in any country, as definition 0.1.6 permits a
+  successor across a border. `reviews:applyReviewDecision` resolves each link
+  in two steps, through the existing task indexes with no new index:
+
+  1. A link a task carries resolves to the site id behind it:
+
+     | Entered | Found by | Stored as |
+     | --- | --- | --- |
+     | current site id | `by_matched_site` | as entered |
+     | candidate site id | `by_candidate_site` | as entered |
+     | `n123`/`w123`/`r123` or `osm:<type>/<id>` | `by_osm`, with the object type checked | the site id of the tasks carrying the object, else the reference entered |
+     | task id | `by_task_id` | the site id of that task, else the link itself if it is a well-formed place identifier, else its OSM reference, else the task id |
+     | source record id | `by_source_record_id` | as for a task id |
+
+  2. A link no task carries is accepted, trimmed and as entered, if it is a
+     well-formed place identifier: a map site id `n123`, `w123` or `r123`
+     (`^[nwr][1-9][0-9]*$`), an OSM reference `osm:node/123`, `osm:way/123` or
+     `osm:relation/123` (`^osm:(node|way|relation)/[1-9][0-9]*$`), or a candidate
+     id (`^candidate:[A-Za-z0-9][A-Za-z0-9._:#/-]*$`, as `candidate:<task id>`
+     and `candidate:<country>:<batch>:<row>` are minted). Anything else is
+     refused as a likely typo, naming the string and giving an example of each
+     accepted form.
+
+  `n123` and `osm:node/123` name one OSM object and so one place. The
+  decision is also refused, naming the identifier entered, when a reference
+  resolves to more than one site id (a source record shared by several
+  candidates, for example), when a link resolves to the task's own place
+  (another task on the same site, named by its task id, or either spelling of
+  the task's own OSM object), when two links name the same place, and when a
+  reference is shared by more than ten tasks (each lookup reads eleven rows
+  and refuses a full read rather than treat it as complete, so a decision
+  reads at most 350 tasks). Numbers in a site id or OSM reference have no
+  leading zero, so `n0123` is refused rather than taken as another place. The
+  portal's help text names the accepted forms, and its check refuses the
+  task's own identifiers in either OSM spelling; the form check is the
+  server's, and its refusal is shown as returned, so no new public query is
+  needed.
 - `target_year_affects`: array of target-year affect objects.
 - `required_follow_up`: optional.
 - `created_at`, `updated_at`.
