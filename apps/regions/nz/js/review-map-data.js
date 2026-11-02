@@ -65,9 +65,12 @@
         };
         const clamp = () => {
             const mapRect = map.getContainer?.()?.getBoundingClientRect?.();
-            if (!mapRect) { apply(); return; }
+            // a detached or unsized panel measures zero, which would wipe a
+            // saved offset; leave the offset alone until it can be measured
+            if (!mapRect || !mapRect.width || div.isConnected === false) { apply(); return; }
             div.style.transform = "";
             const rest = div.getBoundingClientRect();
+            if (!rest.width && !rest.height) { apply(); return; }
             const minX = mapRect.left - rest.left;
             const maxX = mapRect.right - rest.right;
             const minY = mapRect.top - rest.top;

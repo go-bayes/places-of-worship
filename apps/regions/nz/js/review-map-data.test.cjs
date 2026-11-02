@@ -185,6 +185,18 @@ function build(options = {}) {
     assert.ok(mapListeners.resize?.length, "a map resize re-clamps the panel");
 }
 
+// 5b. a saved spot above the corner survives the unmeasured first fold:
+// onAdd runs before the panel is in the map, when it measures zero
+{
+    values.clear();
+    values.set(panel.OFFSET_KEY, JSON.stringify({ x: 0, y: -120 }));
+    timers.splice(0);
+    const { parts } = build();
+    parts.root.rect = { left: 10, top: 370, right: 310, bottom: 430, width: 300, height: 60 };
+    timers.splice(0).forEach((fn) => fn());
+    assert.equal(parts.root.style.transform, "translate(0px, -120px)", "the saved spot is kept, not clamped to the corner");
+}
+
 // 6. without storage the panel still folds and switches for the page
 {
     window.localStorage = { getItem() { throw new Error("blocked"); }, setItem() { throw new Error("blocked"); } };
