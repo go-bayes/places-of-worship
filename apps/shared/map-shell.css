@@ -118,6 +118,19 @@ body, html { margin: 0; height: 100%; background: var(--bg); color: var(--text);
 }
 .shell-pill-select:focus { outline: none; }
 
+/* one focus ring across the map chrome (ui suggestions item 2, accepted
+   2026-11-03; style guide: focus rings are 3 px): the action blue at 3 px,
+   outside the control. scoped to the injected map root, so the working
+   tools that link this sheet keep their own focus styles. the theme
+   select's own rule above removes its ring, so the map root restores it */
+.map-chrome :focus-visible,
+.map-chrome .shell-pill-select:focus-visible {
+  outline: 3px solid var(--action);
+  outline-offset: 2px;
+}
+/* the map canvas fills the screen: its ring sits inside the edge */
+.map-chrome .maplibregl-canvas:focus-visible { outline-offset: -3px; }
+
 /* toast: centred fixed pill, large type on desktop; on phones it
    shrinks and wraps inside the screen instead of running off it */
 .shell-toast {
@@ -269,6 +282,120 @@ body, html { margin: 0; height: 100%; background: var(--bg); color: var(--text);
   height: 24px;
 }
 
+/* stock controls in the chrome recipe (ui suggestions item 2, accepted
+   2026-11-03; primitive 4 of the porting brief): the fullscreen, zoom and
+   compass buttons join one dark stack at 44 px with light line icons, and
+   the attribution becomes a chrome card at 12 px ink on the dark face
+   (about 14:1), above the action row so the two never overlap. phones keep
+   maplibre's collapse to a 44 px credits disc, with the full credit on tap.
+   scoped to the injected map root; the rules above stay the fallback for
+   any other page that links this sheet */
+.map-chrome .maplibregl-ctrl-bottom-right {
+  bottom: calc(var(--safe-bottom) + 52px);
+  right: 0;
+}
+.map-chrome .maplibregl-ctrl-bottom-right .maplibregl-ctrl {
+  margin: 0 var(--safe-right) 8px 0;
+}
+.map-chrome .maplibregl-ctrl-group,
+.map-chrome .maplibregl-ctrl-group:not(:empty) {
+  background: var(--chrome-face);
+  border: 1px solid var(--chrome-line);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-1);
+  overflow: hidden;
+}
+.map-chrome .maplibregl-ctrl-group button {
+  width: 44px;
+  height: 44px;
+}
+.map-chrome .maplibregl-ctrl-group button + button { border-top: 1px solid var(--chrome-line); }
+.map-chrome .maplibregl-ctrl button:not(:disabled):hover { background-color: var(--chrome-wash); }
+/* the ring sits inside each button, so a neighbour in the stack never
+   covers it */
+.map-chrome .maplibregl-ctrl-group button:focus:focus-visible {
+  box-shadow: none;
+  border-radius: 0;
+  outline: 3px solid var(--action);
+  outline-offset: -3px;
+}
+/* the fullscreen group sits on the zoom group: one stack, one outline */
+.map-chrome .maplibregl-ctrl-bottom-right .maplibregl-ctrl-group:has(.maplibregl-ctrl-fullscreen, .maplibregl-ctrl-shrink) {
+  margin-bottom: 0;
+  border-bottom: 0;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  box-shadow: none;
+}
+.map-chrome .maplibregl-ctrl-bottom-right .maplibregl-ctrl-group:has(.maplibregl-ctrl-zoom-in) {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+.map-chrome .maplibregl-ctrl button.maplibregl-ctrl-zoom-in .maplibregl-ctrl-icon {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23f1f5f9' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M12 5v14M5 12h14'/%3E%3C/svg%3E");
+}
+.map-chrome .maplibregl-ctrl button.maplibregl-ctrl-zoom-out .maplibregl-ctrl-icon {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23f1f5f9' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M5 12h14'/%3E%3C/svg%3E");
+}
+.map-chrome .maplibregl-ctrl button.maplibregl-ctrl-fullscreen .maplibregl-ctrl-icon {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23f1f5f9' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5'/%3E%3C/svg%3E");
+}
+.map-chrome .maplibregl-ctrl button.maplibregl-ctrl-shrink .maplibregl-ctrl-icon {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23f1f5f9' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5'/%3E%3C/svg%3E");
+}
+/* the compass keeps a red north; maplibre rotates the icon itself */
+.map-chrome .maplibregl-ctrl button.maplibregl-ctrl-compass .maplibregl-ctrl-icon {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 24 24' stroke-linejoin='round'%3E%3Cpath d='M12 3l4 9H8z' fill='%23ef4444'/%3E%3Cpath d='M8 12h8l-4 9z' fill='none' stroke='%23f1f5f9' stroke-width='1.5'/%3E%3C/svg%3E");
+}
+.map-chrome .maplibregl-ctrl.maplibregl-ctrl-attrib,
+.map-chrome .maplibregl-ctrl-attrib.maplibregl-compact {
+  background: var(--chrome-face);
+  color: var(--ink);
+  border: 1px solid var(--chrome-line);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-1);
+  font-size: 12px;
+  line-height: 1.4;
+}
+.map-chrome .maplibregl-ctrl.maplibregl-ctrl-attrib {
+  padding: 5px 12px;
+  /* a long census credit wraps beside the stack and scrolls past six
+     lines, rather than running under the action row */
+  max-width: min(560px, 44vw);
+  max-height: calc(6 * 1.4em + 10px);
+  overflow-y: auto;
+}
+.map-chrome .maplibregl-ctrl-attrib a { color: var(--ink); }
+.map-chrome .maplibregl-ctrl-attrib a:hover { color: #fff; text-decoration: underline; }
+.map-chrome .maplibregl-ctrl-attrib-button,
+.map-chrome .maplibregl-ctrl-attrib-button:focus {
+  box-shadow: none;
+}
+.map-chrome .maplibregl-ctrl-attrib.maplibregl-compact {
+  box-sizing: border-box;
+  min-width: 46px;
+  min-height: 46px;
+  padding: 0 44px 0 0;
+  border-radius: 23px;
+  max-width: calc(100vw - var(--safe-left) - var(--safe-right));
+}
+.map-chrome .maplibregl-ctrl-attrib.maplibregl-compact-show {
+  padding: 12px 48px 12px 14px;
+  border-radius: var(--r-lg);
+  max-height: 40vh;
+  overflow-y: auto;
+}
+.map-chrome .maplibregl-ctrl-attrib.maplibregl-compact .maplibregl-ctrl-attrib-button {
+  width: 44px;
+  height: 44px;
+  border-radius: 22px;
+  background-color: transparent;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 24 24' fill='none' stroke='%23f1f5f9' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 11v5M12 7.5v.5'/%3E%3C/svg%3E");
+  background-position: center;
+  background-repeat: no-repeat;
+}
+.map-chrome .maplibregl-ctrl-attrib.maplibregl-compact-show .maplibregl-ctrl-attrib-button { background-color: var(--chrome-wash); }
+
 /* contribute entry (jb 2026-09-03): the wordmark's button is text in the
    pill like its neighbours (the divided rule cannot reach a button's own
    border, so the divider is restated); the panel is a small dark card
@@ -292,7 +419,8 @@ body, html { margin: 0; height: 100%; background: var(--bg); color: var(--text);
 }
 #contribute-toggle:hover,
 #contribute-toggle[aria-expanded="true"] { color: #fff; text-decoration: underline; }
-#contribute-toggle:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; border-radius: var(--r-sm); }
+/* its focus ring is the chrome's 3 px action ring (map-chrome rule above) */
+#contribute-toggle:focus-visible { border-radius: var(--r-sm); }
 /* the card recipe is shared by the wordmark's panel and the phone sheet */
 .shell-panel {
   position: fixed;
@@ -317,8 +445,9 @@ body, html { margin: 0; height: 100%; background: var(--bg); color: var(--text);
   text-decoration: none;
 }
 .shell-panel a:hover,
-.shell-panel a:focus-visible { background: var(--chrome-wash); outline: none; }
-.shell-panel a:focus-visible { box-shadow: inset 0 0 0 2px var(--ink); }
+.shell-panel a:focus-visible { background: var(--chrome-wash); }
+/* the chrome's 3 px action ring, inside the card's edge */
+.shell-panel a:focus-visible { outline: 3px solid var(--action); outline-offset: -3px; }
 .shell-panel a strong { font-weight: 600; color: #fff; }
 .shell-panel a span { color: var(--muted); line-height: 1.35; }
 .shell-panel a.shell-panel-minor { padding: 6px 10px; color: var(--ink); text-decoration: underline; }
@@ -326,7 +455,8 @@ body, html { margin: 0; height: 100%; background: var(--bg); color: var(--text);
 /* the wordmark's panel hangs under the pill's right edge */
 #contribute-panel {
   right: var(--safe-right);
-  top: calc(var(--safe-top) + 46px);
+  /* the wordmark is 46 px tall since its entries reached 44 px */
+  top: calc(var(--safe-top) + 52px);
 }
 .maplibregl-popup-content .popup-actions a.popup-revise {
   background: rgba(248, 250, 252, 0.92);
