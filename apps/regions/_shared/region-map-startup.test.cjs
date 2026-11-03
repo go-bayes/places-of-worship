@@ -38,12 +38,20 @@ ok(/polygonsTileset: "nz-polygons"/.test(read("global", "index.html")), "the wor
 ok(/CENSUS_POINT_ANCHORS\.includes\(layers\[i\]\.id\)/.test(runtime), "the census anchor scan matches ids present in the style");
 
 // 2. the manifest waits for map load and an idle slot, and revalidates
-const arm = runtime.slice(runtime.indexOf("const armOffers = () => {"));
-ok(/fetch\(`\$\{REGIONS_BASE\}_shared\/data\/region-bboxes\.json`, HANDOFF_HOME \? \{ cache: "no-cache" \} : undefined\)/.test(arm),
+// one read of the manifest serves the border handoff and the home shade
+const manifestRead = runtime.slice(runtime.indexOf("function readRegionManifest() {"));
+const arm = runtime.slice(runtime.indexOf("function afterLoadWhenIdle(arm) {"));
+ok((runtime.match(/region-bboxes\.json/g) || []).length === 1, "the runtime fetches the manifest in one place");
+ok(/fetch\(`\$\{REGIONS_BASE\}_shared\/data\/region-bboxes\.json`, HANDOFF_HOME \? \{ cache: "no-cache" \} : undefined\)/.test(manifestRead),
   "the manifest fetch keeps no-cache on country pages");
-ok(/requestIdleCallback\(armOffers/.test(arm) && /setTimeout\(armOffers/.test(arm), "idle callback with a timeout fallback");
-ok(/map\.once\("load", armOffersWhenIdle\)/.test(arm), "arming waits for map load");
-ok(!/^\s*armOffers\(\);/m.test(arm) && !/addEventListener\("load", armOffers/.test(arm), "no direct or window-load arming remains");
+ok(/if \(!regionManifestRead\) \{\n\s*regionManifestRead = fetch\(/.test(manifestRead), "the read is made once and shared");
+ok(/requestIdleCallback\(arm, \{ timeout: 5000 \}\)/.test(arm) && /setTimeout\(arm, 1\)/.test(arm), "idle callback with a timeout fallback");
+ok(/map\.once\("load", armWhenIdle\)/.test(arm), "arming waits for map load");
+ok(/afterLoadWhenIdle\(armOffers\);/.test(runtime), "the handoff arms after load and idle");
+ok(/if \(HANDOFF_HOME\) afterLoadWhenIdle\(\(\) => readRegionManifest\(\)\.then\(applyHomeShade\)\);/.test(runtime),
+  "the home shade reads the manifest after load and idle, on country pages only");
+ok((runtime.match(/(?<!function )readRegionManifest\(\)/g) || []).length === 2, "the handoff and the home shade are the manifest's only readers");
+ok(!/^\s*armOffers\(\);/m.test(runtime) && !/addEventListener\("load", armOffers/.test(runtime), "no direct or window-load arming remains");
 // late arrival: each consumer of the manifest copes with null
 ok(/if \(!handoffRegions\) return null;/.test(runtime), "neighbour lookup tolerates a missing manifest");
 ok(/function updateBorderHandoff\(\) \{\n\s*if \(!handoffRegions\) return;/.test(runtime), "handoff refresh tolerates a missing manifest");
@@ -276,8 +284,149 @@ const pending = [];
     "warming, the home and neighbour warms included, waits for activation");
   ok(/let prefetchReady = false;/.test(switcher) && /if \(readyAtInit\) markPrefetchReady\(\);/.test(switcher) &&
     !/if \(prefetchReady\) \{ warmHome\(\)/.test(switcher), "a late script start passes through the same gate");
-  ok(/const armOffersWhenIdle = \(\) => \{\n\s*if \(document\.prerendering\) \{\n\s*document\.addEventListener\("prerenderingchange", armOffersWhenIdle, \{ once: true \}\);\n\s*return;/.test(arm),
+  ok(/const armWhenIdle = \(\) => \{\n\s*if \(document\.prerendering\) \{\n\s*document\.addEventListener\("prerenderingchange", armWhenIdle, \{ once: true \}\);\n\s*return;/.test(arm),
     "the handoff manifest waits for activation");
+}
+
+// 6. the home shade (ui review item 9, jb ruling 2026-11-03): the world with
+// the page's country cut out, above the dots, and the country's outline; both
+// fade out between zooms 6 and 7, and a page without an outline draws none
+{
+  const vm = require("node:vm");
+  const grab = (name) => {
+    const start = runtime.indexOf(`function ${name}(`);
+    assert.ok(start >= 0, `${name} is in the runtime`);
+    return runtime.slice(start, runtime.indexOf("\n}\n", start) + 3);
+  };
+  const constant = (name) => {
+    const start = runtime.indexOf(`const ${name} = `);
+    assert.ok(start >= 0, `${name} is in the runtime`);
+    return runtime.slice(start, runtime.indexOf(";\n", start) + 2);
+  };
+  const manifest = JSON.parse(read("regions", "_shared", "data", "region-bboxes.json"));
+  // a stub map that keeps a layer stack, enough for the layer builder
+  const makeMap = (layerIds, background) => {
+    const stack = layerIds.map((id) => ({ id, type: "circle" }));
+    if (background) stack.unshift({ id: "bg", type: "background", paint: { "background-color": background } });
+    const sources = {};
+    const painted = [];
+    let onRender = null;
+    return {
+      stack, sources, painted,
+      getStyle: () => ({ layers: stack.map((layer) => ({ ...layer })) }),
+      getLayer: (id) => stack.find((layer) => layer.id === id),
+      getSource: (id) => sources[id],
+      addSource: (id, spec) => { sources[id] = spec; },
+      addLayer: (layer, beforeId) => {
+        const at = beforeId ? stack.findIndex((l) => l.id === beforeId) : stack.length;
+        stack.splice(at < 0 ? stack.length : at, 0, layer);
+      },
+      setPaintProperty: (id, prop, value) => painted.push([id, prop, value]),
+      once: (name, fn) => { if (name === "render") onRender = fn; },
+      render: () => onRender && onRender()
+    };
+  };
+  const make = (map) => {
+    const sandbox = {
+      map, HANDOFF_HOME: null,
+      LAYERS: { places: "pow-places-points", overview: "pow-overview-points" },
+      window: {}
+    };
+    vm.createContext(sandbox);
+    vm.runInContext(read("shared", "region-resolve.js"), sandbox);
+    vm.runInContext([
+      "HOME_SHADE", "HOME_SHADE_OPACITY", "HOME_SHADE_FADE_ZOOMS", "HOME_SHADE_TONE", "HOME_OUTLINE_COLOUR"
+    ].map(constant).join("") + "let homeShadeData = null;\n" + [
+      "homeShadeFeatures", "homeShadeTone", "homeShadeLayers", "addHomeShadeLayers", "applyHomeShade"
+    ].map(grab).join("") +
+      // the sandbox's objects belong to another realm; hand them out as json
+      "this.features = (code) => JSON.stringify(homeShadeFeatures(this.regions.find((r) => r.code === code)));\n" +
+      "this.layers = (tone) => JSON.stringify(homeShadeLayers(tone));\n" +
+      "this.apply = (home, doc) => { HANDOFF_HOME = home; applyHomeShade(doc); return homeShadeData !== null; };\n" +
+      "this.tone = () => homeShadeTone();", sandbox);
+    sandbox.regions = manifest.regions;
+    return sandbox;
+  };
+  const sandbox = make(makeMap([]));
+  const shadeOf = (code) => JSON.parse(sandbox.features(code));
+  const regionOf = (code) => manifest.regions.find((r) => r.code === code);
+
+  // the builder: one shade polygon whose exterior is the world and whose
+  // holes are the country's polygons, enclaves shaded again, and an outline
+  for (const code of ["se", "nz", "fj", "ki", "za", "us"]) {
+    const doc = shadeOf(code);
+    const [shade, outline] = doc.features;
+    assert.equal(shade.properties.part, "shade");
+    assert.equal(outline.properties.part, "outline");
+    const polygons = shade.geometry.coordinates;
+    assert.deepEqual(polygons[0][0], [[-180, -90], [180, -90], [180, 90], [-180, 90], [-180, -90]], `${code}: the world is the exterior`);
+    const rings = regionOf(code).rings;
+    // every manifest ring is a hole of the world or an enclave polygon
+    const holes = polygons[0].length - 1;
+    const enclaves = polygons.length - 1;
+    assert.equal(holes + enclaves, rings.length, `${code}: every ring is cut out or shaded back`);
+    assert.ok(polygons.slice(1).every((polygon) => polygon.length === 1), `${code}: an enclave is a plain polygon`);
+    // no ring crosses the antimeridian in the manifest, so the shade stays inside [-180, 180]
+    assert.ok(polygons.flat(2).every(([lng]) => lng >= -180 && lng <= 180), `${code}: the shade stays in one world`);
+    assert.ok(outline.geometry.coordinates.length >= rings.length, `${code}: every ring is outlined`);
+    checks += 5;
+  }
+  // new zealand: the chatham islands, east of the antimeridian, are a hole too
+  const nz = shadeOf("nz").features[0].geometry.coordinates[0].slice(1);
+  ok(nz.some((ring) => ring.every(([lng]) => lng < -175)), "the chathams are cut out of the shade");
+  ok(nz.some((ring) => ring.every(([lng]) => lng > 166)), "the main islands are cut out of the shade");
+  // fiji: the islands cut at the antimeridian keep no outline along the cut
+  const fjOutline = shadeOf("fj").features[1].geometry.coordinates;
+  ok(fjOutline.every((line) => line.every((point, i) => i === 0 ||
+    !(Math.abs(point[0]) >= 180 && Math.abs(line[i - 1][0]) >= 180))), "fiji's outline draws no edge along the antimeridian");
+  ok(fjOutline.length > regionOf("fj").rings.length, "fiji's cut rings split into open lines");
+
+  // no outline: an absent entry, an entry without rings, and the global map
+  ok(sandbox.features("cf") === "null", "the staged central african republic page has no manifest entry and no shade");
+  ok(sandbox.apply("cf", manifest) === false, "a page without an outline keeps no shade data");
+  ok(sandbox.apply(null, manifest) === false, "the global map draws no shade");
+  ok(sandbox.apply("se", null) === false, "a failed manifest read draws no shade");
+
+  // the layers: the zoom fade, the tone, and nothing hit-testable
+  const [fill, line] = JSON.parse(sandbox.layers("#abcdef"));
+  ok(fill.type === "fill" && fill.maxzoom === 7 && line.type === "line" && line.maxzoom === 7, "both layers stop at zoom 7");
+  assert.deepEqual(fill.paint["fill-opacity"], ["interpolate", ["linear"], ["zoom"], 6, 0.5, 7, 0]);
+  assert.deepEqual(line.paint["line-opacity"], ["interpolate", ["linear"], ["zoom"], 6, 0.85, 7, 0]);
+  assert.deepEqual(line.paint["line-width"], ["interpolate", ["linear"], ["zoom"], 2, 1.6, 6, 2.4]);
+  ok(fill.paint["fill-color"] === "#abcdef" && line.paint["line-color"] === "#1e293b", "shade in the given tone, outline in dark slate");
+  checks += 3;
+  ok(make(makeMap([], "hsl(0, 0%, 100%)")).tone() === "hsl(0, 0%, 100%)", "the tone is the basemap's background");
+  ok(make(makeMap([], { stops: [[6, "rgba(252, 247, 229, 1)"], [14, "#fff"]] })).tone() === "rgba(252, 247, 229, 1)",
+    "a zoom-function background gives its first stop");
+  ok(make(makeMap([])).tone() === "#ffffff", "a basemap without a background layer (satellite, openstreetmap) takes the light veil");
+  ok(!/map\.on\("(click|mousemove|mouseenter)", HOME_SHADE/.test(runtime), "the shade takes no clicks or hover");
+
+  // placement: directly above the place dots, below what was drawn over them,
+  // eased in from transparent on arrival and drawn at once after a style switch
+  const map = makeMap(["census", "pow-overview-points", "pow-places-points", "pow-dated-places"], "#fff");
+  const live = make(map);
+  ok(live.apply("se", manifest) === true, "sweden has a shade");
+  assert.deepEqual(map.stack.map((layer) => layer.id),
+    ["bg", "census", "pow-overview-points", "pow-places-points", "pow-home-shade-fill", "pow-home-shade-outline", "pow-dated-places"]);
+  ok(map.sources["pow-home-shade"].maxzoom === 6, "the shade's source tiles stop at zoom 6");
+  ok(map.getLayer("pow-home-shade-fill").paint["fill-opacity"] === 0 && map.painted.length === 0, "the shade starts transparent");
+  map.render();
+  assert.deepEqual(map.painted.map(([id, prop]) => [id, prop]),
+    [["pow-home-shade-fill", "fill-opacity"], ["pow-home-shade-outline", "line-opacity"]]);
+  ok(map.painted[0][2][4] === 0.5, "after one frame the shade eases to its curve");
+  checks += 2;
+  const before = map.stack.length;
+  live.apply("se", manifest);
+  ok(map.stack.length === before, "the shade is added once");
+  const again = makeMap(["pow-places-points"]);
+  const switched = make(again);
+  vm.runInContext("homeShadeData = { type: 'FeatureCollection', features: [] }; addHomeShadeLayers();", switched);
+  ok(again.getLayer("pow-home-shade-fill").paint["fill-opacity"][0] === "interpolate", "after a basemap switch the shade draws at once");
+  const bare = makeMap(["census"]);
+  const noPlaces = make(bare);
+  vm.runInContext("homeShadeData = { type: 'FeatureCollection', features: [] }; addHomeShadeLayers();", noPlaces);
+  ok(bare.stack.length === 1, "no shade before the place layer exists");
+  ok(/addPlacesLayer\(\);\n[^\n]*\n\s*addHomeShadeLayers\(\);\n\}/.test(runtime), "a rebuilt layer stack restores the shade over the dots");
 }
 
 Promise.all(pending).then(() => {

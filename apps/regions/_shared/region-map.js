@@ -1861,6 +1861,146 @@ function addBuildingsLayer() {
   });
 }
 
+// ---- home country shade --------------------------------------------------
+// the opening view of a country page should say which country it is about
+// (ui review item 9, jb ruling 2026-11-03, replacing #215's per-dot
+// recession): one fill of the world with this country's outline cut out,
+// in the basemap's background tone and drawn above the place dots, so the
+// neighbours' dots and land fade under it, and the home outline as a line
+// above it. both fade out between zooms 6 and 7, where the manifest
+// outline's 0.03-degree simplification strays from the coast. the outline
+// comes from the boundary manifest the border handoff reads after load
+// (readRegionManifest), so both layers arrive after the map has drawn;
+// the dot paint is untouched. a page whose country has no outline in the
+// manifest, and the global map, draw as before
+const HOME_SHADE = {
+  source: "pow-home-shade",
+  fill: "pow-home-shade-fill",
+  outline: "pow-home-shade-outline"
+};
+const HOME_SHADE_OPACITY = 0.5;
+const HOME_SHADE_FADE_ZOOMS = [6, 7];
+// the tone for basemaps without a background layer (satellite and the
+// openstreetmap fallback). a dark tone on satellite imagery left the
+// neighbours' dots as vivid as the home dots; a light veil reads on both
+const HOME_SHADE_TONE = "#ffffff";
+const HOME_OUTLINE_COLOUR = "#1e293b";
+// the shade and outline as one feature collection, null until the
+// manifest names this page's country with an outline
+let homeShadeData = null;
+
+// the world with this country's outline cut out, and the outline itself,
+// from a manifest entry; null for an entry without rings. the shade's
+// exterior runs along the antimeridian and the poles, so the world copies
+// meet edge to edge (the fill draws without its antialiasing outline,
+// which would mark the meeting as a seam); the country's polygons become
+// its holes, and an enclave (a hole in a home polygon) is shaded again as
+// a polygon of its own. a ring cut at the antimeridian (fiji) keeps its
+// cut edge out of the outline
+function homeShadeFeatures(region) {
+  if (!region || !Array.isArray(region.rings) || !region.rings.length) return null;
+  const polygons = window.RegionResolve.regionFeature(region).geometry.coordinates;
+  if (!polygons.length) return null;
+  const world = [[-180, -90], [180, -90], [180, 90], [-180, 90], [-180, -90]];
+  const shade = [[world, ...polygons.map((polygon) => polygon[0])]];
+  polygons.forEach((polygon) => polygon.slice(1).forEach((hole) => shade.push([hole])));
+  const onSeam = (a, b) => Math.abs(a[0]) >= 180 && Math.abs(b[0]) >= 180;
+  const lines = [];
+  polygons.forEach((polygon) => polygon.forEach((ring) => {
+    let line = [ring[0]];
+    for (let i = 1; i < ring.length; i++) {
+      if (onSeam(ring[i - 1], ring[i])) {
+        if (line.length > 1) lines.push(line);
+        line = [ring[i]];
+      } else {
+        line.push(ring[i]);
+      }
+    }
+    if (line.length > 1) lines.push(line);
+  }));
+  return {
+    type: "FeatureCollection",
+    features: [
+      { type: "Feature", properties: { part: "shade" }, geometry: { type: "MultiPolygon", coordinates: shade } },
+      { type: "Feature", properties: { part: "outline" }, geometry: { type: "MultiLineString", coordinates: lines } }
+    ]
+  };
+}
+
+// the basemap's background tone: its background layer's colour (the first
+// stop of a zoom function), or the light veil for a basemap that has none
+function homeShadeTone() {
+  const style = map.getStyle();
+  const background = style && (style.layers || []).find((layer) => layer.type === "background");
+  let colour = background && background.paint && background.paint["background-color"];
+  if (colour && Array.isArray(colour.stops) && colour.stops.length) colour = colour.stops[0][1];
+  return typeof colour === "string" ? colour : HOME_SHADE_TONE;
+}
+
+// the two layers. each holds to zoom 6 and fades to nothing by zoom 7,
+// where the layer stops drawing (and its source stops loading tiles)
+function homeShadeLayers(tone) {
+  const [fadeFrom, fadeTo] = HOME_SHADE_FADE_ZOOMS;
+  return [{
+    id: HOME_SHADE.fill,
+    type: "fill",
+    source: HOME_SHADE.source,
+    maxzoom: fadeTo,
+    filter: ["==", ["get", "part"], "shade"],
+    paint: {
+      // the antialiasing outline would draw the exterior's edge along the
+      // antimeridian as a seam; the coast's edge lies under the outline
+      "fill-antialias": false,
+      "fill-color": tone,
+      "fill-opacity": ["interpolate", ["linear"], ["zoom"], fadeFrom, HOME_SHADE_OPACITY, fadeTo, 0]
+    }
+  }, {
+    id: HOME_SHADE.outline,
+    type: "line",
+    source: HOME_SHADE.source,
+    maxzoom: fadeTo,
+    filter: ["==", ["get", "part"], "outline"],
+    layout: { "line-join": "round" },
+    paint: {
+      "line-color": HOME_OUTLINE_COLOUR,
+      "line-width": ["interpolate", ["linear"], ["zoom"], 2, 1.6, 6, 2.4],
+      "line-opacity": ["interpolate", ["linear"], ["zoom"], fadeFrom, 0.85, fadeTo, 0]
+    }
+  }];
+}
+
+// the shade sits directly above the place dots, so the layers added over
+// them later (dated places, pulotu points) stay above it. the shade has no
+// handlers, and every click and hover handler names its own layers, so a
+// neighbour's dot under the shade answers as before. fadeIn starts both
+// layers transparent and eases them to their curves after one frame
+function addHomeShadeLayers(fadeIn = false) {
+  if (!homeShadeData || !map.getLayer(LAYERS.places) || map.getLayer(HOME_SHADE.fill)) return;
+  if (!map.getSource(HOME_SHADE.source)) {
+    map.addSource(HOME_SHADE.source, { type: "geojson", data: homeShadeData, maxzoom: 6 });
+  }
+  const order = map.getStyle().layers.map((layer) => layer.id);
+  const beforeId = order[order.indexOf(LAYERS.places) + 1];
+  const layers = homeShadeLayers(homeShadeTone());
+  const opacity = { fill: "fill-opacity", line: "line-opacity" };
+  layers.forEach((layer) => {
+    const key = opacity[layer.type];
+    const paint = fadeIn ? { ...layer.paint, [key]: 0, [`${key}-transition`]: { duration: 400, delay: 0 } } : layer.paint;
+    map.addLayer({ ...layer, paint }, beforeId);
+  });
+  if (!fadeIn) return;
+  map.once("render", () => layers.forEach((layer) => {
+    if (map.getLayer(layer.id)) map.setPaintProperty(layer.id, opacity[layer.type], layer.paint[opacity[layer.type]]);
+  }));
+}
+
+// the manifest has arrived: find this page's country and draw its shade
+function applyHomeShade(doc) {
+  if (!HANDOFF_HOME || !doc || !Array.isArray(doc.regions)) return;
+  homeShadeData = homeShadeFeatures(doc.regions.find((r) => r.code === HANDOFF_HOME));
+  addHomeShadeLayers(true);
+}
+
 function addCustomLayers() {
   Object.values(LAYERS).forEach((id) => {
     if (map.getLayer(id)) {
@@ -1872,7 +2012,7 @@ function addCustomLayers() {
       map.removeSource(id);
     }
   });
-  [CENSUS.hover, CENSUS.line, CENSUS.fill].forEach((id) => {
+  [CENSUS.hover, CENSUS.line, CENSUS.fill, HOME_SHADE.fill, HOME_SHADE.outline].forEach((id) => {
     if (map.getLayer(id)) map.removeLayer(id);
   });
   if (map.getSource(CENSUS.source)) map.removeSource(CENSUS.source);
@@ -1884,6 +2024,8 @@ function addCustomLayers() {
   addPolygonsLayer();
   addBuildingsLayer();
   addPlacesLayer();
+  // the home shade over the dots, once the manifest has named the country
+  addHomeShadeLayers();
 }
 
 function ensureCustomLayers() {
@@ -6369,6 +6511,43 @@ function updateBorderHandoff() {
   else setOffer("resting", null);
 }
 
+// the one read of the boundary manifest, shared by the border handoff and
+// the home shade. country pages revalidate it against the host's etag
+// (no-cache), so a new country launch reaches every page without a
+// cache-pin ceremony; the global map keeps default caching — the etag
+// still revalidates. both readers defer it past map load (below) so the
+// manifest stays off the critical path
+let regionManifestRead = null;
+function readRegionManifest() {
+  if (!regionManifestRead) {
+    regionManifestRead = fetch(`${REGIONS_BASE}_shared/data/region-bboxes.json`, HANDOFF_HOME ? { cache: "no-cache" } : undefined)
+      .then((res) => (res.ok ? res.json() : null))
+      .catch(() => null);
+  }
+  return regionManifestRead;
+}
+
+// the manifest is not needed to draw the map, so its readers wait for the
+// map's own load and then for an idle slot (setTimeout where
+// requestIdleCallback is missing). a page prerendered from the switcher
+// (speculation rules) reads it only when the visitor arrives, so an unseen
+// prerender never fetches the manifest
+function afterLoadWhenIdle(arm) {
+  const armWhenIdle = () => {
+    if (document.prerendering) {
+      document.addEventListener("prerenderingchange", armWhenIdle, { once: true });
+      return;
+    }
+    if ("requestIdleCallback" in window) window.requestIdleCallback(arm, { timeout: 5000 });
+    else window.setTimeout(arm, 1);
+  };
+  if (map.loaded()) armWhenIdle();
+  else map.once("load", armWhenIdle);
+}
+
+// country pages draw their home shade from the same read
+if (HANDOFF_HOME) afterLoadWhenIdle(() => readRegionManifest().then(applyHomeShade));
+
 // near me can land the camera outside this country entirely (the phone
 // is in another country); the choropleth has nothing to paint there, so
 // the data layer reads off while its panels keep talking about a census
@@ -6406,14 +6585,8 @@ geolocate.on("geolocate", (event) => {
 });
 
 if (offerGo && !RC.disableBorderHandoff) {
-  // country pages revalidate the manifest against the host's etag
-  // (no-cache), so a new country launch reaches every page without a
-  // cache-pin ceremony; the global map keeps default caching — the etag
-  // still revalidates. both defer the fetch past map load (below) so the
-  // manifest stays off the critical path
   const armOffers = () => {
-    fetch(`${REGIONS_BASE}_shared/data/region-bboxes.json`, HANDOFF_HOME ? { cache: "no-cache" } : undefined)
-      .then((res) => (res.ok ? res.json() : null))
+    readRegionManifest()
       .then((doc) => {
         if (!doc || !Array.isArray(doc.regions)) return;
         handoffRegions = doc.regions;
@@ -6480,22 +6653,9 @@ if (offerGo && !RC.disableBorderHandoff) {
       })
       .catch(() => {});
   };
-  // the manifest is not needed to draw the map, so it waits for the map's
-  // own load and then for an idle slot (setTimeout where requestIdleCallback
-  // is missing). every consumer null-checks handoffRegions, and arming ends
-  // in updateBorderHandoff(), so a late arrival only delays the pill
-  // a page prerendered from the switcher (speculation rules) arms only when
-  // the visitor arrives, so an unseen prerender never fetches the manifest
-  const armOffersWhenIdle = () => {
-    if (document.prerendering) {
-      document.addEventListener("prerenderingchange", armOffersWhenIdle, { once: true });
-      return;
-    }
-    if ("requestIdleCallback" in window) window.requestIdleCallback(armOffers, { timeout: 5000 });
-    else window.setTimeout(armOffers, 1);
-  };
-  if (map.loaded()) armOffersWhenIdle();
-  else map.once("load", armOffersWhenIdle);
+  // every consumer null-checks handoffRegions, and arming ends in
+  // updateBorderHandoff(), so a late arrival only delays the pill
+  afterLoadWhenIdle(armOffers);
   // the offer engine claims the main zone's clicks in every non-resting
   // state; this listener registers before the switcher's (script order),
   // so resting clicks fall through to the panel as usual
