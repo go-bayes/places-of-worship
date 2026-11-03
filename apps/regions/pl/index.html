@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-dcvBGenAV1AlPUz0/2xpWO9j6Em7pIud9hRozCkcqrQ='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-61v4/FGtYzBgesLgPJ5onHII4be6BZD/5X4cTEfipgM='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Places of Worship | Poland Research Map</title>
+  <title>religionmap.org · Poland</title>
   <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet" integrity="sha384-p5cy4wHtKSqjnLUNjQ+8ffCwUp0vlLS+6lg1lc3qqXax2E1EmVCMCAimU+R0MOZH" crossorigin="anonymous">
   <link href="../../shared/map-shell.css?v=20261103c" rel="stylesheet">
   <link href="../../global/styles/maplibre-flat.css?v=20261103c" rel="stylesheet">
@@ -36,7 +36,7 @@
     // Authoritative GIS-Expert/KUL church polygons remain pending.
     window.REGION_CONFIG = {
       countryCode: "PL",
-      title: "Places of Worship | Poland Research Map",
+      title: "religionmap.org · Poland",
       dataNoun: "Attendance",
       center: [19.3, 52.05],
       initialZoom: 5.6,
@@ -108,7 +108,7 @@
         ]
       },
       wordmarkLinks: [
-        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+        { id: "wordmark-global", label: "religionmap.org", href: "../../global/", title: "Open the global map" }
       ],
       censusSourceAttribution: 'Catholic Mass attendance rates (dominicantes, communicantes) from <a href="https://iskk.pl/publikacje/" target="_blank" rel="noopener">ISKK, Annuarium Statisticum Ecclesiae in Polonia</a>, by diocese, 2014&ndash;2024 (2020 not counted) &middot; Diocese boundaries mix <a href="https://www.openstreetmap.org/" target="_blank" rel="noopener">OpenStreetMap</a> religious-administration polygons (&copy; OpenStreetMap contributors, ODbL) for 24 dioceses with digitisation from <a href="https://gisco-services.ec.europa.eu/distribution/v2/lau/download/" target="_blank" rel="noopener">Eurostat/GISCO</a> Local Administrative Units 2024 gmina geometry for 17 dioceses; authoritative GIS-Expert/KUL church polygons pending',
       censusFlagNote: "* This diocese boundary layer is mixed-source and provisional: 24 of 41 dioceses use complete OpenStreetMap religious-administration polygons (© OpenStreetMap contributors, ODbL); the other 17 are approximate digitisations, built from Eurostat/GISCO gmina (municipality) boundaries assigned by parish and deanery evidence rather than mapped diocese lines, and seven of those carry low confidence: Białystok, Bydgoszcz, Gdańsk, Łomża, Lublin, Włocławek, Zielona Góra-Gorzów (see docs/manifests/pl-attendance-2014-2024.json). Authoritative GIS-Expert/KUL church polygons are pending. Dominicantes and communicantes are ISKK's counts-based Mass-attendance rates over obliged Catholics, never census religious affiliation, and never comparable on one axis to Italy's self-reported attendance survey."

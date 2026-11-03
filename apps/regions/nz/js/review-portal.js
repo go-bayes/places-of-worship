@@ -120,7 +120,7 @@
     };
 
     function setupPageLabel() {
-        document.title = `${countryName} submitted evidence | Places of Worship`;
+        document.title = `religionmap.org · ${countryName} · Review evidence`;
         // the visible header is one line (ui item 6, 2026-11-03): the
         // surface and the country; its one sentence is the page's own
         const heading = document.getElementById("pageHeading") || document.querySelector("header h1");

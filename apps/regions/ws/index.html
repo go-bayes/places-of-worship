@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-uxcDVCF+Z8HKNAADLyG+bkgLCr1oYjTWJOvmev8vMTI='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-d+HxztoWjvnjbaD6viBE5I1uhbvobXCtpf0ZVHdtNdw='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Places of Worship | Samoa Research Map</title>
+  <title>religionmap.org · Samoa</title>
   <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet" integrity="sha384-p5cy4wHtKSqjnLUNjQ+8ffCwUp0vlLS+6lg1lc3qqXax2E1EmVCMCAimU+R0MOZH" crossorigin="anonymous">
   <link href="../../shared/map-shell.css?v=20261103c" rel="stylesheet">
   <link href="../../global/styles/maplibre-flat.css?v=20261103c" rel="stylesheet">
@@ -19,7 +19,7 @@
     // the four-region layer is an exact roll-up of the constituency product.
     window.REGION_CONFIG = {
       countryCode: "WS",
-      title: "Samoa",
+      title: "religionmap.org · Samoa",
       dataNoun: "Census",
       center: [-172.35, -13.75],
       initialZoom: 7.0,
@@ -65,7 +65,7 @@
         ]
       },
       wordmarkLinks: [
-        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+        { id: "wordmark-global", label: "religionmap.org", href: "../../global/", title: "Open the global map" }
       ],
       censusSourceAttribution: 'Census religion &copy; <a href="https://www.sbs.gov.ws/wp-content/uploads/2022/12/CensusTablesEXCELFiles.xlsx" target="_blank" rel="noopener">Samoa Bureau of Statistics, 2021 Census tables workbook Table 2</a>; derived summaries used with attribution under the project-lead use-for-now ruling while an SBS reuse ask is outgoing. The page reverts in a single commit if SBS objects. &middot; Boundaries <a href="https://pacificdata.org/data/dataset/2011_wsm_phc_admin_boundaries" target="_blank" rel="noopener">Pacific Community (SPC) Statistics for Development Division, Pacific Data Hub, 2011 PHC region boundaries</a>, Creative Commons Attribution. &middot; Project page and code <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a>, subject to the source terms stated here.',
       censusFlagNote: "* Religion is published and staged for 51 electoral constituencies, but no licensed constituency boundary layer exists. The map renders the census's four statistical regions, the workbook's own roll-up, until the Samoa Bureau of Statistics supplies a constituency vector; the full constituency table ships in the committed data product. The 2021 table has no separate not-stated category: all 26 printed categories sum exactly to the enumerated resident population. Religious affiliation is TOTAL minus NO RELIGION, no religion is NO RELIGION, and both percentages use total resident population as their denominator. The boundary layer is the 2011 Population and Housing Census dissemination geography; its four statistical regions are the same frame used by the 2021 workbook roll-up. This release has one subnational census wave, 2021, and therefore reports no change metric."

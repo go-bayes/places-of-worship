@@ -4,15 +4,19 @@
   <meta charset="UTF-8">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Places of Worship — RA field guide</title>
+  <title>religionmap.org · RA field guide</title>
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="guide.css">
+  <script src="guide.js" defer></script>
 </head>
-<body class="ra-guide">
+<body class="ra-guide guide-rail-page">
+  <div class="guide-band">
+    <p class="guide-band-name"><a href="../global/">religionmap.org</a><span class="guide-band-sep" aria-hidden="true">·</span><span class="guide-band-country">New Zealand</span><span class="guide-band-sep" aria-hidden="true">·</span><span class="guide-band-guide">RA field guide</span></p>
+    <a class="guide-band-portal" href="../regions/nz/verification.html">Open the portal</a>
+  </div>
   <header class="page-header">
     <div class="header-inner">
-      <p class="eyebrow">Places of Worship research project</p>
-      <h1>Places of Worship — RA field guide</h1>
+      <h1>RA field guide</h1>
       <p class="purpose">A practical walkthrough for research assistants verifying tasks, recording evidence, and nominating missing places.</p>
       <nav class="site-nav" aria-label="Guide links">
         <a href="pi.html">PI &amp; reviewer guide</a>
@@ -22,30 +26,36 @@
       <p class="storage-note">Every screenshot uses demonstration data only; the places, tasks, and people shown are fictional (St Demo Church, task_demo_*).</p>
     </div>
   </header>
-  <main>
-  <nav class="toc" aria-labelledby="contents-heading">
+  <div class="contents-bar" hidden>
+    <button type="button" class="contents-toggle" aria-expanded="false" aria-controls="contents-sheet">Contents</button>
+    <span class="contents-current" aria-hidden="true"></span>
+    <div id="contents-sheet" class="contents-sheet" hidden></div>
+  </div>
+  <main class="guide-main">
+  <nav class="toc" id="guide-contents" aria-labelledby="contents-heading">
     <h2 id="contents-heading">Contents</h2>
     <ol>
-      <li><a href="#orientation">Orientation: the verification workspace</a></li>
-      <li><a href="#open-and-verify">Open a task and record evidence</a></li>
+      <li><a href="#orientation">Orientation: the contributor portal</a></li>
+      <li><a href="#open-and-verify">Assigned tasks: open a task and record evidence</a></li>
       <li><a href="#change-class">Genuine change versus map correction</a></li>
       <li><a href="#what-counts">What counts as a place of worship</a></li>
-      <li><a href="#submit-flow">Save a draft, submit, and open the next task</a></li>
-      <li><a href="#skip-and-undo">Skip a task with a reason, then undo</a></li>
-      <li><a href="#report-issue">Report a map issue from a task</a></li>
-      <li><a href="#pin-drop">Nominate a missing place with a pin drop</a></li>
-      <li><a href="#revise-after-changes">Respond to a changes-requested review</a></li>
-      <li><a href="#reopen-decided">Reopen a reviewed, accepted or exported place</a></li>
+      <li><a href="#submit-flow">Save draft, Submit for review, and the next task</a></li>
+      <li><a href="#skip-and-undo">Skip this task with a reason, then Undo skip</a></li>
+      <li><a href="#report-issue">Report an issue from a task</a></li>
+      <li><a href="#pin-drop">Add / Revise: add a missing place or revise one</a></li>
+      <li><a href="#revise-after-changes">Changes requested: Revise submission</a></li>
+      <li><a href="#reopen-decided">Reopen with a reason: a reviewed, accepted or exported place</a></li>
       <li><a href="#history-and-provenance">Task history and hover provenance</a></li>
       <li><a href="#ai-evidence-checks">How the AI evidence checks work</a></li>
       <li><a href="#decision-history-and-hashing">Decision history and hashing</a></li>
     </ol>
   </nav>
+  <div class="guide-body">
 
 <section class="guide-section flow-section" id="orientation">
-  <h2>Orientation: the verification workspace</h2>
-  <p>After Google sign-in the portal opens in <strong>Add / Revise</strong>, with one button of that name: press it to drop a pin for a new place, or tap a dot on the map first and it revises that place instead. The line under the button says which it will do. The map takes the same two intents directly: tap a dot and the revise entry opens on that record; hold a finger on the map (double-click on a computer) and the add entry opens with the pin already on that spot. While an entry is open the same button reads <strong>Cancel</strong>, at the same size, and is the way out on any screen. A second button of the same size, <strong>Quick photo</strong>, sits under it for a place you are standing at: one press opens the camera and the photo goes to review with your position (see <em>Nominate a missing place with a pin drop</em> below). <strong>Assigned tasks</strong>, of the same size again, appears only when your batch holds work for you; it opens the specialist assignment sheet, which lists only your batch tasks with <strong>My work</strong> beneath it, and <strong>← Add / Revise</strong> on the bar above that sheet returns. In Add / Revise the sidebar holds the entry you chose; your earlier nominations and revisions open from <strong>Revise a past submission</strong> on the Add places card, listed below it in teal, and <em>Hide</em> puts them away. The header keeps two buttons — <strong>Exit</strong> (the public map) and <strong>Guide</strong> (this page) — and nothing else. The portal is dark throughout. A basemap pill on the map switches between Streets, Hybrid, and Satellite; Streets is a dark map to match the page, while Hybrid and Satellite show the imagery as it is. The map opens on Hybrid, imagery with street names, and returns to it when you leave an activity; a basemap you pick yourself stands for the session, and placing a pin lifts only an automatic Streets map to Hybrid.</p>
-  <p><strong>Before sign-in the map is the whole screen.</strong> The sign-in card floats over it at the top left with three things: <strong>Sign in with Google</strong>, <strong>Contact to join</strong> for anyone not yet invited, and <em>Wrong account showing?</em>, which opens to explain how to switch Google accounts. The <strong>Map data</strong> panel at the bottom left switches the unreviewed places on or off and explains every fill and ring; drag it by its <em>⠿</em> grip to wherever the map is clear, and press <em>Map data</em> to fold it to its bar or open it again. The browser remembers the spot and the fold. The sign-in card moves the same way, by the <em>⠿</em> grip in its corner, and a double tap on either grip sends the panel home. On a phone the card sits above the map instead. Two buttons sit under the zoom buttons at the top left of the map: the crosshair centres the map on you, and <strong>Recentre</strong> returns it to the work (your pin, the open task, or the whole country) after you have scrolled or zoomed away. After sign-in the sidebar returns with your work.</p>
+  <h2>Orientation: the contributor portal</h2>
+  <p>After Google sign-in the portal opens in <strong>Add / Revise</strong>, with one button of that name: press it to drop a pin for a new place, or tap a dot on the map first and it revises that place instead. The line under the button says which it will do. The map takes the same two intents directly: tap a dot and the revise entry opens on that record; hold a finger on the map (double-click on a computer) and the add entry opens with the pin already on that spot. While an entry is open the same button reads <strong>Cancel</strong>, at the same size, and is the way out on any screen. A second button of the same size, <strong>Quick photo</strong>, sits under it for a place you are standing at: one press opens the camera and the photo goes to review with your position (see <em>Add / Revise</em> below). <strong>Assigned tasks</strong>, of the same size again, appears only when your batch holds work for you; it opens the specialist assignment sheet, which lists only your batch tasks with <strong>My work</strong> beneath it, and <strong>← Add / Revise</strong> on the bar above that sheet returns. In Add / Revise the sidebar holds the entry you chose; your earlier nominations and revisions open from <strong>Revise a past submission</strong> on the Add places card, listed below it in teal, and <em>Hide</em> puts them away. The header names the site and the country, <em>religionmap.org · New Zealand</em>, with <em>Contributor portal</em> under it, and keeps two buttons — <strong>Exit</strong> (the public map) and <strong>Guide</strong> (this page) — and nothing else. The portal is dark throughout. A basemap pill on the map switches between Streets, Hybrid, and Satellite; Streets is a dark map to match the page, while Hybrid and Satellite show the imagery as it is. The map opens on Hybrid, imagery with street names, and returns to it when you leave an activity; a basemap you pick yourself stands for the session, and placing a pin lifts only an automatic Streets map to Hybrid.</p>
+  <p><strong>Before sign-in the map is the whole screen.</strong> The sign-in card floats over it at the top left with three things: <strong>Sign in with Google</strong>, <strong>Contact to join</strong> for anyone not yet invited, and <em>Wrong account showing?</em>, which opens to explain how to switch Google accounts. The <strong>Map data</strong> panel at the bottom left switches the unreviewed places on or off and explains every fill and ring; drag it by its <em>⠿</em> grip to wherever the map is clear, and press <em>Map data</em> to fold it to its bar or open it again. The browser remembers the spot and the fold. The sign-in card moves the same way, by the <em>⠿</em> grip in its corner, and a double tap on either grip sends the panel home. On a phone the card sits above the map instead, as one row: <strong>Sign in with Google</strong> beside <strong>Contact to join</strong>, with <em>Wrong account showing?</em> under it; there the <strong>Map data</strong> panel opens folded to its bar until you open it, and the phone then remembers your choice. Two buttons sit under the zoom buttons at the top left of the map: the crosshair centres the map on you, and <strong>Recentre</strong> returns it to the work (your pin, the open task, or the whole country) after you have scrolled or zoomed away. After sign-in the sidebar returns with your work.</p>
   <ol class="step-list">
     <li id="orientation-step-1">
       <figure data-step-file="orientation/orientation-01.png" data-media-key="v6/orientation/orientation-01.png">
@@ -83,7 +93,7 @@
 </section>
 
 <section class="guide-section flow-section" id="open-and-verify">
-  <h2>Open a task and record evidence</h2>
+  <h2>Assigned tasks: open a task and record evidence</h2>
   <ol class="step-list">
     <li id="open-and-verify-step-1">
       <figure data-step-file="open-and-verify/open-and-verify-01.png" data-media-key="v6/open-and-verify/open-and-verify-01.png">
@@ -146,7 +156,7 @@
 </section>
 
 <section class="guide-section flow-section" id="submit-flow">
-  <h2>Save a draft, submit, and open the next task</h2>
+  <h2>Save draft, Submit for review, and the next task</h2>
   <ol class="step-list">
     <li id="submit-flow-step-1">
       <figure data-step-file="submit-flow/submit-flow-01.png" data-media-key="v6/submit-flow/submit-flow-01.png">
@@ -176,7 +186,7 @@
 </section>
 
 <section class="guide-section flow-section" id="skip-and-undo">
-  <h2>Skip a task with a reason, then undo</h2>
+  <h2>Skip this task with a reason, then Undo skip</h2>
   <ol class="step-list">
     <li id="skip-and-undo-step-1">
       <figure data-step-file="skip-and-undo/skip-and-undo-01.png" data-media-key="v6/skip-and-undo/skip-and-undo-01.png">
@@ -214,7 +224,7 @@
 </section>
 
 <section class="guide-section flow-section" id="report-issue">
-  <h2>Report a map issue from a task</h2>
+  <h2>Report an issue from a task</h2>
   <ol class="step-list">
     <li id="report-issue-step-1">
       <figure data-step-file="report-issue/report-issue-01.png" data-media-key="v6/report-issue/report-issue-01.png">
@@ -252,7 +262,7 @@
 </section>
 
 <section class="guide-section flow-section" id="pin-drop">
-  <h2>Nominate a missing place with a pin drop</h2>
+  <h2>Add / Revise: add a missing place or revise one</h2>
   <p><strong>While you are entering, the sidebar shows only the entry.</strong> The task list, My work, the filters, and the counts leave when a pin flow, a task's form, or the periods pane opens, and return when it closes; in Assigned tasks, "Show task list" on the signed-in line brings them back early, and in Add places the card's own buttons are the way out. A held touch on the map, or a double click on a computer, opens <em>Add a place</em> with the pin already down where you pressed, so the buttons that follow are there to move it. Under <em>Add a place</em> three buttons offer the ways to land the pin: <em>Drop pin at my location</em>, <em>Drop pin on map</em> (the map takes the screen; tap the building) and <em>Search and drop</em>, which opens the address search and the coordinate boxes. Typed coordinates move the pin as soon as you leave the second box, a search result drops it where you choose, and once the pin is down you drag it on the map; there is no move button. Dropped the pin by accident? Hold a finger on the pin (on a computer, hold the mouse button still on it until the menu appears, or right-click; the menu stays open after you let go) and choose <em>Remove pin</em>; the entry stays open for another drop, and <em>Cancel placement</em> sits beside it for leaving altogether. When you revise a place the pin is already on its record, so the same buttons read <em>Move pin</em>. The buttons say what they do: <em>Back to map (keeps your draft)</em> leaves the form with your entry saved on this device; <em>Discard this entry (deletes it)</em> removes it after a confirmation; <em>Cancel placement</em> drops an unconfirmed pin. A reload in the middle of an entry, for example a phone that reloads the page after you check a photo in the gallery, keeps you signed in for the rest of the hour and reopens the entry on its confirmed pin with what you typed; an assigned task's typed values return when you open that task again. Pressing <em>Add / Revise</em> lifts a Streets map to Hybrid so the building is visible, holds your zoom and position, and keeps every recorded dot on the map so you can still revise one instead. Photos and documents are one button, <em>Take photo or add files</em>: on a phone it offers the camera, and the count of files chosen reads beside it. <strong>Quick photo</strong>, the outlined button under <em>Add / Revise</em>, is the shortcut for a place you are standing at: one press opens the camera, the portal asks for your position at the same time, and the card that follows shows the photo, the fix (about how many metres, the blue ring on the map), a place name if you know it and a note for the reviewer, both optional. <em>Send for review</em> records it as a flagged entry with today's date and an area the size of the fix; the photo uploads on the screen that follows, and a reviewer places the building and fills in the details. If a recorded place sits near the fix the card names it first: cancel and revise that place from its dot if it is the one you photographed, or press <em>Send for review</em> again. If no position is found, <em>Drop the pin instead</em> carries the photo into the ordinary add flow. The button shows only while you are signed in and no entry is open.</p>
   <p><strong>The entry follows the pin.</strong> The page you opened names a country, but a place is a point on the map: wherever the pin lands, or wherever a quick photo's fix puts you, the entry is recorded as that country and goes to that country's review queue with its census years. If that is not the page's country a line under the entry says so, for example "This pin is in New Zealand; this page opened for Sweden. The entry is recorded as New Zealand.", and the header reads <em>entry in New Zealand</em> while the entry is open; nothing stops you. A dot across a border says which country it is in and revises here the same way. Everything you have entered, from any page, appears in your own work on every page.</p>
   <p><strong>The bar between the entry and the map is yours to move.</strong> On a wide screen it stands between the sidebar and the map: drag it to give the map more room or the form more room, double-click it to return to the usual width, and the browser remembers your choice. On a phone, or on any screen taller than it is wide, the entry and the map share the screen top and bottom instead, and <em>⇅ Swap</em> on the bar puts the other one on top. A bar marked <em>⠿ drag · entry ↕ map</em> divides them. Drag it to one of three positions, mostly map, half and half, or mostly entry, or press <em>More map</em>, <em>Even</em> or <em>More form</em> on the bar itself (on a wide screen the same three set the sidebar to its narrowest, half the window, or its widest); neither pane ever leaves the screen, so the other is always a drag away, and a double tap on the bar returns it to half. The portal moves the bar for you as the work changes: <em>Add / Revise</em> gives the map most of the screen for aiming, dropping the pin brings back half so the confirm card shows beside it, confirming the pin gives the entry most of the screen, and tapping into any field does the same; leaving the entry returns the bar to where you last put it, which the phone remembers. <em>Drop pin at my location</em> drops the pending pin where you are standing; the browser asks once for permission, and a blue dot inside a ring shows the fix and how rough it is, so drag the pin onto the building before confirming. The crosshair button at the top left of the map centres the map on you without dropping a pin. Under it, <strong>Recentre</strong> (four corner brackets around a dot) brings the map back after you have scrolled or zoomed away from your work: to your pin while an entry is open, to the open task, to the place you are revising, or to the whole of New Zealand when nothing is open. Rest the pointer on it, or tab to it, and the tooltip says where it will go.</p>
@@ -329,7 +339,7 @@
 </section>
 
 <section class="guide-section flow-section" id="revise-after-changes">
-  <h2>Respond to a changes-requested review</h2>
+  <h2>Changes requested: Revise submission</h2>
   <ol class="step-list">
     <li id="revise-after-changes-step-1">
       <figure data-step-file="revise-after-changes/revise-after-changes-01.png" data-media-key="v6/revise-after-changes/revise-after-changes-01.png">
@@ -351,7 +361,7 @@
 </section>
 
 <section class="guide-section prose-section" id="reopen-decided">
-  <h2>Reopen a reviewed, accepted or exported place</h2>
+  <h2>Reopen with a reason: a reviewed, accepted or exported place</h2>
   <p>Once a reviewer has decided a place, or the PI has accepted it or it has been exported, you cannot save or submit new evidence on it, and you cannot skip, release or claim it. The task detail says so and offers <em>Reopen with a reason</em>. If you have new evidence, press it, type why the place needs another look (at least eight characters; the reviewers and the PI will read it) and press <em>Reopen this place</em>. You can do the same from the place&#x27;s dot on the map: <em>Reopen this place&#x27;s issue</em> asks for the reason in the popup. The task then returns to <em>Reopened</em> and you can submit your evidence as for any other task. A reopened place wears a <em>Reopened after decision</em> marker, with what it was and your reason, in the task list, My work and the task detail; reviewers and the PI see it too, and it clears when the PI next accepts the place. Reopening does not change a record that has already been exported; the earlier export stays as it was until a new one replaces it. You can reopen up to 20 decided places an hour, and all RAs together up to 60 an hour; past either limit the portal refuses, saying that too many decided tasks were reopened in the last hour and to try again later or ask a reviewer, until the hour has passed, and a reviewer can reopen the place for you. If a place was reopened by mistake, ask a reviewer to revert it: they can do so only while nothing has been written to the task since the reopen. Do not reopen a place just to look at it: the saved evidence is visible without reopening.</p>
 </section>
 
@@ -387,9 +397,10 @@
   <h2>Decision history and hashing</h2>
   <p>Alongside the hashes, the task event log records every transition — imported, claimed, drafted, submitted, decided, exported — with actor, role, time, and reason.</p>
 </section>
+  </div>
   </main>
   <footer>
-    <p>Places of Worship research project · guides updated 2026-10-19 · screenshots: demonstration data only</p>
+    <p>religionmap.org · guides updated 2026-11-03 · screenshots: demonstration data only</p>
   </footer>
 </body>
 </html>

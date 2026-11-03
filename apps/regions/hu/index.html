@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-a+cKqXOMKQq5cfjEigvxt2fuzzZTa83fBCp4SVePO4E='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-NIzO7o2mQ3x+Gy1cmZlHHV2qf0pMoAafeOSm+CaQIRg='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Places of Worship | Hungary Research Map</title>
+  <title>religionmap.org · Hungary</title>
   <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet" integrity="sha384-p5cy4wHtKSqjnLUNjQ+8ffCwUp0vlLS+6lg1lc3qqXax2E1EmVCMCAimU+R0MOZH" crossorigin="anonymous">
   <link href="../../shared/map-shell.css?v=20261103c" rel="stylesheet">
   <link href="../../global/styles/maplibre-flat.css?v=20261103c" rel="stylesheet">
@@ -28,7 +28,7 @@
     // every popup row is asterisked and the flag note explains why.
     window.REGION_CONFIG = {
       countryCode: "HU",
-      title: "Places of Worship | Hungary Research Map",
+      title: "religionmap.org · Hungary",
       center: [19.5, 47.16],
       initialZoom: 6.5,
       censusLevels: {
@@ -93,7 +93,7 @@
         ]
       },
       wordmarkLinks: [
-        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+        { id: "wordmark-global", label: "religionmap.org", href: "../../global/", title: "Open the global map" }
       ],
       censusSourceAttribution: 'Census religion from the <a href="https://www.ksh.hu/" target="_blank" rel="noopener">Hungarian Central Statistical Office (KSH)</a>, census table WBS008 by county, 2001&ndash;2022, CC BY 4.0 with KSH attribution &middot; Boundaries from <a href="https://ec.europa.eu/eurostat/web/gisco" target="_blank" rel="noopener">Eurostat GISCO</a> NUTS 3 (2021 frame), &copy; EuroGeographics for the administrative boundaries',
       censusFlagNote: "* The religion question is voluntary, and shares follow KSH's stated-response presentation: the denominator excludes the Nem válaszolt (No answer) category, whose share varies by county and wave (nationally 10.8% in 2001, 27.2% in 2011, 40.1% in 2022). Shares describe respondents; cross-wave share changes may reflect changing respondent composition as well as changing affiliation. These are census self-declarations; they do not measure belief, practice, attendance, or registered membership."

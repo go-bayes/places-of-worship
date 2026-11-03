@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-wy8MvMObojtvxt/KKQv69iZCJYTKVZ37fQKaedcOpWc='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-tlz9AHyHYsTRZg85sY/BLn4HqCQqt9kJWMdGHqcAVcE='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Places of Worship | Kazakhstan Research Map</title>
+  <title>religionmap.org · Kazakhstan</title>
   <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet" integrity="sha384-p5cy4wHtKSqjnLUNjQ+8ffCwUp0vlLS+6lg1lc3qqXax2E1EmVCMCAimU+R0MOZH" crossorigin="anonymous">
   <link href="../../shared/map-shell.css?v=20261103c" rel="stylesheet">
   <link href="../../global/styles/maplibre-flat.css?v=20261103c" rel="stylesheet">
@@ -51,7 +51,7 @@
     // 17-region 2021 frame by exact complete-unit partitions.
     window.REGION_CONFIG = {
       countryCode: "KZ",
-      title: "Places of Worship | Kazakhstan Research Map",
+      title: "religionmap.org · Kazakhstan",
       // centre on the national extent (bbox lon 46.5..87.3 by lat 40.6..55.5)
       center: [66.9, 48.0],
       initialZoom: 4,
@@ -133,7 +133,7 @@
         ]
       },
       wordmarkLinks: [
-        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+        { id: "wordmark-global", label: "religionmap.org", href: "../../global/", title: "Open the global map" }
       ],
       censusSourceAttribution: 'Census religion © <a href="https://stat.gov.kz/" target="_blank" rel="noopener">Bureau of National Statistics of the Republic of Kazakhstan</a>, 2009 and 2021 National Population Censuses, Brief Results (Краткие итоги) Section 7.1. Used under the BNS open reuse grant with a reference to the source (stat.gov.kz/en/description/). &middot; 2021 boundaries © <a href="https://data.humdata.org/dataset/cod-ab-kaz" target="_blank" rel="noopener">OCHA / UNHCR COD-AB KAZ ADM1</a> (Creative Commons Attribution for Intergovernmental Organisations, CC BY-IGO), UNHCR from OpenStreetMap. &middot; 2009 boundaries © <a href="https://www.geoboundaries.org/api/current/gbOpen/KAZ/ADM1/" target="_blank" rel="noopener">geoBoundaries</a> KAZ ADM1 (Open Data Commons Open Database License, ODbL), source OpenStreetMap contributors.',
       censusFlagNote: "* Religious affiliation % sums the BNS categories Islam, Christianity, Judaism, Buddhism, and Other; No religion % is the Non-believers line. Refused to indicate is a residual kept in the denominator and in neither share (0.5% nationally in 2009, 11.0% in 2021); the two shares therefore need not sum to 100. The year slider switches boundary vintage: 2009 on 16 regions, 2021 on 17 regions after the 2018 South Kazakhstan to Turkistan + Shymkent split. No cross-wave region change is offered. BNS open reuse with attribution."

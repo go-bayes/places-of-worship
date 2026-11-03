@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-7dIW9nsfGauEhqh1euoKZ9odnzvJ2Gg2kIhDQZoyERw='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-ekeleNJESo8CRNBNgd2Or5u08vRNuzN5uyQr5CbZTek='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Places of Worship | Cabo Verde Research Map</title>
+  <title>religionmap.org · Cabo Verde</title>
   <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet" integrity="sha384-p5cy4wHtKSqjnLUNjQ+8ffCwUp0vlLS+6lg1lc3qqXax2E1EmVCMCAimU+R0MOZH" crossorigin="anonymous">
   <link href="../../shared/map-shell.css?v=20261103c" rel="stylesheet">
   <link href="../../global/styles/maplibre-flat.css?v=20261103c" rel="stylesheet">
@@ -58,7 +58,7 @@
     // OpenStreetMap), 22 concelhos joining one-to-one by area_code.
     window.REGION_CONFIG = {
       countryCode: "CV",
-      title: "Places of Worship | Cabo Verde Research Map",
+      title: "religionmap.org · Cabo Verde",
       // boundary bbox verified numerically from the 22-feature layer:
       // lon -25.36..-22.67, lat 14.80..17.21; geographic centroid -24.01, 16.00.
       // The camera is biased north-west of the centroid so the ten-island
@@ -128,7 +128,7 @@
         ]
       },
       wordmarkLinks: [
-        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+        { id: "wordmark-global", label: "religionmap.org", href: "../../global/", title: "Open the global map" }
       ],
       censusSourceAttribution: 'Census religion &copy; <a href="https://ine.cv/" target="_blank" rel="noopener">Instituto Nacional de Estatística (INE), Cabo Verde</a>, Censo 2010 (Tabela 12) and Censo 2021 (Tabela 54, Quadros por Concelho), resident population aged 15 and over, voluntary religion or spirituality question. INE publishes no explicit open-data reuse licence; its Política de Difusão states that published statistics are freely and universally accessible at www.ine.cv, and statistical confidentiality protects only individual microdata. Under a build-then-ask stance the derived concelho summaries ship with attribution to INE, and the licence position remains under review. Fonte: INE, Censo 2010 / Censo 2021. &middot; Boundaries &copy; <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries</a> CPV ADM1 (Open Data Commons Open Database License 1.0, ODbL 1.0, &copy; OpenStreetMap contributors), 22 concelhos',
       censusFlagNote: "* Universe: resident population aged 15 and over in both waves; the religion or spirituality question is voluntary. Religious affiliation % is each concelho's printed 15+ Total minus the Sem religião line and minus the non-response line; no religion % is the single Sem religião line. The non-response line (2010 ND; 2021 Não sabe / Não respondeu) rides in the denominator and in neither share; the two shares therefore need not sum to 100. Both waves reconcile integer-exact to the published national 15+ totals (336,049 in 2010; 352,494 in 2021). The 2010 and 2021 waves are read on the year selector; the 2021 census renamed and split several fine categories and renamed the construct from religião to religião ou espiritualidade; fine-category change is therefore withheld across the instrument break, while the headline affiliation and no-religion shares stay comparable. INE publishes no explicit reuse licence; the derived concelho summaries ship with attribution to INE under a build-then-ask stance while the licence position is reviewed. Boundaries are geoBoundaries CPV ADM1, Open Data Commons Open Database License 1.0 (OpenStreetMap contributors)."

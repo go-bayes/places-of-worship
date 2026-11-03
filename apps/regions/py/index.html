@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-djp8+ElfH9tDKj9UImVgwIALcX7qN7+Hty9BeqmXvSw='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-LbfXBTGfXr/ebcgpnl3Ez16YfoMsM1nN+3nEpZpvjLQ='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Places of Worship | Paraguay Research Map</title>
+  <title>religionmap.org · Paraguay</title>
   <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet" integrity="sha384-p5cy4wHtKSqjnLUNjQ+8ffCwUp0vlLS+6lg1lc3qqXax2E1EmVCMCAimU+R0MOZH" crossorigin="anonymous">
   <link href="../../shared/map-shell.css?v=20261103c" rel="stylesheet">
   <link href="../../global/styles/maplibre-flat.css?v=20261103c" rel="stylesheet">
@@ -48,7 +48,7 @@
     // boundary source DGEEC, joined one-to-one to the census departments by name.
     window.REGION_CONFIG = {
       countryCode: "PY",
-      title: "Places of Worship | Paraguay Research Map",
+      title: "religionmap.org · Paraguay",
       // boundary bbox verified numerically from the 18-feature layer:
       // lon -62.645..-54.259, lat -27.592..-19.290; centre on [-58.45, -23.44].
       // the large, sparse Chaco departments push the extent to about 8.4 deg
@@ -113,7 +113,7 @@
         ]
       },
       wordmarkLinks: [
-        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+        { id: "wordmark-global", label: "religionmap.org", href: "../../global/", title: "Open the global map" }
       ],
       censusSourceAttribution: 'Census religion &copy; <a href="https://www.ine.gov.py/" target="_blank" rel="noopener">INE Paraguay</a>, Censo Nacional de Población y Viviendas 2002, department cross-tabulation via the CELADE-hosted REDATAM Webserver (base CPV2002), recoded to the national cuadro P16 seven-group frame. Fuente: INE Paraguay, Censo Nacional de Población y Viviendas 2002; contenido regido por la Licencia de Uso de la Información Pública (Decreto 4064 / Ley 5282/2014); no es un producto oficial ni patrocinado por el Estado Paraguayo. &middot; Boundaries &copy; <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries</a> PRY ADM1 (Creative Commons Attribution 4.0 International, CC BY 4.0), boundary source DGEEC',
       censusFlagNote: "* The construct is census affiliation (each enumerated resident's declared religion, 'Religión que profesa', population aged 10 and over); it does not measure belief, practice, attendance, or membership. The department table is an extraction from the CELADE-hosted INE REDATAM engine (base CPV2002), recoded from the detailed denomination list to the seven published P16 groups; the seven national group totals reconcile to the published census totals exactly (national total 3,892,603). The 'No informado' non-response group stays in the denominator and outside both shares, so the two shares need not sum to 100. Single wave (2002), department grain; no change metric (2012 and 2022 asked no religion; 1992 is not in REDATAM). † marks a department carrying a P16 group count under ten people (the Indígena group in Cordillera, Misiones, Paraguarí and Ñeembucú); counts render exactly as published, none suppressed. Census reuse accepted under the Paraguay open-data licence (Decreto 4064 / Ley 5282/2014); boundaries geoBoundaries PRY ADM1 (CC BY 4.0)."

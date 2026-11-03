@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-XvHfdFDu4F/6DlyTSWK5sVgfubsFZ1Pc8UsG0SS6y/4='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-GEQ4wQeZ12iWN5/AtQjZ193l22nnRjFEE6/wHXsjpe4='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Places of Worship | Israel Research Map</title>
+  <title>religionmap.org · Israel</title>
   <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet" integrity="sha384-p5cy4wHtKSqjnLUNjQ+8ffCwUp0vlLS+6lg1lc3qqXax2E1EmVCMCAimU+R0MOZH" crossorigin="anonymous">
   <link href="../../shared/map-shell.css?v=20261103c" rel="stylesheet">
   <link href="../../global/styles/maplibre-flat.css?v=20261103c" rel="stylesheet">
@@ -33,7 +33,7 @@
     // previous reference year.
     window.REGION_CONFIG = {
       countryCode: "IL",
-      title: "Places of Worship | Israel Research Map",
+      title: "religionmap.org · Israel",
       dataNoun: "Register",
       center: [35.05, 31.5],
       initialZoom: 7.2,
@@ -100,7 +100,7 @@
         ]
       },
       wordmarkLinks: [
-        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+        { id: "wordmark-global", label: "religionmap.org", href: "../../global/", title: "Open the global map" }
       ],
       censusSourceAttribution: 'Population Register religious classification from the <a href="https://www.cbs.gov.il/en/" target="_blank" rel="noopener">Israel Central Bureau of Statistics (CBS)</a>, Statistical Abstract table 2.11, by district, 1948&ndash;2024 &middot; Boundaries from CBS/Ministry of Interior districts (2022 frame)',
       censusFlagNote: "* This Population Register classification from CBS table 2.11 does not record census self-declaration, belief, or practice. Not classified by religion is a register status for residents without a recognised religious classification (notably many immigrants and their descendants not registered in a religion group); it is not a measure of no religion, irreligion, or secularity, and CBS publishes it by district for 1995, 2008, 2022, and 2024 only. The 1948 wave is recorded context: CBS publishes the district total and Jewish counts but suppresses the Muslim, Christian, and Druze district distributions; both construct fields are therefore null. Counts are published in thousands rounded to one decimal; small group totals outside published district entries remain national residuals and are never distributed."

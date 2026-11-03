@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-jGKTblAkFc+ZzNbY1ippufs1mlpGSq+G3Ol4AIbStRE='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NZ OSM Verification Tasks</title>
+    <title>religionmap.org · New Zealand · Contributor portal</title>
     <link rel="icon" href="data:,">
 
     <!-- connections opened early: the dots tiles (fetched by VectorGrid, so
@@ -78,14 +78,24 @@
         }
 
         .sidebar-header h1 {
-            margin: 0 0 6px 0;
+            margin: 0;
             font-size: var(--fs-xl);
             line-height: 1.2;
             color: var(--ink);
         }
 
+        /* one product name (jb 2026-11-03: religionmap.org): the h1 reads
+           religionmap.org · country, and the surface sits under it muted */
+        .sidebar-surface {
+            margin: 2px 0 0;
+            color: var(--muted);
+            font-size: var(--fs-sm);
+            font-weight: 500;
+            line-height: 1.3;
+        }
+
         .sidebar-header p {
-            margin: 0;
+            margin: 6px 0 0;
             color: var(--muted);
             font-size: var(--fs-sm);
             line-height: 1.45;
@@ -3409,6 +3419,107 @@
                 left: 0;
             }
         }
+
+        /* a phone's header is one 56 px bar (jb 2026-11-03, the ui set's
+           item 5): the name and the surface on the left, exit and guide
+           beside them at 44 px; the page notice, when there is one, runs
+           under the bar. signed out, the sign-in card is one row, the
+           google button beside contact to join, so the map starts near
+           the top of the screen. the selectors outrank the floating-panel
+           rules above */
+        @media (max-width: 700px) {
+            body.assignment-mode .sidebar .sidebar-header {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) auto;
+                column-gap: 8px;
+                align-items: center;
+                min-height: 56px;
+                padding: 6px 12px;
+            }
+
+            body.assignment-mode .sidebar .sidebar-header h1 {
+                grid-column: 1;
+                font-size: var(--fs-md);
+                line-height: 1.25;
+            }
+
+            body.assignment-mode .sidebar .sidebar-header .sidebar-surface {
+                grid-column: 1;
+                margin: 0;
+                font-size: var(--fs-xs);
+            }
+
+            body.assignment-mode .sidebar .sidebar-header .nav-links {
+                grid-column: 2;
+                grid-row: 1 / span 2;
+                flex-wrap: nowrap;
+                gap: 8px;
+                margin: 0;
+            }
+
+            body.assignment-mode .sidebar .sidebar-header .nav-links a {
+                justify-content: center;
+                min-width: 44px;
+                padding: 0 12px;
+            }
+
+            body.assignment-mode .sidebar .sidebar-header .pilot-note {
+                grid-column: 1 / -1;
+                margin-top: 6px;
+            }
+
+            /* the google button takes a fixed width in pixels (measured
+               from its cell when the card renders, at least 200); contact
+               to join takes the rest of the row and may wrap to two lines */
+            body.assignment-mode.portal-signed-out .backend-panel {
+                padding: 10px 12px;
+            }
+
+            body.assignment-mode.portal-signed-out .backend-card.auth-required {
+                grid-template-columns: minmax(200px, 1fr) auto;
+                gap: 8px;
+                align-items: center;
+                padding: 0;
+                border: 0;
+                background: transparent;
+            }
+
+            body.assignment-mode.portal-signed-out .backend-card.auth-required > * {
+                grid-column: 1 / -1;
+            }
+
+            /* the google button says what the step is */
+            body.assignment-mode.portal-signed-out .backend-card.auth-required > strong {
+                display: none;
+            }
+
+            body.assignment-mode.portal-signed-out .backend-card.auth-required > .google-sign-in-host {
+                grid-column: 1;
+                min-width: 0;
+            }
+
+            body.assignment-mode.portal-signed-out .backend-card.auth-required > .join-button {
+                grid-column: 2;
+                padding: 4px 10px;
+                line-height: 1.2;
+                text-align: center;
+            }
+
+            /* the account help and the signed-out dot share the next row;
+               opened, the help takes the whole row */
+            body.assignment-mode.portal-signed-out .backend-card.auth-required > .backend-help {
+                grid-column: 1;
+            }
+
+            body.assignment-mode.portal-signed-out .backend-card.auth-required > .backend-help[open] {
+                grid-column: 1 / -1;
+            }
+
+            body.assignment-mode.portal-signed-out .backend-card.auth-required > .transport-dot {
+                grid-column: 2;
+                justify-self: end;
+            }
+        }
 </style>
 </head>
 <body>
@@ -3436,7 +3547,8 @@
         <aside class="sidebar">
             <header class="sidebar-header">
                 <button type="button" id="signInPanelGrip" class="panel-grip" aria-label="Move this panel: drag it">⠿</button>
-                <h1>NZ OSM Verification</h1>
+                <h1>religionmap.org · New Zealand</h1>
+                <div class="sidebar-surface">Contributor portal</div>
                 <p><span id="snapshotId">Connecting...</span></p>
                 <!-- cross-map links confused RAs mid-task (JB 2026-08-31):
                      one Exit to the public map, plus the guide -->
@@ -3569,7 +3681,7 @@
          hides itself when the key is absent -->
     <script src="../../global/config.public.js"></script>
     <script src="js/convex-config.js?v=20260707-changes-requested"></script>
-    <script src="js/convex-task-client.js?v=20261015d"></script>
+    <script src="js/convex-task-client.js?v=20261103a"></script>
     <script src="js/wide-evidence-fields.js?v=20260907a"></script>
     <script src="js/rapid-entry-contract.js?v=20260901a"></script>
     <script src="js/historical-claim-contract.js?v=20260902a"></script>
@@ -3582,6 +3694,6 @@
     <script src="js/unvalidated-places.js?v=20261013b"></script>
     <script src="js/task-presentation.js?v=20261015c"></script>
     <script src="js/recentre-control.js?v=20261001a"></script>
-    <script src="js/verification-map.js?v=20261019a"></script>
+    <script src="js/verification-map.js?v=20261103a"></script>
 </body>
 </html>

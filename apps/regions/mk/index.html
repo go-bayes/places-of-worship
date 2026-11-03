@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-gB06LqVFwJP+UPxbixyuH4uKVqvRsOjwIT7q7TnW27c='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-/Rmrwyn1tri7lIdHSSA8iTpNbfQfd9Y9NizHGSFMLvM='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Places of Worship | North Macedonia Research Map</title>
+  <title>religionmap.org · North Macedonia</title>
   <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet" integrity="sha384-p5cy4wHtKSqjnLUNjQ+8ffCwUp0vlLS+6lg1lc3qqXax2E1EmVCMCAimU+R0MOZH" crossorigin="anonymous">
   <link href="../../shared/map-shell.css?v=20261103c" rel="stylesheet">
   <link href="../../global/styles/maplibre-flat.css?v=20261103c" rel="stylesheet">
@@ -60,7 +60,7 @@
     // 15-entry Cyrillic-to-Latin transliteration crosswalk.
     window.REGION_CONFIG = {
       countryCode: "MK",
-      title: "Places of Worship | North Macedonia Research Map",
+      title: "religionmap.org · North Macedonia",
       // North Macedonia spans lon 20.45..23.03 by lat 40.85..42.37 across the 80
       // municipalities; centre on the country and open at a zoom that fits the
       // full extent beside the census panels
@@ -125,7 +125,7 @@
         ]
       },
       wordmarkLinks: [
-        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+        { id: "wordmark-global", label: "religionmap.org", href: "../../global/", title: "Open the global map" }
       ],
       censusSourceAttribution: 'Census religion © <a href="https://www.stat.gov.mk/" target="_blank" rel="noopener">State Statistical Office of the Republic of North Macedonia</a>, Census of Population, Households and Dwellings 2021, table T-06 (Total resident population by religious affiliation and sex, by municipalities). No open-data licence is stated; each SSO census book carries the instruction "When using data contained here, please cite the source". These derived municipality summaries carry attribution to the SSO under a build-then-ask posture while a reuse confirmation is pending; the licence is under review. The total resident population (1,836,713) includes 132,260 residents whose data were taken from administrative sources; that component is a distinct published category, rendered as published and never repaired. &middot; Boundaries © <a href="https://data.humdata.org/dataset/cod-ab-mkd" target="_blank" rel="noopener">OCHA COD-AB</a> North Macedonia ADM2 (Creative Commons Attribution for Intergovernmental Organisations, CC BY-IGO), source EuroGeographics and the SSO NTES nomenclature',
       censusFlagNote: "* Single wave (2021), municipality level, on the 80-municipality frame; both margins, and the City of Skopje ten-municipality partition, close integer-exact to the total resident population 1,836,713. The Undeclared and Unknown lines stay in the denominator and in neither slot, and the affiliation and no-religion shares therefore need not sum to 100%. The total resident population includes 132,260 residents (7.20%) whose data were taken from administrative sources; they form the distinct published category “Persons for whom data are taken from administrative sources”, rendered as published and never enumerated into a religion, repaired, or redistributed. The thirteen verbatim source categories are preserved in the published data. 2002 is held: the 2002 religion table (Book X) is on the pre-2004 123-municipality frame with no licensed boundary, and the 2004 re-tabulation excludes religion. No open-data licence is stated; the SSO requests source attribution (reuse confirmation pending, licence under review). Boundaries: OCHA COD-AB North Macedonia ADM2 (CC BY-IGO), source EuroGeographics and SSO."

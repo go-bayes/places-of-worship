@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-yMC9tFXWsbuk4nLHHT2xvef0m+N8/ZjqaeBmWbs8OiE='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-UN7fr4w/2uI4CkkrolCjZ7+x+URBsUOaru9Ti65kzLM='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Places of Worship | Montenegro Research Map</title>
+  <title>religionmap.org · Montenegro</title>
   <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet" integrity="sha384-p5cy4wHtKSqjnLUNjQ+8ffCwUp0vlLS+6lg1lc3qqXax2E1EmVCMCAimU+R0MOZH" crossorigin="anonymous">
   <link href="../../shared/map-shell.css?v=20261103c" rel="stylesheet">
   <link href="../../global/styles/maplibre-flat.css?v=20261103c" rel="stylesheet">
@@ -37,7 +37,7 @@
     // Union of Serbia and Montenegro; the source reports it as Republika Crna Gora.
     window.REGION_CONFIG = {
       countryCode: "ME",
-      title: "Places of Worship | Montenegro Research Map",
+      title: "religionmap.org · Montenegro",
       // boundary bbox verified numerically from the dissolved 21-feature layer:
       // lon 18.4334..20.3540, lat 41.8464..43.5585; centroid [19.394, 42.702].
       // centre on that centroid and zoom to the ~1.9 deg extent.
@@ -106,7 +106,7 @@
         ]
       },
       wordmarkLinks: [
-        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+        { id: "wordmark-global", label: "religionmap.org", href: "../../global/", title: "Open the global map" }
       ],
       censusSourceAttribution: 'Census religion from the <a href="https://www.monstat.org/eng/" target="_blank" rel="noopener">Statistical Office of Montenegro (MONSTAT)</a>, censuses 2003&ndash;2023, derived summaries reproduced with attribution &middot; Boundaries from <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries</a> MNE ADM1 (ODbL, &copy; OpenStreetMap contributors), dissolved to 21 municipalities',
       censusFlagNote: "* Each wave carries its own reconciliation note. In 2003 and 2011 the religion category cells reconcile exactly within each municipality and to the national total. In 2023 the census reports 25 municipalities, aggregated here to the 21-municipality 2003–2011 frame by complete-unit sums (Petnjica into Berane, Gusinje into Plav, and Tuzi and Zeta into Podgorica); MONSTAT applies statistical-confidentiality suppression (marked \"z\") to small 2023 category cells; the 2023 affiliation and no-religion shares are therefore published-cell lower bounds where suppression applies (247 persons across 17 of the 21 municipalities), disclosed and never redistributed or estimated. Municipality population totals are published in full and reconcile exactly for every wave; the population-denominator surface is exact everywhere."

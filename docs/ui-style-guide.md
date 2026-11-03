@@ -59,8 +59,8 @@ and is dated in place.
   the contributor landed on; the entry's country is the pin's. When they
   differ the entry carries one note, never a block: "This pin is in
   New Zealand; this page opened for Sweden. The entry is recorded as
-  New Zealand.", and the header reads "Sweden evidence · entry in
-  New Zealand" while the entry is open. A neighbour's dot reads "In
+  New Zealand.", and the header reads "religionmap.org · Sweden · entry
+  in New Zealand" while the entry is open. A neighbour's dot reads "In
   Norway: revising it here records it as Norway." and revises in place.
   Never send the contributor to another portal to record a place.
 - Use `Save draft` when the RA is still gathering evidence.
@@ -93,13 +93,22 @@ read-only browsing (ruled 2026-09-19: "float it"); the zoom and locate
 buttons step aside to the panel's right; the panel drags by the grip in
 its header and the device remembers the spot. On a phone (700 px and
 under) the card is a strip above the map instead, so nothing covers the
-map's own controls. After sign-in the sidebar returns with the work. The
+map's own controls: the header is one 56 px bar (the name and the surface
+beside `Exit` and `Guide`), and the card is one row, the Google button
+beside `Contact to join`, with the account help and the signed-out dot on
+the row under it (2026-11-03). The Google button takes a fixed width in
+pixels, so on a phone the portal measures its cell (200 px at least) when
+the card renders. After sign-in the sidebar returns with the work. The
 marker legend reads in two columns, fills beside rings, so the map data
 panel stays clear of the floating card. The sign-in card
 carries the Google button, a `Contact to join` button and the folded `Wrong
 account showing?` help, nothing else (ruled 2026-09-19: fewer words); the
 header carries only the title and the `Exit` and `Guide` buttons, at body
 size on a 44 px target, with no batch line (ruled 2026-09-20: words to cut);
+the title is the product name and the country, `religionmap.org · New
+Zealand`, with the surface, `Contributor portal`, as a muted line under it
+(JB, 2026-11-03: the public product name is `religionmap.org`, lower case,
+with the `.org`, on every tab and header); the batch never names the page;
 the invited address shows only when the link carries it. After sign-in the
 portal lands in `Add / Revise` on every screen, with the task list, filters
 and counts absent (ruled 2026-09-20: the task list is specialist assignment
@@ -167,7 +176,10 @@ and retires the imagery buttons for the session (2026-10-01); the dark
 Streets raster is MapTiler's too and is refused with the imagery. The map data panel (the
 unreviewed-places switch and the marker legend) keeps its drag grip and
 folds to its `Map data` bar; both the spot and the fold are remembered on
-the device. The review portal's map carries the same panel (2026-11-03):
+the device. Until the contributor chooses, a phone (700 px and under) opens
+it folded (2026-11-03), since the open panel sits under the attribution and
+half hides its own toggle.
+The review portal's map carries the same panel (2026-11-03):
 it opens folded, the body opens upward above the bar, and the bar holds the
 grip, the fold, a small count pill (`12 in this queue`, with `· unreviewed
 shown` while the places are on) and the unreviewed-places switch as an

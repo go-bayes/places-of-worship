@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-Pr6EnDtwq+7YeE5rKFM4/OMLplNBjWncFP6SdD3dhDo='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-baI9HmVcT5u2TnVrledK6gRIZBUSXUvGdWFudiGx0KE='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Places of Worship | Palestine Research Map</title>
+  <title>religionmap.org · Palestine</title>
   <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet" integrity="sha384-p5cy4wHtKSqjnLUNjQ+8ffCwUp0vlLS+6lg1lc3qqXax2E1EmVCMCAimU+R0MOZH" crossorigin="anonymous">
   <link href="../../shared/map-shell.css?v=20261103c" rel="stylesheet">
   <link href="../../global/styles/maplibre-flat.css?v=20261103c" rel="stylesheet">
@@ -34,7 +34,7 @@
     // so the place-density metrics and the place columns are absent.
     window.REGION_CONFIG = {
       countryCode: "PS",
-      title: "Places of Worship | Palestine Research Map",
+      title: "religionmap.org · Palestine",
       center: [34.90, 31.89],
       initialZoom: 7.8,
       censusLevels: {
@@ -94,7 +94,7 @@
         ]
       },
       wordmarkLinks: [
-        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+        { id: "wordmark-global", label: "religionmap.org", href: "../../global/", title: "Open the global map" }
       ],
       censusSourceAttribution: 'Census religion &copy; <a href="https://www.pcbs.gov.ps/en/publications/" target="_blank" rel="noopener">Palestinian Central Bureau of Statistics (PCBS)</a>, governorate tables 1997, 2007 and 2017 (1997 Table 22; 2007 Table 13; 2017 preliminary Table 3). Current PCBS website terms state <a href="https://www.pcbs.gov.ps/en/reference/terms-of-use/" target="_blank" rel="noopener">Creative Commons Attribution 4.0 International</a> and require attribution to PCBS as the source of data; the cached 1997 and 2007 publications print "All Rights Reserved", and no rights-reservation notice appears in the cached 2017 preliminary report; PCBS publication reuse is under project licence review. &middot; Boundaries &copy; <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries</a> PSE ADM2 (Creative Commons Attribution 4.0, CC BY 4.0), 2017 governorate frame, boundary source Open Data Watch',
       censusFlagNote: "* The construct is census affiliation on PCBS recognised categories; the source publishes no no-religion category, and the product assigns no identity to Other, Others, or Not Stated. It describes the source's category frame and does not measure belief, practice, attendance, or registered membership. Cross-wave change is withheld for every wave pair because PCBS coverage and Jerusalem J1 treatment are not comparable across the complete series, and no change metric is offered. PCBS 1997 Table 22 excludes Jerusalem J1; that governorate row is marked. The 2017 governorate geometry depicts the full release polygons, including territory outside the 1997 data basis, and governorate boundary stability across 1997, 2007 and 2017 remains unverified. Current PCBS website terms state CC BY 4.0; the cached 1997 and 2007 publications print 'All Rights Reserved', and no rights-reservation notice appears in the cached 2017 preliminary report. PCBS publication reuse is under project licence review; this product is held in staging and reverts in a single commit if PCBS objects. Boundaries are geoBoundaries PSE ADM2 (CC BY 4.0), boundary source Open Data Watch."

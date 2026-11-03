@@ -67,12 +67,12 @@ const stamps = {
     "region-map.js": "20261103c", // one card at a time, census fold, key names, phone action bar
     "datamaps-switcher.js": "20261013a", // switcher rows prerender; warming waits for activation
     "unvalidated-places.js": "20261013b", // versioned grid places url; us, de and it use the grid tier from zoom 6
-    "verification-map.js": "20261019a", // two kinds of move on a period card, successor field (definition 0.1.6)
+    "verification-map.js": "20261103a", // religionmap.org header, phone sign-in row, map data folded on phones
     "occupancy-contract.js": "20261019a", // relocation rules follow definition 0.1.6
     "occupancy-review.js": "20261019a", // move wording and successor in the reviewer's period summary
     "task-presentation.js": "20261015c", // decided-status and reopen-flag helpers
-    "convex-task-client.js": "20261015d", // revertReopen client method
-    "review-portal.js": "20261103d", // linked place: warn once on unmatched ids, record anyway
+    "convex-task-client.js": "20261103a", // the sign-in button takes a width from its caller
+    "review-portal.js": "20261103e", // linked place: warn once on unmatched ids, record anyway
     "review-map.js": "20261103a", // the legend becomes the folding map data panel
 };
 const scripts = Object.keys(stamps);

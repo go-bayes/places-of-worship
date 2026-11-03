@@ -39,7 +39,7 @@
   // header: country name, the fixed kicker, and the primary Open-the-map action
   function renderHeader() {
     var header = el("header", "overview-header");
-    header.appendChild(el("div", "overview-kicker", "Research map overview"));
+    header.appendChild(el("div", "overview-kicker", "religionmap.org · Map overview"));
     header.appendChild(el("h1", "overview-title", CONFIG.countryName || CONFIG.countryCode || ""));
     var mapHref = CONFIG.mapHref || "./";
     var open = link("Open the map", mapHref, false);
@@ -235,7 +235,7 @@
     });
     root.appendChild(main);
     if (CONFIG.countryName) {
-      document.title = "Places of Worship | " + CONFIG.countryName + " map overview";
+      document.title = "religionmap.org · " + CONFIG.countryName + " · Map overview";
     }
   }
 

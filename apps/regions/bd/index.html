@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-3A1wcX1aqJT7x3M/54cTeWsY5PkYodYo/h5COwlujjA='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-3GRNfe50O4mZ46IX7VCyzBFo/8xFtTjy/Zumovpykq4='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Places of Worship | Bangladesh Research Map</title>
+  <title>religionmap.org · Bangladesh</title>
   <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet" integrity="sha384-p5cy4wHtKSqjnLUNjQ+8ffCwUp0vlLS+6lg1lc3qqXax2E1EmVCMCAimU+R0MOZH" crossorigin="anonymous">
   <link href="../../shared/map-shell.css?v=20261103c" rel="stylesheet">
   <link href="../../global/styles/maplibre-flat.css?v=20261103c" rel="stylesheet">
@@ -19,7 +19,7 @@
     // ../_shared/region-map.js and keys on this config plus the data files
     window.REGION_CONFIG = {
       countryCode: "BD",
-      title: "Places of Worship | Bangladesh Research Map",
+      title: "religionmap.org · Bangladesh",
       center: [90.35, 23.7],
       initialZoom: 6.3,
       censusLevels: {
@@ -90,7 +90,7 @@
         ]
       },
       wordmarkLinks: [
-        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+        { id: "wordmark-global", label: "religionmap.org", href: "../../global/", title: "Open the global map" }
       ],
       censusSourceAttribution: 'Census religion &copy; <a href="https://bbs.gov.bd/" target="_blank" rel="noopener">Bangladesh Bureau of Statistics</a>, Population and Housing Census 2011 (Community Report series, Table C-13; Lalmonirhat from the Zila Series report, Table P05, authorized source swap) and 2022 (National Report Volume I, Table P08) &middot; Reuse terms unresolved (staging) &middot; Boundaries &copy; <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries</a> BGD ADM2; BBS; OCHA ROAP (CC BY 3.0 IGO)',
       censusFlagNote: "* The BBS census religion frame is Muslim, Hindu, Christian, Buddhist and Others in both waves, with no no-religion and no not-stated category; the frame sums to 100% by construction. The map shades the reference-group (Muslim) share and its exact complement, the minority share; the no-religion slot label carries the minority share and no no-religion meaning. The two waves carry a disclosed universe difference immaterial to the shares: 2011 is the full enumerated population (no third-gender enumeration), and the 2022 table is the sex-classified basis, which excludes the 8,124 hijra (third gender) persons nationally, religion-classified only at division level. Lalmonirhat's 2011 row comes from the Zila Series report (Table P05, authorized source swap) because the Community Report copy is a scanned image; its Buddhist count of 5 fires the fewer-than-ten marker (†). Bhola's 2011 religion composition is withheld on twin source defects (the Community Report omits the printed religion pages and the Zila-Series copy is image-only), so the 2011 row reads no-data, never zero, and Bhola carries no change. This product is held in staging until BBS census reuse terms are established; it reverts in a single commit if BBS objects."

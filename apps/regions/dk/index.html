@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-VT/8fbwefy8WUygbIDhcE2bzcCQKmetRsxcDgDidd9s='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-AutFDrk7zrEgRtaWawT+hf5pKz4I9sOI1GEu6eJn/8E='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Places of Worship | Denmark Research Map</title>
+  <title>religionmap.org · Denmark</title>
   <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet" integrity="sha384-p5cy4wHtKSqjnLUNjQ+8ffCwUp0vlLS+6lg1lc3qqXax2E1EmVCMCAimU+R0MOZH" crossorigin="anonymous">
   <link href="../../shared/map-shell.css?v=20261103c" rel="stylesheet">
   <link href="../../global/styles/maplibre-flat.css?v=20261103c" rel="stylesheet">
@@ -33,7 +33,7 @@
     // in docs/manifests/dk-membership-2011-2026.json).
     window.REGION_CONFIG = {
       countryCode: "DK",
-      title: "Places of Worship | Denmark Research Map",
+      title: "religionmap.org · Denmark",
       dataNoun: "Register",
       center: [10.5, 56.0],
       initialZoom: 6.3,
@@ -119,7 +119,7 @@
         ]
       },
       wordmarkLinks: [
-        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+        { id: "wordmark-global", label: "religionmap.org", href: "../../global/", title: "Open the global map" }
       ],
       censusSourceAttribution: 'Administrative Church of Denmark membership from <a href="https://api.statbank.dk/v1/tableinfo/KM6?lang=en" target="_blank" rel="noopener">Statistics Denmark StatBank KM6</a> (municipality, 2011&ndash;2026) and <a href="https://api.statbank.dk/v1/tableinfo/KM1?lang=en" target="_blank" rel="noopener">KM1</a> (parish, 2023&ndash;2026 Q1), StatBank free reuse corresponding to Creative Commons Attribution 4.0 International &middot; Boundaries from <a href="https://api.dataforsyningen.dk/" target="_blank" rel="noopener">Klimadatastyrelsen/Dataforsyningen DAWA/DAGI</a> current kommuner and sogne, CC BY 4.0; attribution: Klimadatastyrelsen',
       censusFlagNote: "* Church of Denmark membership is an administrative register construct: a baptised member of the National Church who has not opted out by resignation, on the civil population register. It is never census religious affiliation, all-religion membership, attendance, or belief. The parish (sogn) level ships 2023–2026 only; pre-2023 parish waves are deferred pending a governed parish concordance for mergers and code churn, with dropped-parish rates and counts recorded in docs/manifests/dk-membership-2011-2026.json. The municipality (kommune) level carries the full 2011–2026 series on 99 current boundaries."

@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-PpWDje/vFLj9I4bCSnNdZGCEemx2MJBLQBTP3fktfZM='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-cGrPskBG7XIuqNyvcujKyiyPtH/1K0FrPHTQOgla4Fs='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Places of Worship | Jamaica Research Map</title>
+  <title>religionmap.org · Jamaica</title>
   <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet" integrity="sha384-p5cy4wHtKSqjnLUNjQ+8ffCwUp0vlLS+6lg1lc3qqXax2E1EmVCMCAimU+R0MOZH" crossorigin="anonymous">
   <link href="../../shared/map-shell.css?v=20261103c" rel="stylesheet">
   <link href="../../global/styles/maplibre-flat.css?v=20261103c" rel="stylesheet">
@@ -30,7 +30,7 @@
     // slots. No parish has a printed category count under ten.
     window.REGION_CONFIG = {
       countryCode: "JM",
-      title: "Places of Worship | Jamaica Research Map",
+      title: "religionmap.org · Jamaica",
       // boundary bbox verified numerically from the 14-feature layer:
       // lon -78.36893..-76.18296, lat 17.70572..18.52504;
       // centre on [-77.27595, 18.11538] and open at z7.2 to fit the island
@@ -88,7 +88,7 @@
         ]
       },
       wordmarkLinks: [
-        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+        { id: "wordmark-global", label: "religionmap.org", href: "../../global/", title: "Open the global map" }
       ],
       censusSourceAttribution: 'Census religion &copy; <a href="https://statinja.gov.jm/" target="_blank" rel="noopener">Statistical Institute of Jamaica (STATIN)</a>, 2011 Population and Housing Census, Volume 6, Table 5 &lsquo;Population by Sex and Religious Affiliation/Denomination, by Parish&rsquo;. Adapted under the <a href="https://statinja.gov.jm/terms-of-use.aspx" target="_blank" rel="noopener">STATIN Terms &amp; Conditions of Data Use</a>. &middot; Boundaries &copy; <a href="https://www.geoboundaries.org/api/current/gbOpen/JAM/ADM1/" target="_blank" rel="noopener">geoBoundaries</a> JAM ADM1 (Creative Commons Attribution-ShareAlike 2.0, CC BY-SA 2.0), OpenStreetMap contributors',
       censusFlagNote: "* STATIN Volume 6 Table 5 prints a heterogeneous parish frame, carried verbatim here: eleven parishes have 19 categories, Saint James and Saint Catherine have 20, and Saint Andrew has 23. Small-group breakouts appear only where STATIN prints them; remaining small groups stay in the parish Other line. The no-religion slot is assigned by role across three printed spellings ('No Religious Affiliation/Denomination', 'No Religion/Denomination', and 'None'), each preserved in the popup composition. 'Not Reported' or 'Not Stated' stays inside the denominator and outside both shares. Single wave (2011), parish grain; no change metric. Census reuse is accepted under the STATIN Terms & Conditions of Data Use; boundaries are geoBoundaries JAM ADM1 (CC BY-SA 2.0)."

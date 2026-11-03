@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-h1bgenk/pmuwMMizeTAVw1gRsRR22niUBYcWzCfeRBU='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-igUkUcA305+UsOr0Lk+xHxUt1WXl9X1l49Cq4OwbS9w='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Places of Worship | Peru Research Map</title>
+  <title>religionmap.org · Peru</title>
   <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet" integrity="sha384-p5cy4wHtKSqjnLUNjQ+8ffCwUp0vlLS+6lg1lc3qqXax2E1EmVCMCAimU+R0MOZH" crossorigin="anonymous">
   <link href="../../shared/map-shell.css?v=20261103c" rel="stylesheet">
   <link href="../../global/styles/maplibre-flat.css?v=20261103c" rel="stylesheet">
@@ -53,7 +53,7 @@
     // features dissolved to the 25 census departments.
     window.REGION_CONFIG = {
       countryCode: "PE",
-      title: "Places of Worship | Peru Research Map",
+      title: "religionmap.org · Peru",
       // boundary bbox verified numerically from the 25-feature layer:
       // lon -81.33..-68.64, lat -18.36..-0.01; centre on [-75.0, -9.2].
       // Peru is wholly western-hemisphere; the ~12.7 deg lon / ~18.3 deg lat
@@ -123,7 +123,7 @@
         ]
       },
       wordmarkLinks: [
-        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+        { id: "wordmark-global", label: "religionmap.org", href: "../../global/", title: "Open the global map" }
       ],
       censusSourceAttribution: 'Census religion &copy; <a href="https://www.inei.gob.pe/" target="_blank" rel="noopener">Instituto Nacional de Estadística e Informática (INEI)</a>, Censos Nacionales 2007 (Perfil Sociodemográfico, CUADRO Nº 2.46) and 2017 (Resultados Definitivos, CUADRO Nº 1), population aged 12 and over. INEI states no explicit reuse licence on its published census results; the derived department summaries are reproduced with attribution to INEI under a build-then-ask stance, and the licence position remains under review. &middot; Boundaries &copy; <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries</a> PER ADM1 (Public Domain, source Wikimedia Commons), 26 features dissolved to the 25 census departments',
       censusFlagNote: "* Universe: population aged 12 and over in both waves. The four verbatim INEI categories (Católica, Evangélica, Otra, Ninguna) partition the answering population; religious affiliation % sums Católica, Evangélica and Otra, no religion % is the Ninguna share, and the two shares sum to 100 by construction. 2017 carries exact published counts (Resultados Definitivos, CUADRO Nº 1). For 2007 the department Total and the Ninguna percentage are exact-published (Perfil Sociodemográfico, CUADRO Nº 2.46); the Católica, Evangélica and Otra counts are derived from the published one-decimal percentages under a recorded per-category rounding bound of ceiling(Total × 0.0005). The change metric differences the affiliation share across the 2007-2017 pair on the stable 25-department frame; a wave-to-wave difference is not an annual rate. INEI states no explicit reuse licence on its published census results; the derived department summaries ship with attribution to INEI under a build-then-ask stance while the licence position is reviewed. Boundaries are geoBoundaries PER ADM1, Public Domain (Wikimedia Commons source), dissolved to the 25 departments."

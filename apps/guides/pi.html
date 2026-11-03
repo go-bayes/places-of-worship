@@ -4,15 +4,19 @@
   <meta charset="UTF-8">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Places of Worship — PI &amp; reviewer guide</title>
+  <title>religionmap.org · PI &amp; reviewer guide</title>
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="guide.css">
+  <script src="guide.js" defer></script>
 </head>
-<body class="pi-guide">
+<body class="pi-guide guide-rail-page">
+  <div class="guide-band">
+    <p class="guide-band-name"><a href="../global/">religionmap.org</a><span class="guide-band-sep" aria-hidden="true">·</span><span class="guide-band-country">New Zealand</span><span class="guide-band-sep" aria-hidden="true">·</span><span class="guide-band-guide">PI &amp; reviewer guide</span></p>
+    <a class="guide-band-portal" href="../regions/nz/review.html">Open the review portal</a>
+  </div>
   <header class="page-header">
     <div class="header-inner">
-      <p class="eyebrow">Places of Worship research project</p>
-      <h1>Places of Worship — PI &amp; reviewer guide</h1>
+      <h1>PI &amp; reviewer guide</h1>
       <p class="purpose">A reviewer walkthrough for deciding submissions, interpreting AI annotations, and following audit trails.</p>
       <nav class="site-nav" aria-label="Guide links">
         <a href="ra.html">RA field guide</a>
@@ -22,24 +26,30 @@
       <p class="storage-note">Every screenshot uses demonstration data only; the places, tasks, and people shown are fictional (St Demo Church, task_demo_*).</p>
     </div>
   </header>
-  <main>
-  <nav class="toc" aria-labelledby="contents-heading">
+  <div class="contents-bar" hidden>
+    <button type="button" class="contents-toggle" aria-expanded="false" aria-controls="contents-sheet">Contents</button>
+    <span class="contents-current" aria-hidden="true"></span>
+    <div id="contents-sheet" class="contents-sheet" hidden></div>
+  </div>
+  <main class="guide-main">
+  <nav class="toc" id="guide-contents" aria-labelledby="contents-heading">
     <h2 id="contents-heading">Contents</h2>
     <ol>
-      <li><a href="#review-queue">Review a submitted task and record a decision</a></li>
+      <li><a href="#review-queue">Needs review: open a submission and Record decision</a></li>
       <li><a href="#ai-review-panel">Read the AI review panel before deciding</a></li>
       <li><a href="#recorded-confidence">Read the recorded confidence before deciding</a></li>
       <li><a href="#ai-evidence-checks">How the AI evidence checks work</a></li>
-      <li><a href="#reopened-after-decision">Reopened after a decision, and reverting a reopen</a></li>
+      <li><a href="#reopened-after-decision">Reopened after decision, and reverting a reopen</a></li>
       <li><a href="#decision-records-and-hashes">How decisions are recorded and hashed</a></li>
       <li><a href="#change-class">Genuine change versus map correction</a></li>
       <li><a href="#identity-decisions">Identity decisions</a></li>
       <li><a href="#seeding-and-exports">Seeding and exports</a></li>
     </ol>
   </nav>
+  <div class="guide-body">
 
 <section class="guide-section flow-section" id="review-queue">
-  <h2>Review a submitted task and record a decision</h2>
+  <h2>Needs review: open a submission and Record decision</h2>
   <ol class="step-list">
     <li id="review-queue-step-1">
       <figure data-step-file="review-queue/review-queue-01.png" data-media-key="v6/review-queue/review-queue-01.png">
@@ -133,7 +143,7 @@
 </section>
 
 <section class="guide-section prose-section" id="reopened-after-decision">
-  <h2>Reopened after a decision, and reverting a reopen</h2>
+  <h2>Reopened after decision, and reverting a reopen</h2>
   <p>Any signed-in RA may reopen a place you have reviewed, accepted or exported, if they give a reason of at least eight characters (JB, 2026-10-15). The task returns to <em>Reopened</em> and carries a <em>Reopened after decision</em> marker, with the status it held and the reason, in the review queue and the decision panel. Choose <em>reopened after a decision</em> in the queue&#x27;s task status to list them. A reopened task cannot be decided until the contributor submits new evidence; it then comes back to the queue as usual, and the marker stays until you next accept it. Reopening does not change a record that has already been exported.</p>
   <p>If a place was reopened by mistake, a reviewer, curator, admin or PI can press <em>Revert the reopen</em> in the decision panel and give a reason of at least eight characters. The task goes back to the status it held, exactly as before, and the marker clears. This works only while nothing has been written to the task since the reopen: no claim, note, evidence or second reopen. Once anything has been written, the reopen stands and the place needs a new decision. An RA is limited to 20 reopens of decided places an hour, and all RAs together to 60.</p>
 </section>
@@ -186,9 +196,10 @@
   <h2>Seeding and exports</h2>
   <p>Batch seeding and export freezing run from the deployment CLI and are documented in <a href="https://github.com/go-bayes/places-of-worship/blob/main/docs/portal-batch-import-and-corrections.md">docs/portal-batch-import-and-corrections.md</a>.</p>
 </section>
+  </div>
   </main>
   <footer>
-    <p>Places of Worship research project · guides updated 2026-10-19 · screenshots: demonstration data only</p>
+    <p>religionmap.org · guides updated 2026-11-03 · screenshots: demonstration data only</p>
   </footer>
 </body>
 </html>

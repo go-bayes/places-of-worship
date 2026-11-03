@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-8MHUpq2OIyQzRAd95q3A2O5P+8Ozv0qiXsTHwdrpBWk='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-dowlU7C6YkndA6+ZCjXEvdapoQjtXidr3txfHcmaA18='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Places of Worship | Sri Lanka Research Map</title>
+  <title>religionmap.org · Sri Lanka</title>
   <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet" integrity="sha384-p5cy4wHtKSqjnLUNjQ+8ffCwUp0vlLS+6lg1lc3qqXax2E1EmVCMCAimU+R0MOZH" crossorigin="anonymous">
   <link href="../../shared/map-shell.css?v=20261103c" rel="stylesheet">
   <link href="../../global/styles/maplibre-flat.css?v=20261103c" rel="stylesheet">
@@ -60,7 +60,7 @@
     // rendering of the record.
     window.REGION_CONFIG = {
       countryCode: "LK",
-      title: "Places of Worship | Sri Lanka Research Map",
+      title: "religionmap.org · Sri Lanka",
       // boundary bbox verified numerically from the 25-feature layer:
       // lon 79.519..81.877, lat 5.918..9.836; centre on [80.70, 7.88].
       // the ~2.4 deg lon / ~3.9 deg lat extent fits all 25 districts at z7.
@@ -134,7 +134,7 @@
         ]
       },
       wordmarkLinks: [
-        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+        { id: "wordmark-global", label: "religionmap.org", href: "../../global/", title: "Open the global map" }
       ],
       censusSourceAttribution: 'Census religion &copy; <a href="https://www.statistics.gov.lk/" target="_blank" rel="noopener">Department of Census and Statistics (DCS)</a>, Sri Lanka, censuses of population and housing 1981, 2001, 2012 and 2024 (Statistical Abstract 2023 Table 2.14 and Census 2024 Preliminary Report Table A3), derived summaries reproduced with attribution while a reuse ask is outgoing &middot; Boundaries from <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries</a> LKA ADM3 (CC BY 3.0 IGO, OCHA ROAP / Survey Department of Sri Lanka lineage), dissolved to the 25 districts',
       censusFlagNote: "* The DCS census religion frame is Buddhist, Hindu, Islam, Roman Catholic, Other Christian and Other (census-table convention; equivalently Buddhist, Hindus, Muslims, Catholics, Christians, Others in the Statistical Abstract convention), with no no-religion and no not-stated category; the frame sums to 100 by construction. The map shades the reference-group (Buddhist) share and its exact complement, the minority share; the no-religion slot label carries the minority share and no no-religion meaning. The 2001 census enumerated religion for only 18 of 25 districts; the seven northern and eastern districts (Jaffna, Mannar, Vavuniya, Mullaitivu, Kilinochchi, Batticaloa, Trincomalee) carry the DCS estimated total and render as no-data, per the DCS footnote. Kilinochchi did not exist in 1981 (carved from Jaffna in 1984) and renders as no-data in 1981; no split is invented. The change metric differences adjacent censuses over unequal intervals (20, 11, 12 years) and is not an annual rate. DCS asserts all rights reserved; the derived category summaries are reproduced with DCS attribution while a reuse ask is outgoing, and the page reverts in a single commit if DCS objects (project-lead ruling, 2026-07-11). Boundaries are geoBoundaries LKA ADM3, CC BY 3.0 IGO, dissolved to the 25 districts."

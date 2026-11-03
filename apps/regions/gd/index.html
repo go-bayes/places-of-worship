@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-LvS2620XhFN5TVa6M6bf5E8XCDfHgaCC3KvLzfIJmwI='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-2B9I/DHxV/BcIfvg8oCpYrzLxA7ckgpHgbWPD8DLeXw='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Places of Worship | Grenada Research Map</title>
+  <title>religionmap.org · Grenada</title>
   <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet" integrity="sha384-p5cy4wHtKSqjnLUNjQ+8ffCwUp0vlLS+6lg1lc3qqXax2E1EmVCMCAimU+R0MOZH" crossorigin="anonymous">
   <link href="../../shared/map-shell.css?v=20261103c" rel="stylesheet">
   <link href="../../global/styles/maplibre-flat.css?v=20261103c" rel="stylesheet">
@@ -54,7 +54,7 @@
     // census Carriacou & Petite Martinique column.
     window.REGION_CONFIG = {
       countryCode: "GD",
-      title: "Places of Worship | Grenada Research Map",
+      title: "religionmap.org · Grenada",
       // boundary bbox verified numerically from the 7-feature layer:
       // lon -61.802..-61.378, lat 11.988..12.529; centre on [-61.59, 12.26].
       // the Carriacou & Petite Martinique dependency reaches north to 12.53,
@@ -117,7 +117,7 @@
         ]
       },
       wordmarkLinks: [
-        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+        { id: "wordmark-global", label: "religionmap.org", href: "../../global/", title: "Open the global map" }
       ],
       censusSourceAttribution: 'Census religion &copy; <a href="https://stats.gov.gd/" target="_blank" rel="noopener">Central Statistical Office of Grenada (CSO)</a>, 2021 National Population and Housing Census Results (PRELIMINARY), Table 23 &lsquo;Population by Religion and Parish&rsquo;. This product was adapted from the Central Statistical Office of Grenada&rsquo;s information, which is licensed under the CSO Open Licence Agreement. The source is a preliminary release; the product regenerates when the final 2021 report is published. &middot; Boundaries &copy; <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries</a> GRD ADM1 (Creative Commons Attribution-ShareAlike 2.0, CC BY-SA 2.0), OpenStreetMap contributors',
       censusFlagNote: "* The construct is census affiliation (each enumerated resident's recorded religion), from Table 23 'Population by Religion and Parish' of the CSO 2021 PRELIMINARY census results; it does not measure belief, practice, attendance, or membership. The source is a preliminary release: the counts are official CSO figures and reconcile integer-exact to 108,279 at every margin, but may be revised, and the product regenerates when the final 2021 report is published. The 26 verbatim categories carry per row; the no-religion slot sums the two distinct no-religion lines ('Atheist' and 'No Religious Affiliation'), and the 'Not Stated' non-response line stays in the denominator and outside both shares; the two shares need not sum to 100. Single wave (2021), parish grain; no change metric (parish religion is a 2021-only table; 2001 and 2011 religion is published nationally only). † marks a parish carrying a religion category count under ten people (six of the seven parishes; the combined St. George parish is the exception); counts render exactly as published, none suppressed. The Town of St. George is rolled into the St. George parish feature to match the seven-unit boundary (exact, lossless, disclosed). Census reuse accepted under the CSO Open Licence Agreement; boundaries geoBoundaries GRD ADM1 (CC BY-SA 2.0)."

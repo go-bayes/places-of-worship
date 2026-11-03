@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-eDBgsgG5YAXpM3hgUrS3lblDghGeMqtX2YnfOLwUVNM='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-pGMmup97rV3BsK/amMYnaRRm5jbZlv4NDj9FURd8Dzo='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Places of Worship | Trinidad and Tobago Research Map</title>
+  <title>religionmap.org · Trinidad and Tobago</title>
   <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet" integrity="sha384-p5cy4wHtKSqjnLUNjQ+8ffCwUp0vlLS+6lg1lc3qqXax2E1EmVCMCAimU+R0MOZH" crossorigin="anonymous">
   <link href="../../shared/map-shell.css?v=20261103c" rel="stylesheet">
   <link href="../../global/styles/maplibre-flat.css?v=20261103c" rel="stylesheet">
@@ -66,7 +66,7 @@
     // rejected because it omits the Borough of Arima (fourteen units).
     window.REGION_CONFIG = {
       countryCode: "TT",
-      title: "Places of Worship | Trinidad and Tobago Research Map",
+      title: "religionmap.org · Trinidad and Tobago",
       // trinidad and tobago spans lon -61.93..-60.49 by lat 10.04..11.36 across
       // the fifteen municipalities; centre between the two islands and open at a
       // zoom that fits the full extent beside the census panels
@@ -128,7 +128,7 @@
         ]
       },
       wordmarkLinks: [
-        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+        { id: "wordmark-global", label: "religionmap.org", href: "../../global/", title: "Open the global map" }
       ],
       censusSourceAttribution: 'Census religion © <a href="https://cso.gov.tt/" target="_blank" rel="noopener">Central Statistical Office of Trinidad and Tobago (CSO)</a>, 2011 Population and Housing Census Demographic Report, Table 8 (Non-Institutional Population by Sex, Age Group, Religion and Municipality). Source: Central Statistical Office of Trinidad and Tobago, 2011 Population and Housing Census Demographic Report. Reproduced with acknowledgement of source. The CSO asserts copyright and states no open-data licence; a reuse confirmation is pending and the licence status is under review. &middot; Boundaries © <a href="https://data.humdata.org/dataset/cod-ab-tto" target="_blank" rel="noopener">OCHA COD-AB</a> TTO ADM1 (Creative Commons Attribution for Intergovernmental Organisations, CC BY-IGO), geometry from GADM',
       censusFlagNote: "* Counts are the 2011 Demographic Report Table 8 verbatim cells (Non-Institutional Population, Both Sexes, All Ages). The published table does not close integer-exact: printed marginals differ from the printed-cell sums by up to ±2 (municipality columns ±1, religion rows ±2, national total −1); every residual is recorded, never repaired, and printed '-' is transcribed as 0. Religious affiliation is the fifteen named categories plus Other; No religion is the single None line; the Not Stated non-response line stays in the denominator and in neither share; the two therefore need not sum to 100. Single wave (2011), municipality level; no change metric. Census data ship with CSO attribution under a build-then-ask posture, licence needs review; boundaries CC BY-IGO."

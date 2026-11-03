@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-NpIDnTHARP2esnM+ootkc67OYk6NW55OG0eIJQ6NcAY='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-MABPuYEGQwoLfSE9NK3Tn9l5s0msP1CQOBfMmqOx17c='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Places of Worship | Guinea-Bissau Research Map</title>
+  <title>religionmap.org · Guinea-Bissau</title>
   <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet" integrity="sha384-p5cy4wHtKSqjnLUNjQ+8ffCwUp0vlLS+6lg1lc3qqXax2E1EmVCMCAimU+R0MOZH" crossorigin="anonymous">
   <link href="../../shared/map-shell.css?v=20261103c" rel="stylesheet">
   <link href="../../global/styles/maplibre-flat.css?v=20261103c" rel="stylesheet">
@@ -57,7 +57,7 @@
     // 2017, with the Sector Autónomo de Bissau its own feature.
     window.REGION_CONFIG = {
       countryCode: "GW",
-      title: "Places of Worship | Guinea-Bissau Research Map",
+      title: "religionmap.org · Guinea-Bissau",
       // guinea-bissau spans lon -16.72..-13.64 by lat 10.89..12.69 across the
       // nine units; centre on the frame and open at a zoom that fits the full
       // extent beside the census panels
@@ -123,7 +123,7 @@
         ]
       },
       wordmarkLinks: [
-        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+        { id: "wordmark-global", label: "religionmap.org", href: "../../global/", title: "Open the global map" }
       ],
       censusSourceAttribution: 'Census religion © <a href="https://www.stat-guinebissau.com/" target="_blank" rel="noopener">Instituto Nacional de Estatística (INE), Guiné-Bissau</a>, RGPH-2009 (Características socioculturais, Quadro 4). Licence under review: the INE website carries an all-rights-reserved footer and no located open-data licence; reuse of the derived percentages is therefore needs_review pending a project-lead ruling. Source: INE Guiné-Bissau, RGPH-2009. &middot; Boundaries © <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries</a> GNB ADM1 (Open Data Commons Open Database License 1.0, ODbL 1.0), OpenStreetMap contributors',
       censusFlagNote: "* Values are the source's published one-decimal column-percentage shares from RGPH-2009 Quadro 4; the source publishes no counts, and no count is derived from a percentage. The six source categories sum to 100 within a derived rounding bound of 0.30 percentage points; the Oio, Biombo, and Bolama/Bijagós columns print 100.1, 99.9, and 100.1 as published. A large Not-declared non-response share (10.5-25.7% by region) is the gap between the two shares and 100. Single wave (2009), region level, percentages only; no change metric. Census reuse is under review (all-rights-reserved site footer, no located open-data licence)."
