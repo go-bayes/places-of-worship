@@ -200,7 +200,9 @@ export const adminUpsertUser = internalMutation({
     status: v.optional(userStatus),
     // true unbinds the row's workos account (workos_subject), so the next
     // workos claimInvite binds whichever account its verified email reaches
-    // it with: for a person who replaced their workos account
+    // it with: for a person who replaced their workos account. an active
+    // row with no google identity becomes pending again, unless status is
+    // given
     clearWorkosSubject: v.optional(v.boolean()),
   },
   returns: v.object({ user_id: v.id("users"), created: v.boolean(), status: v.string() }),
@@ -220,15 +222,22 @@ export const adminUpsertUser = internalMutation({
       .unique();
 
     if (existing !== null) {
+      // unbinding a row claimed only through workos leaves it with no
+      // subject at all, which no sign-in may claim by email while active;
+      // it returns to an invitation, so the replacement account can claim it
+      const reinvite = args.clearWorkosSubject === true
+        && existing.auth_subject === undefined
+        && existing.status === "active";
+      const status = args.status ?? (reinvite ? "pending" : existing.status);
       await ctx.db.patch(existing._id, {
         roles: args.roles,
         display_name: args.displayName ?? existing.display_name,
         initials: args.initials?.trim().slice(0, 12) || existing.initials,
-        status: args.status ?? existing.status,
+        status,
         ...(args.clearWorkosSubject === true ? { workos_subject: undefined } : {}),
         updated_at: now,
       });
-      return { user_id: existing._id, created: false, status: args.status ?? existing.status };
+      return { user_id: existing._id, created: false, status };
     }
 
     const userId = await ctx.db.insert("users", {
