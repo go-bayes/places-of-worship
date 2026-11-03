@@ -3693,7 +3693,7 @@ class NzVerificationMap {
             div.querySelector("#portalPointsToggle")?.addEventListener("click", () => {
                 this.setPointsMode(this.pointsMode === "off" ? "all" : "off");
             });
-            this.makeControlMovable(div, div.querySelector(".legend-grip"));
+            this.mapDataMovable = this.makeControlMovable(div, div.querySelector(".legend-grip"));
             this.mapDataPanel = div;
             div.querySelector(".legend-fold")?.addEventListener("click", () => {
                 this.setMapDataFolded(!div.classList.contains("folded"), { chosen: true });
@@ -3761,6 +3761,12 @@ class NzVerificationMap {
         if (caret) caret.textContent = on ? "▸" : "▾";
         const body = div.querySelector(".legend-body");
         if (body) body.hidden = on;
+        // the open grid can be taller than a short map (a phone's even
+        // split), so the body is capped to the map and the panel pulled
+        // back inside it, keeping the bar and its fold in reach (greptile,
+        // pr #217)
+        this.fitMapDataBody();
+        this.mapDataMovable?.clamp();
         if (chosen) {
             try {
                 localStorage.setItem(MAP_DATA_FOLD_KEY, on ? "1" : "0");
@@ -3769,6 +3775,22 @@ class NzVerificationMap {
             }
         }
         return on;
+    }
+
+    // caps the open map data body to the map's height less the bar, so
+    // the whole panel fits the map and the body scrolls inside it
+    fitMapDataBody() {
+        const div = this.mapDataPanel;
+        const body = div?.querySelector?.(".legend-body");
+        if (!body || body.hidden) return null;
+        const mapHeight = this.map?.getContainer?.()?.clientHeight || 0;
+        // an unmeasured map leaves the stylesheet's viewport cap in place
+        if (!mapHeight) return null;
+        const barHeight = div.querySelector(".legend-bar")?.offsetHeight || 0;
+        // leaflet's corner margins and the panel's padding and gap
+        const cap = Math.max(48, mapHeight - barHeight - 40);
+        body.style.maxHeight = `${cap}px`;
+        return cap;
     }
 
     // drags a leaflet control by its grip (pointer events, so touch and
@@ -3798,8 +3820,12 @@ class NzVerificationMap {
             // inactive: paint nothing and leave the remembered spot alone
             if (!active()) { apply(); return; }
             const mapRect = this.map.getContainer().getBoundingClientRect();
+            // an unsized map or panel measures zero, which would wipe the
+            // remembered spot; leave it until it can be measured
+            if (!mapRect.width || !mapRect.height || div.isConnected === false) { apply(); return; }
             div.style.transform = "";
             const rest = div.getBoundingClientRect();
+            if (!rest.width && !rest.height) { apply(); return; }
             const minX = mapRect.left - rest.left;
             const maxX = mapRect.right - rest.right;
             const minY = mapRect.top - rest.top;
@@ -3846,9 +3872,14 @@ class NzVerificationMap {
             apply();
             save();
         });
-        this.map.on("resize", clamp);
+        this.map.on("resize", () => {
+            // a resized map re-caps the open map data body before clamping
+            if (div === this.mapDataPanel) this.fitMapDataBody();
+            clamp();
+        });
         // the corner is laid out after the control is added; clamp then
         setTimeout(clamp, 0);
+        return { clamp };
     }
 
     // where the unvalidated dots come from: the country's dated product
