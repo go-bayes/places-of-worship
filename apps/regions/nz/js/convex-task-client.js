@@ -56,6 +56,28 @@
         }
     }
 
+    // which workos user this device has claimed for (users:claimInvite), so
+    // later loads skip the claim; cleared at sign-out
+    const WORKOS_CLAIMED_KEY = "powWorkosClaimed:v1";
+
+    function workosClaimRecorded(workosUserId) {
+        if (!workosUserId) return false;
+        try {
+            return window.localStorage.getItem(WORKOS_CLAIMED_KEY) === workosUserId;
+        } catch (error) {
+            return false;
+        }
+    }
+
+    function recordWorkosClaim(workosUserId) {
+        try {
+            if (workosUserId) window.localStorage.setItem(WORKOS_CLAIMED_KEY, workosUserId);
+            else window.localStorage.removeItem(WORKOS_CLAIMED_KEY);
+        } catch (error) {
+            // blocked storage: the next load claims again
+        }
+    }
+
     function readWorkosReturn() {
         try {
             const record = JSON.parse(window.sessionStorage.getItem(WORKOS_RETURN_KEY) || "null");
@@ -206,6 +228,7 @@
             this.authkitPromise = null;
             this.signInError = null;
             this.workosClaimed = false;
+            this.workosClaimRefusal = null;
             if (this.usesWorkos) {
                 // the session lives in authkit's refresh token; a google
                 // token left from before the switch is dropped
@@ -278,6 +301,7 @@
                 }
             }
             forgetWorkosRefreshToken(this.config.workosClientId);
+            recordWorkosClaim("");
         }
 
         // where workos sends a sign-out: the contributor portal on this
@@ -392,10 +416,16 @@
                 }
                 return false;
             }
+            // the claim comes before any other request: until claimInvite
+            // binds this workos user to its row, every function but users:me
+            // refuses it. after a sign-in, and on the first load of a device
+            // that has not claimed for this workos user, claim first
             const completed = takeCompletedWorkosReturn();
-            if (completed) {
+            const workosUserId = String(authkit.getUser()?.id || "");
+            if (completed || !workosClaimRecorded(workosUserId)) {
                 try {
-                    await this.claimInvite(completed.initials || "");
+                    await this.claimInvite(completed?.initials || "");
+                    recordWorkosClaim(workosUserId);
                 } catch (error) {
                     this.endRestoreWithError(error);
                     return false;
@@ -775,9 +805,22 @@
         }
 
         async claimInvite(initials) {
-            const claimed = await this.request("mutation", "users:claimInvite", {
-                initials: initials || undefined,
-            });
+            // workos: a claim the backend refused (no invitation, another
+            // account's row, no email claim) stays refused for the rest of
+            // the page's life, and is reported without asking again; a
+            // network failure or an expired sign-in may be retried
+            if (this.usesWorkos && this.workosClaimRefusal) throw this.workosClaimRefusal;
+            let claimed;
+            try {
+                claimed = await this.request("mutation", "users:claimInvite", {
+                    initials: initials || undefined,
+                });
+            } catch (error) {
+                if (this.usesWorkos && !error?.network && !error?.transient && !error?.authExpired) {
+                    this.workosClaimRefusal = error;
+                }
+                throw error;
+            }
             this.workosClaimed = this.usesWorkos;
             return claimed;
         }

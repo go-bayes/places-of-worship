@@ -200,7 +200,7 @@ const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
   // local storage (devMode) and the callback page as redirect; every
   // request asks authkit for the token first and carries the newest one
   {
-    const page = makePage({ config: workosConfig, files: ["convex-task-client.js"], answers: { "tasks:raLanding": landing, "tasks:listMyTasks": [] } });
+    const page = makePage({ config: workosConfig, files: ["convex-task-client.js"], answers: { "users:claimInvite": "user_1", "tasks:raLanding": landing, "tasks:listMyTasks": [] } });
     page.localStorage.setItem(`workos:refresh-token:${CLIENT_ID}`, "rt_1");
     const first = jwtWithExpIn(300);
     const second = jwtWithExpIn(300, { sid: "renewed" });
@@ -215,7 +215,10 @@ const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
     assert.equal(options.devMode, true, "devMode is set explicitly: the refresh token stays in local storage");
     assert.equal(options.redirectUri, `${ORIGIN}/apps/regions/nz/auth-callback.html`);
     assert.equal(typeof options.onRefreshFailure, "function");
-    assert.deepEqual(page.log.fetches.map((entry) => entry.path), ["tasks:raLanding"], "no claimInvite without a completed hand-off");
+    // a device that has not claimed for this workos user claims before any
+    // other request: until the claim binds the row, requireUser refuses it
+    assert.deepEqual(page.log.fetches.map((entry) => entry.path), ["users:claimInvite", "tasks:raLanding"], "the claim comes first");
+    assert.equal(page.localStorage.getItem("powWorkosClaimed:v1"), "user_01");
     assert.equal(page.log.fetches[0].authorization, `Bearer ${first}`);
     const before = page.log.tokenCalls;
     await client.listMyTasks({});
@@ -223,6 +226,17 @@ const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
     assert.equal(page.log.fetches.at(-1).authorization, `Bearer ${second}`, "the renewed token is the one sent");
     assert.equal(client.signedIn, true);
     assert.equal(page.log.googleInitialised, 0, "no google script in workos mode");
+    // the next load on this device goes straight to the landing
+    page.log.fetches.length = 0;
+    const reloaded = new page.window.PowConvexTaskClient(workosConfig);
+    assert.equal((await reloaded.restoreSessionWithLanding(landingArgs)).user._id, "user_1");
+    assert.deepEqual(page.log.fetches.map((entry) => entry.path), ["tasks:raLanding"]);
+    // another workos user on the same device claims again
+    page.authkitState.user = { id: "user_02" };
+    page.log.fetches.length = 0;
+    const other = new page.window.PowConvexTaskClient(workosConfig);
+    await other.restoreSessionWithLanding(landingArgs);
+    assert.deepEqual(page.log.fetches.map((entry) => entry.path), ["users:claimInvite", "tasks:raLanding"]);
   }
 
   // 4. a session authkit cannot renew ends as an expired sign-in: the
@@ -246,6 +260,7 @@ const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
       "workos ends the session without leaving the page, answering with this origin's contributor portal",
     );
     assert.equal(page.localStorage.getItem(`workos:refresh-token:${CLIENT_ID}`), null, "the refresh token leaves the device");
+    assert.equal(page.localStorage.getItem("powWorkosClaimed:v1"), null, "and the device's claim record with it");
   }
 
   // 5. a transient renewal failure keeps the session for a retry
@@ -317,11 +332,21 @@ const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
     assert.deepEqual(errors, [refusal], "the card is told why");
     await client.renderSignInButton(host, { onError: (error) => errors.push(error.message) });
     assert.equal(errors.length, 1, "and only once");
+    // a refused claim is not asked again for the rest of the page's life
+    const claims = () => page.log.fetches.filter((entry) => entry.path === "users:claimInvite").length;
+    assert.equal(claims(), 1);
+    await assert.rejects(client.claimInvite(""), (error) => error.message === refusal);
+    page.localStorage.setItem(`workos:refresh-token:${CLIENT_ID}`, "rt_again");
+    page.authkitState.user = { id: "user_01" };
+    assert.equal(await client.restoreSession(), null);
+    assert.equal(claims(), 1, "no second claim request");
   }
 
-  // 9. a kept session restored while offline keeps the refresh token
+  // 9. a kept session restored while offline keeps the refresh token, and a
+  // claim that failed in transit is tried again once the connection is back
   {
-    const page = makePage({ config: workosConfig, files: ["convex-task-client.js"], answers: { "tasks:raLanding": "offline", "users:me": "offline" } });
+    const answers = { "users:claimInvite": "offline", "tasks:raLanding": "offline", "users:me": "offline" };
+    const page = makePage({ config: workosConfig, files: ["convex-task-client.js"], answers });
     page.localStorage.setItem(`workos:refresh-token:${CLIENT_ID}`, "rt_1");
     page.authkitState.user = { id: "user_01" };
     page.authkitState.tokens = [jwtWithExpIn(300)];
@@ -331,6 +356,11 @@ const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
     assert.equal(page.log.signOuts.length, 0);
     assert.equal(page.localStorage.getItem(`workos:refresh-token:${CLIENT_ID}`), "rt_1", "the session waits for the connection");
     assert.match(client.signInError.message, /Could not reach the project backend/);
+    answers["users:claimInvite"] = "user_1";
+    answers["tasks:raLanding"] = landing;
+    const online = await client.restoreSessionWithLanding(landingArgs);
+    assert.equal(online.user._id, "user_1");
+    assert.equal(page.log.fetches.filter((entry) => entry.path === "users:claimInvite").length, 2);
   }
 
   // 10. a kept refresh token workos no longer honours restores nobody,
@@ -360,18 +390,32 @@ const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
     assert.equal(page.log.signOuts.length, 0);
   }
 
-  // 10c. a row the landing found by email, with no workos identity bound,
-  // is claimed once after the landing, so the identity is bound
+  // 10c. the device recorded a claim, but the row has since been unbound
+  // (adminUpsertUser clearWorkosSubject): the landing is refused, users:me
+  // finds the row by email with no workos user bound, and the client claims
+  // it once before naming the user
   {
-    const unbound = { ...landing, user: { _id: "user_1", email: "ra@example.org", status: "active" } };
-    const page = makePage({ config: workosConfig, files: ["convex-task-client.js"], answers: { "tasks:raLanding": unbound, "users:claimInvite": "user_1", "tasks:listMyTasks": [] } });
+    let bound = false;
+    const row = () => ({ _id: "user_1", email: "ra@example.org", status: "active", ...(bound ? { workos_subject: "user_01" } : {}) });
+    const page = makePage({
+      config: workosConfig,
+      files: ["convex-task-client.js"],
+      answers: {
+        "tasks:raLanding": () => (bound ? { ...landing, user: row() } : { __error: "Authenticated user is not active in this project." }),
+        "users:me": () => row(),
+        "users:claimInvite": () => { bound = true; return "user_1"; },
+        "tasks:listMyTasks": [],
+      },
+    });
     page.localStorage.setItem(`workos:refresh-token:${CLIENT_ID}`, "rt_1");
+    page.localStorage.setItem("powWorkosClaimed:v1", "user_01");
     page.authkitState.user = { id: "user_01" };
     page.authkitState.tokens = [jwtWithExpIn(300)];
     const client = new page.window.PowConvexTaskClient(workosConfig);
     const restored = await client.restoreSessionWithLanding(landingArgs);
     assert.equal(restored.user._id, "user_1");
-    assert.deepEqual(page.log.fetches.map((entry) => entry.path), ["tasks:raLanding", "users:claimInvite"]);
+    assert.equal(restored.user.workos_subject, "user_01");
+    assert.deepEqual(page.log.fetches.map((entry) => entry.path), ["tasks:raLanding", "users:me", "users:claimInvite", "users:me"]);
     await client.listMyTasks({});
     assert.equal(page.log.fetches.filter((entry) => entry.path === "users:claimInvite").length, 1, "claimed once per page");
   }
