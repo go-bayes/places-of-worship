@@ -53,6 +53,11 @@
         // Use-recommendation / Decide-differently buttons; null = no
         // explicit choice, agreement derives from the decision itself
         agentAgreementChoice: null,
+        // the task and linked places the reviewer chose to keep after the
+        // server's unmatched-link warning (jb, 2026-11-03), as a key from
+        // linkConfirmationKey; null until the warning shows, and cleared when
+        // the linked-place field is edited or the form is drawn again
+        linkConfirmation: null,
         // occupancy lane (jb 2026-09-02): the task's periods and the derived
         // per-year proposals, loaded after the detail renders and refreshed
         // on their own after each per-year decision
@@ -2010,6 +2015,75 @@ function human(value) {
         return "";
     }
 
+    // unmatched links (jb, 2026-11-03): the server refuses a well-formed
+    // linked place that no task carries once, with a message that starts
+    // with this prefix (UNMATCHED_LINK_PREFIX in convex/lib/identityLinks.ts);
+    // the portal shows it as a warning, and the next submit of the same
+    // links sends confirm_unmatched_links to keep them
+    const UNMATCHED_LINK_PREFIX = "Unmatched linked place";
+
+    // the warning's own line, cut from the error text convex wraps around it
+    function unmatchedLinkWarning(message) {
+        const text = String(message || "");
+        const at = text.indexOf(UNMATCHED_LINK_PREFIX);
+        return at < 0 ? "" : text.slice(at).split("\n")[0].trim();
+    }
+
+    function linkConfirmationKey(taskId, ids) {
+        return JSON.stringify([taskId, ...ids]);
+    }
+
+    function showLinkConfirmation(form, warning) {
+        const box = document.getElementById("linkedSiteWarning");
+        if (box) {
+            box.textContent = warning;
+            box.hidden = false;
+        }
+        const button = form.querySelector('button[type="submit"]');
+        if (button) button.textContent = "Record anyway";
+    }
+
+    function clearLinkConfirmation(form) {
+        state.linkConfirmation = null;
+        const box = document.getElementById("linkedSiteWarning");
+        if (box) {
+            box.textContent = "";
+            box.hidden = true;
+        }
+        const button = form.querySelector('button[type="submit"]');
+        if (button) button.textContent = "Record decision";
+    }
+
+    // the published nz sites (data/nz_places.json), fetched once and only
+    // when an nz decision carries a link; a link to one of them is a real
+    // place, so it goes with the confirmation and skips the warning. a
+    // failed fetch reads as no published sites and is tried again next time
+    let publishedNzSites = null;
+    function publishedNzSiteIds() {
+        if (publishedNzSites === null) {
+            publishedNzSites = Promise.resolve()
+                .then(() => window.fetch("data/nz_places.json"))
+                .then((response) => (response.ok ? response.json() : Promise.reject(new Error("unavailable"))))
+                .then((rows) => new Set((Array.isArray(rows) ? rows : []).map((row) => row?.id).filter((id) => typeof id === "string")))
+                .catch(() => {
+                    publishedNzSites = null;
+                    return new Set();
+                });
+        }
+        return publishedNzSites;
+    }
+
+    // true when every link is a published nz site, by its map id (n123) or
+    // its osm reference (osm:node/123)
+    async function linksArePublishedNzSites(ids) {
+        if (countryCode !== "NZ" || ids.length === 0) return false;
+        const published = await publishedNzSiteIds();
+        return ids.every((id) => {
+            const ref = /^osm:(node|way|relation)\/([1-9][0-9]*)$/.exec(id);
+            return published.has(ref ? `${ref[1][0]}${ref[2]}` : id);
+        });
+    }
+
     function setDecisionFormValues(form, values) {
         if (values.decisionStatus !== undefined) form.decisionStatus.value = values.decisionStatus;
         if (values.identityDecision !== undefined) form.identityDecision.value = values.identityDecision;
@@ -2058,6 +2132,11 @@ function human(value) {
 
     function wireDecisionForm(form) {
         form.decisionStatus?.addEventListener("change", () => updateDecisionHelp(form));
+        // a fresh form holds no confirmation, and editing the links ends one
+        state.linkConfirmation = null;
+        form.linkedSiteIds?.addEventListener("input", () => {
+            if (state.linkConfirmation !== null) clearLinkConfirmation(form);
+        });
         form.querySelectorAll("[data-decision]").forEach((button) => {
             if (button.id === "markSystemTest" || button.id === "requestMoreEvidence") return;
             button.addEventListener("click", () => {
@@ -2196,6 +2275,7 @@ function human(value) {
                     <label for="linkedSiteIds">Linked place</label>
                     <input id="linkedSiteIds" name="linkedSiteIds" type="text" maxlength="2200" autocomplete="off" ${canDecide ? "" : "disabled"}>
                     <small class="muted">The other place's site identifier, such as n123 or w456, an OpenStreetMap reference such as osm:node/123, a candidate identifier, or the task identifier or source record of a place in the portal; separate several with commas. A place in any country may be linked; a task or source record is recorded as its place's site identifier. Required for a successor at a new site, an end and new foundation, a split or a merge; optional for a duplicate or an uncertain decision.</small>
+                    <div id="linkedSiteWarning" class="review-warning" role="status" aria-live="polite" hidden></div>
                 </div>
                 ${hasOriginalPoint ? `
                     <div>
@@ -2337,6 +2417,11 @@ function human(value) {
                 : undefined,
             required_follow_up: form.requiredFollowUp.value.trim() || undefined,
         };
+        // the reviewer pressed Record anyway on these links for this task
+        const linkKey = linkConfirmationKey(state.selected.task.task_id, linkedSiteIds);
+        if (linkedSiteIds.length > 0 && state.linkConfirmation === linkKey) {
+            decision.confirm_unmatched_links = true;
+        }
         // provenance: which AI recommendation was on screen and whether the
         // human followed it — explicit button choice wins, otherwise derived
         // from the decision so the record never overstates agreement
@@ -2358,6 +2443,9 @@ function human(value) {
         setTransport("saving");
         const selectedTask = state.selected.task;
         try {
+            if (!decision.confirm_unmatched_links && await linksArePublishedNzSites(linkedSiteIds)) {
+                decision.confirm_unmatched_links = true;
+            }
             const result = await client.recordReviewDecision({
                 taskId: selectedTask.task_id,
                 decision,
@@ -2377,6 +2465,17 @@ function human(value) {
             renderDecisionRecorded(result.task_status, previousIds, decidedTaskId);
         } catch (error) {
             const message = error.message || "Could not record the review decision.";
+            // a warning, not an error: the links may be right, and pressing
+            // Record anyway sends the same links with the confirmation
+            const warning = decision.confirm_unmatched_links ? "" : unmatchedLinkWarning(message);
+            if (warning) {
+                state.linkConfirmation = linkKey;
+                showLinkConfirmation(form, warning);
+                statusText.textContent = "Check the linked place. Record anyway keeps it as entered.";
+                statusText.className = "state-banner tone-act";
+                setTransport("ready");
+                return;
+            }
             // the server answered, so transport is fine; the refusal stays
             // on screen and the record button is the retry
             statusText.textContent = /stale/i.test(message) ? message : `${message} Check the form and record again.`;
@@ -2434,7 +2533,7 @@ function human(value) {
     // the dom tests load this file with the flag set and drive the pure-ish
     // renderers directly; the page itself boots as before
     if (window.__POW_TEST_NO_BOOTSTRAP__) {
-        window.__PowReviewPortalTest = { state, els, renderQueue, renderQueueRollup, renderDetail, renderEmptyDetail, decisionForm, wireRevertReopen, wireDecisionForm, setDecisionFormValues, setTransport, renderAuth, setupBoundary, setupPageLabel, parseLinkedSiteIds, linkedSiteIdsProblem, identityLabel };
+        window.__PowReviewPortalTest = { state, els, renderQueue, renderQueueRollup, renderDetail, renderEmptyDetail, decisionForm, wireRevertReopen, wireDecisionForm, submitDecision, setDecisionFormValues, setTransport, renderAuth, setupBoundary, setupPageLabel, parseLinkedSiteIds, linkedSiteIdsProblem, identityLabel };
     } else {
         init();
     }
