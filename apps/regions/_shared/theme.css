@@ -22,6 +22,14 @@
   --caution: #f2c14e;
   --caution-soft: #3f3110;
   --caution-strong: #e0a800;
+  /* jb 2026-11-03, ui item 8: the uncertain target-year fill is indigo and
+     the disputed ring red-violet, so neither draws amber on the open-case
+     amber. the uncertain status tag follows the fill in indigo; the act
+     tags (changes requested, reopened) keep the caution amber above */
+  --marker-uncertain: #6366f1;
+  --marker-disputed: #c8218e;
+  --uncertain: #a5b4fc;
+  --uncertain-soft: #262a52;
   --present: #6fcf97;
   --present-soft: #163a26;
   --absent: #b8c2d0;

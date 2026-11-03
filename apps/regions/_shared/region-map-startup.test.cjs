@@ -48,7 +48,7 @@ ok(/if \(!regionManifestRead\) \{\n\s*regionManifestRead = fetch\(/.test(manifes
 ok(/requestIdleCallback\(arm, \{ timeout: 5000 \}\)/.test(arm) && /setTimeout\(arm, 1\)/.test(arm), "idle callback with a timeout fallback");
 ok(/map\.once\("load", armWhenIdle\)/.test(arm), "arming waits for map load");
 ok(/afterLoadWhenIdle\(armOffers\);/.test(runtime), "the handoff arms after load and idle");
-ok(/if \(HANDOFF_HOME\) afterLoadWhenIdle\(\(\) => readRegionManifest\(\)\.then\(applyHomeShade\)\);/.test(runtime),
+ok(/if \(HANDOFF_HOME\) afterLoadWhenIdle\(\(\) => readRegionManifest\(\)\.then\(applyHomeShade\)\.catch\(\(\) => \{\}\)\);/.test(runtime),
   "the home shade reads the manifest after load and idle, on country pages only");
 ok((runtime.match(/(?<!function )readRegionManifest\(\)/g) || []).length === 2, "the handoff and the home shade are the manifest's only readers");
 ok(!/^\s*armOffers\(\);/m.test(runtime) && !/addEventListener\("load", armOffers/.test(runtime), "no direct or window-load arming remains");

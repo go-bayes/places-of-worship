@@ -1407,11 +1407,13 @@ function statusLabel(status) {
 }
 
 // marker fill = target-year status, in the page's own tokens; not assessed
-// is hollow (createIcon), so it has no fill here
+// is hollow (createIcon), so it has no fill here. uncertain has its own
+// indigo mark (jb 2026-11-03, ui item 8), not the caution amber of the
+// uncertain pill, so it never sits amber on the open-case amber
 function statusColor(status) {
     if (status === "present") return "var(--present)";
     if (status === "absent") return "var(--absent)";
-    if (status === "uncertain") return "var(--caution-strong)";
+    if (status === "uncertain") return "var(--marker-uncertain)";
     return "";
 }
 
@@ -3606,11 +3608,52 @@ class NzVerificationMap {
         document.getElementById("pinSearchToggleButton")?.setAttribute?.("aria-expanded", open ? "true" : "false");
     }
 
-    // corner control: the points-mode select plus the one marker legend
-    // (fills, then rings, then the unvalidated dot, in the status pills'
-    // own words); period is offered only where the country
-    // ships a dated context layer with real features (config-gated, like
-    // the data maps)
+    // the map data legend (jb 2026-11-03, ui item 8): a grid of fill rows
+    // (target-year status) against ring columns (validation), so every cell
+    // is a marker the map can draw; then the marks that stand alone. each
+    // cell wears the map's own marker classes, so the key follows the
+    // basemap's halo as the markers do. without target years the fill
+    // carries no status, and one row stands for any place
+    mapDataLegendHtml(source) {
+        const fills = TARGET_YEARS.length
+            ? [
+                ["present", "legend-fill-present"],
+                ["absent", "legend-fill-absent"],
+                ["uncertain", "legend-fill-uncertain"],
+                ["not assessed", "vm-unknown"],
+            ]
+            : [["any place", "legend-fill-any"]];
+        const rings = [
+            ["open case", "vm-unvalidated"],
+            ["validated", "vm-validated-present"],
+            ["validated absent", "vm-validated-absent"],
+            ["disputed", "vm-disputed"],
+        ];
+        // a grid cell names its combination; a single mark sits beside
+        // its own words, so it is hidden from assistive technology
+        const cell = (classes, label) => `<span class="verification-marker legend-mark ${classes}" role="img" aria-label="${label}"></span>`;
+        const single = classes => `<span class="verification-marker legend-mark ${classes}" aria-hidden="true"></span>`;
+        const head = rings.map(([ring]) => `<th scope="col">${ring}</th>`).join("");
+        const rows = fills.map(([fill, fillClass]) => `
+                        <tr><th scope="row">${fill}</th>${rings.map(([ring, ringClass]) => `<td>${cell(`${fillClass} ${ringClass}`, `${fill}, ${ring}`)}</td>`).join("")}</tr>`).join("");
+        return `
+                <div class="map-legend">
+                    <table class="legend-grid">
+                        <caption>${TARGET_YEARS.length ? "Fill: status in the target year" : "Fill"} · Ring: validation</caption>
+                        <thead><tr><td></td>${head}</tr></thead>
+                        <tbody>${rows}
+                        </tbody>
+                    </table>
+                    <div class="legend-singles">
+                        <span class="legend-row">${single("vm-in-review")}in review</span>
+                        <span class="legend-row">${single("vm-nomination")}your nomination</span>
+                        ${source !== "none" ? `<span class="legend-row"><span class="legend-dot context-dot-swatch" aria-hidden="true"></span>place on today's map, tap to revise</span>` : ""}
+                    </div>
+                </div>`;
+    }
+
+    // corner control: the map data legend, then the points toggle where
+    // the country has unreviewed places to show
     addPointsLegendControl() {
         const control = L.control({ position: "bottomleft" });
         control.onAdd = () => {
@@ -3637,29 +3680,9 @@ class NzVerificationMap {
                     <button type="button" class="legend-fold" aria-expanded="true" aria-controls="portalMapData">Map data <span class="legend-caret" aria-hidden="true">▾</span></button>
                 </div>
                 <div id="portalMapData" class="legend-body">
+                ${this.mapDataLegendHtml(source)}
                 ${source !== "none" ? `
                 <button type="button" id="portalPointsToggle" class="points-toggle" aria-pressed="${this.pointsMode === "off" ? "false" : "true"}">${this.pointsMode === "off" ? "Show points" : "Hide points"}</button>` : ""}
-                <div class="map-legend">
-                    <div class="legend-group">
-                    ${TARGET_YEARS.length ? `
-                    <span class="legend-caption">Fill: status in the target year</span>
-                    <span class="legend-row"><span class="legend-dot fill-present-swatch"></span>present</span>
-                    <span class="legend-row"><span class="legend-dot fill-absent-swatch"></span>absent</span>
-                    <span class="legend-row"><span class="legend-dot fill-uncertain-swatch"></span>uncertain</span>
-                    <span class="legend-row"><span class="legend-dot fill-not-assessed-swatch"></span>not assessed</span>` : `
-                    <span class="legend-caption">Fill</span>`}
-                    <span class="legend-row"><span class="legend-dot vm-nomination-swatch"></span>your nomination</span>
-                    </div>
-                    <div class="legend-group">
-                    <span class="legend-caption">Ring: validation</span>
-                    <span class="legend-row"><span class="legend-dot vm-validated-present-swatch"></span>validated</span>
-                    <span class="legend-row"><span class="legend-dot vm-validated-absent-swatch"></span>validated absent</span>
-                    <span class="legend-row"><span class="legend-dot vm-disputed-swatch"></span>disputed</span>
-                    <span class="legend-row"><span class="legend-dot vm-in-review-swatch"></span>in review</span>
-                    <span class="legend-row"><span class="legend-dot vm-unvalidated-swatch"></span>not yet reviewed (open case)</span>
-                    ${source !== "none" ? `<span class="legend-row"><span class="legend-dot context-dot-swatch"></span>place on today's map, tap to revise</span>` : ""}
-                    </div>
-                </div>
                 </div>
             `;
             // keep map gestures away from the control
@@ -3670,7 +3693,7 @@ class NzVerificationMap {
             div.querySelector("#portalPointsToggle")?.addEventListener("click", () => {
                 this.setPointsMode(this.pointsMode === "off" ? "all" : "off");
             });
-            this.makeControlMovable(div, div.querySelector(".legend-grip"));
+            this.mapDataMovable = this.makeControlMovable(div, div.querySelector(".legend-grip"));
             this.mapDataPanel = div;
             div.querySelector(".legend-fold")?.addEventListener("click", () => {
                 this.setMapDataFolded(!div.classList.contains("folded"), { chosen: true });
@@ -3738,6 +3761,12 @@ class NzVerificationMap {
         if (caret) caret.textContent = on ? "▸" : "▾";
         const body = div.querySelector(".legend-body");
         if (body) body.hidden = on;
+        // the open grid can be taller than a short map (a phone's even
+        // split), so the body is capped to the map and the panel pulled
+        // back inside it, keeping the bar and its fold in reach (greptile,
+        // pr #217)
+        this.fitMapDataBody();
+        this.mapDataMovable?.clamp();
         if (chosen) {
             try {
                 localStorage.setItem(MAP_DATA_FOLD_KEY, on ? "1" : "0");
@@ -3746,6 +3775,22 @@ class NzVerificationMap {
             }
         }
         return on;
+    }
+
+    // caps the open map data body to the map's height less the bar, so
+    // the whole panel fits the map and the body scrolls inside it
+    fitMapDataBody() {
+        const div = this.mapDataPanel;
+        const body = div?.querySelector?.(".legend-body");
+        if (!body || body.hidden) return null;
+        const mapHeight = this.map?.getContainer?.()?.clientHeight || 0;
+        // an unmeasured map leaves the stylesheet's viewport cap in place
+        if (!mapHeight) return null;
+        const barHeight = div.querySelector(".legend-bar")?.offsetHeight || 0;
+        // leaflet's corner margins and the panel's padding and gap
+        const cap = Math.max(48, mapHeight - barHeight - 40);
+        body.style.maxHeight = `${cap}px`;
+        return cap;
     }
 
     // drags a leaflet control by its grip (pointer events, so touch and
@@ -3775,8 +3820,12 @@ class NzVerificationMap {
             // inactive: paint nothing and leave the remembered spot alone
             if (!active()) { apply(); return; }
             const mapRect = this.map.getContainer().getBoundingClientRect();
+            // an unsized map or panel measures zero, which would wipe the
+            // remembered spot; leave it until it can be measured
+            if (!(mapRect.right - mapRect.left) || !(mapRect.bottom - mapRect.top) || div.isConnected === false) { apply(); return; }
             div.style.transform = "";
             const rest = div.getBoundingClientRect();
+            if (!(rest.right - rest.left) && !(rest.bottom - rest.top)) { apply(); return; }
             const minX = mapRect.left - rest.left;
             const maxX = mapRect.right - rest.right;
             const minY = mapRect.top - rest.top;
@@ -3823,9 +3872,14 @@ class NzVerificationMap {
             apply();
             save();
         });
-        this.map.on("resize", clamp);
+        this.map.on("resize", () => {
+            // a resized map re-caps the open map data body before clamping
+            if (div === this.mapDataPanel) this.fitMapDataBody();
+            clamp();
+        });
         // the corner is laid out after the control is added; clamp then
         setTimeout(clamp, 0);
+        return { clamp };
     }
 
     // where the unvalidated dots come from: the country's dated product
@@ -6031,9 +6085,10 @@ class NzVerificationMap {
         }
         // the validation state is worn as a RING (box-shadow) or, for in_review,
         // a dashed hollow border — never as the fill hue, so it never competes
-        // with the religion/context colour. Ring hues (blue, slate, amber,
-        // violet) are chosen colourblind-distinct from each other and from the
-        // religion palette. stale_validation is plumbed but unreachable today.
+        // with the religion/context colour. Ring hues (open-case amber,
+        // validated blue, validated-absent ink, disputed red-violet, stale
+        // violet) are chosen colourblind-distinct from each other and from
+        // the fills. stale_validation is plumbed but unreachable today.
         const stateClass = {
             validated_present: " vm-validated-present",
             validated_absent: " vm-validated-absent",

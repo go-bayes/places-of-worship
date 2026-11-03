@@ -99,8 +99,13 @@ beside `Contact to join`, with the account help and the signed-out dot on
 the row under it (2026-11-03). The Google button takes a fixed width in
 pixels, so on a phone the portal measures its cell (200 px at least) when
 the card renders. After sign-in the sidebar returns with the work. The
-marker legend reads in two columns, fills beside rings, so the map data
-panel stays clear of the floating card. The sign-in card
+marker legend is a grid (JB ruling, 2026-11-03, UI item 8): fill rows
+(`present`, `absent`, `uncertain`, `not assessed`, the target-year status)
+against ring columns (`open case`, `validated`, `validated absent`,
+`disputed`), each cell a marker drawn with the map's own
+`.verification-marker` classes, then `in review`, `your nomination` and
+the unreviewed-place dot as single marks, then the points toggle. Without
+target years the grid keeps one `any place` row in neutral slate. The sign-in card
 carries the Google button, a `Contact to join` button and the folded `Wrong
 account showing?` help, nothing else (ruled 2026-09-19: fewer words); the
 header carries only the title and the `Exit` and `Guide` buttons, at body
@@ -178,7 +183,9 @@ unreviewed-places switch and the marker legend) keeps its drag grip and
 folds to its `Map data` bar; both the spot and the fold are remembered on
 the device. Until the contributor chooses, a phone (700 px and under) opens
 it folded (2026-11-03), since the open panel sits under the attribution and
-half hides its own toggle.
+half hides its own toggle. Opened on a phone, the panel shows the legend
+grid as on a computer, its column headings wrapping inside a 375 px screen
+(UI item 8); before the fold, phone widths hid the legend entirely.
 The review portal's map carries the same panel (2026-11-03):
 it opens folded, the body opens upward above the bar, and the bar holds the
 grip, the fold, a small count pill (`12 in this queue`, with `· unreviewed
@@ -199,7 +206,7 @@ work is a card button away, never a list at the top). Nominations always stay on
 healthy, keeping their validation-state ring once disputed or validated —
 so the duplicate check and the route back to them survive the separation.
 
-The split between sidebar and map is the user's (ruled 2026-09-19: the map's size should be adjustable, and a portrait monitor must work). Side by side, the bar between the panes drags the sidebar width from 320 px to six tenths of the window; a double click returns it to 420 px, Left and Right arrows step it, Home resets it, and the device remembers the width. On a narrow screen or any portrait screen the panes stack: the same bar drags the split to one of three positions (mostly map, half, mostly entry), a `⇅ Swap` button on the bar puts the other pane on top, and the device remembers both. The stacked layout keeps two-column forms and the map legend on a portrait monitor; only a phone width (700 px and under) collapses them. The review portal carries the same idiom (JB, 2026-09-21: "we need the sliders on the review panel"): side by side, the bar between the queue and the detail drags the queue width from 320 px to six tenths of the window (default 390 px), and the bar under the map drags the map's height from 200 px to nine tenths of the window on every screen, phone included (default 440 px, 300 px on a phone). Arrows step, Home and a double click reset, and the device remembers both. Stacked, the page scrolls, so the column bar is hidden and only the map bar remains. Each bar also carries three named positions (R-U7, applied 2026-09-21: "a drag bar alone is easy to miss"): on the RA portal `More map`, `Even`, `More form`, which stacked are the three detents and side by side are the narrowest sidebar, half the window and the widest sidebar; on the review portal `More queue`, `Even`, `More detail` on the column bar and `More map`, `Even`, `More cards` on the map bar. The position in force is pressed; a dragged position between presets presses none; a preset is remembered like a drag. On a phone width the grip keeps its handle and drops its words, since the presets carry them. On the review portal side by side, the words move off the bars (JB ruling, 2026-11-03, UI item 6): both sets sit in a toolbar above the columns as segmented buttons, `Queue width` and `Map height`, the one in force pressed (`aria-pressed`), and both bars are plain grips; stacked, the toolbar hides and the map bar keeps its own set, as above.
+The split between sidebar and map is the user's (ruled 2026-09-19: the map's size should be adjustable, and a portrait monitor must work). Side by side, the bar between the panes drags the sidebar width from 320 px to six tenths of the window; a double click returns it to 420 px, Left and Right arrows step it, Home resets it, and the device remembers the width. On a narrow screen or any portrait screen the panes stack: the same bar drags the split to one of three positions (mostly map, half, mostly entry), a `⇅ Swap` button on the bar puts the other pane on top, and the device remembers both. The stacked layout keeps two-column forms on a portrait monitor; only a phone width (700 px and under) collapses them. The map legend stays in the folding map data panel at every width. The review portal carries the same idiom (JB, 2026-09-21: "we need the sliders on the review panel"): side by side, the bar between the queue and the detail drags the queue width from 320 px to six tenths of the window (default 390 px), and the bar under the map drags the map's height from 200 px to nine tenths of the window on every screen, phone included (default 440 px, 300 px on a phone). Arrows step, Home and a double click reset, and the device remembers both. Stacked, the page scrolls, so the column bar is hidden and only the map bar remains. Each bar also carries three named positions (R-U7, applied 2026-09-21: "a drag bar alone is easy to miss"): on the RA portal `More map`, `Even`, `More form`, which stacked are the three detents and side by side are the narrowest sidebar, half the window and the widest sidebar; on the review portal `More queue`, `Even`, `More detail` on the column bar and `More map`, `Even`, `More cards` on the map bar. The position in force is pressed; a dragged position between presets presses none; a preset is remembered like a drag. On a phone width the grip keeps its handle and drops its words, since the presets carry them. On the review portal side by side, the words move off the bars (JB ruling, 2026-11-03, UI item 6): both sets sit in a toolbar above the columns as segmented buttons, `Queue width` and `Map height`, the one in force pressed (`aria-pressed`), and both bars are plain grips; stacked, the toolbar hides and the map bar keeps its own set, as above.
 
 The review portal's first view (2026-11-03, UI item 6): a one-line header with the product name `religionmap.org`, `Review · <country>`, one sentence and `Guide` as a 44 px outline control; signed in, the transport dot, the account and `Sign out` move into the header and the sign-in card hides. The queue is the first panel, its rollup pill beside the `Queue` heading, and each row leads with its state pill. `Review boundary` follows the queue, open on a reviewer's first visit and closed after (R-D3), with a summary line that says what it holds.
 
@@ -220,12 +227,16 @@ Do not reuse these colours for unrelated meanings.
 | Primary action, focus, links, and the validated ring | `button.primary`, `.workflow-step.active`, links, focus outlines | the one blue `--action` `#7fb3e6`, hover `#93c1ec`, soft `#1b3550` (PR-H3: headings are ink, not blue) |
 | Present target-year state | `.status-present`, `.workflow-step.done`, `.closed-badge` | green, `--present` `#6fcf97` on `--present-soft` `#163a26` |
 | Absent target-year state | `.status-absent` | neutral grey, `--absent` `#b8c2d0` on `--absent-soft` `#2c3a48` |
-| Uncertain, caution, or disputed | `.status-uncertain`, `.skip-badge`, `.skip-form button.skip-confirm`, the disputed ring | the one amber pair `--caution` `#f2c14e` on `--caution-soft` `#3f3110`, `--caution-strong` `#e0a800` for borders and the disputed ring (PR-H3, 2026-09-04) |
+| Caution or act now, in text | `.pill.amber`, `.skip-badge`, `.skip-form button.skip-confirm`, `.state-pill.tone-act` | the one amber pair `--caution` `#f2c14e` on `--caution-soft` `#3f3110`, `--caution-strong` `#e0a800` for borders (PR-H3, 2026-09-04). Since 2026-11-03 the amber no longer marks the map: see the next two rows |
+| Uncertain target-year status on the map — the marker fill only, never a pill | `statusColor()` in `js/verification-map.js`, `.legend-mark.legend-fill-uncertain` | indigo `--marker-uncertain` `#6366f1` (JB ruling, 2026-11-03, UI item 8 (a): "go with (a) plus (b)"). The `.status-uncertain` tag follows in indigo text, `--uncertain` `#a5b4fc` on `--uncertain-soft` `#262a52` (6.9:1; JB, 2026-11-03: "indigo for uncertain, keep act tags amber"), so the tag and the fill agree; the act tags (`Changes requested`, `Reopened`) keep the caution amber, which means the viewer must act |
+| Disputed validation state on the map — the ring only | `.verification-marker.vm-disputed`, `.legend-dot.vm-disputed-swatch` on both portals (the review portal's `changes requested or reopened`) | red-violet `--marker-disputed` `#c8218e` (JB ruling, 2026-11-03, UI item 8 (b)), replacing `--caution-strong`, so the disputed ring no longer reads as the open-case amber |
 | Not assessed | `.status-not-assessed`; the map marker is hollow white with a `--muted` border (PR-H3) | `--not-assessed` `#8fb8e0` on `--not-assessed-soft` `#1b3550` |
 | Warning or demo-only message | `.demo-warning` | amber warning |
 | Disabled or unavailable state | `.disabled-panel`, `.backend-card.disabled` | light grey |
-| Unreviewed place on the map (an open case an RA can revise) — marks only, never a status pill | `.legend-dot.context-dot-swatch`, `--marker-unvalidated`, the `vm-unvalidated` ring on task markers, `COLOUR` and `HALO` in `js/unvalidated-places.js` (shared by the RA and review portals) | amber disc `#f59e0b` with a white halo, on every basemap (JB ruling R-D1′, 2026-09-04 afternoon: "any PoW that has not been reviewed should be in amber; all cases are open", overriding the morning's slate R-D1). Every place no reviewer has confirmed is an open case and wears this amber; the darker `--caution-strong` stays for uncertain, caution, and the disputed ring. |
-| Pure data entry (nominations, walk-up records) — containers only, never the action button | `.portal-mode-bar.mode-add`, `.nominations-panel`, `.entry-badge`, `.task-row.entry-card`, `.pin-card-host`, `.verification-marker.vm-nomination`, `.legend-dot.vm-nomination-swatch`, `.chooser-option#chooseAddButton strong` | teal, `--entry` `#5fd3c4` on `--entry-soft` `#123a36` (JB separation ruling, 2026-08-31) |
+| Unreviewed place on the map (an open case an RA can revise) — marks only, never a status pill | `.legend-dot.context-dot-swatch`, `--marker-unvalidated`, the `vm-unvalidated` ring on task markers, `COLOUR` and `HALO` in `js/unvalidated-places.js` (shared by the RA and review portals) | amber disc `#f59e0b` with a white halo, on every basemap (JB ruling R-D1′, 2026-09-04 afternoon: "any PoW that has not been reviewed should be in amber; all cases are open", overriding the morning's slate R-D1). Every place no reviewer has confirmed is an open case and wears this amber, the only amber on the map since 2026-11-03: the uncertain fill and the disputed ring have their own marker tokens. |
+| Pure data entry (nominations, walk-up records) — containers only, never the action button | `.portal-mode-bar.mode-add`, `.nominations-panel`, `.entry-badge`, `.task-row.entry-card`, `.pin-card-host`, `.verification-marker.vm-nomination` (the legend draws the same class), `.legend-dot.vm-nomination-swatch` on the review portal, `.chooser-option#chooseAddButton strong` | teal, `--entry` `#5fd3c4` on `--entry-soft` `#123a36` (JB separation ruling, 2026-08-31) |
+
+The two marker colours of 2026-11-03 were chosen against the whole marker palette, in CIEDE2000 colour difference (ΔE00) under normal vision and under simulated deuteranopia and protanopia (Machado, Oliveira and Fernandes 2009, full severity). The old pairs drew ΔE00 8.5 between `--caution-strong` and the open-case amber in normal vision and under 1.5 under either deficiency, so they were one colour to a colour-blind reader. The indigo fill now stands 63 to 69 from the open-case amber, at least 28 from the present and absent fills, and 17 to 28 from the red-violet ring; the red-violet ring stands 45 to 60 from the open-case amber and at least 20 from the validated blue. Under both deficiencies the indigo reads as a saturated blue and the open case as yellow, and the red-violet reads as grey (deuteranopia) or dark blue (protanopia), apart from the light blue and near-white rings. Indigo is close to the reserved `--stale` violet ring (ΔE00 17 under protanopia), which no marker can reach today.
 
 If these colours change, update both the CSS and this table. Since PR-H3 (2026-09-04) the three surfaces share one token system, the block in section 3 of `docs/development/ui-design-audit-2026-09-03.md`: `verification.html` and `review.html` each declare it in their `:root` (`--bg`, `--panel`, `--panel-2`, `--ink`, `--muted`, `--line`, `--control-line`, `--action*`, `--danger*`, `--caution*`, `--present*`, `--absent*`, `--not-assessed*`, `--entry*`, `--marker-unvalidated`, `--font`, `--fs-*`, `--sp-*`, `--r-*`), and the public map shell scopes its dark variant under `.map-chrome` in `apps/shared/map-shell.css`. Change a meaning by changing its variable, then update this table. Type: base 16 px in the working tools, labels, meta and pills 15 px (`--fs-sm`, raised from 14 px under R-U6 on 2026-09-21), the small register 14 px (`--fs-xs`), chart labels 13 px, nothing under 13 px; labels 600, prose 400; the system font stack everywhere, declared once. Buttons: one filled primary per row, the outline as the secondary idiom, disabled controls keep readable text (grey face, muted ink, never opacity).
 
@@ -250,6 +261,10 @@ Both portals share one token sheet, `apps/regions/_shared/theme.css`, and dark i
 | `--caution` | `#6b4e00` | `#f2c14e` |
 | `--caution-soft` | `#fff4dc` | `#3f3110` |
 | `--caution-strong` | `#9a6700` | `#e0a800` |
+| `--marker-uncertain` | none (added 2026-11-03) | `#6366f1` |
+| `--marker-disputed` | none (added 2026-11-03) | `#c8218e` |
+| `--uncertain` | none (added 2026-11-03) | `#a5b4fc` |
+| `--uncertain-soft` | none (added 2026-11-03) | `#262a52` |
 | `--present` | `#145a32` | `#6fcf97` |
 | `--present-soft` | `#dff3e6` | `#163a26` |
 | `--absent` | `#374151` | `#b8c2d0` |
@@ -282,6 +297,10 @@ Contrast (WCAG relative luminance) on the pairs the pages actually draw; the Dar
 | `--danger` on `--panel` | 6.6:1 | 6.9:1 |
 | `--caution` on `--panel` | 7.7:1 | 9.8:1 |
 | `--panel` on `--caution-strong` | 4.9:1 | 7.7:1 |
+| `--marker-uncertain` on `--panel` (the fill inside the marker's border) | none | 3.7:1 |
+| `--uncertain` on `--uncertain-soft` (the uncertain tag) | none | 6.9:1 |
+| `--marker-disputed` on `--panel` (the ring on the dark Streets map) | none | 3.2:1 |
+| `--marker-disputed` on `--marker-halo` (the ring between its halos) | none | 5.2:1 |
 | `--present` on `--panel` | 8.3:1 | 8.7:1 |
 | `--entry` on `--panel` | 5.5:1 | 9.1:1 |
 | `--not-assessed` on `--panel` | 8.7:1 | 7.9:1 |

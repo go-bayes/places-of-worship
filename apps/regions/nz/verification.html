@@ -22,7 +22,7 @@
     <link rel="stylesheet" href="../../shared/map-shell.css">
     <!-- theme: the choice is applied to <html> before paint (r-u2) -->
     <script src="../_shared/theme.js?v=20260921a"></script>
-    <link rel="stylesheet" href="../_shared/theme.css?v=20261001a">
+    <link rel="stylesheet" href="../_shared/theme.css?v=20261103a">
     <link rel="stylesheet" href="../_shared/state.css?v=20260921a">
 
     <style>
@@ -741,9 +741,10 @@
             color: var(--absent);
         }
 
+        /* the uncertain tag follows the map's indigo fill (jb 2026-11-03) */
         .status-uncertain {
-            background: var(--caution-soft);
-            color: var(--caution);
+            background: var(--uncertain-soft);
+            color: var(--uncertain);
         }
 
         .status-not-assessed {
@@ -1690,11 +1691,6 @@
             border: 2px dashed var(--entry);
         }
 
-        .legend-dot.vm-nomination-swatch {
-            background: var(--panel);
-            border: 2px dashed var(--entry);
-        }
-
         .copy-help kbd {
             background: var(--panel);
             border: 1px solid var(--control-line);
@@ -2243,9 +2239,9 @@
             box-shadow: 0 0 0 2px var(--marker-halo), 0 0 0 5px var(--action), 0 0 5px var(--shade-ink);
         }
 
-        /* validated_absent: distinct closed ring — a single heavy near-black
-           ring, far darker than the blue present ring, so the two read apart
-           without relying on hue */
+        /* validated_absent: distinct closed ring — a single heavy ring in
+           --ink, near-white under the dark theme, far lighter than the blue
+           present ring, so the two read apart without relying on hue */
         .verification-marker.vm-validated-absent {
             box-shadow: 0 0 0 2px var(--marker-halo), 0 0 0 5px var(--ink), 0 0 5px var(--shade-ink);
         }
@@ -2259,15 +2255,16 @@
 
         /* unvalidated (jb 2026-09-04): no reviewer has confirmed the case, so
            it is open and wears the same amber as the unreviewed dots, as a
-           thin single ring; the darker caution ring below is disputed */
+           thin single ring; the red-violet ring below is disputed */
         .verification-marker.vm-unvalidated {
             box-shadow: 0 0 0 1.5px var(--marker-halo), 0 0 0 3.5px var(--marker-unvalidated), 0 0 5px var(--shade-ink);
         }
 
-        /* disputed: intermediate single amber ring — trust dropped back, one
-           ring not two, in a caution hue distinct from validated blue */
+        /* disputed: intermediate single ring — trust dropped back, one ring
+           not two, in red-violet (jb 2026-11-03, ui item 8), apart from the
+           open-case amber and the validated blue */
         .verification-marker.vm-disputed {
-            box-shadow: 0 0 0 2px var(--marker-halo), 0 0 0 4px var(--caution-strong), 0 0 5px var(--shade-ink);
+            box-shadow: 0 0 0 2px var(--marker-halo), 0 0 0 4px var(--marker-disputed), 0 0 5px var(--shade-ink);
         }
 
         /* imagery basemaps (hybrid, satellite): every marker gains an outer
@@ -2295,7 +2292,7 @@
         }
 
         .basemap-imagery .verification-marker.vm-disputed {
-            box-shadow: 0 0 0 2px var(--marker-halo), 0 0 0 4px var(--caution-strong), 0 0 0 6px var(--marker-halo), 0 0 6px 6px var(--shade-ink-deep);
+            box-shadow: 0 0 0 2px var(--marker-halo), 0 0 0 4px var(--marker-disputed), 0 0 0 6px var(--marker-halo), 0 0 6px 6px var(--shade-ink-deep);
         }
 
         .basemap-imagery .verification-marker.vm-stale {
@@ -2438,17 +2435,88 @@
             background: var(--action-soft);
         }
 
+        /* the map data legend as a grid (jb 2026-11-03, ui item 8): fill rows
+           (the target-year status, in the pills' own words) against ring
+           columns (validation), then the marks that stand alone. every cell
+           draws the map's own .verification-marker classes at the medium
+           task size, so the key wears the imagery halo when the map does */
         .map-legend {
             display: grid;
-            grid-template-columns: auto auto;
-            column-gap: 16px;
-            align-items: start;
+            gap: 6px;
+            justify-items: start;
         }
 
-        .legend-group {
+        .legend-grid {
+            border-collapse: collapse;
+            font-size: var(--fs-xs);
+        }
+
+        .legend-grid caption {
+            caption-side: top;
+            text-align: left;
+            font-weight: 600;
+            color: var(--ink);
+            padding-bottom: 2px;
+        }
+
+        .legend-grid thead th {
+            padding: 0 3px 2px;
+            color: var(--muted);
+            font-weight: 600;
+            line-height: 1.15;
+            text-align: center;
+            vertical-align: bottom;
+        }
+
+        .legend-grid tbody th {
+            padding: 0 8px 0 0;
+            color: var(--ink);
+            font-weight: 400;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        /* 7 px of ring and halo on either side of a 17 px marker */
+        .legend-grid td {
+            height: 32px;
+            padding: 0 3px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .verification-marker.legend-mark {
+            display: inline-block;
+            width: 13px;
+            height: 13px;
+            vertical-align: middle;
+            flex: none;
+        }
+
+        .legend-mark.legend-fill-present {
+            background: var(--present);
+        }
+
+        .legend-mark.legend-fill-absent {
+            background: var(--absent);
+        }
+
+        .legend-mark.legend-fill-uncertain {
+            background: var(--marker-uncertain);
+        }
+
+        /* without target years: a neutral slate stands for any fill */
+        .legend-mark.legend-fill-any {
+            background: var(--muted);
+        }
+
+        .legend-singles {
             display: grid;
-            gap: 3px;
-            align-content: start;
+            gap: 8px;
+            padding-left: 4px;
+        }
+
+        .legend-singles .legend-row {
+            gap: 10px;
         }
 
         .legend-body {
@@ -2471,45 +2539,9 @@
             display: inline-block;
         }
 
-        /* fill swatches: the target-year status, in the pills' own words */
-        .legend-dot.fill-present-swatch,
-        .legend-dot.fill-absent-swatch,
-        .legend-dot.fill-uncertain-swatch {
-            border: 1.5px solid var(--panel);
-            box-shadow: 0 0 3px var(--shade-ink);
-        }
-
-        .legend-dot.fill-present-swatch {
-            background: var(--present);
-        }
-
-        .legend-dot.fill-absent-swatch {
-            background: var(--absent);
-        }
-
-        .legend-dot.fill-uncertain-swatch {
-            background: var(--caution-strong);
-        }
-
-        .legend-dot.fill-not-assessed-swatch {
-            background: var(--panel);
-            border: 2px solid var(--muted);
-        }
-
-        /* small headings above the fill rows and the ring rows */
-        .legend-caption {
-            font-weight: 600;
-            color: var(--ink);
-            margin-bottom: 1px;
-        }
-
-        .legend-caption:not(:first-child) {
-            margin-top: 6px;
-        }
-
-        /* legend swatches mirror the map ring treatments; the fill is a neutral
-           slate stand-in for "any religion/status fill", so each row reads as
-           the RING, not the fill */
+        /* the task rows' state dots mirror the map ring treatments; the fill
+           is a neutral slate stand-in for "any status fill", so each dot
+           reads as the RING, not the fill */
         .legend-dot.vm-validated-present-swatch {
             background: var(--muted);
             box-shadow: 0 0 0 1.5px var(--panel), 0 0 0 3.5px var(--action);
@@ -2525,14 +2557,9 @@
             border: 2.5px dashed var(--action);
         }
 
-        .legend-dot.vm-unvalidated-swatch {
-            background: var(--muted);
-            box-shadow: 0 0 0 1.5px var(--panel), 0 0 0 3px var(--marker-unvalidated);
-        }
-
         .legend-dot.vm-disputed-swatch {
             background: var(--muted);
-            box-shadow: 0 0 0 1.5px var(--panel), 0 0 0 3px var(--caution-strong);
+            box-shadow: 0 0 0 1.5px var(--panel), 0 0 0 3px var(--marker-disputed);
         }
 
         .legend-dot.vm-stale-swatch {
@@ -3263,9 +3290,10 @@
             }
         }
 
-        /* phone width only: one-column forms, and the validation-ring legend
-           that would cover a third of a phone-height map leaves; the Points
-           control stays. a portrait monitor keeps both */
+        /* phone width only: one-column forms. the map data panel opens
+           folded on a phone (2026-11-03), so its legend grid no longer
+           covers the map unasked and stays in the panel; its column
+           headings wrap to keep the grid inside a 375 px screen */
         @media (max-width: 700px) {
             /* the presets carry the words on a phone; the handle stays */
             .pane-grip-text {
@@ -3276,8 +3304,8 @@
                 grid-template-columns: 1fr;
             }
 
-            .map-legend {
-                display: none;
+            .legend-grid thead th {
+                width: 4.2em;
             }
         }
             .osm-history-host { margin: 8px 0; }
@@ -3694,6 +3722,6 @@
     <script src="js/unvalidated-places.js?v=20261013b"></script>
     <script src="js/task-presentation.js?v=20261015c"></script>
     <script src="js/recentre-control.js?v=20261001a"></script>
-    <script src="js/verification-map.js?v=20261103a"></script>
+    <script src="js/verification-map.js?v=20261103b"></script>
 </body>
 </html>

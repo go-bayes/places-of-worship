@@ -6546,7 +6546,9 @@ function afterLoadWhenIdle(arm) {
 }
 
 // country pages draw their home shade from the same read
-if (HANDOFF_HOME) afterLoadWhenIdle(() => readRegionManifest().then(applyHomeShade));
+// country pages draw their home shade from the same read; a failure to
+// build it leaves the map unshaded rather than raising
+if (HANDOFF_HOME) afterLoadWhenIdle(() => readRegionManifest().then(applyHomeShade).catch(() => {}));
 
 // near me can land the camera outside this country entirely (the phone
 // is in another country); the choropleth has nothing to paint there, so
