@@ -33,6 +33,7 @@
     // exchanged the code, when it did
     const WORKOS_RETURN_KEY = "powWorkosReturn:v1";
     const WORKOS_CALLBACK_PAGE = "auth-callback.html";
+    const WORKOS_SIGN_OUT_PAGE = "verification.html";
     const WORKOS_RETURN_MAX_AGE_MS = 15 * 60 * 1000;
 
     function workosRefreshTokenStored(clientId) {
@@ -265,13 +266,21 @@
             const authkit = this.authkit;
             if (authkit) {
                 try {
-                    const ending = authkit.signOut({ navigate: false });
+                    const ending = authkit.signOut({ navigate: false, returnTo: this.workosSignOutUri() });
                     ending?.catch?.(() => {});
                 } catch (error) {
                     // no session in memory: nothing for workos to end
                 }
             }
             forgetWorkosRefreshToken(this.config.workosClientId);
+        }
+
+        // where workos sends a sign-out: the contributor portal on this
+        // origin (localhost when checked locally), one sign-out uri per
+        // origin. the page stays put; the redirect only answers the fetch
+        workosSignOutUri() {
+            if (this.config.workosSignOutUri) return this.config.workosSignOutUri;
+            return new URL(WORKOS_SIGN_OUT_PAGE, window.location.href).href;
         }
 
         // the address workos returns to: one callback page beside the

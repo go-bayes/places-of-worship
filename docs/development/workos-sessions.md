@@ -13,7 +13,7 @@ The contributor portal (`apps/regions/nz/verification.html`) and the review port
 - **Sign-in.** The sign-in card shows a **Sign in with Google** button. It records the page and the contributor's initials in the tab's session storage and calls `authkit.signIn()`, which goes to the WorkOS hosted page; Google sits behind it. WorkOS returns to `apps/regions/nz/auth-callback.html`, one page for both portals, which exchanges the code and goes back to the page that started the sign-in, query string included. The return address is checked to be on the same site.
 - **Each request.** Before each Convex request the client asks `authkit.getAccessToken()`, which renews the access token when it is close to expiry. A session AuthKit cannot renew signs the client out, and the request reports "Your sign-in expired. Sign in again, then retry.", the message the portals already handle. A network failure keeps the session for a retry.
 - **Reloads.** A kept refresh token restores the session on the next page load, as a kept Google token did, so the device-restore paths (saved drafts, pin resume) are unchanged.
-- **Sign-out.** The sign-out button calls `authkit.signOut({ navigate: false })`: the session ends at WorkOS, the refresh token leaves the device, and the portal clears its own state as before.
+- **Sign-out.** The sign-out button calls `authkit.signOut({ navigate: false, returnTo })`, with `returnTo` the contributor portal on the page's own origin: the session ends at WorkOS, the refresh token leaves the device, and the portal clears its own state as before.
 
 ## Backend
 
@@ -37,7 +37,7 @@ WorkOS keeps a staging and a production environment, each with its own client ID
 1. **Redirects.** Add the callback addresses as redirect URIs, and make the live one the default:
    - `https://religionmap.org/apps/regions/nz/auth-callback.html` (live)
    - `http://localhost:8765/apps/regions/nz/auth-callback.html` and `http://127.0.0.1:8765/apps/regions/nz/auth-callback.html` (local checks, in the environment that allows them)
-2. **Sign-out redirect.** Set it to `https://religionmap.org/apps/regions/nz/verification.html`. The portal ends the session without leaving the page, but WorkOS answers the sign-out request with this redirect.
+2. **Sign-out redirects.** Add `https://religionmap.org/apps/regions/nz/verification.html` and `http://localhost:8765/apps/regions/nz/verification.html`. The client asks WorkOS to return to `verification.html` on the page's own origin (`workosSignOutUri` in `convex-task-client.js`). The portal stays on its page; the redirect only answers the sign-out request.
 3. **CORS.** Add the allowed web origins `https://religionmap.org`, `http://localhost:8765` and `http://127.0.0.1:8765`. AuthKit's code exchange and renewal are browser fetches to `api.workos.com`, which answers only listed origins.
 4. **Google.** Enable Google as an authentication method (Authentication, OAuth providers, Google). The staging environment works with WorkOS's default Google credentials; production needs the project's own Google OAuth client ID and secret, with WorkOS's callback address added to that Google client. Turn off the other methods for now, so Google is the only way in.
 5. **JWT template.** WorkOS access tokens carry no email by default. Under Authentication, the sessions JWT template, paste:

@@ -237,7 +237,11 @@ const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
     assert.equal(page.log.fetches.length, sent, "nothing is sent without a token");
     assert.equal(client.authToken, "");
     assert.equal(client.user, null);
-    assert.equal(JSON.stringify(page.log.signOuts), JSON.stringify([{ navigate: false }]), "workos ends the session without leaving the page");
+    assert.equal(
+      JSON.stringify(page.log.signOuts),
+      JSON.stringify([{ navigate: false, returnTo: `${ORIGIN}/apps/regions/nz/verification.html` }]),
+      "workos ends the session without leaving the page, answering with this origin's contributor portal",
+    );
     assert.equal(page.localStorage.getItem(`workos:refresh-token:${CLIENT_ID}`), null, "the refresh token leaves the device");
   }
 
@@ -456,6 +460,8 @@ const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
       host.children[0].click();
       await tick();
       assert.equal(JSON.parse(page.sessionStorage.getItem("powWorkosReturn:v1")).returnTo, "/apps/regions/nz/review.html");
+      // the review page's sign-out answers with the contributor portal on the same origin
+      assert.equal(new page.window.PowConvexTaskClient(workosConfig).workosSignOutUri(), `${ORIGIN}/apps/regions/nz/verification.html`);
     }
   }
 
