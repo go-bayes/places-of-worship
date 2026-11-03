@@ -45,9 +45,35 @@ export const WORKOS_EMAIL_VERIFIED_CLAIM = "email_verified";
 
 type IdentityLike = Pick<UserIdentity, "tokenIdentifier"> & Partial<UserIdentity>;
 
+declare const process: { env: Record<string, string | undefined> };
+
+// the two issuers convex/auth.config.ts accepts for this deployment's
+// workos client
+export function workosIssuers(): string[] {
+  const clientId = process.env.WORKOS_CLIENT_ID;
+  return clientId ? [WORKOS_ISSUER_PREFIX, `${WORKOS_ISSUER_PREFIX}user_management/${clientId}`] : [];
+}
+
+// the token's issuer: identity.issuer, or the part of tokenIdentifier
+// before the subject
+function identityIssuer(identity: IdentityLike): string {
+  if (identity.issuer) return String(identity.issuer);
+  const token = String(identity.tokenIdentifier ?? "");
+  const cut = token.lastIndexOf("|");
+  return cut < 0 ? "" : token.slice(0, cut);
+}
+
+// a workos identity is one whose issuer is exactly one of this client's two
+// forms. convex already checks the token against those providers; an issuer
+// on workos's host that names another client is refused here rather than
+// read down the google path
 export function isWorkosIdentity(identity: IdentityLike): boolean {
-  return String(identity.issuer ?? "").startsWith(WORKOS_ISSUER_PREFIX)
-    || String(identity.tokenIdentifier ?? "").startsWith(WORKOS_ISSUER_PREFIX);
+  const issuer = identityIssuer(identity);
+  if (!issuer.startsWith(WORKOS_ISSUER_PREFIX)) return false;
+  if (!workosIssuers().includes(issuer)) {
+    throw new Error("This sign-in comes from a WorkOS client this project does not use.");
+  }
+  return true;
 }
 
 // the verified, normalised email of a workos identity, or a refusal that

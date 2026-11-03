@@ -23,6 +23,8 @@ const { me, claimInvite, adminUpsertUser } = await import("./users.ts");
 
 const CLIENT_ID = "client_01TEST";
 const ISSUER = `https://api.workos.com/user_management/${CLIENT_ID}`;
+// the deployment's workos client, as convex/auth.config.ts reads it
+process.env.WORKOS_CLIENT_ID = CLIENT_ID;
 const GOOGLE_RA = "https://accounts.google.com|google-sub-ra";
 
 // a query's db reads only; a mutation's also patches
@@ -105,6 +107,30 @@ test("a workos identity is recognised by either documented issuer", () => {
   assert.equal(isWorkosIdentity({ tokenIdentifier: GOOGLE_RA, issuer: "https://accounts.google.com" }), false);
   // the identities the existing tests and pow-cli impersonation send
   assert.equal(isWorkosIdentity({ tokenIdentifier: "pow-cli-seed-service" }), false);
+  // the issuer read from tokenIdentifier when identity.issuer is absent
+  assert.equal(isWorkosIdentity({ tokenIdentifier: `${ISSUER}|user_x` }), true);
+});
+
+test("an issuer on workos's host naming another client is refused, not read as google", async () => {
+  const rows = fixture();
+  const reason = /WorkOS client this project does not use/;
+  for (const issuer of ["https://api.workos.com/user_management/client_01OTHER", "https://api.workos.com/sso", "https://api.workos.com/user_management/"]) {
+    const identity = verified("ra@example.org", "user_ra", { issuer });
+    assert.throws(() => isWorkosIdentity(identity), reason);
+    await assert.rejects(requireUser(ctxAs(rows, identity), ["ra"]), reason);
+    await assert.rejects(me._handler(ctxAs(rows, identity), {}), reason);
+    await assert.rejects(claim(rows, identity), reason);
+  }
+  assert.equal(row(rows, "ra_1").workos_subject, undefined);
+  assert.equal(row(rows, "ra_1").auth_subject, GOOGLE_RA);
+  // a deployment without WORKOS_CLIENT_ID accepts no workos issuer
+  const saved = process.env.WORKOS_CLIENT_ID;
+  delete process.env.WORKOS_CLIENT_ID;
+  try {
+    assert.throws(() => isWorkosIdentity(workos()), reason);
+  } finally {
+    process.env.WORKOS_CLIENT_ID = saved;
+  }
 });
 
 test("before the claim, users:me sees the row by email and requireUser waits", async () => {
@@ -177,6 +203,27 @@ test("adminUpsertUser can unbind a row's workos account for a replacement accoun
   // without the flag the binding stays
   await adminUpsertUser._handler(ctxAs(rows, null), { email: "ra@example.org", roles: ["ra", "reviewer"] });
   assert.equal(row(rows, "ra_1").workos_subject, "user_replacement");
+});
+
+test("a row claimed only through workos, unbound, returns to an invitation and binds the replacement", async () => {
+  const rows = fixture();
+  await claim(rows, verified("new@example.org", "user_original"));
+  assert.equal(row(rows, "inv_1").status, "active");
+  assert.equal(row(rows, "inv_1").auth_subject, undefined);
+  const result = await adminUpsertUser._handler(ctxAs(rows, null), { email: "new@example.org", roles: ["ra"], clearWorkosSubject: true });
+  assert.equal(result.status, "pending");
+  assert.equal(row(rows, "inv_1").status, "pending", "no subject left, so it is an invitation again");
+  assert.equal("workos_subject" in row(rows, "inv_1"), false);
+  await assert.rejects(requireUser(ctxAs(rows, workos({}, { user: "user_original" })), ["ra"]), /not active in this project/);
+  assert.equal(await claim(rows, verified("new@example.org", "user_replacement")), "inv_1");
+  assert.equal(row(rows, "inv_1").status, "active");
+  assert.equal(row(rows, "inv_1").workos_subject, "user_replacement");
+  assert.equal((await requireUser(ctxAs(rows, workos({}, { user: "user_replacement" })), ["ra"]))._id, "inv_1");
+  // an explicit status wins, and a disabled row is not reopened
+  await adminUpsertUser._handler(ctxAs(rows, null), { email: "new@example.org", roles: ["ra"], clearWorkosSubject: true, status: "disabled" });
+  assert.equal(row(rows, "inv_1").status, "disabled");
+  await adminUpsertUser._handler(ctxAs(rows, null), { email: "new@example.org", roles: ["ra"], clearWorkosSubject: true });
+  assert.equal(row(rows, "inv_1").status, "disabled");
 });
 
 test("a workos identity with no email is refused on the email path with the reason", async () => {
