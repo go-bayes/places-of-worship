@@ -3822,10 +3822,10 @@ class NzVerificationMap {
             const mapRect = this.map.getContainer().getBoundingClientRect();
             // an unsized map or panel measures zero, which would wipe the
             // remembered spot; leave it until it can be measured
-            if (!mapRect.width || !mapRect.height || div.isConnected === false) { apply(); return; }
+            if (!(mapRect.right - mapRect.left) || !(mapRect.bottom - mapRect.top) || div.isConnected === false) { apply(); return; }
             div.style.transform = "";
             const rest = div.getBoundingClientRect();
-            if (!rest.width && !rest.height) { apply(); return; }
+            if (!(rest.right - rest.left) && !(rest.bottom - rest.top)) { apply(); return; }
             const minX = mapRect.left - rest.left;
             const maxX = mapRect.right - rest.right;
             const minY = mapRect.top - rest.top;
