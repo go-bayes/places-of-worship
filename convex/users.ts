@@ -1,11 +1,22 @@
 import { v } from "convex/values";
 import { internalMutation, mutation, query } from "./_generated/server";
 import { projectRole, userStatus } from "./model";
-import { normaliseEmail, requireUser } from "./lib/auth";
+import { findUserForIdentity, holdsServiceRole, isWorkosIdentity, normaliseEmail, requireUser, workosSubject, workosVerifiedEmail } from "./lib/auth";
 
 declare const process: {
   env: Record<string, string | undefined>;
 };
+
+// the google rollback from workos sessions: google's claimInvite may bind
+// an active row claimed only through workos to the google account with its
+// verified email. it is a takeover path for every such row while google is
+// an accepted provider, so it is off unless the deployment sets
+// POW_AUTH_GOOGLE_ROLLBACK=1, which the project lead does only during an
+// actual rollback (docs/development/workos-sessions.md). read, never set,
+// by this code
+function googleRollbackEnabled(): boolean {
+  return process.env.POW_AUTH_GOOGLE_ROLLBACK === "1";
+}
 
 function requireSetupToken(token: string) {
   const expected = process.env.POW_CONVEX_SETUP_TOKEN;
@@ -24,10 +35,11 @@ export const me = query({
     if (identity === null) {
       return null;
     }
-    return await ctx.db
-      .query("users")
-      .withIndex("by_auth_subject", (q) => q.eq("auth_subject", identity.tokenIdentifier))
-      .unique();
+    // google: by auth_subject. workos: by workos_subject, or before the
+    // claim by the verified email claim, so the portal can see an
+    // unclaimed row; a workos session without that claim is refused with
+    // the reason
+    return await findUserForIdentity(ctx, identity, { emailFallback: true });
   },
 });
 
@@ -186,6 +198,12 @@ export const adminUpsertUser = internalMutation({
     // optional status override, e.g. to create an active service account
     // that never signs in; omitted = preserve existing, pending on insert
     status: v.optional(userStatus),
+    // true unbinds the row's workos account (workos_subject), so the next
+    // workos claimInvite binds whichever account its verified email reaches
+    // it with: for a person who replaced their workos account. an active
+    // row with no google identity becomes pending again, unless status is
+    // given
+    clearWorkosSubject: v.optional(v.boolean()),
   },
   returns: v.object({ user_id: v.id("users"), created: v.boolean(), status: v.string() }),
   handler: async (ctx, args) => {
@@ -204,14 +222,22 @@ export const adminUpsertUser = internalMutation({
       .unique();
 
     if (existing !== null) {
+      // unbinding a row claimed only through workos leaves it with no
+      // subject at all, which no sign-in may claim by email while active;
+      // it returns to an invitation, so the replacement account can claim it
+      const reinvite = args.clearWorkosSubject === true
+        && existing.auth_subject === undefined
+        && existing.status === "active";
+      const status = args.status ?? (reinvite ? "pending" : existing.status);
       await ctx.db.patch(existing._id, {
         roles: args.roles,
         display_name: args.displayName ?? existing.display_name,
         initials: args.initials?.trim().slice(0, 12) || existing.initials,
-        status: args.status ?? existing.status,
+        status,
+        ...(args.clearWorkosSubject === true ? { workos_subject: undefined } : {}),
         updated_at: now,
       });
-      return { user_id: existing._id, created: false, status: args.status ?? existing.status };
+      return { user_id: existing._id, created: false, status };
     }
 
     const userId = await ctx.db.insert("users", {
@@ -237,6 +263,37 @@ export const claimInvite = mutation({
       throw new Error("Authentication required.");
     }
 
+    // a workos session claims the row its workos user is bound to, or,
+    // before its first claim, the row its verified email names, and binds
+    // workos_subject then: the one place a workos user is bound.
+    // auth_subject is left as it is: it holds the google identity of a row
+    // claimed before the switch
+    if (isWorkosIdentity(identity)) {
+      const row = await findUserForIdentity(ctx, identity, { emailFallback: true });
+      if (row === null) {
+        throw new Error(`No project invitation found for ${workosVerifiedEmail(identity)}.`);
+      }
+      if (row.status !== "active" && row.status !== "pending") {
+        throw new Error("Authenticated user is not active in this project.");
+      }
+      // a bound, active row: nothing to write
+      if (row.workos_subject !== undefined && row.status === "active") {
+        return row._id;
+      }
+      await ctx.db.patch(row._id, {
+        workos_subject: row.workos_subject ?? workosSubject(identity),
+        ...(row.status === "pending"
+          ? {
+              display_name: row.display_name ?? (identity.name?.trim() || undefined),
+              initials: args.initials?.trim().slice(0, 12) || row.initials,
+              status: "active" as const,
+            }
+          : {}),
+        updated_at: Date.now(),
+      });
+      return row._id;
+    }
+
     const active = await ctx.db
       .query("users")
       .withIndex("by_auth_subject", (q) => q.eq("auth_subject", identity.tokenIdentifier))
@@ -249,13 +306,31 @@ export const claimInvite = mutation({
     if (email === undefined) {
       throw new Error("This invitation requires a verified email address.");
     }
+    // the email is the only link from this google account to the row, so
+    // google must vouch for it
+    if (identity.emailVerified !== true) {
+      throw new Error(`Google does not report ${email} as verified, so it cannot claim a project invitation.`);
+    }
 
     const invite = await ctx.db
       .query("users")
       .withIndex("by_email", (q) => q.eq("email", email))
       .unique();
 
-    if (invite === null || invite.status !== "pending") {
+    if (invite === null || holdsServiceRole(invite)) {
+      throw new Error("No pending project invitation found for this email.");
+    }
+    // a row bound to another google account is never taken over by email
+    if (invite.auth_subject !== undefined) {
+      throw new Error("This email's project account is linked to another Google account. Ask the project lead.");
+    }
+    // a pending invitation, or, during a rollback from workos only
+    // (POW_AUTH_GOOGLE_ROLLBACK=1), an active row claimed only through
+    // workos, which has no google identity yet
+    const rollback = googleRollbackEnabled()
+      && invite.status === "active"
+      && invite.workos_subject !== undefined;
+    if (invite.status !== "pending" && !rollback) {
       throw new Error("No pending project invitation found for this email.");
     }
 

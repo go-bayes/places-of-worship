@@ -126,6 +126,14 @@ test("no google maps script host and no wildcard script source", () => {
   assert.ok(!/script-src[^;]*\*/.test(policy));
 });
 
+test("workos is reachable by fetch only, never as a script source", () => {
+  const policy = policyFor(PAGE);
+  const directive = (name) => policy.split("; ").find((entry) => entry.startsWith(`${name} `)) || "";
+  assert.ok(directive("connect-src").split(" ").includes("https://api.workos.com"));
+  assert.ok(!directive("script-src").includes("workos"));
+  assert.ok(!directive("frame-src").includes("workos"));
+});
+
 test("a comment-like string inside a script is hashed as written", () => {
   const body = 'window.note="<!-- keep -->";';
   assert.ok(scriptSrc(policyFor(pageWith(`<script>${body}</script>`))).includes(hashOf(body)));

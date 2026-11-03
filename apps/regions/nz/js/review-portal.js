@@ -2525,7 +2525,7 @@ function human(value) {
         setupPageLabel();
         setupBoundary();
         // a sign-in kept on the device from before a reload (jb 2026-09-05)
-        if (client.authToken) {
+        if (client.canRestoreSession) {
             state.user = await client.restoreSession().catch(() => null);
         }
         els.refreshQueue.addEventListener("click", loadQueue);

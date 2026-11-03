@@ -31,6 +31,8 @@ cp scripts/tests/fixtures/submission-receipts-local.ts convex/receiptLocalTest.t
 env -u CONVEX_DEPLOYMENT -u CONVEX_DEPLOY_KEY CONVEX_AGENT_MODE=anonymous npx convex dev --local-cloud-port 3260 --local-site-port 3261 --typecheck disable
 ```
 
+Since 2026-11-03 `convex/auth.config.ts` reads `WORKOS_CLIENT_ID` (see `workos-sessions.md`), and Convex refuses to push an auth configuration that reads an unset variable. If the first push on a fresh local deployment reports it, set any placeholder there from another terminal with the same environment prefix (`env -u CONVEX_DEPLOYMENT -u CONVEX_DEPLOY_KEY CONVEX_AGENT_MODE=anonymous npx convex env set WORKOS_CLIENT_ID client_local_placeholder`), then save a file under `convex/` to push again. The local checks use admin-key identities and never a WorkOS token.
+
 After the CLI reports that the local functions are ready, run the integration script in another terminal in the same worktree:
 
 ```sh

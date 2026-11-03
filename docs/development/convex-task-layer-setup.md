@@ -146,6 +146,16 @@ portals see.
 `docs/development/convex-auth-google.config.example.ts` is kept only as a small
 reference copy of the same configuration.
 
+Since 2026-11-03 `convex/auth.config.ts` also accepts WorkOS AuthKit access
+tokens, so the portals can move to sessions that renew silently while Google
+remains the way people sign in. It reads `WORKOS_CLIENT_ID` from the
+deployment environment, which must be set before the backend is pushed. A
+WorkOS identity is matched to its `users` row by its verified email claim, a
+Google identity by `auth_subject` as before. The portals switch with one
+constant, `workosClientId` in `apps/regions/nz/js/convex-config.js`. The
+setup, the WorkOS dashboard steps and the switch are in
+`docs/development/workos-sessions.md`.
+
 The deploy key and any OAuth client secret are not public. Configure secrets in
 the Convex dashboard, GitHub secrets, or a local shell environment. Do not paste
 them into chat or commit them.

@@ -62,7 +62,11 @@ const SOURCES = {
     "https://pastel-goshawk-398.convex.cloud",
     // attachment uploads go to presigned urls on the account's r2 host
     "https://*.r2.cloudflarestorage.com",
-    "https://accounts.google.com/gsi/"
+    "https://accounts.google.com/gsi/",
+    // workos sessions: authkit-js exchanges the sign-in code, renews the
+    // session and ends it by fetch here. its script is vendored, so the
+    // host is never a script source
+    "https://api.workos.com"
   ],
   "worker-src": ["'self'", "blob:"],
   "frame-src": ["https://accounts.google.com/gsi/", "https://www.google.com/maps/embed/"],

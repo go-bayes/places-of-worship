@@ -114,6 +114,9 @@ export default defineSchema({
 
   users: defineTable({
     auth_subject: v.optional(v.string()),
+    // the workos user id (the token's sub) that users:claimInvite bound to
+    // this row; later workos sign-ins must match it (convex/lib/auth.ts)
+    workos_subject: v.optional(v.string()),
     email: v.optional(v.string()),
     display_name: v.optional(v.string()),
     initials: v.string(),
@@ -123,6 +126,7 @@ export default defineSchema({
     updated_at: v.number(),
   })
     .index("by_auth_subject", ["auth_subject"])
+    .index("by_workos_subject", ["workos_subject"])
     .index("by_email", ["email"])
     .index("by_status", ["status"]),
 
