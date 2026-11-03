@@ -286,8 +286,10 @@ body, html { margin: 0; height: 100%; background: var(--bg); color: var(--text);
    2026-11-03; primitive 4 of the porting brief): the fullscreen, zoom and
    compass buttons join one dark stack at 44 px with light line icons, and
    the attribution becomes a chrome card at 12 px ink on the dark face
-   (about 14:1), above the action row so the two never overlap. phones keep
-   maplibre's collapse to a 44 px credits disc, with the full credit on tap.
+   (about 14:1), above the action row so the two never overlap. every
+   screen uses maplibre's collapse to a 44 px credits disc, open on load
+   and folded on the first drag or press, with the full credit on tap (jb
+   2026-11-03; phones had it before).
    scoped to the injected map root; the rules above stay the fallback for
    any other page that links this sheet */
 .map-chrome .maplibregl-ctrl-bottom-right {
@@ -357,14 +359,6 @@ body, html { margin: 0; height: 100%; background: var(--bg); color: var(--text);
   font-size: 12px;
   line-height: 1.4;
 }
-.map-chrome .maplibregl-ctrl.maplibregl-ctrl-attrib {
-  padding: 5px 12px;
-  /* a long census credit wraps beside the stack and scrolls past six
-     lines, rather than running under the action row */
-  max-width: min(560px, 44vw);
-  max-height: calc(6 * 1.4em + 10px);
-  overflow-y: auto;
-}
 .map-chrome .maplibregl-ctrl-attrib a { color: var(--ink); }
 .map-chrome .maplibregl-ctrl-attrib a:hover { color: #fff; text-decoration: underline; }
 .map-chrome .maplibregl-ctrl-attrib-button,
@@ -384,6 +378,15 @@ body, html { margin: 0; height: 100%; background: var(--bg); color: var(--text);
   border-radius: var(--r-lg);
   max-height: 40vh;
   overflow-y: auto;
+}
+/* opened on a wide map, a long census credit wraps beside the control
+   stack and scrolls past six lines, rather than running across the
+   action row */
+@media (min-width: 641px) {
+  .map-chrome .maplibregl-ctrl-attrib.maplibregl-compact-show {
+    max-width: min(560px, 44vw);
+    max-height: calc(6 * 1.4em + 26px);
+  }
 }
 .map-chrome .maplibregl-ctrl-attrib.maplibregl-compact .maplibregl-ctrl-attrib-button {
   width: 44px;

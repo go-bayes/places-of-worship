@@ -28,7 +28,7 @@ const settle = () => new Promise((r) => setImmediate(r));
 // the credit is the compact disc on every screen (jb 2026-11-03), and an
 // opened credit keeps the old width on a wide map
 assert.match(runtime, /new maplibregl\.AttributionControl\(\{\s*compact: true,/, "the credit is compact on every screen");
-assert.match(fs.readFileSync(path.join(__dirname, "region-map.css"), "utf8"), /@media \(min-width: 641px\) \{\s*\.map-chrome \.maplibregl-ctrl-attrib\.maplibregl-compact-show \{\s*max-width: min\(560px, 44vw\);/, "an opened credit keeps its width on a wide map");
+assert.match(fs.readFileSync(path.join(__dirname, "..", "..", "shared", "map-shell.css"), "utf8"), /@media \(min-width: 641px\) \{\s*\.map-chrome \.maplibregl-ctrl-attrib\.maplibregl-compact-show \{\s*max-width: min\(560px, 44vw\);/, "an opened credit keeps its width on a wide map");
 let checks = 0;
 const focusLog = [];
 

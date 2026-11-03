@@ -492,13 +492,3 @@
 /* border handoff (the travel pill): styled in the shared sheet
    (../../global/styles/maplibre-flat.css) since the global map seats the
    same control */
-
-/* the credit is the compact disc on every screen (jb 2026-11-03). opened
-   on a wide map it keeps the width the full credit had, wrapping beside
-   the control stack rather than running across the action row */
-@media (min-width: 641px) {
-  .map-chrome .maplibregl-ctrl-attrib.maplibregl-compact-show {
-    max-width: min(560px, 44vw);
-    max-height: calc(6 * 1.4em + 26px);
-  }
-}
