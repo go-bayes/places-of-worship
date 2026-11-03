@@ -519,15 +519,17 @@ const map = new maplibregl.Map({
   minZoom: IS_MOBILE ? CONFIG.mobileMinZoom : CONFIG.desktopMinZoom
 });
 
-// responsive attribution: full text on wide maps, the standard
-// tap-to-expand disc on phones, where the corner shares the pill line.
+// attribution: the standard tap-to-expand disc on every screen (jb
+// 2026-11-03: the visitor is drawn into the map, not its text; phones had
+// the disc already). maplibre shows the credit open on load and folds it
+// to its disc on the first drag, so the credit is seen before it folds.
 // the project-licence line rides every page; per-product source terms
 // recorded in the manifests prevail where they differ (LICENSE.md)
 map.addControl(new maplibregl.AttributionControl({
+  compact: true,
   customAttribution: '<strong>Project compilation <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a></strong>'
 }), "bottom-right");
-// phones: maplibre shows the credit open on load and folds it to its disc
-// on the first drag. the chrome's sheets (search, contribute, the census
+// the chrome's sheets (search, contribute, the census
 // panel) open over the same corner, so a press anywhere outside the credit
 // folds it too (ui suggestions item 4); the disc reopens it
 document.addEventListener("click", (event) => {

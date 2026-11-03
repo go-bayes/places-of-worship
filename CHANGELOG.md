@@ -2,10 +2,11 @@
 
 ## Unreleased
 
-### 2026-11-03 (census panel folded on every screen)
+### 2026-11-03 (census panel and map credit folded on every screen)
 
 - Country maps (`apps/regions/_shared/region-map.js`). The census data panel now opens folded on every screen, not only on phones (JB, 2026-11-03: the visitor should be drawn into the map, not its text). The census layer stays on at start, and the folded bar still names the metric, year and geography; the panel's options, colour key and notes open from the bar or the census button. The onboarding card's fold and restore are unchanged, and now act only on a panel the visitor has opened. Load time is unchanged: the census still starts loading during script evaluation.
-- Stamp: `region-map.js?v=20261103e` on all 104 pages that load it (pinned in `tiles-v2-client.test.cjs`). Tests: `census-chrome.test.cjs` checks that a desktop opens folded, and opens the panel by the bar where a case needs it open.
+- The map credit is MapLibre's compact disc on every screen, not only on phones (JB, 2026-11-03). As on phones, the credit shows open when the map loads and folds to its ⓘ disc on the first drag or on a press elsewhere; the disc reopens it. On a wide map the opened credit keeps the width the full credit had (`region-map.css`, at most 560 px or 44% of the width).
+- Stamps: `region-map.js?v=20261103e` on all 104 pages that load it (pinned in `tiles-v2-client.test.cjs`) and `region-map.css?v=20261103d` on the 103 pages that load it. Tests: `census-chrome.test.cjs` checks that a desktop opens folded, opens the panel by the bar where a case needs it open, and pins the compact credit and its wide-map width.
 
 ### 2026-11-03 (home country shade on country maps)
 
