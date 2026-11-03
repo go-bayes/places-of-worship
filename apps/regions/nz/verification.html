@@ -1690,11 +1690,6 @@
             border: 2px dashed var(--entry);
         }
 
-        .legend-dot.vm-nomination-swatch {
-            background: var(--panel);
-            border: 2px dashed var(--entry);
-        }
-
         .copy-help kbd {
             background: var(--panel);
             border: 1px solid var(--control-line);
@@ -2439,17 +2434,88 @@
             background: var(--action-soft);
         }
 
+        /* the map data legend as a grid (jb 2026-11-03, ui item 8): fill rows
+           (the target-year status, in the pills' own words) against ring
+           columns (validation), then the marks that stand alone. every cell
+           draws the map's own .verification-marker classes at the medium
+           task size, so the key wears the imagery halo when the map does */
         .map-legend {
             display: grid;
-            grid-template-columns: auto auto;
-            column-gap: 16px;
-            align-items: start;
+            gap: 6px;
+            justify-items: start;
         }
 
-        .legend-group {
+        .legend-grid {
+            border-collapse: collapse;
+            font-size: var(--fs-xs);
+        }
+
+        .legend-grid caption {
+            caption-side: top;
+            text-align: left;
+            font-weight: 600;
+            color: var(--ink);
+            padding-bottom: 2px;
+        }
+
+        .legend-grid thead th {
+            padding: 0 3px 2px;
+            color: var(--muted);
+            font-weight: 600;
+            line-height: 1.15;
+            text-align: center;
+            vertical-align: bottom;
+        }
+
+        .legend-grid tbody th {
+            padding: 0 8px 0 0;
+            color: var(--ink);
+            font-weight: 400;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        /* 7 px of ring and halo on either side of a 17 px marker */
+        .legend-grid td {
+            height: 32px;
+            padding: 0 3px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .verification-marker.legend-mark {
+            display: inline-block;
+            width: 13px;
+            height: 13px;
+            vertical-align: middle;
+            flex: none;
+        }
+
+        .legend-mark.legend-fill-present {
+            background: var(--present);
+        }
+
+        .legend-mark.legend-fill-absent {
+            background: var(--absent);
+        }
+
+        .legend-mark.legend-fill-uncertain {
+            background: var(--marker-uncertain);
+        }
+
+        /* without target years: a neutral slate stands for any fill */
+        .legend-mark.legend-fill-any {
+            background: var(--muted);
+        }
+
+        .legend-singles {
             display: grid;
-            gap: 3px;
-            align-content: start;
+            gap: 8px;
+            padding-left: 4px;
+        }
+
+        .legend-singles .legend-row {
+            gap: 10px;
         }
 
         .legend-body {
@@ -2472,45 +2538,9 @@
             display: inline-block;
         }
 
-        /* fill swatches: the target-year status, in the pills' own words */
-        .legend-dot.fill-present-swatch,
-        .legend-dot.fill-absent-swatch,
-        .legend-dot.fill-uncertain-swatch {
-            border: 1.5px solid var(--panel);
-            box-shadow: 0 0 3px var(--shade-ink);
-        }
-
-        .legend-dot.fill-present-swatch {
-            background: var(--present);
-        }
-
-        .legend-dot.fill-absent-swatch {
-            background: var(--absent);
-        }
-
-        .legend-dot.fill-uncertain-swatch {
-            background: var(--marker-uncertain);
-        }
-
-        .legend-dot.fill-not-assessed-swatch {
-            background: var(--panel);
-            border: 2px solid var(--muted);
-        }
-
-        /* small headings above the fill rows and the ring rows */
-        .legend-caption {
-            font-weight: 600;
-            color: var(--ink);
-            margin-bottom: 1px;
-        }
-
-        .legend-caption:not(:first-child) {
-            margin-top: 6px;
-        }
-
-        /* legend swatches mirror the map ring treatments; the fill is a neutral
-           slate stand-in for "any religion/status fill", so each row reads as
-           the RING, not the fill */
+        /* the task rows' state dots mirror the map ring treatments; the fill
+           is a neutral slate stand-in for "any status fill", so each dot
+           reads as the RING, not the fill */
         .legend-dot.vm-validated-present-swatch {
             background: var(--muted);
             box-shadow: 0 0 0 1.5px var(--panel), 0 0 0 3.5px var(--action);
@@ -2524,11 +2554,6 @@
         .legend-dot.vm-in-review-swatch {
             background: var(--panel);
             border: 2.5px dashed var(--action);
-        }
-
-        .legend-dot.vm-unvalidated-swatch {
-            background: var(--muted);
-            box-shadow: 0 0 0 1.5px var(--panel), 0 0 0 3px var(--marker-unvalidated);
         }
 
         .legend-dot.vm-disputed-swatch {
@@ -3264,9 +3289,10 @@
             }
         }
 
-        /* phone width only: one-column forms, and the validation-ring legend
-           that would cover a third of a phone-height map leaves; the Points
-           control stays. a portrait monitor keeps both */
+        /* phone width only: one-column forms. the map data panel opens
+           folded on a phone (2026-11-03), so its legend grid no longer
+           covers the map unasked and stays in the panel; its column
+           headings wrap to keep the grid inside a 375 px screen */
         @media (max-width: 700px) {
             /* the presets carry the words on a phone; the handle stays */
             .pane-grip-text {
@@ -3277,8 +3303,8 @@
                 grid-template-columns: 1fr;
             }
 
-            .map-legend {
-                display: none;
+            .legend-grid thead th {
+                width: 4.2em;
             }
         }
             .osm-history-host { margin: 8px 0; }

@@ -3608,11 +3608,52 @@ class NzVerificationMap {
         document.getElementById("pinSearchToggleButton")?.setAttribute?.("aria-expanded", open ? "true" : "false");
     }
 
-    // corner control: the points-mode select plus the one marker legend
-    // (fills, then rings, then the unvalidated dot, in the status pills'
-    // own words); period is offered only where the country
-    // ships a dated context layer with real features (config-gated, like
-    // the data maps)
+    // the map data legend (jb 2026-11-03, ui item 8): a grid of fill rows
+    // (target-year status) against ring columns (validation), so every cell
+    // is a marker the map can draw; then the marks that stand alone. each
+    // cell wears the map's own marker classes, so the key follows the
+    // basemap's halo as the markers do. without target years the fill
+    // carries no status, and one row stands for any place
+    mapDataLegendHtml(source) {
+        const fills = TARGET_YEARS.length
+            ? [
+                ["present", "legend-fill-present"],
+                ["absent", "legend-fill-absent"],
+                ["uncertain", "legend-fill-uncertain"],
+                ["not assessed", "vm-unknown"],
+            ]
+            : [["any place", "legend-fill-any"]];
+        const rings = [
+            ["open case", "vm-unvalidated"],
+            ["validated", "vm-validated-present"],
+            ["validated absent", "vm-validated-absent"],
+            ["disputed", "vm-disputed"],
+        ];
+        // a grid cell names its combination; a single mark sits beside
+        // its own words, so it is hidden from assistive technology
+        const cell = (classes, label) => `<span class="verification-marker legend-mark ${classes}" role="img" aria-label="${label}"></span>`;
+        const single = classes => `<span class="verification-marker legend-mark ${classes}" aria-hidden="true"></span>`;
+        const head = rings.map(([ring]) => `<th scope="col">${ring}</th>`).join("");
+        const rows = fills.map(([fill, fillClass]) => `
+                        <tr><th scope="row">${fill}</th>${rings.map(([ring, ringClass]) => `<td>${cell(`${fillClass} ${ringClass}`, `${fill}, ${ring}`)}</td>`).join("")}</tr>`).join("");
+        return `
+                <div class="map-legend">
+                    <table class="legend-grid">
+                        <caption>${TARGET_YEARS.length ? "Fill: status in the target year" : "Fill"} · Ring: validation</caption>
+                        <thead><tr><td></td>${head}</tr></thead>
+                        <tbody>${rows}
+                        </tbody>
+                    </table>
+                    <div class="legend-singles">
+                        <span class="legend-row">${single("vm-in-review")}in review</span>
+                        <span class="legend-row">${single("vm-nomination")}your nomination</span>
+                        ${source !== "none" ? `<span class="legend-row"><span class="legend-dot context-dot-swatch" aria-hidden="true"></span>place on today's map, tap to revise</span>` : ""}
+                    </div>
+                </div>`;
+    }
+
+    // corner control: the map data legend, then the points toggle where
+    // the country has unreviewed places to show
     addPointsLegendControl() {
         const control = L.control({ position: "bottomleft" });
         control.onAdd = () => {
@@ -3639,29 +3680,9 @@ class NzVerificationMap {
                     <button type="button" class="legend-fold" aria-expanded="true" aria-controls="portalMapData">Map data <span class="legend-caret" aria-hidden="true">▾</span></button>
                 </div>
                 <div id="portalMapData" class="legend-body">
+                ${this.mapDataLegendHtml(source)}
                 ${source !== "none" ? `
                 <button type="button" id="portalPointsToggle" class="points-toggle" aria-pressed="${this.pointsMode === "off" ? "false" : "true"}">${this.pointsMode === "off" ? "Show points" : "Hide points"}</button>` : ""}
-                <div class="map-legend">
-                    <div class="legend-group">
-                    ${TARGET_YEARS.length ? `
-                    <span class="legend-caption">Fill: status in the target year</span>
-                    <span class="legend-row"><span class="legend-dot fill-present-swatch"></span>present</span>
-                    <span class="legend-row"><span class="legend-dot fill-absent-swatch"></span>absent</span>
-                    <span class="legend-row"><span class="legend-dot fill-uncertain-swatch"></span>uncertain</span>
-                    <span class="legend-row"><span class="legend-dot fill-not-assessed-swatch"></span>not assessed</span>` : `
-                    <span class="legend-caption">Fill</span>`}
-                    <span class="legend-row"><span class="legend-dot vm-nomination-swatch"></span>your nomination</span>
-                    </div>
-                    <div class="legend-group">
-                    <span class="legend-caption">Ring: validation</span>
-                    <span class="legend-row"><span class="legend-dot vm-validated-present-swatch"></span>validated</span>
-                    <span class="legend-row"><span class="legend-dot vm-validated-absent-swatch"></span>validated absent</span>
-                    <span class="legend-row"><span class="legend-dot vm-disputed-swatch"></span>disputed</span>
-                    <span class="legend-row"><span class="legend-dot vm-in-review-swatch"></span>in review</span>
-                    <span class="legend-row"><span class="legend-dot vm-unvalidated-swatch"></span>not yet reviewed (open case)</span>
-                    ${source !== "none" ? `<span class="legend-row"><span class="legend-dot context-dot-swatch"></span>place on today's map, tap to revise</span>` : ""}
-                    </div>
-                </div>
                 </div>
             `;
             // keep map gestures away from the control
