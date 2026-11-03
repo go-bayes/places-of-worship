@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-jNWUWvZqGgsAi2xjdch+ncx0G2iN+HyHVQvSfn9vN7s='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/ https://api.workos.com; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex">
+    <title>religionmap.org · Signing in</title>
+    <!-- workos returns here after sign-in (convex-task-client.js); the page
+         exchanges the code and goes back to the portal that started it -->
+    <script src="../_shared/theme.js?v=20260921a"></script>
+    <link rel="stylesheet" href="../_shared/theme.css?v=20261103a">
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            padding: 16px;
+            background: var(--bg);
+            color: var(--ink);
+            font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+        }
+
+        a {
+            color: var(--action);
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <p id="callbackStatus" role="status" aria-live="polite">Finishing sign-in…</p>
+        <p id="callbackBack" hidden><a id="callbackBackLink" href="verification.html">Back to the portal</a></p>
+    </main>
+    <script src="js/convex-config.js?v=20261103a"></script>
+    <script src="../../vendor/authkit-js@0.20.5/dist/authkit.iife.min.js?v=20261103a"></script>
+    <script src="js/convex-task-client.js?v=20261103b"></script>
+    <script>
+        window.PowConvexTaskClient.completeWorkosCallback(window.POW_CONVEX_CONFIG, function (message, back) {
+            document.getElementById("callbackStatus").textContent = message;
+            document.getElementById("callbackBackLink").setAttribute("href", back);
+            document.getElementById("callbackBack").hidden = false;
+        });
+    </script>
+</body>
+</html>

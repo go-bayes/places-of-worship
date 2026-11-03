@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/ https://api.workos.com; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>religionmap.org · New Zealand · Review evidence</title>
     <!-- connections opened early: the dots tiles (fetched by VectorGrid, so
@@ -1351,8 +1351,10 @@
     <script src="js/review-map-data.js?v=20261103a"></script>
     <script src="js/review-map.js?v=20261103a"></script>
     <script src="js/review-panes.js?v=20261103a"></script>
-    <script src="js/convex-config.js?v=20260523-vanuatu"></script>
-    <script src="js/convex-task-client.js?v=20261103a"></script>
+    <script src="js/convex-config.js?v=20261103a"></script>
+    <!-- workos sign-in, used only when convex-config.js sets workosClientId -->
+    <script src="../../vendor/authkit-js@0.20.5/dist/authkit.iife.min.js?v=20261103a"></script>
+    <script src="js/convex-task-client.js?v=20261103b"></script>
     <script src="js/claude-review-panel.js?v=20260825-ai-review"></script>
     <script src="js/confidence-panel.js?v=20261001c"></script>
     <script src="js/location-assertion-contract.js?v=20260902a"></script>
@@ -1360,6 +1362,6 @@
     <script src="js/occupancy-review.js?v=20261019a"></script>
     <script src="js/review-snapshot-content.js?v=20261001c"></script>
     <script src="js/task-presentation.js?v=20261015c"></script>
-    <script src="js/review-portal.js?v=20261103e"></script>
+    <script src="js/review-portal.js?v=20261103f"></script>
 </body>
 </html>

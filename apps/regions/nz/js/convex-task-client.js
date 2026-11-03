@@ -3,6 +3,10 @@
         enabled: false,
         url: "",
         googleClientId: "",
+        // workos authkit sessions (jb 2026-11-03): set, the portals sign in
+        // through workos (google behind it) and the session renews silently;
+        // empty, they keep the google id token below
+        workosClientId: "",
         countryCode: "NZ",
     };
     const AUTH_REFRESH_MARGIN_MS = 5 * 60 * 1000;
@@ -14,6 +18,102 @@
     const AUTH_STORAGE_KEY = "powConvexAuth:v1";
     const GSI_SCRIPT_SRC = "https://accounts.google.com/gsi/client";
     const scriptLoads = new Map();
+
+    // workos mode. authkit-js keeps its refresh token in this page's local
+    // storage (devMode: true, set explicitly): its production mode renews
+    // through a cookie on api.workos.com, which ios safari blocks as a
+    // third-party cookie (jb 2026-11-03, option a). the page's strict
+    // content-security-policy is the mitigation; a custom auth domain is
+    // the planned upgrade. the key is authkit-js 0.20.5's own
+    // (src/utils/session-data.ts), read only to know whether a session can
+    // be restored before the library loads
+    const WORKOS_REFRESH_KEY_PREFIX = "workos:refresh-token";
+    // the sign-in hand-off in this tab's session storage: where to return,
+    // the ra's initials for claimInvite, and, once the callback page has
+    // exchanged the code, when it did
+    const WORKOS_RETURN_KEY = "powWorkosReturn:v1";
+    const WORKOS_CALLBACK_PAGE = "auth-callback.html";
+    const WORKOS_RETURN_MAX_AGE_MS = 15 * 60 * 1000;
+
+    function workosRefreshTokenStored(clientId) {
+        try {
+            return Boolean(
+                window.localStorage.getItem(`${WORKOS_REFRESH_KEY_PREFIX}:${clientId}`)
+                || window.localStorage.getItem(WORKOS_REFRESH_KEY_PREFIX),
+            );
+        } catch (error) {
+            return false;
+        }
+    }
+
+    function forgetWorkosRefreshToken(clientId) {
+        try {
+            window.localStorage.removeItem(`${WORKOS_REFRESH_KEY_PREFIX}:${clientId}`);
+            window.localStorage.removeItem(WORKOS_REFRESH_KEY_PREFIX);
+        } catch (error) {
+            // storage unavailable: nothing kept
+        }
+    }
+
+    function readWorkosReturn() {
+        try {
+            const record = JSON.parse(window.sessionStorage.getItem(WORKOS_RETURN_KEY) || "null");
+            return record && typeof record === "object" ? record : null;
+        } catch (error) {
+            return null;
+        }
+    }
+
+    function writeWorkosReturn(record) {
+        try {
+            if (record) window.sessionStorage.setItem(WORKOS_RETURN_KEY, JSON.stringify(record));
+            else window.sessionStorage.removeItem(WORKOS_RETURN_KEY);
+        } catch (error) {
+            // blocked storage: the return falls back to the portal's own page
+        }
+    }
+
+    // the hand-off of a sign-in the callback page has just completed, taken
+    // once; an old or unfinished hand-off is dropped
+    function takeCompletedWorkosReturn() {
+        const record = readWorkosReturn();
+        if (!record?.signedInAt) return null;
+        writeWorkosReturn(null);
+        return Date.now() - Number(record.signedInAt) <= WORKOS_RETURN_MAX_AGE_MS ? record : null;
+    }
+
+    // a same-origin path to return to, never another site: the stored value
+    // came from this tab, but the callback page treats it as input
+    function sameOriginReturn(value, fallback) {
+        try {
+            const url = new URL(String(value || ""), window.location.href);
+            if (url.origin !== window.location.origin) return fallback;
+            if (url.pathname.endsWith(`/${WORKOS_CALLBACK_PAGE}`)) return fallback;
+            return `${url.pathname}${url.search}${url.hash}`;
+        } catch (error) {
+            return fallback;
+        }
+    }
+
+    function workosLibrary() {
+        const library = window.WorkOSAuthKit;
+        if (!library?.createClient) {
+            throw new Error("WorkOS sign-in did not load. Reload the page, then try again.");
+        }
+        return library;
+    }
+
+    // an authkit failure that leaves the session in place (network, 5xx,
+    // rate limit, lock timeout) as opposed to one that ends it
+    function isTransientAuthkitError(error) {
+        return error?.isTransient === true;
+    }
+
+    function expiredSignInError() {
+        const error = new Error("Your sign-in expired. Sign in again, then retry.");
+        error.authExpired = true;
+        return error;
+    }
 
     // a deployment that predates a function answers with this message; the
     // client then falls back to the reads it replaces, so it can ship before
@@ -95,6 +195,17 @@
             this.credentialWaiters = [];
             this.signInOptions = {};
             this.user = null;
+            // workos mode: the authkit client, made on first need, and a
+            // refusal from the last sign-in that the sign-in card says once
+            this.authkit = null;
+            this.authkitPromise = null;
+            this.signInError = null;
+            if (this.usesWorkos) {
+                // the session lives in authkit's refresh token; a google
+                // token left from before the switch is dropped
+                writeStoredAuthToken("");
+                return;
+            }
             // a token kept from before a reload comes back with its refresh
             // timer; restoreSession() then names the user again. a token
             // inside its refresh margin is dropped rather than restored
@@ -107,22 +218,188 @@
             }
         }
 
+        // one constant switches both portals: workosClientId in
+        // convex-config.js. empty keeps the google id token
+        get usesWorkos() {
+            return Boolean(this.config.workosClientId);
+        }
+
         get configured() {
-            return Boolean(this.config.enabled && this.config.url && this.config.googleClientId);
+            const signIn = this.usesWorkos ? this.config.workosClientId : this.config.googleClientId;
+            return Boolean(this.config.enabled && this.config.url && signIn);
         }
 
         get signedIn() {
             return Boolean(this.authToken && this.user);
         }
 
+        // whether a reload can name the user without the sign-in card: a
+        // kept google token, or a kept workos refresh token
+        get canRestoreSession() {
+            if (!this.configured) return false;
+            return this.usesWorkos
+                ? workosRefreshTokenStored(this.config.workosClientId)
+                : Boolean(this.authToken);
+        }
+
         // deliberate: the sign-out button. google's auto-select cooldown is
         // for a chosen sign-out only; an expiry must not make the next
-        // automatic re-selection less likely
+        // automatic re-selection less likely. in workos mode every sign-out
+        // ends the workos session as well, so the kept refresh token goes
         signOut({ deliberate = false } = {}) {
             this.clearAuth();
+            if (this.usesWorkos) {
+                this.endWorkosSession();
+                return;
+            }
             if (deliberate && window.google?.accounts?.id?.disableAutoSelect) {
                 window.google.accounts.id.disableAutoSelect();
             }
+        }
+
+        // authkit's sign-out without leaving the page: it forgets the
+        // session in memory and storage and asks workos to end it. the
+        // device copy is cleared here too, for a session authkit never
+        // loaded on this page
+        endWorkosSession() {
+            const authkit = this.authkit;
+            if (authkit) {
+                try {
+                    const ending = authkit.signOut({ navigate: false });
+                    ending?.catch?.(() => {});
+                } catch (error) {
+                    // no session in memory: nothing for workos to end
+                }
+            }
+            forgetWorkosRefreshToken(this.config.workosClientId);
+        }
+
+        // the address workos returns to: one callback page beside the
+        // portals, so one redirect uri per origin serves both
+        workosRedirectUri() {
+            if (this.config.workosRedirectUri) return this.config.workosRedirectUri;
+            return new URL(WORKOS_CALLBACK_PAGE, window.location.href).href;
+        }
+
+        // the authkit client, made once per page. creating it renews a kept
+        // session from its refresh token
+        async ensureAuthKit() {
+            if (!this.usesWorkos) return null;
+            if (!this.authkitPromise) {
+                this.authkitPromise = Promise.resolve()
+                    .then(() => workosLibrary().createClient(this.config.workosClientId, {
+                        devMode: true,
+                        redirectUri: this.workosRedirectUri(),
+                        onRefresh: ({ accessToken }) => {
+                            // a renewal replaces the token only for a live session
+                            if (this.authToken) this.setWorkosAccessToken(accessToken);
+                        },
+                        // the session could not be renewed: end it here, so
+                        // the next request reads as an expired sign-in
+                        onRefreshFailure: () => this.signOut(),
+                    }))
+                    .then((authkit) => {
+                        this.authkit = authkit;
+                        return authkit;
+                    }, (error) => {
+                        this.authkitPromise = null;
+                        throw error;
+                    });
+            }
+            return this.authkitPromise;
+        }
+
+        setWorkosAccessToken(token) {
+            this.authToken = token || "";
+            this.authExpiresAt = jwtExpiryMs(this.authToken);
+        }
+
+        // the token for the next request, renewed by authkit when close to
+        // expiry. a session authkit cannot renew is over (signed out, and
+        // the error says so); a transient failure leaves it for a retry
+        async ensureWorkosToken() {
+            if (!this.authkit || !this.authToken) return;
+            try {
+                this.setWorkosAccessToken(await this.authkit.getAccessToken());
+            } catch (error) {
+                if (isTransientAuthkitError(error)) {
+                    const transient = new Error("Could not renew your sign-in just now. Check the connection, then retry.");
+                    transient.transient = true;
+                    throw transient;
+                }
+                this.signOut();
+                throw expiredSignInError();
+            }
+        }
+
+        // the sign-in button in workos mode: a redirect to workos, google
+        // behind it, and back through the callback page to this page
+        async startWorkosSignIn(options = {}) {
+            const authkit = await this.ensureAuthKit();
+            writeWorkosReturn({
+                returnTo: sameOriginReturn(window.location.href, ""),
+                initials: options.initials || "",
+                startedAt: Date.now(),
+            });
+            await authkit.signIn();
+        }
+
+        // after a reload or the return from workos: a live workos session
+        // gives the request token, and a sign-in just completed claims its
+        // invitation first. false when there is no session to name
+        async prepareWorkosSession() {
+            if (!this.configured) return false;
+            if (this.authToken && this.authkit?.getUser?.()) return true;
+            let authkit;
+            try {
+                authkit = await this.ensureAuthKit();
+            } catch (error) {
+                this.signInError = error;
+                return false;
+            }
+            if (!authkit.getUser()) {
+                this.clearAuth();
+                return false;
+            }
+            try {
+                this.setWorkosAccessToken(await authkit.getAccessToken());
+            } catch (error) {
+                if (isTransientAuthkitError(error)) {
+                    this.signInError = new Error("Could not reach WorkOS to renew your sign-in. Check the connection, then reload.");
+                    this.clearAuth();
+                } else {
+                    this.signOut();
+                }
+                return false;
+            }
+            const completed = takeCompletedWorkosReturn();
+            if (completed) {
+                try {
+                    await this.claimInvite(completed.initials || "");
+                } catch (error) {
+                    this.endRestoreWithError(error);
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        // a restore that failed. google: the kept token is dropped, as
+        // before. workos: a refusal from the backend (no invitation, no
+        // email claim) ends the session and is kept for the sign-in card; a
+        // network failure keeps the session for the next reload
+        endRestoreWithError(error) {
+            if (!this.usesWorkos) {
+                this.clearAuth();
+                return;
+            }
+            if (error?.network || error?.transient) {
+                this.signInError = new Error("Could not reach the project backend. Check the connection, then reload.");
+                this.clearAuth();
+                return;
+            }
+            if (!error?.authExpired) this.signInError = error;
+            this.signOut();
         }
 
         clearAuth() {
@@ -261,6 +538,7 @@
         // after a reload: the kept token names the user again, or is
         // dropped so the sign-in card shows
         async restoreSession() {
+            if (this.usesWorkos && !(await this.prepareWorkosSession())) return null;
             if (!this.configured || !this.authToken) return null;
             if (this.user) return this.user;
             // the backend vouches for the kept token, so nothing waits for
@@ -272,17 +550,32 @@
             // loads, and is retried until the token expires
             this.warmGoogle();
             try {
-                this.user = (await this.me()) || null;
-                if (!this.user) this.clearAuth();
+                let user = (await this.me()) || null;
+                // a workos sign-in whose hand-off was lost (another tab
+                // finished it) still claims its invitation here
+                if (this.usesWorkos && user?.status === "pending") {
+                    await this.claimInvite("");
+                    user = (await this.me()) || null;
+                }
+                this.user = user;
+                if (!this.user) {
+                    if (this.usesWorkos) {
+                        this.endRestoreWithError(new Error("This sign-in has no project account. Ask the project lead for an invitation."));
+                    } else {
+                        this.clearAuth();
+                    }
+                }
                 return this.user;
             } catch (error) {
-                this.clearAuth();
+                this.endRestoreWithError(error);
                 return null;
             }
         }
 
-        // starts google's script and initialisation without waiting for it
+        // starts google's script and initialisation without waiting for it;
+        // workos mode needs no google script
         warmGoogle() {
+            if (this.usesWorkos) return;
             this.ensureGoogleInitialised().catch(() => false);
         }
 
@@ -315,6 +608,7 @@
         // unavailable or failed for a reason the old reads will report in
         // their own words; the user is then named by users:me as before
         async restoreSessionWithLanding(args) {
+            if (this.usesWorkos && !(await this.prepareWorkosSession())) return { user: null, landing: null };
             if (!this.configured || !this.authToken) return { user: null, landing: null };
             if (this.user) return { user: this.user, landing: null };
             this.warmGoogle();
@@ -348,6 +642,17 @@
         async renderSignInButton(container, options = {}) {
             if (!this.configured || !container) return;
             this.signInOptions = options;
+            if (this.usesWorkos) {
+                this.renderWorkosSignInButton(container, options);
+                // a refusal from the last sign-in or restore, said once
+                const pending = this.signInError;
+                if (pending) {
+                    this.signInError = null;
+                    await null;
+                    options.onError?.(pending);
+                }
+                return;
+            }
             await this.ensureGoogleInitialised();
             window.google.accounts.id.renderButton(container, {
                 theme: "outline",
@@ -359,11 +664,39 @@
             });
         }
 
+        // the workos sign-in button: one of the page's own buttons, so no
+        // google script or frame loads. a caller's width is kept as the
+        // google button's was
+        renderWorkosSignInButton(container, options = {}) {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "primary workos-sign-in";
+            button.textContent = "Sign in with Google";
+            if (options.width && button.style) {
+                button.style.width = `${options.width}px`;
+                button.style.maxWidth = "100%";
+            }
+            button.addEventListener("click", () => {
+                button.disabled = true;
+                this.startWorkosSignIn(options).catch((error) => {
+                    button.disabled = false;
+                    options.onError?.(error);
+                });
+            });
+            container.replaceChildren(button);
+        }
+
         async request(kind, path, args = {}) {
             if (!this.configured) {
                 throw new Error("Convex is not configured for this map.");
             }
-            await this.ensureFreshToken();
+            // workos: authkit hands out the access token, renewing it when
+            // close to expiry, before every request
+            if (this.usesWorkos) {
+                await this.ensureWorkosToken();
+            } else {
+                await this.ensureFreshToken();
+            }
             const endpoint = kind === "query" ? "query" : kind === "action" ? "action" : "mutation";
             const headers = {
                 "Content-Type": "application/json",
@@ -372,15 +705,22 @@
             if (this.authToken) {
                 headers.Authorization = `Bearer ${this.authToken}`;
             }
-            const response = await fetch(`${this.config.url}/api/${endpoint}`, {
-                method: "POST",
-                headers,
-                body: JSON.stringify({
-                    path,
-                    format: "convex_encoded_json",
-                    args: [compactObject(args)],
-                }),
-            });
+            let response;
+            try {
+                response = await fetch(`${this.config.url}/api/${endpoint}`, {
+                    method: "POST",
+                    headers,
+                    body: JSON.stringify({
+                        path,
+                        format: "convex_encoded_json",
+                        args: [compactObject(args)],
+                    }),
+                });
+            } catch (error) {
+                // offline or blocked: marked, so a restore keeps the session
+                error.network = true;
+                throw error;
+            }
             const text = await response.text();
             let payload;
             try {
@@ -663,6 +1003,41 @@
             return await this.request("mutation", "tasks:respondToReviewerComment", args);
         }
     }
+
+    // the callback page (auth-callback.html): authkit exchanges the code
+    // workos returned, keeping the refresh token on the device; the hand-off
+    // is marked complete for the portal's claimInvite, and the tab returns
+    // to the page that started the sign-in. a failed exchange stays on the
+    // callback page with a link back
+    PowConvexTaskClient.completeWorkosCallback = async function (config, report = () => {}) {
+        const settings = normaliseConfig(config);
+        const handOff = readWorkosReturn();
+        const back = sameOriginReturn(handOff?.returnTo, "verification.html");
+        if (!settings.workosClientId) {
+            report("WorkOS sign-in is not switched on for this site.", back);
+            return false;
+        }
+        let exchanged = false;
+        try {
+            await workosLibrary().createClient(settings.workosClientId, {
+                devMode: true,
+                redirectUri: `${window.location.origin}${window.location.pathname}`,
+                onRedirectCallback: () => {
+                    exchanged = true;
+                },
+            });
+        } catch (error) {
+            exchanged = false;
+        }
+        if (!exchanged) {
+            writeWorkosReturn(null);
+            report("Sign-in did not complete. Go back and sign in again.", back);
+            return false;
+        }
+        writeWorkosReturn({ ...(handOff || {}), signedInAt: Date.now() });
+        window.location.replace(back);
+        return true;
+    };
 
     window.PowConvexTaskClient = PowConvexTaskClient;
 })();

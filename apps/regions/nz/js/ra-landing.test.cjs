@@ -66,6 +66,8 @@ function portal({ landing, supported = true }) {
   page.backend = {
     configured: true,
     authToken: "kept-token",
+    // the client's own getter reads the kept google token or workos refresh token
+    get canRestoreSession() { return Boolean(this.authToken); },
     get signedIn() { return Boolean(page.backendUser); },
     async restoreSessionWithLanding(args) {
       order.push("restoreSessionWithLanding");

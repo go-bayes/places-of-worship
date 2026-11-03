@@ -660,7 +660,7 @@ window.POW_DATE_FLOOR_YEAR = window.PowDateFloor ? window.PowDateFloor.yearFor(C
 const TARGET_YEARS = COUNTRY_CONFIG.targetYears;
 const DEFAULT_TARGET_YEAR = COUNTRY_CONFIG.defaultTargetYear || TARGET_YEARS[TARGET_YEARS.length - 1] || "";
 const BACKEND_CONFIG = window.POW_CONVEX_CONFIG || {};
-const BACKEND_CONFIGURED = Boolean(BACKEND_CONFIG.enabled && BACKEND_CONFIG.url && BACKEND_CONFIG.googleClientId);
+const BACKEND_CONFIGURED = Boolean(BACKEND_CONFIG.enabled && BACKEND_CONFIG.url && (BACKEND_CONFIG.workosClientId || BACKEND_CONFIG.googleClientId));
 const FULL_MAP_MODE = SEARCH_PARAMS.get("full") === "1" || SEARCH_PARAMS.get("batch") === "all";
 const REQUESTED_ASSIGNMENT_BATCH_ID = (SEARCH_PARAMS.get("batch") || "").trim();
 const DEFAULT_ASSIGNMENT_BATCH_ID = COUNTRY_CONFIG.defaultAssignmentBatchId || "";
@@ -2468,7 +2468,7 @@ class NzVerificationMap {
     // the tab while the contributor is in the photo gallery, then reloads
     // it) names the user again before the panel paints (jb 2026-09-05)
     async restoreBackendSession() {
-        if (!this.backend?.configured || !this.backend.authToken || this.backendUser) return null;
+        if (!this.backend?.configured || !this.backend.canRestoreSession || this.backendUser) return null;
         this.setTransportBusy("signing_in");
         try {
             // the user and the landing lists arrive in one round trip; the
