@@ -31,8 +31,9 @@ export function canReview(
 // person by a workos user id, which matches no row before its first workos
 // sign-in: rows claimed through google hold google's tokenIdentifier in
 // auth_subject, and invites hold only an email. a workos identity therefore
-// reaches its row by workos_subject once bound, and before that by the
-// verified email claim that the dashboard's jwt template adds. the google
+// reaches its row by workos_subject (the workos user id) once claimInvite
+// has bound it, and before that, in users:me and users:claimInvite only, by
+// the verified email claim that the dashboard's jwt template adds. the google
 // path matches auth_subject against tokenIdentifier, as before. refusal
 // messages avoid the words the portal reads as an expired sign-in (token,
 // jwt, authentication required), so the reason reaches the person
@@ -88,14 +89,39 @@ export function opensByEmail(user: Doc<"users">): boolean {
   return user.status === "pending" || user.auth_subject !== undefined || user.workos_subject !== undefined;
 }
 
+// the workos user id (the token's sub). the key leaves out the issuer, since
+// both accepted issuer forms name the same workos user
+export function workosSubject(identity: IdentityLike): string {
+  const subject = identity.subject || String(identity.tokenIdentifier ?? "").split("|").pop() || "";
+  if (!subject) throw new Error("This WorkOS sign-in names no user.");
+  return subject;
+}
+
+// the row a workos user is bound to, by workos_subject alone: no email
+// claim, so a bound row does not depend on the jwt template
+async function findBoundWorkosUser(
+  ctx: QueryCtx | MutationCtx,
+  identity: IdentityLike,
+): Promise<Doc<"users"> | null> {
+  const subject = workosSubject(identity);
+  const bound = await ctx.db
+    .query("users")
+    .withIndex("by_workos_subject", (q) => q.eq("workos_subject", subject))
+    .unique();
+  if (bound !== null && holdsServiceRole(bound)) throw new Error("Service accounts cannot sign in.");
+  return bound;
+}
+
 // a verified email is a standing credential: a recycled mailbox would carry
-// it to a new owner. so the first workos sign-in that reaches a row binds
-// its workos identity (workos_subject), and from then on only that identity
-// reaches the row. email matching serves only rows with no workos identity
-// yet: invitations, and rows claimed through google before the switch
+// it to a new owner. so a workos user reaches a row by workos_subject once
+// claimInvite has bound it, and by its verified email only before that:
+// invitations, and rows claimed through google before the switch.
+// emailFallback is for users:me and users:claimInvite only; requireUser
+// takes bound rows alone, so every other function waits for the claim
 export async function findUserForIdentity(
   ctx: QueryCtx | MutationCtx,
   identity: IdentityLike,
+  { emailFallback = false }: { emailFallback?: boolean } = {},
 ): Promise<Doc<"users"> | null> {
   if (!isWorkosIdentity(identity)) {
     return await ctx.db
@@ -103,15 +129,9 @@ export async function findUserForIdentity(
       .withIndex("by_auth_subject", (q) => q.eq("auth_subject", identity.tokenIdentifier))
       .unique();
   }
+  const bound = await findBoundWorkosUser(ctx, identity);
+  if (bound !== null || !emailFallback) return bound;
   const email = workosVerifiedEmail(identity);
-  const bound = await ctx.db
-    .query("users")
-    .withIndex("by_workos_subject", (q) => q.eq("workos_subject", identity.tokenIdentifier))
-    .unique();
-  if (bound !== null) {
-    if (holdsServiceRole(bound)) throw new Error("Service accounts cannot sign in.");
-    return bound;
-  }
   const user = await ctx.db
     .query("users")
     .withIndex("by_email", (q) => q.eq("email", email))
@@ -127,22 +147,6 @@ export async function findUserForIdentity(
     throw new Error("This project account is not set up for sign-in. Ask the project lead.");
   }
   return user;
-}
-
-// records the workos identity on the first workos sign-in that reaches a
-// row; a row already bound is left as it is
-export async function bindWorkosSubject(
-  ctx: MutationCtx,
-  user: Doc<"users">,
-  identity: IdentityLike,
-): Promise<void> {
-  if (!isWorkosIdentity(identity) || user.workos_subject !== undefined) return;
-  await ctx.db.patch(user._id, { workos_subject: identity.tokenIdentifier, updated_at: Date.now() });
-}
-
-// a mutation's db can write; a query's cannot
-function canWrite(ctx: QueryCtx | MutationCtx): ctx is MutationCtx {
-  return typeof (ctx.db as { patch?: unknown }).patch === "function";
 }
 
 export async function requireUser(
@@ -162,12 +166,6 @@ export async function requireUser(
 
   if (!allowedRoles.some((role) => user.roles.includes(role))) {
     throw new Error("Project role does not permit this action.");
-  }
-
-  // the first workos mutation that reaches the row binds it, should the
-  // sign-in's own claimInvite not have run
-  if (canWrite(ctx)) {
-    await bindWorkosSubject(ctx, user, identity);
   }
 
   return user;

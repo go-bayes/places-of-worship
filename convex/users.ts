@@ -1,11 +1,22 @@
 import { v } from "convex/values";
 import { internalMutation, mutation, query } from "./_generated/server";
 import { projectRole, userStatus } from "./model";
-import { findUserForIdentity, holdsServiceRole, isWorkosIdentity, normaliseEmail, requireUser, workosVerifiedEmail } from "./lib/auth";
+import { findUserForIdentity, holdsServiceRole, isWorkosIdentity, normaliseEmail, requireUser, workosSubject, workosVerifiedEmail } from "./lib/auth";
 
 declare const process: {
   env: Record<string, string | undefined>;
 };
+
+// the google rollback from workos sessions: google's claimInvite may bind
+// an active row claimed only through workos to the google account with its
+// verified email. it is a takeover path for every such row while google is
+// an accepted provider, so it is off unless the deployment sets
+// POW_AUTH_GOOGLE_ROLLBACK=1, which the project lead does only during an
+// actual rollback (docs/development/workos-sessions.md). read, never set,
+// by this code
+function googleRollbackEnabled(): boolean {
+  return process.env.POW_AUTH_GOOGLE_ROLLBACK === "1";
+}
 
 function requireSetupToken(token: string) {
   const expected = process.env.POW_CONVEX_SETUP_TOKEN;
@@ -24,9 +35,11 @@ export const me = query({
     if (identity === null) {
       return null;
     }
-    // google: by auth_subject; workos: by the verified email claim, and a
-    // workos session without one is refused with the reason
-    return await findUserForIdentity(ctx, identity);
+    // google: by auth_subject. workos: by workos_subject, or before the
+    // claim by the verified email claim, so the portal can see an
+    // unclaimed row; a workos session without that claim is refused with
+    // the reason
+    return await findUserForIdentity(ctx, identity, { emailFallback: true });
   },
 });
 
@@ -185,6 +198,10 @@ export const adminUpsertUser = internalMutation({
     // optional status override, e.g. to create an active service account
     // that never signs in; omitted = preserve existing, pending on insert
     status: v.optional(userStatus),
+    // true unbinds the row's workos account (workos_subject), so the next
+    // workos claimInvite binds whichever account its verified email reaches
+    // it with: for a person who replaced their workos account
+    clearWorkosSubject: v.optional(v.boolean()),
   },
   returns: v.object({ user_id: v.id("users"), created: v.boolean(), status: v.string() }),
   handler: async (ctx, args) => {
@@ -208,6 +225,7 @@ export const adminUpsertUser = internalMutation({
         display_name: args.displayName ?? existing.display_name,
         initials: args.initials?.trim().slice(0, 12) || existing.initials,
         status: args.status ?? existing.status,
+        ...(args.clearWorkosSubject === true ? { workos_subject: undefined } : {}),
         updated_at: now,
       });
       return { user_id: existing._id, created: false, status: args.status ?? existing.status };
@@ -236,22 +254,25 @@ export const claimInvite = mutation({
       throw new Error("Authentication required.");
     }
 
-    // a workos session claims the row its workos identity is bound to, or,
-    // before the first workos sign-in, the row its verified email names; it
-    // binds workos_subject then. auth_subject is left as it is: it holds the
-    // google identity of a row claimed before the switch
+    // a workos session claims the row its workos user is bound to, or,
+    // before its first claim, the row its verified email names, and binds
+    // workos_subject then: the one place a workos user is bound.
+    // auth_subject is left as it is: it holds the google identity of a row
+    // claimed before the switch
     if (isWorkosIdentity(identity)) {
-      const email = workosVerifiedEmail(identity);
-      const row = await findUserForIdentity(ctx, identity);
+      const row = await findUserForIdentity(ctx, identity, { emailFallback: true });
       if (row === null) {
-        throw new Error(`No project invitation found for ${email}.`);
+        throw new Error(`No project invitation found for ${workosVerifiedEmail(identity)}.`);
       }
       if (row.status !== "active" && row.status !== "pending") {
         throw new Error("Authenticated user is not active in this project.");
       }
-      const now = Date.now();
+      // a bound, active row: nothing to write
+      if (row.workos_subject !== undefined && row.status === "active") {
+        return row._id;
+      }
       await ctx.db.patch(row._id, {
-        workos_subject: row.workos_subject ?? identity.tokenIdentifier,
+        workos_subject: row.workos_subject ?? workosSubject(identity),
         ...(row.status === "pending"
           ? {
               display_name: row.display_name ?? (identity.name?.trim() || undefined),
@@ -259,7 +280,7 @@ export const claimInvite = mutation({
               status: "active" as const,
             }
           : {}),
-        updated_at: now,
+        updated_at: Date.now(),
       });
       return row._id;
     }
@@ -294,9 +315,12 @@ export const claimInvite = mutation({
     if (invite.auth_subject !== undefined) {
       throw new Error("This email's project account is linked to another Google account. Ask the project lead.");
     }
-    // a pending invitation, or (the rollback from workos) an active row
-    // claimed only through workos, which has no google identity yet
-    const rollback = invite.status === "active" && invite.workos_subject !== undefined;
+    // a pending invitation, or, during a rollback from workos only
+    // (POW_AUTH_GOOGLE_ROLLBACK=1), an active row claimed only through
+    // workos, which has no google identity yet
+    const rollback = googleRollbackEnabled()
+      && invite.status === "active"
+      && invite.workos_subject !== undefined;
     if (invite.status !== "pending" && !rollback) {
       throw new Error("No pending project invitation found for this email.");
     }

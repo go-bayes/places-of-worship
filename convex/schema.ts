@@ -114,8 +114,8 @@ export default defineSchema({
 
   users: defineTable({
     auth_subject: v.optional(v.string()),
-    // the workos identity (tokenIdentifier) that first signed in to this
-    // row; later workos sign-ins must match it (convex/lib/auth.ts)
+    // the workos user id (the token's sub) that users:claimInvite bound to
+    // this row; later workos sign-ins must match it (convex/lib/auth.ts)
     workos_subject: v.optional(v.string()),
     email: v.optional(v.string()),
     display_name: v.optional(v.string()),
