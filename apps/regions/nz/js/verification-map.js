@@ -2238,6 +2238,10 @@ class NzVerificationMap {
                     ${this.backendLastError ? `<span class="copy-status${this.signedOutDeliberately ? "" : " error"}">${escapeHtml(this.backendLastError)}</span>` : ""}
                 </div>
             `;
+            // the signed-out layout first, so the button's cell is measured
+            // in the one-row card and not in the work sidebar it leaves
+            // (sonnet review, pr #213: a sign-out or an expired session)
+            this.syncPortalChrome();
             const signInHost = document.getElementById("googleSignInButton");
             this.backend.renderSignInButton(signInHost, {
                 width: this.signInButtonWidth(signInHost),
@@ -2251,7 +2255,6 @@ class NzVerificationMap {
                 this.backendLastError = error.message || "Could not initialise sign-in.";
                 this.renderBackendPanel();
             });
-            this.syncPortalChrome();
             return;
         }
 
