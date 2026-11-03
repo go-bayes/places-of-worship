@@ -2442,6 +2442,11 @@ function human(value) {
         statusText.className = "muted";
         setTransport("saving");
         const selectedTask = state.selected.task;
+        // read before the published-site wait, during which the reviewer may
+        // open another task and replace the snapshot (greptile, pr #216)
+        const heldSnapshot = state.reviewSnapshot;
+        const snapshotHash = heldSnapshot ? heldSnapshot.snapshot_hash : undefined;
+        const includeJudgments = Array.isArray(heldSnapshot?.snapshot?.recorded_judgments) ? true : undefined;
         try {
             if (!decision.confirm_unmatched_links && await linksArePublishedNzSites(linkedSiteIds)) {
                 decision.confirm_unmatched_links = true;
@@ -2451,8 +2456,8 @@ function human(value) {
                 decision,
                 // sent whenever a snapshot is held, whatever the decision
                 // status; the server requires it only for accepted_for_export
-                snapshotHash: state.reviewSnapshot ? state.reviewSnapshot.snapshot_hash : undefined,
-                includeJudgments: Array.isArray(state.reviewSnapshot?.snapshot?.recorded_judgments) ? true : undefined,
+                snapshotHash,
+                includeJudgments,
             });
             statusText.textContent = `Recorded. Task is now ${presentRow({ status: result.task_status }).label.toLowerCase()}.`;
             statusText.className = "state-banner tone-done";
