@@ -64,7 +64,7 @@ assert.doesNotMatch(unvalidated, /overviewKeep/);
 // every html page that loads a changed script carries the bumped query
 // one stamp per script: a script's stamp moves only when that script changes
 const stamps = {
-    "region-map.js": "20261103c", // one card at a time, census fold, key names, phone action bar
+    "region-map.js": "20261103d", // home country shade and outline below zoom 7
     "datamaps-switcher.js": "20261013a", // switcher rows prerender; warming waits for activation
     "unvalidated-places.js": "20261013b", // versioned grid places url; us, de and it use the grid tier from zoom 6
     "verification-map.js": "20261103a", // religionmap.org header, phone sign-in row, map data folded on phones
