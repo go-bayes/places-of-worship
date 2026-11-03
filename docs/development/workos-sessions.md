@@ -19,14 +19,23 @@ The contributor portal (`apps/regions/nz/verification.html`) and the review port
 
 `convex/auth.config.ts` accepts three providers: Google, as before, and the two WorkOS issuers that Convex's AuthKit guide lists (`https://api.workos.com/` with the client ID as audience, and `https://api.workos.com/user_management/<client ID>`), both checked against the WorkOS keys for the client ID. Google stays during the switch, so a contributor signed in with Google is not locked out; removing it is a later step.
 
-A WorkOS token names the person by a WorkOS user ID, which no stored row holds: a row claimed through Google keeps Google's identifier in `auth_subject`, and an invitation holds only an email. `convex/lib/auth.ts` therefore matches a WorkOS identity to its row by the verified email claim (`findUserForIdentity`), and matches a Google identity by `auth_subject` as before. `requireUser`, `users:me` and `users:claimInvite` all go through it, so a person who signed in with Google before the switch reaches the same row, roles and work through WorkOS. The WorkOS path:
+A WorkOS token names the person by a WorkOS user ID, which no row holds before that person's first WorkOS sign-in: a row claimed through Google keeps Google's identifier in `auth_subject`, and an invitation holds only an email. `findUserForIdentity` in `convex/lib/auth.ts` therefore works in two stages:
+
+- **Bound rows.** A WorkOS identity first looks for the row whose `workos_subject` (a new optional field, with the index `by_workos_subject`) holds its identifier, and takes that row.
+- **Rows not yet bound.** Otherwise it looks for the row its verified email names. The first WorkOS sign-in that reaches the row records the identity in `workos_subject`: `users:claimInvite`, which the portal calls after the return from WorkOS, or failing that the first mutation through `requireUser`. From then on only that WorkOS account reaches the row, so a verified email ceases to be a standing credential: a recycled mailbox, or a second WorkOS account with the same address, is refused.
+
+A Google identity is matched by `auth_subject`, as before. `requireUser`, `users:me` and `users:claimInvite` all go through the lookup, so a person who signed in with Google before the switch reaches the same row, roles and work through WorkOS. The WorkOS path:
 
 - refuses a token without an `email` claim, with a message that names the missing claim;
 - refuses an email that WorkOS does not report as verified (`email_verified`);
-- refuses a row that holds only the `service` role, since service accounts never sign in;
-- leaves `auth_subject` untouched when a WorkOS sign-in claims an invitation.
+- refuses an email that names a row already bound to another WorkOS account;
+- refuses any row carrying the `service` role, mixed roles included, since service accounts never sign in;
+- refuses, by email, an active row that no one has signed in to (no `auth_subject` and no `workos_subject`), such as an actor made by `adminUpsertUser`;
+- leaves `auth_subject` untouched.
 
-`adminUpsertUser`, the email-keyed roster and the `pow-cli-seed-service` impersonation path are unchanged. `convex/workos-identity.node-test.mjs` covers the mapping.
+Google's `claimInvite` now claims only with an email Google reports as verified. It also accepts the rollback case: an active row claimed only through WorkOS, which has no Google identity yet, is bound to the Google account with its verified email. A row bound to another Google account is never taken over. The residual exposure is the same in both directions: a row that no provider has bound yet can be reached by its verified email, once.
+
+`adminUpsertUser`, the email-keyed roster and the `pow-cli-seed-service` impersonation path are unchanged. `convex/workos-identity.node-test.mjs` covers the mapping, the binding, the recycled mailbox, duplicate emails and the rollback.
 
 ## One-time setup
 
@@ -61,7 +70,10 @@ Set `WORKOS_CLIENT_ID` on the deployment before deploying this backend. Convex r
 1. Set `WORKOS_CLIENT_ID` on the deployment.
 2. Deploy the backend (both providers). Google sign-in keeps working.
 3. Complete the WorkOS dashboard steps above.
-4. Check a real sign-in on `http://127.0.0.1:8765` with `workosClientId` set in a local, uncommitted copy of `convex-config.js`.
+4. Check a real sign-in on `http://localhost:8765` with `workosClientId` set in a local, uncommitted copy of `convex-config.js`:
+   - an invited Google account signs in, lands signed in, and its row gains `workos_subject`;
+   - a reload keeps the session, and sign-out returns the card;
+   - **the negative check:** a Google account with no invitation signs in at WorkOS and is refused on the sign-in card with "No project invitation found for <address>.", and no `users` row is created or changed.
 5. Commit the client ID in `convex-config.js` (one line, with a `convex-config.js` stamp bump on the three pages that load it and in `tiles-v2-client.test.cjs`). Pages publishes it, and contributors sign in once more, through WorkOS.
 
-Rolling back is the same line set back to empty.
+Rolling back is the same line set back to empty. A person whose invitation was first claimed through WorkOS then signs in with Google once more, and Google's `claimInvite` binds the row to that Google account by its verified email.

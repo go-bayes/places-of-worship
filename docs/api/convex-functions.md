@@ -58,11 +58,11 @@ and export bundles. Accepted changes become research data only after export,
 
 | Function | Kind | Roles | Purpose | Writes |
 | --- | --- | --- | --- | --- |
-| `me` | query | signed-in user or anonymous | Return the current project user record, or `null` if not signed in. A Google identity is matched by `auth_subject`; a WorkOS identity by its verified email claim, and a WorkOS token without one is refused with the reason (`convex/lib/auth.ts`, `findUserForIdentity`, which `requireUser` also uses). | None |
+| `me` | query | signed-in user or anonymous | Return the current project user record, or `null` if not signed in. A Google identity is matched by `auth_subject`; a WorkOS identity by its bound `workos_subject`, or before its first sign-in by its verified email claim, and a WorkOS token without one is refused with the reason (`convex/lib/auth.ts`, `findUserForIdentity`, which `requireUser` also uses). | None |
 | `bootstrapFirstAdmin` | mutation | setup token plus authenticated user | Create the first active admin when the deployment has no users. | `users` |
 | `bootstrapPendingInvites` | mutation | setup token | Create the initial pending admin and RA invites before users claim them. | `users` |
 | `inviteUser` | mutation | `admin` | Create or update a pending invitation and assigned roles. | `users` |
-| `claimInvite` | mutation | invited authenticated user | Activate a pending email invitation. Through Google it binds the invitation to the Google subject (`auth_subject`); through WorkOS it activates the row its verified email names and leaves `auth_subject` as it was. | `users` |
+| `claimInvite` | mutation | invited authenticated user | Activate a pending email invitation. Through Google it needs an email Google reports as verified and binds the invitation, or an active row claimed only through WorkOS, to the Google subject (`auth_subject`); a row bound to another Google account is refused. Through WorkOS it activates the row its verified email names, or its bound row, and records `workos_subject` on the first WorkOS sign-in; `auth_subject` is left as it was. | `users` |
 | `listUsers` | query | `admin` | List project users, optionally filtered by status. | None |
 | `adminUpsertUser` | internal mutation | `admin key` | Repair a user record: patch roles on an existing user while preserving status (unlike `inviteUser`, which resets active users to pending), or insert a pending invite when no row matches the email. | `users` |
 
