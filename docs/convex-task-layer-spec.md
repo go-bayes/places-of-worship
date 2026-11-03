@@ -557,6 +557,22 @@ Fields:
      refused as a likely typo, naming the string and giving an example of each
      accepted form.
 
+  A well-formed identifier that no task carries may still be a mistyped
+  number, `n12354` for `n12345`, so step 2 warns once rather than accepting
+  silently (JB, 2026-11-03). After every other check passes, a decision with
+  such links is refused with one message that names each of them and starts
+  with the stable prefix `Unmatched linked place` (`UNMATCHED_LINK_PREFIX`):
+  `Unmatched linked place: "n12354" matches no place the review system
+  knows. Check the identifier, or record the decision again to keep it.`
+  (`Unmatched linked places: ... match ...` for several). Recording the
+  decision again with `confirm_unmatched_links: true` in the decision input
+  stores the links as entered. The flag is read by the resolver only: it is
+  not stored on the decision row and is not part of `decision_hash`. It relaxes
+  no other refusal: a string fitting no form, a self-link, two
+  links naming one place, or an ambiguous reference is refused with the flag
+  as without it. `recordReviewDecision` and `batchRecordReviewDecisions`
+  behave alike, as both pass through `applyReviewDecision`.
+
   `n123` and `osm:node/123` name one OSM object and so one place. The
   decision is also refused, naming the identifier entered, when a reference
   resolves to more than one site id (a source record shared by several
@@ -570,7 +586,14 @@ Fields:
   portal's help text names the accepted forms, and its check refuses the
   task's own identifiers in either OSM spelling; the form check is the
   server's, and its refusal is shown as returned, so no new public query is
-  needed.
+  needed. The unmatched-link refusal is the exception: the portal shows it as
+  a warning under *Linked place*, relabels the record button `Record anyway`,
+  and sends the next submit of the same links for the same task with
+  `confirm_unmatched_links: true`; editing the field ends the confirmation.
+  On New Zealand review pages, a decision whose links are all published NZ
+  sites (by `id` in `apps/regions/nz/data/nz_places.json`, fetched once and
+  only when a link is entered, in either OSM spelling) is sent with the flag
+  from the first submit, and a real published site draws no warning.
 - `target_year_affects`: array of target-year affect objects.
 - `required_follow_up`: optional.
 - `created_at`, `updated_at`.
