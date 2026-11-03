@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="../../vendor/leaflet@1.9.4/dist/leaflet.css">
     <!-- theme: the choice is applied to <html> before paint (r-u2) -->
     <script src="../_shared/theme.js?v=20260921a"></script>
-    <link rel="stylesheet" href="../_shared/theme.css?v=20261001a">
+    <link rel="stylesheet" href="../_shared/theme.css?v=20261103a">
     <link rel="stylesheet" href="../_shared/state.css?v=20260921a">
     <link rel="stylesheet" href="../_shared/map-data-panel.css?v=20261103a">
     <style>
@@ -934,7 +934,7 @@
         }
         .legend-dot.vm-disputed-swatch {
             background: var(--muted);
-            box-shadow: 0 0 0 1.5px var(--panel), 0 0 0 3px var(--caution-strong);
+            box-shadow: 0 0 0 1.5px var(--panel), 0 0 0 3px var(--marker-disputed);
         }
         .legend-dot.vm-nomination-swatch {
             background: var(--panel);
@@ -979,7 +979,7 @@
             box-shadow: 0 0 0 1.5px var(--marker-halo), 0 0 0 3.5px var(--marker-unvalidated), 0 0 5px var(--shade-ink);
         }
         .verification-marker.vm-disputed {
-            box-shadow: 0 0 0 2px var(--marker-halo), 0 0 0 4px var(--caution-strong), 0 0 5px var(--shade-ink);
+            box-shadow: 0 0 0 2px var(--marker-halo), 0 0 0 4px var(--marker-disputed), 0 0 5px var(--shade-ink);
         }
         .verification-marker.vm-nomination {
             background: var(--panel);
@@ -997,7 +997,7 @@
             box-shadow: 0 0 0 1.5px var(--marker-halo), 0 0 0 3.5px var(--marker-unvalidated), 0 0 0 5px var(--marker-halo), 0 0 6px 5px var(--shade-ink-deep);
         }
         .basemap-imagery .verification-marker.vm-disputed {
-            box-shadow: 0 0 0 2px var(--marker-halo), 0 0 0 4px var(--caution-strong), 0 0 0 6px var(--marker-halo), 0 0 6px 6px var(--shade-ink-deep);
+            box-shadow: 0 0 0 2px var(--marker-halo), 0 0 0 4px var(--marker-disputed), 0 0 0 6px var(--marker-halo), 0 0 6px 6px var(--shade-ink-deep);
         }
         .basemap-imagery .verification-marker.vm-in-review,
         .basemap-imagery .verification-marker.vm-nomination {

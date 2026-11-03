@@ -22,6 +22,11 @@
   --caution: #f2c14e;
   --caution-soft: #3f3110;
   --caution-strong: #e0a800;
+  /* map marks only (jb 2026-11-03, ui item 8): the uncertain target-year
+     fill is indigo and the disputed ring red-violet, so neither draws amber
+     on the open-case amber. text pills keep the caution amber above */
+  --marker-uncertain: #6366f1;
+  --marker-disputed: #c8218e;
   --present: #6fcf97;
   --present-soft: #163a26;
   --absent: #b8c2d0;

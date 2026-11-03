@@ -1407,11 +1407,13 @@ function statusLabel(status) {
 }
 
 // marker fill = target-year status, in the page's own tokens; not assessed
-// is hollow (createIcon), so it has no fill here
+// is hollow (createIcon), so it has no fill here. uncertain has its own
+// indigo mark (jb 2026-11-03, ui item 8), not the caution amber of the
+// uncertain pill, so it never sits amber on the open-case amber
 function statusColor(status) {
     if (status === "present") return "var(--present)";
     if (status === "absent") return "var(--absent)";
-    if (status === "uncertain") return "var(--caution-strong)";
+    if (status === "uncertain") return "var(--marker-uncertain)";
     return "";
 }
 
@@ -6031,9 +6033,10 @@ class NzVerificationMap {
         }
         // the validation state is worn as a RING (box-shadow) or, for in_review,
         // a dashed hollow border — never as the fill hue, so it never competes
-        // with the religion/context colour. Ring hues (blue, slate, amber,
-        // violet) are chosen colourblind-distinct from each other and from the
-        // religion palette. stale_validation is plumbed but unreachable today.
+        // with the religion/context colour. Ring hues (open-case amber,
+        // validated blue, validated-absent ink, disputed red-violet, stale
+        // violet) are chosen colourblind-distinct from each other and from
+        // the fills. stale_validation is plumbed but unreachable today.
         const stateClass = {
             validated_present: " vm-validated-present",
             validated_absent: " vm-validated-absent",

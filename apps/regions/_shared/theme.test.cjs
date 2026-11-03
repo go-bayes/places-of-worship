@@ -30,6 +30,10 @@ const vm = require("node:vm");
   assert.match(sheet, /:root \{\n\s+color-scheme: dark;/);
   assert.match(sheet, /--bg: #0f1620/);
   assert.match(sheet, /--marker-halo: #ffffff/);
+  // map marks leave the caution amber (jb 2026-11-03, ui item 8)
+  assert.match(sheet, /--marker-uncertain: #6366f1/);
+  assert.match(sheet, /--marker-disputed: #c8218e/);
+  assert.match(sheet, /--marker-unvalidated: #f59e0b/);
   assert.equal(/\[data-theme="/.test(sheet), false, "no theme choice block");
   assert.equal(/prefers-color-scheme/.test(sheet), false, "no device query");
   assert.equal(/\.theme-control/.test(sheet), false, "no control styles");
