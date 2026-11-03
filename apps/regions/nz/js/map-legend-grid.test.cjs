@@ -51,7 +51,7 @@ const token = (name) => {
 
 // 3. the text pills keep the amber caution triad
 {
-    assert.match(page, /\.status-uncertain \{\s*background: var\(--caution-soft\);\s*color: var\(--caution\);/);
+    assert.match(page, /\.status-uncertain \{\s*background: var\(--uncertain-soft\);\s*color: var\(--uncertain\);/);
     assert.match(page, /\.skip-badge \{[^}]*var\(--caution-strong\)/);
 }
 

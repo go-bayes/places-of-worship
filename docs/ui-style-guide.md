@@ -227,8 +227,8 @@ Do not reuse these colours for unrelated meanings.
 | Primary action, focus, links, and the validated ring | `button.primary`, `.workflow-step.active`, links, focus outlines | the one blue `--action` `#7fb3e6`, hover `#93c1ec`, soft `#1b3550` (PR-H3: headings are ink, not blue) |
 | Present target-year state | `.status-present`, `.workflow-step.done`, `.closed-badge` | green, `--present` `#6fcf97` on `--present-soft` `#163a26` |
 | Absent target-year state | `.status-absent` | neutral grey, `--absent` `#b8c2d0` on `--absent-soft` `#2c3a48` |
-| Uncertain or caution, in text | `.status-uncertain`, `.pill.amber`, `.skip-badge`, `.skip-form button.skip-confirm`, `.state-pill.tone-act` | the one amber pair `--caution` `#f2c14e` on `--caution-soft` `#3f3110`, `--caution-strong` `#e0a800` for borders (PR-H3, 2026-09-04). Since 2026-11-03 the amber no longer marks the map: see the next two rows |
-| Uncertain target-year status on the map — the marker fill only, never a pill | `statusColor()` in `js/verification-map.js`, `.legend-mark.legend-fill-uncertain` | indigo `--marker-uncertain` `#6366f1` (JB ruling, 2026-11-03, UI item 8 (a): "go with (a) plus (b)"). The `uncertain` pill keeps the caution amber, so the pill and the marker fill differ for this status |
+| Caution or act now, in text | `.pill.amber`, `.skip-badge`, `.skip-form button.skip-confirm`, `.state-pill.tone-act` | the one amber pair `--caution` `#f2c14e` on `--caution-soft` `#3f3110`, `--caution-strong` `#e0a800` for borders (PR-H3, 2026-09-04). Since 2026-11-03 the amber no longer marks the map: see the next two rows |
+| Uncertain target-year status on the map — the marker fill only, never a pill | `statusColor()` in `js/verification-map.js`, `.legend-mark.legend-fill-uncertain` | indigo `--marker-uncertain` `#6366f1` (JB ruling, 2026-11-03, UI item 8 (a): "go with (a) plus (b)"). The `.status-uncertain` tag follows in indigo text, `--uncertain` `#a5b4fc` on `--uncertain-soft` `#262a52` (6.9:1; JB, 2026-11-03: "indigo for uncertain, keep act tags amber"), so the tag and the fill agree; the act tags (`Changes requested`, `Reopened`) keep the caution amber, which means the viewer must act |
 | Disputed validation state on the map — the ring only | `.verification-marker.vm-disputed`, `.legend-dot.vm-disputed-swatch` on both portals (the review portal's `changes requested or reopened`) | red-violet `--marker-disputed` `#c8218e` (JB ruling, 2026-11-03, UI item 8 (b)), replacing `--caution-strong`, so the disputed ring no longer reads as the open-case amber |
 | Not assessed | `.status-not-assessed`; the map marker is hollow white with a `--muted` border (PR-H3) | `--not-assessed` `#8fb8e0` on `--not-assessed-soft` `#1b3550` |
 | Warning or demo-only message | `.demo-warning` | amber warning |
@@ -263,6 +263,8 @@ Both portals share one token sheet, `apps/regions/_shared/theme.css`, and dark i
 | `--caution-strong` | `#9a6700` | `#e0a800` |
 | `--marker-uncertain` | none (added 2026-11-03) | `#6366f1` |
 | `--marker-disputed` | none (added 2026-11-03) | `#c8218e` |
+| `--uncertain` | none (added 2026-11-03) | `#a5b4fc` |
+| `--uncertain-soft` | none (added 2026-11-03) | `#262a52` |
 | `--present` | `#145a32` | `#6fcf97` |
 | `--present-soft` | `#dff3e6` | `#163a26` |
 | `--absent` | `#374151` | `#b8c2d0` |
@@ -296,6 +298,7 @@ Contrast (WCAG relative luminance) on the pairs the pages actually draw; the Dar
 | `--caution` on `--panel` | 7.7:1 | 9.8:1 |
 | `--panel` on `--caution-strong` | 4.9:1 | 7.7:1 |
 | `--marker-uncertain` on `--panel` (the fill inside the marker's border) | none | 3.7:1 |
+| `--uncertain` on `--uncertain-soft` (the uncertain tag) | none | 6.9:1 |
 | `--marker-disputed` on `--panel` (the ring on the dark Streets map) | none | 3.2:1 |
 | `--marker-disputed` on `--marker-halo` (the ring between its halos) | none | 5.2:1 |
 | `--present` on `--panel` | 8.3:1 | 8.7:1 |
