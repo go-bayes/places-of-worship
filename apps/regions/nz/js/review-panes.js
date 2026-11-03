@@ -6,8 +6,12 @@
 // map's height on every screen, phone included. the device remembers both.
 // keyboard: left / right and up / down step, home resets; a double click
 // resets too. same idiom as verification-map.js setupPaneDivider. r-u7:
-// each bar carries three named positions (a drag bar alone is easy to
-// miss); the one in force is pressed.
+// three named positions for each bar (a drag bar alone is easy to miss);
+// the one in force is pressed. jb ruling 2026-11-03 (ui item 6): side by
+// side, both sets sit in a toolbar of segmented buttons above the columns
+// and the bars are plain grips; stacked, the toolbar hides and the map bar
+// keeps its own set. a set may therefore live in more than one place, and
+// every place is kept in step.
 (function () {
     const SIDEBAR_KEY = "pow-review-sidebar-w";
     const MAP_KEY = "pow-review-map-h";
@@ -99,6 +103,12 @@
         const mapBar = options.mapBar || document.getElementById?.("mapDivider");
         const mapEl = options.mapEl || document.getElementById?.("reviewMap");
         const onResize = typeof options.onResize === "function" ? options.onResize : () => {};
+        // where each bar's named positions live: on the bar itself, and in
+        // the toolbar group above the columns (2026-11-03)
+        const presetHosts = {
+            sidebar: [sidebarBar, options.sidebarPresets || document.getElementById?.("queueWidthPresets")].filter(Boolean),
+            map: [mapBar, options.mapPresets || document.getElementById?.("mapHeightPresets")].filter(Boolean),
+        };
         const api = {
             sidebarWidth: null,
             mapHeight: null,
@@ -228,20 +238,22 @@
                 const selected = api.selectedPresets[bar];
                 return matches.includes(selected) ? selected : matches.length === 1 ? matches[0] : null;
             },
+            presetButtons(bar) {
+                return (presetHosts[bar] || []).flatMap((host) => Array.from(host?.querySelectorAll?.("[data-pane-preset]") || []));
+            },
             syncPresets(bar, current) {
-                const host = bar === "sidebar" ? sidebarBar : mapBar;
-                const buttons = host?.querySelectorAll?.("[data-pane-preset]");
-                if (!buttons || !buttons.length) return;
+                const buttons = api.presetButtons(bar);
+                if (!buttons.length) return;
                 const active = api.activePreset(bar, current);
                 buttons.forEach((button) => button.setAttribute?.("aria-pressed", String(button.getAttribute?.("data-pane-preset") === active)));
             },
             stacked,
         };
 
-        // the presets sit on the bars: their taps are not drags, and a
-        // quick second tap is not the bar's reset
-        function wirePresets(host, bar) {
-            host?.querySelectorAll?.("[data-pane-preset]")?.forEach?.((button) => {
+        // a preset on a bar is not a drag, and a quick second tap is not
+        // the bar's reset; in the toolbar the same guards are harmless
+        function wirePresets(bar) {
+            api.presetButtons(bar).forEach((button) => {
                 button.addEventListener("pointerdown", (event) => event.stopPropagation?.());
                 button.addEventListener("dblclick", (event) => event.stopPropagation?.());
                 button.addEventListener("click", (event) => {
@@ -250,8 +262,8 @@
                 });
             });
         }
-        wirePresets(sidebarBar, "sidebar");
-        wirePresets(mapBar, "map");
+        wirePresets("sidebar");
+        wirePresets("map");
 
         // what the device remembers, applied before the first paint settles
         const savedSidebar = read(SIDEBAR_KEY);

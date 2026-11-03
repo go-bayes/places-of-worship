@@ -23,7 +23,7 @@ test("the identity validator carries the definition 0.1.6 bases", () => {
   }
 });
 
-test("the validator keeps the pre-0.1.6 relocation value, so it does not narrow", () => {
+test("the validator keeps the pre-0.1.6 relocation value, so stored rows remain valid", () => {
   assert.ok(validatorValues.includes("relocation"));
 });
 

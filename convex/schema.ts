@@ -534,6 +534,10 @@ export default defineSchema({
     decision_note: v.optional(v.string()),
     accepted_action: v.optional(v.string()),
     identity_decision: v.optional(identityDecision),
+    // the place a successor, end and new foundation, split or merge is
+    // linked to (convex/lib/identityLinks.ts); outside decision_hash, like
+    // evidence_version_hash, until a version 2 envelope names it
+    linked_site_ids: v.optional(v.array(v.string())),
     location_outcome: v.optional(locationOutcome),
     target_year_affects: v.optional(v.array(targetYearAffect)),
     required_follow_up: v.optional(v.string()),

@@ -1,0 +1,127 @@
+/* the map data panel: a corner control that folds to one bar, with a grip
+   that moves it and the fold remembered on the device. the contributor
+   portal drew the idiom first (verification.html, jb 2026-09-19); the
+   review portal takes it from this file (2026-11-03), and the contributor
+   portal is to move onto it in a later, separate change. every rule is
+   scoped to .map-data-panel so a page that already styles the same class
+   names inline is unaffected. colours come from the page's theme tokens.
+
+   at the bottom left of a map the panel grows upward: the body sits above
+   the bar, so the bar stays where the reviewer left it when it opens */
+
+.map-data-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    /* wide enough for grip, fold, count and switch on one line beside a
+       desktop map; a phone's map wraps the bar instead */
+    max-width: min(460px, calc(100vw - 40px));
+    padding: 6px;
+    background: var(--veil);
+    border: 1px solid var(--control-line);
+    border-radius: var(--r-sm);
+    box-shadow: 0 1px 4px var(--shade);
+    color: var(--ink);
+    font-size: var(--fs-sm);
+}
+
+.map-data-panel .legend-body {
+    display: grid;
+    gap: 6px;
+    padding: 4px 4px 2px;
+}
+
+.map-data-panel .legend-body[hidden] {
+    display: none;
+}
+
+/* one bar: the grip (drag to move), the fold (name the panel, open or
+   close it), the count pill and the points switch. it wraps rather than
+   overflow a narrow map */
+.map-data-panel .legend-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+
+.map-data-panel .legend-grip,
+.map-data-panel .legend-fold {
+    width: auto;
+    min-height: 44px;
+    margin: 0;
+    padding: 2px 10px;
+    border: 0;
+    border-radius: var(--r-sm);
+    background: var(--panel-2);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* touch-action none keeps the browser from scrolling instead of dragging */
+.map-data-panel .legend-grip {
+    color: var(--muted);
+    cursor: grab;
+    touch-action: none;
+}
+
+.map-data-panel .legend-fold {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--ink);
+    cursor: pointer;
+}
+
+.map-data-panel .legend-grip:hover:not(:disabled),
+.map-data-panel .legend-fold:hover:not(:disabled) {
+    background: var(--action-soft);
+    border-color: transparent;
+}
+
+.map-data-panel .legend-caret {
+    color: var(--muted);
+}
+
+/* the points switch: the outline button, its word saying what a press does */
+.map-data-panel .legend-points {
+    width: auto;
+    min-height: 44px;
+    margin: 0;
+    padding: 0 12px;
+    border: 1px solid var(--action);
+    border-radius: var(--r-sm);
+    background: var(--panel);
+    color: var(--action);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* a small count of what the map shows, never a control */
+.map-data-panel .legend-count {
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    padding: 2px 10px;
+    border: 1px solid var(--line);
+    border-radius: var(--r-pill, 999px);
+    color: var(--muted);
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.map-data-panel .legend-count[hidden] {
+    display: none;
+}
+
+.map-data-panel.dragging {
+    box-shadow: 0 4px 14px var(--shade-deep);
+}
+
+.map-data-panel.dragging .legend-grip {
+    cursor: grabbing;
+}

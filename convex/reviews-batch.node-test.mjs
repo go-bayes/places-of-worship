@@ -14,7 +14,11 @@ function context({ intake = false, agentReview = null } = {}) {
   const rows = { users: [user], tasks: [task], evidence_drafts: [draft], review_decisions: [], task_events: [], agent_reviews: agentReview === null ? [] : [agentReview], historical_claims: [], site_occupancies: [], derived_target_year_states: [], derived_year_locations: [], derived_target_year_functions: [], derived_state_events: [], review_snapshots: [], evidence_head_changes: [] };
   const q = { eq() { return q; }, gte() { return q; } };
   const db = {
-    query(table) { return { withIndex(_index, select) { if (select) select(q); return { async unique() { if (table === "users") return rows.users[0]; if (table === "tasks") return rows.tasks[0]; if (table === "evidence_drafts") return rows.evidence_drafts[0]; if (table === "agent_reviews") return rows.agent_reviews[0] ?? null; if (table === "review_snapshots") return rows.review_snapshots[0] ?? null; return null; }, async collect() { return rows[table] ?? []; }, async first() { return (rows[table] ?? [])[0] ?? null; } }; } }; },
+    query(table) { return { withIndex(_index, select) {
+      // the tasks table answers by the fields its index ranges name, so the
+      // linked-place resolver sees only the tasks that carry an identifier
+      if (table === "tasks") { const eqs = []; const range = { eq(field, value) { eqs.push([field, value]); return range; } }; if (select) select(range); const hits = rows.tasks.filter((row) => eqs.every(([field, value]) => row[field] === value)); return { async unique() { return hits[0] ?? null; }, async take(n) { return hits.slice(0, n); }, async collect() { return hits; }, async first() { return hits[0] ?? null; } }; }
+      if (select) select(q); return { async unique() { if (table === "users") return rows.users[0]; if (table === "tasks") return rows.tasks[0]; if (table === "evidence_drafts") return rows.evidence_drafts[0]; if (table === "agent_reviews") return rows.agent_reviews[0] ?? null; if (table === "review_snapshots") return rows.review_snapshots[0] ?? null; return null; }, async collect() { return rows[table] ?? []; }, async first() { return (rows[table] ?? [])[0] ?? null; } }; } }; },
     async insert(table, value) { rows[table].push(value); return `${table}_${rows[table].length}`; },
     async patch(_id, value) { for (const table of Object.values(rows)) { const row = table.find((candidate) => candidate._id === _id); if (row) Object.assign(row, value); } },
   };
@@ -44,19 +48,49 @@ test("batch acceptance succeeds with the current snapshot and records an audit h
   assert.match(recorded.snapshot_json, /needs_review/);
 });
 
-test("a decision records a definition 0.1.6 identity basis and hashes it", async () => {
+test("a decision records a definition 0.1.6 identity basis with its link, outside the hash", async () => {
+  const ctx = context();
+  // the predecessor, a known place in another country, named by its osm reference
+  ctx.rows.tasks.push({ _id: "task_row_vu", task_id: "vu-revise-1", country_code: "VU", matched_current_site_id: "osm:node/555", matched_osm_id: "555", osm_object_type: "node" });
+  const inspected = await getReviewSnapshot._handler(ctx, { taskId: "task_1", evidenceDraftId: "draft_1" });
+  const successor = item(inspected.snapshot_hash);
+  successor.decision.identity_decision = "successor_at_new_site";
+  successor.decision.linked_site_ids = [" vu-revise-1 "];
+  await batchRecordReviewDecisions._handler(ctx, { items: [successor] });
+  const stored = ctx.rows.review_decisions[0];
+  assert.equal(stored.identity_decision, "successor_at_new_site");
+  // stored as the place's canonical site identifier, not the task id entered
+  assert.deepEqual(stored.linked_site_ids, ["osm:node/555"]);
+  // the version 1 envelope names its fields, so the links stay outside it
+  const { canonicalJson, sha256 } = await import("./lib/sha256.ts");
+  const { decision_hash, review_snapshot_hash, decision_hash_version, evidence_version_hash, linked_site_ids, ...fields } = stored;
+  fields.reviewer_user_id = String(fields.reviewer_user_id);
+  const expected = sha256(canonicalJson({ schema_version: "review-decision.v1", decision: fields, review_snapshot_hash }));
+  assert.equal(decision_hash, expected);
+});
+
+test("a new decision refuses relocation and an unlinked successor before writing", async () => {
+  const ctx = context();
+  const inspected = await getReviewSnapshot._handler(ctx, { taskId: "task_1", evidenceDraftId: "draft_1" });
+  const relocation = item(inspected.snapshot_hash);
+  relocation.decision.identity_decision = "relocation";
+  await assert.rejects(batchRecordReviewDecisions._handler(ctx, { items: [relocation] }), /no longer an identity basis/);
+  const unlinked = item(inspected.snapshot_hash);
+  unlinked.decision.identity_decision = "successor_at_new_site";
+  await assert.rejects(batchRecordReviewDecisions._handler(ctx, { items: [unlinked] }), /linked place's identifier/);
+  assert.equal(ctx.rows.review_decisions.length, 0);
+  assert.equal(ctx.task.status, "needs_review");
+});
+
+test("a new decision refuses a link that fits no place form and no task carries, before writing", async () => {
   const ctx = context();
   const inspected = await getReviewSnapshot._handler(ctx, { taskId: "task_1", evidenceDraftId: "draft_1" });
   const successor = item(inspected.snapshot_hash);
   successor.decision.identity_decision = "successor_at_new_site";
-  await batchRecordReviewDecisions._handler(ctx, { items: [successor] });
-  const stored = ctx.rows.review_decisions[0];
-  assert.equal(stored.identity_decision, "successor_at_new_site");
-  const { canonicalJson, sha256 } = await import("./lib/sha256.ts");
-  const { decision_hash, review_snapshot_hash, decision_hash_version, evidence_version_hash, ...fields } = stored;
-  fields.reviewer_user_id = String(fields.reviewer_user_id);
-  const expected = sha256(canonicalJson({ schema_version: "review-decision.v1", decision: fields, review_snapshot_hash }));
-  assert.equal(decision_hash, expected);
+  successor.decision.linked_site_ids = ["nz-osm-node-1"];
+  await assert.rejects(batchRecordReviewDecisions._handler(ctx, { items: [successor] }), /Linked place "nz-osm-node-1" is not a place identifier/);
+  assert.equal(ctx.rows.review_decisions.length, 0);
+  assert.equal(ctx.task.status, "needs_review");
 });
 
 test("batch acceptance refuses intake-only drafts before writing", async () => {

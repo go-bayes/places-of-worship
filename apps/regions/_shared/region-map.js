@@ -47,6 +47,41 @@ document.title = RC.title;
 const REGIONS_BASE = RC.regionsBase || "../";
 const SCHEMA_BASE = RC.schemaBase || "../../../schemas/";
 
+// one card at a time (ui suggestions item 1, accepted 2026-11-03): the
+// onboarding card leads with at most two sentences of its intro and at
+// most three bullets. a longer intro and a longer list fold into a
+// Source notes disclosure (not "About these data", which the census panel
+// already uses), so the card's buttons stay on a phone screen. the copy
+// itself stays in each page's config; only its arrangement is decided here
+const ONBOARD_LEAD_SENTENCES = 2;
+const ONBOARD_OPEN_BULLETS = 3;
+function onboardCopy(onboarding) {
+  const intro = String((onboarding && onboarding.intro) || "").trim();
+  const bullets = (onboarding && onboarding.bullets) || [];
+  // a sentence ends at . ! or ? followed by space and a capital, a digit,
+  // an opening quote or bracket, or markup
+  const sentences = intro ? intro.split(/(?<=[.!?])\s+(?=[A-Z0-9<“"‘(])/) : [];
+  const lead = sentences.slice(0, ONBOARD_LEAD_SENTENCES).join(" ");
+  const notesIntro = sentences.slice(ONBOARD_LEAD_SENTENCES).join(" ");
+  const bulletsInNotes = bullets.length > ONBOARD_OPEN_BULLETS;
+  return {
+    lead,
+    notesIntro,
+    openBullets: bulletsInNotes ? [] : bullets.slice(),
+    notesBullets: bulletsInNotes ? bullets.slice() : []
+  };
+}
+
+// line icons for the phone action bar (ui suggestions item 4): icon over
+// label on phones; the desktop sheet hides them, so the row there reads
+// as before
+function barIcon(paths) {
+  return `<svg class="bar-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`;
+}
+const SEARCH_ICON = barIcon('<circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/>');
+const CLOSE_ICON = barIcon('<path d="M6 6l12 12M18 6 6 18"/>');
+const CONTRIBUTE_ICON = barIcon('<path d="M12 5v14M5 12h14"/>');
+
 // ── page chrome ─────────────────────────────────────────────────────
 // injected rather than authored per country so the structure cannot
 // drift between forks; only the copy (onboarding, wordmark links) comes
@@ -59,9 +94,17 @@ const SCHEMA_BASE = RC.schemaBase || "../../../schemas/";
   // the chrome tokens in map-shell.css are scoped to this class, so the
   // light working tools that link the same sheet keep their own ink
   root.classList.add("map-chrome");
-  const onboardBullets = (RC.onboarding.bullets || [])
-    .map((item) => `<li>${item}</li>`)
-    .join("\n      ");
+  const onboardParts = onboardCopy(RC.onboarding);
+  const onboardList = (items) => items.length
+    ? `<ul>\n        ${items.map((item) => `<li>${item}</li>`).join("\n        ")}\n      </ul>`
+    : "";
+  const onboardNotes = onboardParts.notesIntro || onboardParts.notesBullets.length
+    ? `<details class="onboard-notes">
+        <summary>Source notes</summary>
+        ${onboardParts.notesIntro ? `<p>${onboardParts.notesIntro}</p>` : ""}
+        ${onboardList(onboardParts.notesBullets)}
+      </details>`
+    : "";
   // onboarding actions: config links first, then the shared dismiss button
   const onboardLinks = (RC.onboarding.links || [])
     .map((link) => link.external
@@ -85,6 +128,8 @@ const SCHEMA_BASE = RC.schemaBase || "../../../schemas/";
   // CENSUS_LEVELS binds. a censusless page (the global map) gets no
   // census element at all, which is what keeps the census machinery inert
   const hasCensusConfig = Boolean(RC.censusLevels || RC.overlays);
+  // the stylesheets seat the onboarding card below the census row
+  root.classList.toggle("has-census", hasCensusConfig);
   const censusChrome = hasCensusConfig ? `  <!-- census data control: options, colour key and time slider; front and
        centre (jb 2026-07-09) now the top strip has room. the pill is split:
        the census-data half toggles the panel while the layer is on and turns
@@ -100,6 +145,14 @@ const SCHEMA_BASE = RC.schemaBase || "../../../schemas/";
       <span id="census-partial-tag" hidden>Partial layer</span>
       <select id="censusPoints" class="shell-pill-select" aria-label="Place dots"></select>
     </div>
+    <!-- the folded panel (ui suggestions item 1, 2026-11-03): one bar that
+         names what the overlay shows, so the map is legible without
+         opening the panel; the whole bar opens it -->
+    <button id="census-fold" class="shell-pill" type="button" aria-controls="census-panel" aria-expanded="false" hidden>
+      <span class="census-fold-dot" aria-hidden="true"></span>
+      <span class="census-fold-text"><span class="census-fold-metric"></span><span class="census-fold-frame"></span><span class="census-fold-level"></span></span>
+      <span class="census-fold-change">Change <span aria-hidden="true">▾</span></span>
+    </button>
     <div id="census-panel">
       <!-- phone-only dismiss: the panel covers half a phone screen, and
            field-testing (jb 2026-07-16) showed the census button's caret
@@ -141,11 +194,12 @@ const SCHEMA_BASE = RC.schemaBase || "../../../schemas/";
   <div id="tile-status">Loading tiles…</div>
   <div id="click-hint" class="shell-toast" role="status" aria-live="polite"></div>
   <div id="onboard" role="dialog" aria-label="${RC.onboarding.ariaLabel || "About this map"}">
-    <h3>${RC.onboarding.title}</h3>
-    <p>${RC.onboarding.intro}</p>
-    <ul>
-      ${onboardBullets}
-    </ul>
+    <div class="onboard-body">
+      <h3>${RC.onboarding.title}</h3>
+      ${onboardParts.lead ? `<p>${onboardParts.lead}</p>` : ""}
+      ${onboardList(onboardParts.openBullets)}
+      ${onboardNotes}
+    </div>
     <div class="onboard-actions">
       ${onboardLinks}
       <button type="button" id="onboard-dismiss">Got it</button>
@@ -177,14 +231,14 @@ const SCHEMA_BASE = RC.schemaBase || "../../../schemas/";
     </svg>
   </button>
   <div id="bottom-actions" class="shell-bottom-centre">
-    <button id="dock-toggle" class="shell-pill" type="button">Search &amp; Filters</button>
+    <button id="dock-toggle" class="shell-pill bar-cell" type="button">${SEARCH_ICON}<span class="bar-label">Search &amp; Filters</span></button>
     <button id="filters-clear" class="shell-pill" type="button" hidden aria-label="Clear filters"></button>
-    <button id="near-me" class="shell-pill" type="button" aria-pressed="false"><span class="nm-dot"></span><span>Near Me</span></button>
+    <button id="near-me" class="shell-pill bar-cell" type="button" aria-pressed="false"><span class="nm-dot" aria-hidden="true"></span><span class="bar-label">Near Me</span></button>
     <div id="datamaps-pill" class="shell-pill" aria-live="polite">
       <a id="datamaps-go" href="${REGIONS_BASE}" title="Country data maps"><span class="dm-label-long">Data Maps</span><span class="dm-label-short">Data</span></a>
       <button id="datamaps-caret" type="button" aria-label="Search all country data maps"><span class="dm-caret-word">Countries</span><span class="dm-caret-glyph" aria-hidden="true">▴</span></button>
     </div>
-    <button id="contribute-go" class="shell-pill" type="button" aria-expanded="false" aria-controls="contribute-sheet" title="Submit evidence to this project">Contribute</button>
+    <button id="contribute-go" class="shell-pill bar-cell" type="button" aria-expanded="false" aria-controls="contribute-sheet" title="Submit evidence to this project">${CONTRIBUTE_ICON}<span class="bar-label">Contribute</span></button>
   </div>
   <!-- top-left: the denomination key for the place dots -->
   ${keyWrapOpen}
@@ -472,6 +526,15 @@ const map = new maplibregl.Map({
 map.addControl(new maplibregl.AttributionControl({
   customAttribution: '<strong>Project compilation <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a></strong>'
 }), "bottom-right");
+// phones: maplibre shows the credit open on load and folds it to its disc
+// on the first drag. the chrome's sheets (search, contribute, the census
+// panel) open over the same corner, so a press anywhere outside the credit
+// folds it too (ui suggestions item 4); the disc reopens it
+document.addEventListener("click", (event) => {
+  const attrib = document.querySelector(".maplibregl-ctrl-attrib.maplibregl-compact-show");
+  if (!attrib || attrib.contains(event.target)) return;
+  attrib.classList.remove("maplibregl-compact-show");
+}, true);
 
 // fall back to the free carto basemap when the keyed maptiler style or
 // tiles stop loading: 401/403 key blocked or credit exhausted, 429
@@ -2411,17 +2474,24 @@ function scheduleSearchHintClear(targetCoords) {
   requestAnimationFrame(check);
 }
 
+// one card at a time (ui suggestions item 1, accepted 2026-11-03): while
+// the onboarding card shows, the census panel stays folded to its bar, and
+// the card's dismissal is remembered per country across visits
+// (localStorage; it was per session). reset still resurfaces the card
 function showOnboard() {
   if (!onboard) return;
   onboard.classList.add("visible");
+  foldCensusForOnboard();
 }
 
 function hideOnboard(persist) {
   if (!onboard) return;
+  const wasVisible = onboard.classList.contains("visible");
   onboard.classList.remove("visible");
+  if (wasVisible) restoreCensusAfterOnboard();
   if (!persist) return;
   try {
-    sessionStorage.setItem(ONBOARD_STORAGE_KEY, "1");
+    localStorage.setItem(ONBOARD_STORAGE_KEY, "1");
   } catch (error) {
     // Ignore storage failures (private mode, etc).
   }
@@ -2429,7 +2499,7 @@ function hideOnboard(persist) {
 
 function shouldShowOnboard() {
   try {
-    return !sessionStorage.getItem(ONBOARD_STORAGE_KEY);
+    return !localStorage.getItem(ONBOARD_STORAGE_KEY);
   } catch (error) {
     return true;
   }
@@ -2460,8 +2530,10 @@ if (onboard) {
 
 function syncDockToggleLabel(isOpen) {
   if (!dockToggle) return;
-  // the long label overflows the phone pill row once the filter chip joins
-  dockToggle.textContent = isOpen ? "Close" : (IS_MOBILE ? "Search" : "Search & Filters");
+  // the long label overflows the phone row; the icon shows in the phone
+  // bar only
+  const label = isOpen ? "Close" : (IS_MOBILE ? "Search" : "Search & Filters");
+  dockToggle.innerHTML = `${isOpen ? CLOSE_ICON : SEARCH_ICON}<span class="bar-label">${label}</span>`;
 }
 
 function dockIsOpen() {
@@ -3112,16 +3184,63 @@ let countsScheduled = false;
 
 // compact pull-down: three colour dots hint at the palette, the panel
 // holds the full key. dots follow the top categories in view.
-let countsTopThree = null;
-function syncCountsToggleLabel() {
-  if (!countsToggle) return;
-  const top = countsTopThree && countsTopThree.length ? countsTopThree : countLabels.slice(0, 3);
+// the key names its colours (ui suggestions item 3, accepted 2026-11-03):
+// on every width the accessible name lists the categories the dots show
+// ("Show denomination key: Christian, Muslim, Hindu"). on the global map at
+// 900 px and wider, with live counts in view, the pill becomes a strip:
+// each of the top three categories as dot, name and count, then Key and
+// its caret. a strip that would run into the top-right identity pill drops
+// its counts, then its names. country maps keep the compact pill, because
+// the census pill and its folded bar sit beside the key there
+let countsTopThree = null; // [{ key, label, color, count }], or null
+let countsSampled = false; // the counts are an approximation (below zoom 8)
+let keyStripLive = false;  // the strip has live counts to show
+const KEY_STRIP_QUERY = window.matchMedia("(min-width: 900px)");
+function keyStripWanted() {
+  return RC.keyPlacement === "top-centre" && KEY_STRIP_QUERY.matches;
+}
+// form: "counts" (dot, name, count), "names" (dot, name) or "dots"
+function countsToggleName(top, form) {
+  const verb = countsUserEnabled ? "Hide" : "Show";
+  const names = top.map((c) => (form === "counts" ? `${c.label} ${countsSampled ? "about " : ""}${c.count.toLocaleString()}` : c.label));
+  return `${verb} denomination key: ${names.join(", ")}`;
+}
+function renderCountsToggle(top, form) {
+  const dot = (c) => `<span class="key-dot" style="background:${c.color}" aria-hidden="true"></span>`;
+  const cat = (c) => `<span class="key-cat">${dot(c)}<span class="key-name">${c.label}</span>` +
+    // sampled counts carry a tilde, as the panel's line says "places shown"
+    (form === "counts" ? `<span class="key-count">${countsSampled ? "~" : ""}${c.count.toLocaleString()}</span>` : "") +
+    `</span>`;
+  countsToggle.classList.toggle("key-strip", form !== "dots");
   countsToggle.innerHTML =
-    top.map((c) => `<span class="key-dot" style="background:${c.color}"></span>`).join("") +
+    (form === "dots" ? top.map(dot).join("") : top.map(cat).join("")) +
     `<span class="key-label">Key</span>` +
     `<span class="key-caret" aria-hidden="true">${countsUserEnabled ? "▴" : "▾"}</span>`;
+  countsToggle.setAttribute("aria-label", countsToggleName(top, form));
+}
+// the strip and the identity pill share the top row; a strip that overlaps
+// the pill's box (with a small gap) does not fit
+function keyStripClearOfWordmark() {
+  const mark = document.getElementById("wordmark");
+  if (!mark) return true;
+  const a = countsToggle.getBoundingClientRect();
+  const b = mark.getBoundingClientRect();
+  if (!b.width || !b.height) return true;
+  const gap = 8;
+  return a.right + gap <= b.left || a.left >= b.right + gap || a.bottom <= b.top || a.top >= b.bottom;
+}
+function syncCountsToggleLabel() {
+  if (!countsToggle) return;
+  const live = Boolean(countsTopThree && countsTopThree.length);
+  const top = live ? countsTopThree : countLabels.slice(0, 3);
   countsToggle.setAttribute("aria-expanded", countsUserEnabled ? "true" : "false");
-  countsToggle.setAttribute("aria-label", countsUserEnabled ? "Hide denomination key" : "Show denomination key");
+  if (live && keyStripLive && keyStripWanted()) {
+    renderCountsToggle(top, "counts");
+    if (keyStripClearOfWordmark()) return;
+    renderCountsToggle(top, "names");
+    if (keyStripClearOfWordmark()) return;
+  }
+  renderCountsToggle(top, "dots");
 }
 
 if (countsToggle) {
@@ -3180,8 +3299,10 @@ function renderCounts(counts, sampled = false) {
   const ranked = countLabels
     .filter((c) => (counts[c.key] || 0) > 0)
     .sort((a, b) => (counts[b.key] || 0) - (counts[a.key] || 0))
-    .slice(0, 3);
+    .slice(0, 3)
+    .map((c) => ({ ...c, count: counts[c.key] || 0 }));
   countsTopThree = ranked.length ? ranked : null;
+  countsSampled = Boolean(sampled);
   syncCountsToggleLabel();
 }
 
@@ -3205,6 +3326,9 @@ function updateCounts() {
     countsLastUpdate = performance.now();
     const zoom = map.getZoom();
     const eligibleZoom = zoom >= 4;
+    // the strip names live counts only where the panel would count them
+    const stripCounts = eligibleZoom && !keyDotsOff && keyStripWanted();
+    if (!stripCounts) keyStripLive = false;
     if (countsToggle) {
       countsToggle.style.display = "inline-flex";
       const disableToggle = (!eligibleZoom || keyDotsOff) && !IS_MOBILE;
@@ -3245,15 +3369,17 @@ function updateCounts() {
     }
     if (!countsUserEnabled) {
       countsPanel.style.display = "none";
-      return;
+      // a closed panel still counts when the key strip shows the leaders
+      if (!stripCounts) return;
+    } else {
+      countsPanel.style.display = "block";
+      if (countsHint) {
+        countsHint.style.display = "none";
+        countsHint.textContent = countsHintDefault;
+      }
+      countsList.style.display = "grid";
+      countsTotal.style.display = "block";
     }
-    countsPanel.style.display = "block";
-    if (countsHint) {
-      countsHint.style.display = "none";
-      countsHint.textContent = countsHintDefault;
-    }
-    countsList.style.display = "grid";
-    countsTotal.style.display = "block";
     const preferredLayer = zoom < 6 ? LAYERS.overview : LAYERS.places;
     if (!map.getLayer(preferredLayer)) return;
     const features = map.queryRenderedFeatures({ layers: [preferredLayer] });
@@ -3273,9 +3399,27 @@ function updateCounts() {
     const sampled = zoom < 6
       ? true
       : placesCountsSampled(zoom, drawnPlacesTileZooms());
+    keyStripLive = stripCounts;
     renderCounts(counts, sampled);
   });
 }
+// crossing the strip's width threshold redraws the key in the other form
+KEY_STRIP_QUERY.addEventListener("change", () => {
+  if (!KEY_STRIP_QUERY.matches) keyStripLive = false;
+  syncCountsToggleLabel();
+  updateCounts();
+});
+// a resize within the strip's range can bring the identity pill closer, so
+// the strip's form is checked again, once a frame at most
+let keyStripResizeQueued = false;
+window.addEventListener("resize", () => {
+  if (!keyStripWanted() || keyStripResizeQueued) return;
+  keyStripResizeQueued = true;
+  requestAnimationFrame(() => {
+    keyStripResizeQueued = false;
+    syncCountsToggleLabel();
+  });
+});
 
 let tileTimer = null;
 function showTileStatus() {
@@ -3555,42 +3699,27 @@ const censusMetricSelect = document.getElementById("censusMetric");
 const censusSourceSelect = document.getElementById("censusSource");
 const censusYearSelect = document.getElementById("censusYear");
 const censusLegend = document.getElementById("census-legend");
+const censusFold = document.getElementById("census-fold");
 
 // census is on by default; the centre Census button opens and closes its
 // data panel (options, colour key, slider) rather than toggling the layer.
-// phones remember a dismissal for the session (tribunal 2026-07-17 item 4):
-// the panel teaches on the first visit; once closed via the x or the census
-// button, later country pages open with the choropleth on and the panel
-// folded. an explicit reopen clears the memory — the state follows the last
-// gesture. desktop keeps the always-open default.
-const CENSUS_PANEL_DISMISSED_KEY = "pow-census-panel-dismissed";
-function censusPanelDismissalRemembered() {
-  if (!IS_MOBILE) return false;
-  try {
-    return window.sessionStorage.getItem(CENSUS_PANEL_DISMISSED_KEY) === "1";
-  } catch (err) {
-    return false;
-  }
-}
-function rememberCensusPanelDismissal(dismissed) {
-  if (!IS_MOBILE) return;
-  try {
-    if (dismissed) window.sessionStorage.setItem(CENSUS_PANEL_DISMISSED_KEY, "1");
-    else window.sessionStorage.removeItem(CENSUS_PANEL_DISMISSED_KEY);
-  } catch (err) {
-    // private-mode storage failures cost only the memory
-  }
-}
-let censusPanelOpen = !censusPanelDismissalRemembered();
+// folded, the panel is one bar under the button that names the overlay's
+// metric, year and geography, and the whole bar opens it (ui suggestions
+// item 1, accepted 2026-11-03). phones open the panel folded on every
+// country page, which replaces the per-session dismissal memory of the
+// tribunal (2026-07-17 item 4): the panel no longer covers half a phone
+// screen on arrival, and the bar still says what the map shows. desktop
+// opens it, except while the onboarding card shows (see
+// foldCensusForOnboard below)
+let censusPanelOpen = !IS_MOBILE;
 // the census button follows the layer (jb 2026-10-14). while the layer is
 // off (the data maps pill's toggle, a failed load, a foreign location fix)
-// the panel stays hidden, because its selects, key and slider would describe
+// the panel and its folded bar stay hidden, because they would describe
 // a layer the map is not drawing, and the button turns the layer back on
-// instead of folding the panel. censusPanelOpen and the phone's remembered
-// dismissal are left as they were, so the layer's return restores the panel
-// as the visitor left it. until the first enable or disable (the default
-// enable runs at map load) the button reads as on, so the panel does not
-// show the off state while the map loads
+// instead of folding the panel. censusPanelOpen is left as it was, so the
+// layer's return restores the panel as the visitor left it. until the
+// first enable or disable (the default enable runs at map load) the button
+// reads as on, so the panel does not show the off state while the map loads
 let censusLayerSettled = false;
 function censusLayerOff() {
   return HAS_CENSUS && censusLayerSettled && !censusState.enabled;
@@ -3598,6 +3727,7 @@ function censusLayerOff() {
 function syncCensusPanel() {
   const off = censusLayerOff();
   if (censusPanel) censusPanel.hidden = off || !censusPanelOpen;
+  if (censusFold) censusFold.hidden = off || censusPanelOpen;
   if (!censusToggle) return;
   const noun = RC.dataNoun || "Census";
   const caret = censusToggle.querySelector(".census-caret");
@@ -3628,6 +3758,32 @@ function censusActive() {
 }
 function censusLevelDef() {
   return CENSUS_LEVELS[censusState.level];
+}
+
+// one card at a time (ui suggestions item 1): while the onboarding card
+// shows, an open panel folds to its bar; dismissing the card opens it
+// again on desktop, unless the visitor has opened or folded the panel in
+// the meantime. phones keep the bar after the card, as they open with it
+let censusFoldedForOnboard = false;
+function foldCensusForOnboard() {
+  if (!censusPanel || !censusPanelOpen) return;
+  censusPanelOpen = false;
+  censusFoldedForOnboard = true;
+  syncCensusPanel();
+}
+function restoreCensusAfterOnboard() {
+  if (!censusFoldedForOnboard) return;
+  censusFoldedForOnboard = false;
+  if (IS_MOBILE) return;
+  censusPanelOpen = true;
+  syncCensusPanel();
+}
+// the card appears after a short delay; the panel must not flash open
+// before it, so a first visit starts folded (the sync runs with the
+// census button's wiring below)
+if (censusPanel && censusPanelOpen && onboard && shouldShowOnboard()) {
+  censusPanelOpen = false;
+  censusFoldedForOnboard = true;
 }
 // unified timeline: a country whose eras live on different boundary
 // levels (the us runs 1850-2020 across six county vintages) declares
@@ -5336,7 +5492,38 @@ function passportProviders(meta) {
 // interaction: source · construct on one line, geography · wave on the
 // next. it renders only what the product metadata states — a page whose
 // product carries no construct shows none rather than a guessed one.
+// the folded panel's bar (ui suggestions item 1) names what the overlay
+// shows: the metric without its unit, the year and, on wider screens, the
+// geography ("Religious affiliation, 2023 · Territorial authority"). the
+// full sentence is also its tooltip, since a short bar ellipsises the
+// geography first and then the metric
+function renderCensusFold() {
+  if (!censusFold) return;
+  const metricEl = censusFold.querySelector(".census-fold-metric");
+  const frameEl = censusFold.querySelector(".census-fold-frame");
+  const levelEl = censusFold.querySelector(".census-fold-level");
+  if (!metricEl || !frameEl || !levelEl) return;
+  let metric = RC.dataNoun || "Census";
+  let year = "";
+  let level = "";
+  if (pulotuState.active) {
+    metric = "Pulotu cultures";
+  } else {
+    const def = CENSUS_METRICS[censusState.metric];
+    if (def && def.label) metric = String(def.label).replace(/\s*\(?%\)?\s*$/, "");
+    year = censusState.year ? `, ${censusState.year}` : "";
+    const levelDef = censusLevelDef();
+    level = levelDef && levelDef.label ? levelDef.label : "";
+  }
+  metricEl.textContent = metric;
+  frameEl.textContent = year;
+  // the geography is the first part to give way when the bar is short
+  levelEl.textContent = level ? `\u00a0· ${level}` : "";
+  censusFold.title = `${metric}${year}${level ? ` · ${level}` : ""}. Change the data shown`;
+}
+
 function updateDataPassport() {
+  renderCensusFold();
   const passport = document.getElementById("census-passport");
   const evidence = document.getElementById("census-evidence");
   const hideAll = () => {
@@ -5783,6 +5970,7 @@ async function setOverlayDomain(domainId) {
   applyCensusPaint();
 }
 
+renderCensusFold();
 if (censusToggle) {
   syncCensusPanel();
   censusToggle.addEventListener("click", () => {
@@ -5794,9 +5982,20 @@ if (censusToggle) {
         .finally(syncCensusChrome);
       return;
     }
+    // the visitor's gesture outranks the onboarding card's fold
+    censusFoldedForOnboard = false;
     censusPanelOpen = !censusPanelOpen;
-    rememberCensusPanelDismissal(!censusPanelOpen);
     syncCensusPanel();
+  });
+}
+// the folded bar opens the panel through the same state; focus moves to
+// the census button, which now reads as expanded, since the bar hides
+if (censusFold) {
+  censusFold.addEventListener("click", () => {
+    censusFoldedForOnboard = false;
+    censusPanelOpen = true;
+    syncCensusPanel();
+    if (censusToggle) censusToggle.focus();
   });
 }
 // the phone X closes through the same state, so the census button's
@@ -5804,8 +6003,8 @@ if (censusToggle) {
 const censusClose = document.getElementById("census-close");
 if (censusClose) {
   censusClose.addEventListener("click", () => {
+    censusFoldedForOnboard = false;
     censusPanelOpen = false;
-    rememberCensusPanelDismissal(true);
     syncCensusPanel();
   });
 }
@@ -5906,7 +6105,7 @@ if (censusSourceSelect && RC.pulotuCultures) {
 // that draws the tile come first
 let countsSettleTimer = null;
 function scheduleCountsRefresh() {
-  if (!countsUserEnabled) return;
+  if (!countsUserEnabled && !keyStripWanted()) return;
   clearTimeout(countsSettleTimer);
   countsSettleTimer = setTimeout(updateCounts, 300);
 }
@@ -6098,8 +6297,11 @@ function setOffer(mode, region) {
   } else if (mode === "offer") {
     // the arrow sits outside the ellipsised name, so a long country
     // never truncates the navigation affordance itself
-    offerGo.innerHTML = `<span class="dm-offer-name"></span><span class="dm-offer-arrow" aria-hidden="true">→</span>`;
-    offerGo.querySelector(".dm-offer-name").textContent = `${region.name} Data`;
+    // the phone bar's cell takes the short label, the country's code
+    // (ui suggestions item 4); the accessible name keeps the full name
+    offerGo.innerHTML = `<span class="dm-offer-name"><span class="dm-label-long"></span><span class="dm-label-short"></span></span><span class="dm-offer-arrow" aria-hidden="true">→</span>`;
+    offerGo.querySelector(".dm-offer-name .dm-label-long").textContent = `${region.name} Data`;
+    offerGo.querySelector(".dm-offer-name .dm-label-short").textContent = `${String(region.code).toUpperCase()} Data`;
     offerGo.setAttribute("href", handoffHref(region));
     offerGo.removeAttribute("role");
     offerGo.setAttribute("aria-label", `Open the ${region.name} data map`);
@@ -6108,7 +6310,9 @@ function setOffer(mode, region) {
     // global-only state: a data country sits under the centre but the
     // view is too far out for a direct offer; the hint promises data on
     // zoom and the click handler delivers the zoom
-    offerGo.textContent = `Zoom for ${region.name} data`;
+    offerGo.innerHTML = `<span class="dm-label-long"></span><span class="dm-label-short"></span>`;
+    offerGo.querySelector(".dm-label-long").textContent = `Zoom for ${region.name} data`;
+    offerGo.querySelector(".dm-label-short").textContent = `${String(region.code).toUpperCase()} Data`;
     offerGo.setAttribute("href", REGIONS_BASE);
     offerGo.removeAttribute("role");
     offerGo.setAttribute("aria-label", `Zoom in for ${region.name} data`);
