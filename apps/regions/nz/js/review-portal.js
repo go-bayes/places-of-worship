@@ -2468,6 +2468,12 @@ function human(value) {
             // a warning, not an error: the links may be right, and pressing
             // Record anyway sends the same links with the confirmation
             const warning = decision.confirm_unmatched_links ? "" : unmatchedLinkWarning(message);
+            // the reviewer moved to another task while this one was in
+            // flight: its form is gone, so the warning has nowhere to go
+            if (warning && state.selected?.task?.task_id !== selectedTask.task_id) {
+                setTransport("ready");
+                return;
+            }
             if (warning) {
                 state.linkConfirmation = linkKey;
                 showLinkConfirmation(form, warning);
