@@ -109,6 +109,8 @@ function makePage({ config, files, search = "?batch=nz-temporal-ra-workpack-001"
       async createClient(clientId, options) {
         log.created.push({ clientId, options });
         if (authkitState.createError) throw authkitState.createError;
+        // workos refused the kept refresh token: authkit removes it
+        if (authkitState.dropTokenOnInit) localStorage.removeItem(`workos:refresh-token:${clientId}`);
         if (authkitState.exchange) options.onRedirectCallback?.({});
         return authkit;
       },
@@ -149,7 +151,8 @@ function makePage({ config, files, search = "?batch=nz-temporal-ra-workpack-001"
 
 const workosConfig = { enabled: true, url: "https://example.convex.cloud", googleClientId: GOOGLE_ID, workosClientId: CLIENT_ID };
 const googleConfig = { enabled: true, url: "https://example.convex.cloud", googleClientId: GOOGLE_ID, workosClientId: "" };
-const landing = { user: { _id: "user_1", email: "ra@example.org", status: "active" }, tasks: [], manualTasks: [], myWork: [] };
+// a row already bound to its workos identity, so no claim follows the landing
+const landing = { user: { _id: "user_1", email: "ra@example.org", status: "active", workos_subject: "https://api.workos.com/user_management/client|user_01" }, tasks: [], manualTasks: [], myWork: [] };
 const landingArgs = { countryCode: "NZ", batchId: "b1", limit: 1000 };
 const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
 
@@ -336,10 +339,41 @@ const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
     const page = makePage({ config: workosConfig, files: ["convex-task-client.js"] });
     page.localStorage.setItem(`workos:refresh-token:${CLIENT_ID}`, "rt_dead");
     page.authkitState.user = null;
+    page.authkitState.dropTokenOnInit = true;
     const client = new page.window.PowConvexTaskClient(workosConfig);
     assert.equal(await client.restoreSession(), null);
     assert.equal(page.log.fetches.length, 0);
     assert.equal(client.signInError, null);
+  }
+
+  // 10b. a renewal that failed in transit on reload leaves the refresh token
+  // kept and no user; the card says why, and the session waits
+  {
+    const page = makePage({ config: workosConfig, files: ["convex-task-client.js"] });
+    page.localStorage.setItem(`workos:refresh-token:${CLIENT_ID}`, "rt_kept");
+    page.authkitState.user = null;
+    const client = new page.window.PowConvexTaskClient(workosConfig);
+    assert.equal(await client.restoreSession(), null);
+    assert.equal(page.log.fetches.length, 0);
+    assert.match(client.signInError?.message || "", /Could not reach WorkOS to renew your sign-in/);
+    assert.equal(page.localStorage.getItem(`workos:refresh-token:${CLIENT_ID}`), "rt_kept");
+    assert.equal(page.log.signOuts.length, 0);
+  }
+
+  // 10c. a row the landing found by email, with no workos identity bound,
+  // is claimed once after the landing, so the identity is bound
+  {
+    const unbound = { ...landing, user: { _id: "user_1", email: "ra@example.org", status: "active" } };
+    const page = makePage({ config: workosConfig, files: ["convex-task-client.js"], answers: { "tasks:raLanding": unbound, "users:claimInvite": "user_1", "tasks:listMyTasks": [] } });
+    page.localStorage.setItem(`workos:refresh-token:${CLIENT_ID}`, "rt_1");
+    page.authkitState.user = { id: "user_01" };
+    page.authkitState.tokens = [jwtWithExpIn(300)];
+    const client = new page.window.PowConvexTaskClient(workosConfig);
+    const restored = await client.restoreSessionWithLanding(landingArgs);
+    assert.equal(restored.user._id, "user_1");
+    assert.deepEqual(page.log.fetches.map((entry) => entry.path), ["tasks:raLanding", "users:claimInvite"]);
+    await client.listMyTasks({});
+    assert.equal(page.log.fetches.filter((entry) => entry.path === "users:claimInvite").length, 1, "claimed once per page");
   }
 
   // 11. the sign-in button: "Sign in with Google", which records where to
@@ -385,6 +419,16 @@ const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
     foreign.authkitState.exchange = true;
     await foreign.window.PowConvexTaskClient.completeWorkosCallback(workosConfig);
     assert.deepEqual(foreign.log.replaced, ["verification.html"], "another site is never the return");
+
+    // a same-origin url whose path opens with // or /\ would read as another
+    // host in location.replace; it falls back to the portal
+    for (const returnTo of [`${ORIGIN}//evil.example/steal`, "//evil.example/steal", `${ORIGIN}/\\evil.example/steal`, "/\\evil.example"]) {
+      const slashes = makePage({ config: workosConfig, files: ["convex-task-client.js"], pathname: "/apps/regions/nz/auth-callback.html", search: "?code=abc" });
+      slashes.sessionStorage.setItem("powWorkosReturn:v1", JSON.stringify({ returnTo }));
+      slashes.authkitState.exchange = true;
+      await slashes.window.PowConvexTaskClient.completeWorkosCallback(workosConfig);
+      assert.deepEqual(slashes.log.replaced, ["verification.html"], `${returnTo} is refused`);
+    }
 
     const failed = makePage({ config: workosConfig, files: ["convex-task-client.js"], pathname: "/apps/regions/nz/auth-callback.html", search: "?code=abc" });
     failed.sessionStorage.setItem("powWorkosReturn:v1", JSON.stringify({ returnTo: PORTAL_PATH }));

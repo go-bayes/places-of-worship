@@ -90,7 +90,11 @@
             const url = new URL(String(value || ""), window.location.href);
             if (url.origin !== window.location.origin) return fallback;
             if (url.pathname.endsWith(`/${WORKOS_CALLBACK_PAGE}`)) return fallback;
-            return `${url.pathname}${url.search}${url.hash}`;
+            const path = `${url.pathname}${url.search}${url.hash}`;
+            // a path that opens with // (or /\) reads as another host when
+            // handed to location.replace
+            if (!path.startsWith("/") || /^\/[/\\]/.test(path)) return fallback;
+            return path;
         } catch (error) {
             return fallback;
         }
@@ -201,6 +205,7 @@
             this.authkit = null;
             this.authkitPromise = null;
             this.signInError = null;
+            this.workosClaimed = false;
             if (this.usesWorkos) {
                 // the session lives in authkit's refresh token; a google
                 // token left from before the switch is dropped
@@ -367,6 +372,12 @@
                 return false;
             }
             if (!authkit.getUser()) {
+                // authkit drops a refresh token workos refuses; one still
+                // kept means the renewal failed in transit, and the session
+                // waits for the connection
+                if (workosRefreshTokenStored(this.config.workosClientId)) {
+                    this.signInError = new Error("Could not reach WorkOS to renew your sign-in. Check the connection, then reload.");
+                }
                 this.clearAuth();
                 return false;
             }
@@ -561,8 +572,9 @@
             try {
                 let user = (await this.me()) || null;
                 // a workos sign-in whose hand-off was lost (another tab
-                // finished it) still claims its invitation here
-                if (this.usesWorkos && user?.status === "pending") {
+                // finished it) still claims its invitation, and binds its
+                // workos identity to the row, here
+                if (this.needsWorkosClaim(user)) {
                     await this.claimInvite("");
                     user = (await this.me()) || null;
                 }
@@ -625,6 +637,8 @@
                 const landing = await this.readLanding(args);
                 if (landing) {
                     this.user = landing.user;
+                    // bind the workos identity the landing found by email
+                    if (this.needsWorkosClaim(this.user)) await this.claimInvite("");
                     return { user: this.user, landing };
                 }
             } catch (error) {
@@ -761,9 +775,19 @@
         }
 
         async claimInvite(initials) {
-            return await this.request("mutation", "users:claimInvite", {
+            const claimed = await this.request("mutation", "users:claimInvite", {
                 initials: initials || undefined,
             });
+            this.workosClaimed = this.usesWorkos;
+            return claimed;
+        }
+
+        // a workos session whose row is still an invitation, or has no workos
+        // identity bound yet, claims it once per page: the claim activates
+        // the invitation and binds the identity (convex/users.ts)
+        needsWorkosClaim(user) {
+            if (!this.usesWorkos || !user || this.workosClaimed) return false;
+            return user.status === "pending" || !user.workos_subject;
         }
 
         async listTasks(args) {
