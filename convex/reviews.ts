@@ -331,11 +331,12 @@ export async function applyReviewDecision(ctx: MutationCtx, args: { taskId: stri
     // relocation is refused and a linked basis names its other place; a
     // link a task carries is stored as the site id behind it, and one no
     // task carries must be a well-formed place identifier (jb, option b and
-    // its revision of 2026-11-03)
+    // its revision of 2026-11-03), which is refused once with a warning
+    // until the decision is recorded again with confirm_unmatched_links
     const checkedLinks = assertIdentityLinks(task, args.decision);
     const linkedSiteIds = checkedLinks === undefined
       ? undefined
-      : await resolveIdentityLinks(ctx.db, task, checkedLinks);
+      : await resolveIdentityLinks(ctx.db, task, checkedLinks, args.decision.confirm_unmatched_links === true);
     assertMaxString("review decision note", args.decision.decision_note, TASK_REASON_MAX);
     assertMaxString("accepted action", args.decision.accepted_action, MEDIUM_TEXT_MAX);
     assertMaxString("required follow-up", args.decision.required_follow_up, LONG_TEXT_MAX);

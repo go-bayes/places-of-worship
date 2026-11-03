@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { assertIdentityLinks, ownIdentifiers, resolveIdentityLinks, LINK_REQUIRED_BASES, LINK_OPTIONAL_BASES, MAX_RESOLUTION_MATCHES } from "./identityLinks.ts";
+import { assertIdentityLinks, ownIdentifiers, resolveIdentityLinks, LINK_REQUIRED_BASES, LINK_OPTIONAL_BASES, MAX_RESOLUTION_MATCHES, UNMATCHED_LINK_PREFIX } from "./identityLinks.ts";
 
 const task = { task_id: "task_1", matched_current_site_id: "nz-site-1", candidate_site_id: "candidate:nz:b:1" };
 const check = (identity_decision, linked_site_ids) => assertIdentityLinks(task, { identity_decision, linked_site_ids });
@@ -95,6 +95,8 @@ const known = [
 ];
 const thisTask = { task_id: "nz-verify-n200", matched_current_site_id: "n200", source_record_id: "nz-verify-n200", matched_osm_id: "200", osm_object_type: "node" };
 const resolve = (links, task = thisTask, rows = known) => resolveIdentityLinks(tasksDb(rows), task, links);
+// the same, with the reviewer's confirmation of links no task carries
+const confirmed = (links, task = thisTask, rows = known) => resolveIdentityLinks(tasksDb(rows), task, links, true);
 
 test("an existing current or candidate site identifier is stored as entered", async () => {
   assert.deepEqual(await resolve(["n100"]), ["n100"]);
@@ -120,10 +122,44 @@ test("an existing osm reference resolves to the site carrying that object, type 
   assert.deepEqual(await resolve(["w777"]), ["w777"]);
 });
 
-test("a well-formed place identifier no task carries is stored as entered", async () => {
-  assert.deepEqual(await resolve(["n999", "w999", "r999"]), ["n999", "w999", "r999"]);
-  assert.deepEqual(await resolve(["osm:relation/100", "osm:way/999"]), ["osm:relation/100", "osm:way/999"]);
-  assert.deepEqual(await resolve(["candidate:au-candidate-1-unknown-place-of-worship", "candidate:vu:batch-1:12"]), ["candidate:au-candidate-1-unknown-place-of-worship", "candidate:vu:batch-1:12"]);
+test("a well-formed place identifier no task carries is stored as entered once confirmed", async () => {
+  assert.deepEqual(await confirmed(["n999", "w999", "r999"]), ["n999", "w999", "r999"]);
+  assert.deepEqual(await confirmed(["osm:relation/100", "osm:way/999"]), ["osm:relation/100", "osm:way/999"]);
+  assert.deepEqual(await confirmed(["candidate:au-candidate-1-unknown-place-of-worship", "candidate:vu:batch-1:12"]), ["candidate:au-candidate-1-unknown-place-of-worship", "candidate:vu:batch-1:12"]);
+});
+
+test("without confirmation, a well-formed identifier no task carries is refused with a warning naming it", async () => {
+  // a mistyped number, n12354 for n12345, fits the form and no task carries it
+  await assert.rejects(resolve(["n12354"]), (error) => {
+    assert.equal(error.message, 'Unmatched linked place: "n12354" matches no place the review system knows. Check the identifier, or record the decision again to keep it.');
+    assert.ok(error.message.startsWith(UNMATCHED_LINK_PREFIX));
+    return true;
+  });
+  // every unmatched identifier is named; one a task carries is not
+  await assert.rejects(resolve(["n100", "w999", "osm:relation/100", "candidate:vu:batch-1:12"]), (error) => {
+    assert.ok(error.message.startsWith(`${UNMATCHED_LINK_PREFIX}s: "w999", "osm:relation/100", "candidate:vu:batch-1:12" match no place`), error.message);
+    assert.match(error.message, /Check the identifiers, or record the decision again to keep them\.$/);
+    assert.doesNotMatch(error.message, /"n100"/);
+    return true;
+  });
+  assert.deepEqual(await confirmed(["n100", "w999"]), ["n100", "w999"]);
+});
+
+test("links that tasks carry need no confirmation, and the flag changes nothing for them", async () => {
+  const carried = ["n100", "candidate:nz-candidate-1", "nz-verify-w100", "osm:way/777", "n555"];
+  const stored = ["n100", "candidate:nz-candidate-1", "w100", "osm:way/777", "osm:node/555"];
+  assert.deepEqual(await resolve(carried), stored);
+  assert.deepEqual(await confirmed(carried), stored);
+});
+
+test("the hard refusals stand with confirmation, and come before the warning", async () => {
+  for (const typo of ["nz-osm-node-1", "N999", "n0123"]) {
+    await assert.rejects(confirmed(["n999", typo]), new RegExp(`Linked place "${typo}" is not a place identifier`));
+    await assert.rejects(resolve(["n999", typo]), new RegExp(`Linked place "${typo}" is not a place identifier`));
+  }
+  await assert.rejects(confirmed(["n999", "osm:node/999"]), /name the same place/);
+  await assert.rejects(resolve(["n999", "osm:node/999"]), /name the same place/);
+  await assert.rejects(confirmed(["Woodberry (2010)"]), /matches more than one place/);
 });
 
 test("an identifier that fits no place form and no task carries is refused by name, with an example", async () => {

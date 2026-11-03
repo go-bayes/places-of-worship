@@ -814,6 +814,9 @@ export const reviewDecisionInput = v.object({
   accepted_action: v.optional(v.string()),
   identity_decision: v.optional(identityDecision),
   linked_site_ids: v.optional(v.array(v.string())),
+  // true keeps linked places that no task carries after the warning that
+  // names them (jb, 2026-11-03); read by the resolver, never stored or hashed
+  confirm_unmatched_links: v.optional(v.boolean()),
   location_outcome: v.optional(locationOutcome),
   target_year_affects: v.optional(v.array(targetYearAffect)),
   required_follow_up: v.optional(v.string()),

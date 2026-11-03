@@ -142,6 +142,14 @@ export function assertIdentityLinks(
 //    behind it, so a stored link names a place, never a document;
 // 2. otherwise by form: a well-formed place identifier (above) is stored as
 //    entered, and anything else is refused as a likely typo.
+// a well-formed identifier that no task carries may still be a mistyped
+// number (n12354 for n12345), so it is held back once with a warning (jb,
+// 2026-11-03): the decision is refused with the unmatched identifiers named,
+// and the reviewer keeps them by recording the decision again with
+// confirm_unmatched_links set. the flag is not stored and not hashed.
+
+// the stable start of that refusal, which the portal recognises
+export const UNMATCHED_LINK_PREFIX = "Unmatched linked place";
 
 // tasks one record reference may name before the reviewer is asked for the
 // site identifier instead: each lookup reads one more row than this, so a
@@ -177,19 +185,30 @@ function placesOf(tasks: TaskIdentifiers[], input: string): string[] {
   return [...fallback];
 }
 
+// the refusal for links accepted by form alone, naming every one
+export function unmatchedLinksMessage(ids: readonly string[]): string {
+  const named = ids.map((id) => `"${id}"`).join(", ");
+  return ids.length === 1
+    ? `${UNMATCHED_LINK_PREFIX}: ${named} matches no place the review system knows. Check the identifier, or record the decision again to keep it.`
+    : `${UNMATCHED_LINK_PREFIX}s: ${named} match no place the review system knows. Check the identifiers, or record the decision again to keep them.`;
+}
+
 // resolves each link that assertIdentityLinks has trimmed and checked to
 // the identifier to store, and refuses, naming the identifier, a link that
 // no task carries and that fits no place-identifier form, a reference that
 // matches more than one place, a link to this task's own place, and two
-// links that name the same place
+// links that name the same place; after those checks, it refuses links
+// accepted by form alone unless confirmUnmatched is true
 export async function resolveIdentityLinks(
   db: TaskReader,
   task: TaskIdentifiers,
   links: readonly string[],
+  confirmUnmatched = false,
 ): Promise<string[]> {
   const ownPlaces = new Set(ownIdentifiers(task).map(placeKey));
   const resolved: string[] = [];
   const resolvedFrom = new Map<string, string>();
+  const unmatched: string[] = [];
   for (const id of links) {
     let canonical: string;
     // a site id a task carries stands as entered, whatever its form
@@ -227,6 +246,7 @@ export async function resolveIdentityLinks(
         canonical = places[0];
       } else if (isPlaceIdentifier(id)) {
         canonical = id;
+        unmatched.push(id);
       } else {
         throw new Error(`Linked place "${id}" is not a place identifier and no task carries it. Give a site identifier such as n123 or w456, an OpenStreetMap reference such as osm:node/123, a candidate identifier such as candidate:nz-candidate-1, or the task identifier or source record of a place in the portal.`);
       }
@@ -241,5 +261,6 @@ export async function resolveIdentityLinks(
     resolvedFrom.set(placeKey(canonical), id);
     resolved.push(canonical);
   }
+  if (unmatched.length > 0 && !confirmUnmatched) throw new Error(unmatchedLinksMessage(unmatched));
   return resolved;
 }

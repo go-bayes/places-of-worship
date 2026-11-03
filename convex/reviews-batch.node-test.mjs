@@ -93,6 +93,50 @@ test("a new decision refuses a link that fits no place form and no task carries,
   assert.equal(ctx.task.status, "needs_review");
 });
 
+test("a link no task carries is held back until the decision is recorded again with confirmation", async () => {
+  for (const batch of [true, false]) {
+    const ctx = context();
+    const inspected = await getReviewSnapshot._handler(ctx, { taskId: "task_1", evidenceDraftId: "draft_1" });
+    const successor = item(inspected.snapshot_hash);
+    successor.decision.identity_decision = "successor_at_new_site";
+    successor.decision.linked_site_ids = ["n12354"];
+    const record = (decision) => batch
+      ? batchRecordReviewDecisions._handler(ctx, { items: [{ ...successor, decision }] })
+      : recordReviewDecision._handler(ctx, { taskId: "task_1", decision, snapshotHash: inspected.snapshot_hash });
+    // a mistyped but well-formed number: refused with the warning, nothing written
+    await assert.rejects(record(successor.decision), /^Error: Unmatched linked place: "n12354" matches no place the review system knows\. Check the identifier, or record the decision again to keep it\.$/);
+    await assert.rejects(record({ ...successor.decision, confirm_unmatched_links: false }), /Unmatched linked place/);
+    assert.equal(ctx.rows.review_decisions.length, 0);
+    assert.equal(ctx.task.status, "needs_review");
+    // recorded again with the flag: kept as entered, the flag neither stored nor hashed
+    await record({ ...successor.decision, confirm_unmatched_links: true });
+    const stored = ctx.rows.review_decisions[0];
+    assert.deepEqual(stored.linked_site_ids, ["n12354"]);
+    assert.equal("confirm_unmatched_links" in stored, false);
+    const { decision_hash, review_snapshot_hash, decision_hash_version, evidence_version_hash, linked_site_ids, ...fields } = stored;
+    fields.reviewer_user_id = String(fields.reviewer_user_id);
+    assert.equal(decision_hash, sha256(canonicalJson({ schema_version: "review-decision.v1", decision: fields, review_snapshot_hash })));
+    assert.equal(ctx.task.status, "reviewed");
+  }
+});
+
+test("a link a task carries needs no confirmation, and a malformed one is refused even with it", async () => {
+  const ctx = context();
+  ctx.rows.tasks.push({ _id: "task_row_nz", task_id: "nz-verify-n12345", country_code: "NZ", matched_current_site_id: "n12345", matched_osm_id: "12345", osm_object_type: "node" });
+  const inspected = await getReviewSnapshot._handler(ctx, { taskId: "task_1", evidenceDraftId: "draft_1" });
+  const malformed = item(inspected.snapshot_hash);
+  malformed.decision.identity_decision = "successor_at_new_site";
+  malformed.decision.linked_site_ids = ["n12345x"];
+  malformed.decision.confirm_unmatched_links = true;
+  await assert.rejects(batchRecordReviewDecisions._handler(ctx, { items: [malformed] }), /Linked place "n12345x" is not a place identifier/);
+  assert.equal(ctx.rows.review_decisions.length, 0);
+  const known = item(inspected.snapshot_hash);
+  known.decision.identity_decision = "successor_at_new_site";
+  known.decision.linked_site_ids = ["n12345"];
+  await batchRecordReviewDecisions._handler(ctx, { items: [known] });
+  assert.deepEqual(ctx.rows.review_decisions[0].linked_site_ids, ["n12345"]);
+});
+
 test("batch acceptance refuses intake-only drafts before writing", async () => {
   const ctx = context({ intake: true });
   const inspected = await getReviewSnapshot._handler(ctx, { taskId: "task_1", evidenceDraftId: "draft_1" });
