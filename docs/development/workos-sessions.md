@@ -17,7 +17,7 @@ The contributor portal (`apps/regions/nz/verification.html`) and the review port
 
 ## Backend
 
-`convex/auth.config.ts` accepts three providers: Google, as before, and the two WorkOS issuers that Convex's AuthKit guide lists (`https://api.workos.com/` with the client ID as audience, and `https://api.workos.com/user_management/<client ID>`), both checked against the WorkOS keys for the client ID. Google stays during the switch, so a contributor signed in with Google is not locked out; removing it is a later step.
+`convex/auth.config.ts` accepts three providers: Google, as before, and the two WorkOS issuers that Convex's AuthKit guide lists (`https://api.workos.com/` with the client ID as audience, and `https://api.workos.com/user_management/<client ID>`), both checked against the WorkOS keys for the client ID. In WorkOS mode the client discards a kept Google token, so everyone signs in again through WorkOS on their first load after the switch. The Google provider therefore matters only for pages still open on the old configuration, which keep sending Google tokens until reloaded, and for a rollback. Removing it is a later step. A WorkOS token is accepted only if its issuer is exactly one of the two forms for this deployment's `WORKOS_CLIENT_ID`; an issuer on WorkOS's host that names another client is refused.
 
 A WorkOS token names the person by a WorkOS user ID (the token's `sub`), which no row holds before that person's first WorkOS sign-in: a row claimed through Google keeps Google's identifier in `auth_subject`, and an invitation holds only an email. `findUserForIdentity` in `convex/lib/auth.ts` therefore works in two stages:
 
@@ -42,7 +42,12 @@ The residual exposure is the same in both directions: a row the other provider h
 
 ### Unbinding a WorkOS account
 
-A person who replaces their WorkOS account (a new Google account, say) is refused, because their row is bound to the old one. To release the row, run `users:adminUpsertUser` with the row's email, its current roles and `clearWorkosSubject: true`, for example `npx convex run users:adminUpsertUser '{"email":"ra@example.org","roles":["ra"],"clearWorkosSubject":true}'` against the deployment. Alternatively, delete the `workos_subject` field on the row in the Convex dashboard's data view. Status and roles are kept, and the person's next WorkOS sign-in binds the new account by its verified email. Both are deployment data changes and need the project lead's instruction.
+A person who replaces their WorkOS account (a new Google account, say) is refused, because their row is bound to the old one. To release the row, run `users:adminUpsertUser` with the row's email, its current roles and `clearWorkosSubject: true`, for example `npx convex run users:adminUpsertUser '{"email":"ra@example.org","roles":["ra"],"clearWorkosSubject":true}'` against the deployment. Roles are kept.
+- A row that also holds a Google identity (`auth_subject`) keeps its status.
+- An active row claimed only through WorkOS would be left with no subject at all, which no sign-in may claim by email. `clearWorkosSubject` therefore returns it to `pending`, unless `status` is given, and the person's next WorkOS sign-in claims it again and binds the new account by its verified email.
+- A disabled row stays disabled.
+
+Deleting the `workos_subject` field in the Convex dashboard's data view also unbinds the row, but it leaves a WorkOS-only row active and unclaimable. Set its status to `pending` as well, or use `adminUpsertUser`. Either way, these are deployment data changes and need the project lead's instruction.
 
 ### Rolling back to Google
 
@@ -83,13 +88,22 @@ Set `WORKOS_CLIENT_ID` on the deployment before deploying this backend. Convex r
 
 ## Order of the switch
 
-1. Set `WORKOS_CLIENT_ID` on the deployment.
+1. Set `WORKOS_CLIENT_ID` on the deployment. As of 2026-11-03 the **staging** client (`client_01M6FM678TDW5ZX9FF4H0AVAR9`) is set on `pastel-goshawk-398`, for the localhost check.
 2. Deploy the backend (both providers). Google sign-in keeps working.
-3. Complete the WorkOS dashboard steps above.
-4. Check a real sign-in on `http://localhost:8765` with `workosClientId` set in a local, uncommitted copy of `convex-config.js`:
+3. Complete the WorkOS dashboard steps above, in the staging environment.
+4. Check a real sign-in on `http://localhost:8765` with the staging client ID set as `workosClientId` in a local, uncommitted copy of `convex-config.js`:
    - an invited Google account signs in, lands signed in, and its row gains `workos_subject` (the WorkOS user ID, `user_…`);
    - a reload keeps the session, and sign-out returns the card;
    - **the negative check:** a Google account with no invitation signs in at WorkOS and is refused on the sign-in card with "No project invitation found for <address>.", and no `users` row is created or changed.
-5. Commit the client ID in `convex-config.js` (one line, with a `convex-config.js` stamp bump on the three pages that load it and in `tiles-v2-client.test.cjs`). Pages publishes it, and contributors sign in once more, through WorkOS.
+
+   Every row bound during this check, the lead's included, now holds a **staging** WorkOS user ID.
+5. **Before the deployment moves to a production WorkOS client, unbind every bound row.** A production account is a different WorkOS user, so the next sign-in to a row still bound to a staging user is refused with "… is already linked to another WorkOS account".
+   - Find the bound rows in the Convex dashboard's `users` table: those with `workos_subject` set.
+   - Run `users:adminUpsertUser` with `clearWorkosSubject: true` for each (see "Unbinding a WorkOS account").
+   - Then complete the dashboard steps in the production environment, set `WORKOS_CLIENT_ID` to the production client ID, and push the backend again, so the auth configuration reads the new ID.
+
+   Skip this step only if the live switch stays on the staging client.
+6. Commit the client ID in `convex-config.js`: one line, naming the same environment as `WORKOS_CLIENT_ID`, with a `convex-config.js` stamp bump on the three pages that load it and in `tiles-v2-client.test.cjs`. Pages publishes it.
+   - In WorkOS mode the client discards a kept Google token, so every contributor signs in again, through WorkOS, on their first load of the new page.
 
 Rolling back is the same line set back to empty, with `POW_AUTH_GOOGLE_ROLLBACK=1` set for the duration, as described under "Rolling back to Google".

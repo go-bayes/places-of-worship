@@ -64,7 +64,7 @@ and export bundles. Accepted changes become research data only after export,
 | `inviteUser` | mutation | `admin` | Create or update a pending invitation and assigned roles. | `users` |
 | `claimInvite` | mutation | invited authenticated user | Activate a pending email invitation. Through Google it needs an email Google reports as verified and binds the invitation to the Google subject (`auth_subject`); during a rollback only (`POW_AUTH_GOOGLE_ROLLBACK=1` on the deployment) it also binds an active row claimed only through WorkOS; a row bound to another Google account is refused. Through WorkOS it activates the row its verified email names, or its bound row, and is the one place `workos_subject` is recorded; `auth_subject` is left as it was. | `users` |
 | `listUsers` | query | `admin` | List project users, optionally filtered by status. | None |
-| `adminUpsertUser` | internal mutation | `admin key` | Repair a user record: patch roles on an existing user while preserving status (unlike `inviteUser`, which resets active users to pending), or insert a pending invite when no row matches the email. `clearWorkosSubject: true` unbinds the row's WorkOS account, so the person's next WorkOS sign-in binds a replacement account. | `users` |
+| `adminUpsertUser` | internal mutation | `admin key` | Repair a user record: patch roles on an existing user while preserving status (unlike `inviteUser`, which resets active users to pending), or insert a pending invite when no row matches the email. `clearWorkosSubject: true` unbinds the row's WorkOS account, so the person's next WorkOS sign-in binds a replacement account; an active row with no Google identity returns to `pending` unless `status` is given. | `users` |
 
 ## `tasks.ts`
 
