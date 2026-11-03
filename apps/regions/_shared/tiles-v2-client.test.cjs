@@ -71,7 +71,7 @@ const stamps = {
     "occupancy-contract.js": "20261019a", // relocation rules follow definition 0.1.6
     "occupancy-review.js": "20261019a", // move wording and successor in the reviewer's period summary
     "task-presentation.js": "20261015c", // decided-status and reopen-flag helpers
-    "convex-task-client.js": "20261103d", // workos sessions; claim before any other request, refused claims not retried
+    "convex-task-client.js": "20261103e", // workos sessions; transient 5xx, 429 and non-json answers keep the session
     "review-portal.js": "20261103f", // a kept workos session restores like a kept google token
     "review-map.js": "20261103a", // the legend becomes the folding map data panel
     "convex-config.js": "20261103a", // workosClientId, empty until the switch

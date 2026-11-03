@@ -666,9 +666,9 @@
             try {
                 const landing = await this.readLanding(args);
                 if (landing) {
+                    // the user is named only once a needed claim has succeeded
+                    if (this.needsWorkosClaim(landing.user)) await this.claimInvite("");
                     this.user = landing.user;
-                    // bind the workos identity the landing found by email
-                    if (this.needsWorkosClaim(this.user)) await this.claimInvite("");
                     return { user: this.user, landing };
                 }
             } catch (error) {
@@ -775,12 +775,26 @@
                 throw error;
             }
             const text = await response.text();
-            let payload;
+            let payload = null;
             try {
                 payload = text ? JSON.parse(text) : {};
             } catch (error) {
-                throw new Error(text || `Convex ${kind} failed.`);
+                payload = null;
             }
+            // the backend or something in front of it did not answer: a rate
+            // limit, a 5xx, or a body that is not convex's json. convex
+            // answers a function that throws with 560 and a json error, which
+            // stays a refusal. transient failures keep a workos session and
+            // its claim for a retry, as an offline request does
+            const unauthorised = response.status === 401 || response.status === 403;
+            const transientStatus = response.status === 429
+                || (response.status >= 500 && response.status !== 560);
+            if (!unauthorised && (payload === null || transientStatus)) {
+                const transient = new Error(`The project backend did not answer (HTTP ${response.status}). Check the connection, then retry.`);
+                transient.transient = true;
+                throw transient;
+            }
+            payload = payload || {};
             const message = payload.errorMessage || text || `Convex ${kind} failed.`;
             if (
                 response.status === 401

@@ -137,10 +137,15 @@ function makePage({ config, files, search = "?batch=nz-temporal-ra-workpack-001"
       const answer = answers[body.path];
       if (answer === "offline") throw new TypeError("Failed to fetch");
       const value = typeof answer === "function" ? answer(body) : answer;
+      // { __status, __raw } answers with that http status and raw body, as
+      // a gateway or a rate limit would; __error is convex's json error,
+      // which convex sends with 560
+      const status = value?.__status ?? (value?.__error ? 560 : 200);
       const reply = value && value.__error
         ? { status: "error", errorMessage: value.__error }
         : { status: "success", value: value === undefined ? null : value };
-      return { status: 200, ok: true, text: async () => JSON.stringify(reply) };
+      const raw = value?.__raw ?? JSON.stringify(reply);
+      return { status, ok: status < 400, text: async () => raw };
     },
   });
   for (const file of files) {
@@ -418,6 +423,67 @@ const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
     assert.deepEqual(page.log.fetches.map((entry) => entry.path), ["tasks:raLanding", "users:me", "users:claimInvite", "users:me"]);
     await client.listMyTasks({});
     assert.equal(page.log.fetches.filter((entry) => entry.path === "users:claimInvite").length, 1, "claimed once per page");
+  }
+
+  // 10d. a claim that meets a gateway error, a rate limit or a body that is
+  // not convex's json is transient: the session and the claim are kept for a
+  // retry. convex's own 560 json error stays a refusal
+  {
+    for (const failure of [
+      { __status: 502, __raw: "<html>Bad gateway</html>" },
+      { __status: 503, __raw: JSON.stringify({ status: "error", errorMessage: "Service unavailable" }) },
+      { __status: 429, __raw: JSON.stringify({ status: "error", errorMessage: "Too many requests" }) },
+      { __status: 200, __raw: "not json" },
+    ]) {
+      const answers = { "users:claimInvite": failure, "tasks:raLanding": landing };
+      const page = makePage({ config: workosConfig, files: ["convex-task-client.js"], answers });
+      page.localStorage.setItem(`workos:refresh-token:${CLIENT_ID}`, "rt_1");
+      page.authkitState.user = { id: "user_01" };
+      page.authkitState.tokens = [jwtWithExpIn(300)];
+      const client = new page.window.PowConvexTaskClient(workosConfig);
+      const restored = await client.restoreSessionWithLanding(landingArgs);
+      assert.equal(restored.user, null, `${failure.__status}: nobody named yet`);
+      assert.equal(page.log.signOuts.length, 0, `${failure.__status}: the session is kept`);
+      assert.equal(page.localStorage.getItem(`workos:refresh-token:${CLIENT_ID}`), "rt_1");
+      assert.match(client.signInError.message, /Could not reach the project backend/);
+      assert.equal(client.workosClaimRefusal, null, "not recorded as a refusal");
+      answers["users:claimInvite"] = "user_1";
+      assert.equal((await client.restoreSessionWithLanding(landingArgs)).user._id, "user_1", `${failure.__status}: the retry claims`);
+      assert.equal(page.log.fetches.filter((entry) => entry.path === "users:claimInvite").length, 2);
+    }
+    // convex's 560 for a function that threw is a refusal
+    const refused = makePage({ config: workosConfig, files: ["convex-task-client.js"], answers: { "users:claimInvite": { __error: "No project invitation found for x@example.org." } } });
+    refused.localStorage.setItem(`workos:refresh-token:${CLIENT_ID}`, "rt_1");
+    refused.authkitState.user = { id: "user_01" };
+    refused.authkitState.tokens = [jwtWithExpIn(300)];
+    const client = new refused.window.PowConvexTaskClient(workosConfig);
+    assert.equal((await client.restoreSessionWithLanding(landingArgs)).user, null);
+    assert.equal(refused.log.signOuts.length, 1);
+    assert.match(client.workosClaimRefusal.message, /No project invitation/);
+  }
+
+  // 10e. the landing names the user only after a needed claim succeeds
+  {
+    const unbound = { ...landing, user: { _id: "user_1", email: "ra@example.org", status: "active" } };
+    const page = makePage({
+      config: workosConfig,
+      files: ["convex-task-client.js"],
+      answers: {
+        "tasks:raLanding": unbound,
+        "users:claimInvite": { __error: "ra@example.org is already linked to another WorkOS account, so this sign-in cannot use it. Ask the project lead." },
+        "users:me": { __error: "ra@example.org is already linked to another WorkOS account, so this sign-in cannot use it. Ask the project lead." },
+      },
+    });
+    page.localStorage.setItem(`workos:refresh-token:${CLIENT_ID}`, "rt_1");
+    page.localStorage.setItem("powWorkosClaimed:v1", "user_01");
+    page.authkitState.user = { id: "user_01" };
+    page.authkitState.tokens = [jwtWithExpIn(300)];
+    const client = new page.window.PowConvexTaskClient(workosConfig);
+    const restored = await client.restoreSessionWithLanding(landingArgs);
+    assert.equal(restored.user, null);
+    assert.equal(client.user, null, "never named while the claim was refused");
+    assert.equal(client.signedIn, false);
+    assert.match(client.signInError.message, /already linked to another WorkOS account/);
   }
 
   // 11. the sign-in button: "Sign in with Google", which records where to
