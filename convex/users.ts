@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { internalMutation, mutation, query } from "./_generated/server";
 import { projectRole, userStatus } from "./model";
-import { normaliseEmail, requireUser } from "./lib/auth";
+import { findUserForIdentity, isWorkosIdentity, normaliseEmail, requireUser, workosVerifiedEmail } from "./lib/auth";
 
 declare const process: {
   env: Record<string, string | undefined>;
@@ -24,10 +24,9 @@ export const me = query({
     if (identity === null) {
       return null;
     }
-    return await ctx.db
-      .query("users")
-      .withIndex("by_auth_subject", (q) => q.eq("auth_subject", identity.tokenIdentifier))
-      .unique();
+    // google: by auth_subject; workos: by the verified email claim, and a
+    // workos session without one is refused with the reason
+    return await findUserForIdentity(ctx, identity);
   },
 });
 
@@ -235,6 +234,30 @@ export const claimInvite = mutation({
     const identity = await ctx.auth.getUserIdentity();
     if (identity === null) {
       throw new Error("Authentication required.");
+    }
+
+    // a workos session claims the row its verified email names. auth_subject
+    // is left as it is: it holds the google identity of a row claimed before
+    // the switch, which the google path still reads while both providers run
+    if (isWorkosIdentity(identity)) {
+      const email = workosVerifiedEmail(identity);
+      const row = await findUserForIdentity(ctx, identity);
+      if (row === null) {
+        throw new Error(`No project invitation found for ${email}.`);
+      }
+      if (row.status === "active") {
+        return row._id;
+      }
+      if (row.status !== "pending") {
+        throw new Error("Authenticated user is not active in this project.");
+      }
+      await ctx.db.patch(row._id, {
+        display_name: row.display_name ?? (identity.name?.trim() || undefined),
+        initials: args.initials?.trim().slice(0, 12) || row.initials,
+        status: "active",
+        updated_at: Date.now(),
+      });
+      return row._id;
     }
 
     const active = await ctx.db
