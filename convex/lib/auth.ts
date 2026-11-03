@@ -28,11 +28,14 @@ export function canReview(
 }
 
 // workos authkit sessions (2026-11-03). a workos access token names the
-// person by a workos user id, which matches no stored row: rows claimed
-// through google hold google's tokenIdentifier in auth_subject, and invites
-// hold only an email. a workos identity is therefore matched to its row by
-// the email claim that the dashboard's jwt template adds, and by nothing
-// else. the google path is unchanged: auth_subject against tokenIdentifier
+// person by a workos user id, which matches no row before its first workos
+// sign-in: rows claimed through google hold google's tokenIdentifier in
+// auth_subject, and invites hold only an email. a workos identity therefore
+// reaches its row by workos_subject once bound, and before that by the
+// verified email claim that the dashboard's jwt template adds. the google
+// path matches auth_subject against tokenIdentifier, as before. refusal
+// messages avoid the words the portal reads as an expired sign-in (token,
+// jwt, authentication required), so the reason reaches the person
 export const WORKOS_ISSUER_PREFIX = "https://api.workos.com/";
 // the claims the workos jwt template sets; convex also maps the standard
 // oidc pair onto identity.email and identity.emailVerified
@@ -70,14 +73,26 @@ export function workosVerifiedEmail(identity: IdentityLike): string {
   return email;
 }
 
-// a row holding only the service role is an internal actor that never signs
-// in; an email match must not open it to a browser session
-function isServiceOnly(user: Doc<"users">): boolean {
-  return user.roles.length > 0 && user.roles.every((role) => role === "service");
+// a row carrying the service role is an internal actor; an email match must
+// not open it to a browser session, whatever other roles it holds
+export function holdsServiceRole(user: Doc<"users">): boolean {
+  return user.roles.includes("service");
 }
 
-// the project row an identity names, or null when it names none. a workos
-// identity without a verified email throws (workosVerifiedEmail)
+// whether an email match may open this row to a sign-in that has no subject
+// bound to it yet: an invitation, or a row someone has already signed in to
+// through a provider. an active row no one has signed in to (a service or
+// seeding actor made by adminUpsertUser) never opens by email
+export function opensByEmail(user: Doc<"users">): boolean {
+  if (holdsServiceRole(user)) return false;
+  return user.status === "pending" || user.auth_subject !== undefined || user.workos_subject !== undefined;
+}
+
+// a verified email is a standing credential: a recycled mailbox would carry
+// it to a new owner. so the first workos sign-in that reaches a row binds
+// its workos identity (workos_subject), and from then on only that identity
+// reaches the row. email matching serves only rows with no workos identity
+// yet: invitations, and rows claimed through google before the switch
 export async function findUserForIdentity(
   ctx: QueryCtx | MutationCtx,
   identity: IdentityLike,
@@ -89,14 +104,45 @@ export async function findUserForIdentity(
       .unique();
   }
   const email = workosVerifiedEmail(identity);
+  const bound = await ctx.db
+    .query("users")
+    .withIndex("by_workos_subject", (q) => q.eq("workos_subject", identity.tokenIdentifier))
+    .unique();
+  if (bound !== null) {
+    if (holdsServiceRole(bound)) throw new Error("Service accounts cannot sign in.");
+    return bound;
+  }
   const user = await ctx.db
     .query("users")
     .withIndex("by_email", (q) => q.eq("email", email))
     .unique();
-  if (user !== null && isServiceOnly(user)) {
-    throw new Error("Service accounts cannot sign in.");
+  if (user === null) return null;
+  if (holdsServiceRole(user)) throw new Error("Service accounts cannot sign in.");
+  if (user.workos_subject !== undefined) {
+    throw new Error(
+      `${email} is already linked to another WorkOS account, so this sign-in cannot use it. Ask the project lead.`,
+    );
+  }
+  if (!opensByEmail(user)) {
+    throw new Error("This project account is not set up for sign-in. Ask the project lead.");
   }
   return user;
+}
+
+// records the workos identity on the first workos sign-in that reaches a
+// row; a row already bound is left as it is
+export async function bindWorkosSubject(
+  ctx: MutationCtx,
+  user: Doc<"users">,
+  identity: IdentityLike,
+): Promise<void> {
+  if (!isWorkosIdentity(identity) || user.workos_subject !== undefined) return;
+  await ctx.db.patch(user._id, { workos_subject: identity.tokenIdentifier, updated_at: Date.now() });
+}
+
+// a mutation's db can write; a query's cannot
+function canWrite(ctx: QueryCtx | MutationCtx): ctx is MutationCtx {
+  return typeof (ctx.db as { patch?: unknown }).patch === "function";
 }
 
 export async function requireUser(
@@ -116,6 +162,12 @@ export async function requireUser(
 
   if (!allowedRoles.some((role) => user.roles.includes(role))) {
     throw new Error("Project role does not permit this action.");
+  }
+
+  // the first workos mutation that reaches the row binds it, should the
+  // sign-in's own claimInvite not have run
+  if (canWrite(ctx)) {
+    await bindWorkosSubject(ctx, user, identity);
   }
 
   return user;

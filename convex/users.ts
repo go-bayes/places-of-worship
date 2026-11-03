@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { internalMutation, mutation, query } from "./_generated/server";
 import { projectRole, userStatus } from "./model";
-import { findUserForIdentity, isWorkosIdentity, normaliseEmail, requireUser, workosVerifiedEmail } from "./lib/auth";
+import { findUserForIdentity, holdsServiceRole, isWorkosIdentity, normaliseEmail, requireUser, workosVerifiedEmail } from "./lib/auth";
 
 declare const process: {
   env: Record<string, string | undefined>;
@@ -236,26 +236,30 @@ export const claimInvite = mutation({
       throw new Error("Authentication required.");
     }
 
-    // a workos session claims the row its verified email names. auth_subject
-    // is left as it is: it holds the google identity of a row claimed before
-    // the switch, which the google path still reads while both providers run
+    // a workos session claims the row its workos identity is bound to, or,
+    // before the first workos sign-in, the row its verified email names; it
+    // binds workos_subject then. auth_subject is left as it is: it holds the
+    // google identity of a row claimed before the switch
     if (isWorkosIdentity(identity)) {
       const email = workosVerifiedEmail(identity);
       const row = await findUserForIdentity(ctx, identity);
       if (row === null) {
         throw new Error(`No project invitation found for ${email}.`);
       }
-      if (row.status === "active") {
-        return row._id;
-      }
-      if (row.status !== "pending") {
+      if (row.status !== "active" && row.status !== "pending") {
         throw new Error("Authenticated user is not active in this project.");
       }
+      const now = Date.now();
       await ctx.db.patch(row._id, {
-        display_name: row.display_name ?? (identity.name?.trim() || undefined),
-        initials: args.initials?.trim().slice(0, 12) || row.initials,
-        status: "active",
-        updated_at: Date.now(),
+        workos_subject: row.workos_subject ?? identity.tokenIdentifier,
+        ...(row.status === "pending"
+          ? {
+              display_name: row.display_name ?? (identity.name?.trim() || undefined),
+              initials: args.initials?.trim().slice(0, 12) || row.initials,
+              status: "active" as const,
+            }
+          : {}),
+        updated_at: now,
       });
       return row._id;
     }
@@ -272,13 +276,28 @@ export const claimInvite = mutation({
     if (email === undefined) {
       throw new Error("This invitation requires a verified email address.");
     }
+    // the email is the only link from this google account to the row, so
+    // google must vouch for it
+    if (identity.emailVerified !== true) {
+      throw new Error(`Google does not report ${email} as verified, so it cannot claim a project invitation.`);
+    }
 
     const invite = await ctx.db
       .query("users")
       .withIndex("by_email", (q) => q.eq("email", email))
       .unique();
 
-    if (invite === null || invite.status !== "pending") {
+    if (invite === null || holdsServiceRole(invite)) {
+      throw new Error("No pending project invitation found for this email.");
+    }
+    // a row bound to another google account is never taken over by email
+    if (invite.auth_subject !== undefined) {
+      throw new Error("This email's project account is linked to another Google account. Ask the project lead.");
+    }
+    // a pending invitation, or (the rollback from workos) an active row
+    // claimed only through workos, which has no google identity yet
+    const rollback = invite.status === "active" && invite.workos_subject !== undefined;
+    if (invite.status !== "pending" && !rollback) {
       throw new Error("No pending project invitation found for this email.");
     }
 
