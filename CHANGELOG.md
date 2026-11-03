@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### 2026-11-03 (census panel folded on every screen)
+
+- Country maps (`apps/regions/_shared/region-map.js`). The census data panel now opens folded on every screen, not only on phones (JB, 2026-11-03: the visitor should be drawn into the map, not its text). The census layer stays on at start, and the folded bar still names the metric, year and geography; the panel's options, colour key and notes open from the bar or the census button. The onboarding card's fold and restore are unchanged, and now act only on a panel the visitor has opened. Load time is unchanged: the census still starts loading during script evaluation.
+- Stamp: `region-map.js?v=20261103e` on all 104 pages that load it (pinned in `tiles-v2-client.test.cjs`). Tests: `census-chrome.test.cjs` checks that a desktop opens folded, and opens the panel by the bar where a case needs it open.
+
 ### 2026-11-03 (home country shade on country maps)
 
 - Item 9 of the 2026-10-26 UI review, in the form JB chose on closing #215 (2026-11-03). Below zoom 7 a country page draws one shade over the world with its own outline cut out, above the place dots, so the neighbours' dots and land fade under it, and draws its outline in dark slate (`#1e293b`, 1.6 px at zoom 2 to 2.4 px at zoom 6) above the shade. The shade is the basemap's background colour at 0.5 opacity (white on the default Backdrop and on Toner, the paper tones of Dataviz, Aquarelle and Topo, the first zoom stop on Streets and Winter), and white on Satellite and the OpenStreetMap fallback, which have no background layer: a dark tone on Satellite left the neighbours' dots as vivid as the home dots. Both layers fade out between zooms 6 and 7, where the manifest outline's 0.03-degree simplification strays from the coast. The place layers' paint is unchanged, so no dot does any extra work.

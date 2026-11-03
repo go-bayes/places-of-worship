@@ -3847,13 +3847,13 @@ const censusFold = document.getElementById("census-fold");
 // data panel (options, colour key, slider) rather than toggling the layer.
 // folded, the panel is one bar under the button that names the overlay's
 // metric, year and geography, and the whole bar opens it (ui suggestions
-// item 1, accepted 2026-11-03). phones open the panel folded on every
-// country page, which replaces the per-session dismissal memory of the
-// tribunal (2026-07-17 item 4): the panel no longer covers half a phone
-// screen on arrival, and the bar still says what the map shows. desktop
-// opens it, except while the onboarding card shows (see
-// foldCensusForOnboard below)
-let censusPanelOpen = !IS_MOBILE;
+// item 1, accepted 2026-11-03). every screen opens the panel folded (jb
+// 2026-11-03: the visitor is drawn into the map, not its text; phones had
+// opened folded since earlier that day), which replaces the per-session
+// dismissal memory of the tribunal (2026-07-17 item 4): the coloured map
+// and the bar say what is shown, and the panel's options and notes are one
+// tap away
+let censusPanelOpen = false;
 // the census button follows the layer (jb 2026-10-14). while the layer is
 // off (the data maps pill's toggle, a failed load, a foreign location fix)
 // the panel and its folded bar stay hidden, because they would describe

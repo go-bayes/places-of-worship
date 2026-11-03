@@ -18,7 +18,7 @@ const slice = (from, to) => {
   assert.ok(a >= 0 && b > a, `slice ${from}`);
   return runtime.slice(a, b);
 };
-const panelBody = slice("let censusPanelOpen = !IS_MOBILE;", "function censusActive()");
+const panelBody = slice("let censusPanelOpen = false;", "function censusActive()");
 const onboardFoldBody = slice("let censusFoldedForOnboard = false;", "// the card appears after a short delay");
 const enableBody = slice("function syncCensusChrome() {", "// switching geography swaps the source");
 const clickBody = slice("if (censusToggle) {\n  syncCensusPanel();", "if (censusLevelSelect && HAS_CENSUS) {");
@@ -137,12 +137,19 @@ const off = (t) => {
 (async () => {
   // before the first enable the button reads as on, so loading shows no off state
   let t = make();
-  assert.equal(t.panel.hidden, false, "the panel is open before the default enable");
-  assert.equal(t.toggle.getAttribute("aria-expanded"), "true", "the button is a disclosure before the default enable");
-  checks += 2;
+  assert.equal(t.panel.hidden, true, "the panel is folded before the default enable");
+  assert.equal(t.fold.hidden, false, "the folded bar shows before the default enable");
+  assert.equal(t.toggle.getAttribute("aria-expanded"), "false", "the button is a disclosure before the default enable");
+  checks += 3;
 
-  // default enable, then off from the bottom pill, then back on from the top button
+  // default enable: desktop opens folded too (jb 2026-11-03)
   await t.setCensusEnabled(true);
+  on(t);
+  assert.equal(t.panel.hidden, true, "a desktop opens with the panel folded");
+  checks += 1;
+  // the visitor opens it from the bar; then off from the bottom pill, and
+  // back on from the top button
+  t.fold.click();
   on(t);
   await t.setCensusEnabled(false);
   off(t);
@@ -203,6 +210,7 @@ const off = (t) => {
   // the onboarding card folds an open desktop panel and reopens it on dismissal
   t = make();
   await t.setCensusEnabled(true);
+  t.fold.click();
   t.foldCensusForOnboard();
   on(t);
   assert.equal(t.panel.hidden, true, "the card folds the panel");
@@ -247,6 +255,7 @@ const off = (t) => {
   // a foreign location fix turns the layer off without folding the panel
   t = make();
   await t.setCensusEnabled(true);
+  t.fold.click();
   t.foldCensusForAbroad();
   await settle();
   off(t);
