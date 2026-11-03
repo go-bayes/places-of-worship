@@ -19,7 +19,7 @@ const slice = (from, to) => {
   return runtime.slice(a, b);
 };
 const panelBody = slice("let censusPanelOpen = false;", "function censusActive()");
-const onboardFoldBody = slice("let censusFoldedForOnboard = false;", "// the card appears after a short delay");
+const onboardFoldBody = slice("let censusFoldedForOnboard = false;", "// unified timeline");
 const enableBody = slice("function syncCensusChrome() {", "// switching geography swaps the source");
 const clickBody = slice("if (censusToggle) {\n  syncCensusPanel();", "if (censusLevelSelect && HAS_CENSUS) {");
 const foldBody = slice("function foldCensusForAbroad() {", "function judgeFix() {");

@@ -139,8 +139,8 @@ const CONTRIBUTE_ICON = barIcon('<path d="M12 5v14M5 12h14"/>');
   <div id="top-center-controls">
   <div id="census-wrap">
     <div id="data-pill" class="shell-pill">
-      <button id="census-toggle" type="button" aria-controls="census-panel" aria-expanded="true">
-        <span class="census-label-long">Show ${RC.dataNoun || "Census"} Data</span><span class="census-label-short">${RC.dataNoun || "Census"}</span><span class="census-caret" aria-hidden="true">▴</span>
+      <button id="census-toggle" type="button" aria-controls="census-panel" aria-expanded="false">
+        <span class="census-label-long">Show ${RC.dataNoun || "Census"} Data</span><span class="census-label-short">${RC.dataNoun || "Census"}</span><span class="census-caret" aria-hidden="true">▾</span>
       </button>
       <span id="census-partial-tag" hidden>Partial layer</span>
       <select id="censusPoints" class="shell-pill-select" aria-label="Place dots"></select>
@@ -153,7 +153,7 @@ const CONTRIBUTE_ICON = barIcon('<path d="M12 5v14M5 12h14"/>');
       <span class="census-fold-text"><span class="census-fold-metric"></span><span class="census-fold-frame"></span><span class="census-fold-level"></span></span>
       <span class="census-fold-change">Change <span aria-hidden="true">▾</span></span>
     </button>
-    <div id="census-panel">
+    <div id="census-panel" hidden>
       <!-- phone-only dismiss: the panel covers half a phone screen, and
            field-testing (jb 2026-07-16) showed the census button's caret
            is not discovered as the way to clear it; the X collapses via
@@ -3902,10 +3902,10 @@ function censusLevelDef() {
   return CENSUS_LEVELS[censusState.level];
 }
 
-// one card at a time (ui suggestions item 1): while the onboarding card
-// shows, an open panel folds to its bar; dismissing the card opens it
-// again on desktop, unless the visitor has opened or folded the panel in
-// the meantime. phones keep the bar after the card, as they open with it
+// one card at a time (ui suggestions item 1): every screen opens folded,
+// so the card folds only a panel the visitor opened before it appeared;
+// dismissing the card opens that panel again on desktop, unless the
+// visitor has opened or folded it in the meantime. phones keep the bar
 let censusFoldedForOnboard = false;
 function foldCensusForOnboard() {
   if (!censusPanel || !censusPanelOpen) return;
@@ -3919,13 +3919,6 @@ function restoreCensusAfterOnboard() {
   if (IS_MOBILE) return;
   censusPanelOpen = true;
   syncCensusPanel();
-}
-// the card appears after a short delay; the panel must not flash open
-// before it, so a first visit starts folded (the sync runs with the
-// census button's wiring below)
-if (censusPanel && censusPanelOpen && onboard && shouldShowOnboard()) {
-  censusPanelOpen = false;
-  censusFoldedForOnboard = true;
 }
 // unified timeline: a country whose eras live on different boundary
 // levels (the us runs 1850-2020 across six county vintages) declares
