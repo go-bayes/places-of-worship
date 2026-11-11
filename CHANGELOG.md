@@ -5,7 +5,7 @@
 ### 2026-11-11 (photos on submitted portal records)
 
 - Contributor portal (`apps/regions/nz/js/verification-map.js`). Photos and documents can again be added to a record already submitted for review, as the backend has always allowed. A record entered through the short current-observation form showed its summary with no photos section; it now carries one below the summary. A record entered through the detailed form drew its photos section but locked it with the rest of the submitted form, so the picker did nothing; the read-only lock now leaves the photos section usable and still locks the form's fields and its pre-save file picker. Reported by Guy Lavender Forsyth on the Vanuatu portal (2026-11-10).
-- Stamp: `verification-map.js?v=20261111a` in `apps/regions/nz/verification.html`. Tests: `task-state-dom.test.cjs` checks the photos section on a submitted rapid record and which controls the read-only lock leaves usable.
+- Stamp: `verification-map.js?v=20261111a` in `apps/regions/nz/verification.html` (pinned in `tiles-v2-client.test.cjs`). Tests: `task-state-dom.test.cjs` checks the photos section on a submitted rapid record and which controls the read-only lock leaves usable.
 
 ### 2026-11-03 (census panel and map credit folded on every screen)
 

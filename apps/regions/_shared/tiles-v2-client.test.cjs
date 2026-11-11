@@ -67,7 +67,7 @@ const stamps = {
     "region-map.js": "20261103e", // census panel opens folded on every screen
     "datamaps-switcher.js": "20261013a", // switcher rows prerender; warming waits for activation
     "unvalidated-places.js": "20261013b", // versioned grid places url; us, de and it use the grid tier from zoom 6
-    "verification-map.js": "20261103b", // map data legend as a fill by ring grid; uncertain fill leaves amber
+    "verification-map.js": "20261111a", // photos attach to submitted portal records
     "occupancy-contract.js": "20261019a", // relocation rules follow definition 0.1.6
     "occupancy-review.js": "20261019a", // move wording and successor in the reviewer's period summary
     "task-presentation.js": "20261015c", // decided-status and reopen-flag helpers
