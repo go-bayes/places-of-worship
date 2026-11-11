@@ -8073,6 +8073,7 @@ class NzVerificationMap {
                 </div>
                 ${canCorrect ? `<div class="copy-help">Correct only for a mistake or new information. Delete withdraws the draft from review; it stays in the audit history.</div>` : ""}
             ` : ""}
+            ${taskId ? `<div id="recordedAttachmentsBlock" class="attachments-block" hidden></div>` : ""}
             <div id="copyStatus" class="copy-status" aria-live="polite"></div>
         `;
     }
@@ -10750,6 +10751,9 @@ class NzVerificationMap {
             this.initAttachmentsBlock(props, document.getElementById("taskAttachmentsBlock"));
             return;
         }
+        // a submitted rapid record shows a summary rather than the form;
+        // photos attach beside the record and leave it unchanged
+        this.initAttachmentsBlock(props, document.getElementById("recordedAttachmentsBlock"));
         const actionSelect = document.getElementById("raActionSelect");
         const sourceUrl = document.getElementById("sourceUrlInput");
         const sourceTitle = document.getElementById("sourceTitleInput");
@@ -10952,11 +10956,14 @@ class NzVerificationMap {
     }
 
     setReviewFormReadOnly() {
+        // the photos block stays usable: an attachment sits beside the
+        // submitted record and does not rewrite it
+        const keepsAttachmentControl = element => Boolean(element.closest?.(".attachments-block:not(.attachments-inline)"));
         document.querySelectorAll(".review-form select, .review-form input, .review-form textarea").forEach(element => {
-            element.disabled = true;
+            if (!keepsAttachmentControl(element)) element.disabled = true;
         });
         document.querySelectorAll(".review-form button").forEach(element => {
-            if (element.id !== "reviseSubmissionButton") {
+            if (element.id !== "reviseSubmissionButton" && !keepsAttachmentControl(element)) {
                 element.disabled = true;
             }
         });

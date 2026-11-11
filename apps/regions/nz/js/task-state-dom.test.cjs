@@ -367,6 +367,41 @@ const feature = (t) => ({ type: "Feature", properties: { task_id: t.task_id, nam
   const waitHtml = app.reviewFormHtml({ task_id: waiting.task_id });
   assert.match(waitHtml, /This observation is waiting for review\./);
   assert.doesNotMatch(waitHtml, /data-detail-reopen/);
+  // photos can still be added to a submitted rapid record (guy, 2026-11-10)
+  assert.match(waitHtml, /id="recordedAttachmentsBlock"/);
+}
+
+// 11. locking a submitted guided form leaves the photos block usable, but
+// still locks the form's own inputs and the inline pre-save file picker
+{
+  const app = fresh();
+  const control = (inside) => ({ disabled: false, id: "", closest(selector) {
+    if (selector !== ".attachments-block:not(.attachments-inline)") throw new Error(`unexpected selector ${selector}`);
+    return inside === "block" ? {} : null;
+  } });
+  const formInput = control("form");
+  const inlineInput = control("inline");
+  const photoInput = control("block");
+  const photoButton = control("block");
+  const saveButton = control("form");
+  const revise = control("form");
+  revise.id = "reviseSubmissionButton";
+  const original = document.querySelectorAll;
+  document.querySelectorAll = (selector) => selector.includes("button")
+    ? [photoButton, saveButton, revise]
+    : [formInput, inlineInput, photoInput];
+  try {
+    app.setReviewFormReadOnly();
+  } finally {
+    document.querySelectorAll = original;
+  }
+  assert.equal(formInput.disabled, true);
+  assert.equal(inlineInput.disabled, true);
+  assert.equal(saveButton.disabled, true);
+  assert.equal(photoInput.disabled, false);
+  assert.equal(photoButton.disabled, false);
+  assert.equal(revise.disabled, false);
+  console.log("task-state-dom: read-only photos ok");
 }
 
 console.log("task-state-dom: ok");
