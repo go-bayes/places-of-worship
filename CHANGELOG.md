@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-11-16 (workbench notice on the unbuilt page)
+
+- Research workbench (`apps/workbench/index.html`). The site publishes the workbench's unbuilt Vite entry, whose script is not served, so the page at `/apps/workbench/` was blank. The page now carries a short static notice inside `#root` saying that the workbench is a development prototype not published here, with a link to the atlas. React replaces the notice when the app runs under `npm run dev` or a build. The workbench itself is unchanged and still unpublished.
+
 ### 2026-11-16 (roadmap status and references)
 
 - `ROADMAP.md`. The *How To Read This* section now names `docs/system-map.md` and `CHANGELOG.md` and says that the project's private planning records hold active design and decisions. Its earlier pointers named `PLANNING.md` and `JOURNAL.md`, which left this repository when those records went to the private tier. The authenticated review portal is marked as in place, since `apps/regions/nz/review.html` records role-gated decisions that the contributor portal shows. Content-addressed review versions are marked as in progress: canonical JSON hashing and immutable evidence versions are implemented, and verification by replaying accepted events remains to be built.
