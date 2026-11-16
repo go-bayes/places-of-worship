@@ -4,6 +4,8 @@
 
 ## 1. Clerk authentication
 
+**Superseded (2026-11-16).** Clerk is no longer the planned identity layer. JB's plan of 2026-11-03 uses WorkOS AuthKit, with Google behind it; its first step, WorkOS sessions in both portals behind one configuration constant, is PR #220 (a draft, unmerged). PR #153, which built Clerk sessions, was closed on 2026-11-16. The text below records the Clerk proposal as ratified on 2026-07-11.
+
 **What.** Replace the current portal auth (Convex Google OAuth invites; see [convex-auth-google.config.example.ts](convex-auth-google.config.example.ts)) with [Clerk](https://clerk.com) as the identity layer in front of Convex.
 
 **Why.** The invite flow today assumes a small RA roster whose accounts the PI seeds by hand (rows in the dev-deployment `users` table that activate on first Google sign-in). A global RA cohort needs self-service sign-up with review, multi-provider sign-in (not every RA has a Google account), organisation/role management, and session management that the project does not want to hand-build. Clerk has a first-class Convex integration path.
@@ -28,4 +30,4 @@
 
 ## Sequencing note
 
-Clerk precedes GT if both proceed: identity and roles are the substrate the portal serves localised content on. Neither lane starts before its design doc is ratified.
+Authentication (now the WorkOS plan, section 1) precedes GT if both proceed: identity and roles are the substrate the portal serves localised content on. Neither lane starts before its design doc is ratified.
