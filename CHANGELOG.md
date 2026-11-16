@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+### 2026-11-16 (README history)
+
+- `README.md` gains a short History section: Nick Young built the first version of the global places of worship map in 2018, and the present site grew out of that work.
+
+### 2026-11-16 (operational definition 0.1.7)
+
+- Version 0.1.7 of the [operational definition](docs/operational-definition.md), snapshot at `docs/development/place-of-worship-definition-2026-11-16-v0.1.7.md` (JB rulings, 2026-11-16). A vehicle or other mobile venue is not a site: where worship by or for a community recurs at a stop the vehicle returns to, the stop may be a place of worship and the vehicle is a linked entity; a vehicle with no recurring stop yields none. The rule stands under criterion 1 and Identity over time, with a Sukkah Mobile as the worked example. The Christchurch example now applies the succession rule to the Transitional Cathedral's land: the place at Latimer Square begins with St John the Baptist Church, the cardboard building is a new structure on a continuing site, and the cathedral congregation is a second community there; the count stays at two. Identity over time states that a community moving to a site already holding a place of worship, and succeeding to its use, becomes a further community of that place. A short Acknowledgements section names those whose discussions during 2026 shaped the definition. The version history no longer says that the implementation lags version 0.1.6, since the occupancy validator has followed it since 2026-10-19. The criteria section states that the project, not yet able to consult the communities whose places it classifies, rules on every community's sites by the same criteria, and that each ruling is provisional and open to revision on the advice of the community concerned (JB, 2026-11-16).
+- The 0.1.6 snapshot carries a supersession notice; the counting discussion's status notes are corrected and record the 0.1.7 change to the Christchurch example; `apps/guides/definition.html` is re-rendered; the PI and reviewer guide's identity bases and the RA field guide's site rule follow the new text; `FAQ.md` answers whether a vehicle can be a place of worship; `docs/edge-cases.md` records the Transitional Cathedral as EC-002.
+
 ### 2026-11-16 (review rulings carried into the standing documents)
 
 - `docs/ai-assisted-research.md`, `docs/portal-claude-batch-review.md`, the "How human review decides" section of `docs/confidence-standard.md`, `docs/development/human-review-and-release.md` and the agent-assisted lane of `docs/portal-free-contribution-design.md` now state JB's review rulings of 2026-11-16 as recorded in the publication pipeline brief: an agent may author the ordinary draft through a deterministic conversion, the named reviewer may be an agent from another provider, free text is withheld from public outputs unless chosen and cleared by a person, batch release by the lead replaces per-item acceptance once it passes its tests, and a named person authorises every release. Each passage keeps the ruling apart from current behaviour, which is still per-item human preparation, review and PI acceptance until that pipeline work is built.
