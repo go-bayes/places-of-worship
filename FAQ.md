@@ -58,6 +58,10 @@ Candidate collection is broader than accepted classification. An OSM tag, direct
 
 The proposed direction treats a shared multi-faith prayer room as a PoW and distinct hospital chapels as distinct PoWs. A coherent worship complex can include several buildings, rooms, or altars. The boundary of a coherent complex needs further operational examples. See the [public discussion of counting places and coherent worship complexes](docs/development/pow-counting-and-complexes-discussion-2026-09-22.md) for the examples, persistent identifiers through inactivity, and open questions. Version 0.1.6 of the operational definition (2026-09-22) adopted the discussion's rule for shared rooms and replacement venues; the boundary of a coherent complex and the implemented counting rules remain follow-up work.
 
+## Can a vehicle be a place of worship?
+
+No. A vehicle or other mobile venue is not a site, because its changing position gives no fixed place to find again. Where worship by or for a community recurs at a stop the vehicle returns to, such as a corner where a Sukkah Mobile parks through Sukkot each year, the stop is the site and may be a place of worship, and the vehicle is recorded as a linked entity, as an organisation is. A vehicle with no recurring stop yields no place of worship; its activity is evidence about the organisation that runs it. Version 0.1.7 of the [operational definition](docs/operational-definition.md#identity-over-time) states the rule (2026-11-16).
+
 ## What do opening, closure, and change dates mean here?
 
 These are source-backed dates and changes in the history of a worship site,

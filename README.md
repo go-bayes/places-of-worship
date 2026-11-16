@@ -71,9 +71,13 @@ The project's original code, documentation, map pages, manifests, derived summar
 
 Source data retain their own licences, recorded per product in provenance manifests held in the project's private research tier during the work phase. Each map page states its source, construct, and licence position; collaborators may request the manifest detail. Where a source licence requires different terms, including CC BY-SA or ODbL, those terms govern the product. See [LICENSE.md](LICENSE.md) and [docs/data-access-and-research-tiers.md](docs/data-access-and-research-tiers.md).
 
+## History
+
+Nick Young of the University of Auckland Centre for eResearch built the first version of the [global places of worship map](https://uoa-eresearch.github.io/religion/churches.html) in 2018, after a conversation with JB. The present site grew out of that work. This repository began on 20 August 2025.
+
 ## Project Team
 
-The project team includes Professor Joseph Bulbulia (Victoria University of Wellington, New Zealand), Dr Joseph Watts (University of Canterbury, New Zealand), and Professor Robert Woodberry (Baylor University, United States), who contributes the historical mission-station data and reviews it. We thank Nick Young at the University of Auckland Centre for eResearch for the initial inspiration.
+The project team includes Professor Joseph Bulbulia (Victoria University of Wellington, New Zealand), Dr Joseph Watts (University of Canterbury, New Zealand), and Professor Robert Woodberry (Baylor University, United States), who contributes the historical mission-station data and reviews it.
 
 This work is supported by a Templeton Religion Trust subgrant (TRT-2022-30666).
 
