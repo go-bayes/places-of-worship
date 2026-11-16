@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-11-16 (roadmap status and references)
+
+- `ROADMAP.md`. The *How To Read This* section now names `docs/system-map.md` and `CHANGELOG.md` and says that the project's private planning records hold active design and decisions. Its earlier pointers named `PLANNING.md` and `JOURNAL.md`, which left this repository when those records went to the private tier. The authenticated review portal is marked as in place, since `apps/regions/nz/review.html` records role-gated decisions that the contributor portal shows. Content-addressed review versions are marked as in progress: canonical JSON hashing and immutable evidence versions are implemented, and verification by replaying accepted events remains to be built.
+
 ### 2026-11-11 (photos on submitted portal records)
 
 - Contributor portal (`apps/regions/nz/js/verification-map.js`). Photos and documents can again be added to a record already submitted for review, as the backend has always allowed. A record entered through the short current-observation form showed its summary with no photos section; it now carries one below the summary. A record entered through the detailed form drew its photos section but locked it with the rest of the submitted form, so the picker did nothing; the read-only lock now leaves the photos section usable and still locks the form's fields and its pre-save file picker. Reported by Guy Lavender Forsyth on the Vanuatu portal (2026-11-10).
