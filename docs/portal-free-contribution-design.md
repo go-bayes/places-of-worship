@@ -198,7 +198,7 @@ human ownership.
 | Human role | RA reviews, corrects, rejects, or confirms each claim before submission. |
 | Author of record | The confirming human is the author of record. The agent is a transcription and extraction assistant. |
 | Submission gate | `agent_draft` claims cannot be submitted until marked `human_confirmed`. |
-| Reviewer view | Reviewers see the source, agent run, human edits, confirmation time, and final human-owned claim. |
+| Reviewer view | Reviewers see the source, agent run, human edits, confirmation time, and final human-owned claim, which is the decision target in this lane today (see the 2026-11-16 ruling on agent authorship below). |
 
 The UI shows an extraction workspace with source metadata at the top and a
 claim table below. Each claim has one of four states: `agent_draft`,
@@ -226,8 +226,7 @@ Required provenance fields are:
 Reviewer pages should sort agent-assisted submissions with human submissions,
 while showing a clear `agent-assisted` badge. The reviewer should see the
 original source reference, extraction provenance, confidence, human edits, and
-dedup candidates. The reviewer should decide on the final human-owned claim.
-The agent draft alone is not the decision target.
+dedup candidates. In this lane as designed, the reviewer decides on the final human-owned claim, and the agent draft alone is not the decision target. The project lead ruled on 2026-11-16 that an agent may author an ordinary evidence draft through a deterministic, validated conversion that preserves claim lineage and keeps observation apart from interpretation, and that a named reviewer, who may be a person or an agent from another provider, then judges that draft ([publication pipeline brief](development/publication-pipeline-brief-2026-10-19.md), sections 4.2 and 4.5). The brief applies the ruling to agent-filed corrections, and no conversion is built, so the `human_confirmed` gate above still governs this lane.
 
 ### The AGENT-AUTONOMOUS Lane
 

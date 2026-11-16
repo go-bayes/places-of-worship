@@ -245,7 +245,7 @@
 
 ## Agent Signature On Pull Requests
 
-Several agents and people collaborate on this repository, so every pull request body, review, and comment an agent writes ends with the agent's model identity (Joseph, 2026-09-19). Sign with the model name and version as the provider reports it, for example `— Claude Fable 5.1` or `— gpt-6-astra`; a generic product name is not enough. Commits stay unsigned and carry no AI attribution. The signature lets the team see which model produced a review or a claim when reading a thread later.
+Several agents and people collaborate on this repository, so every pull request body, review, and comment an agent writes ends with the agent's model identity (Joseph, 2026-09-19). Sign with the model name and version as the provider reports it, for example `— Claude Fable 5.1` or `— gpt-6-astra`; a generic product name is not enough. Commits need no signature; AI attribution in a commit, such as a co-author trailer naming the model, is permitted but not required (Joseph, 2026-11-16). The signature lets the team see which model produced a review or a claim when reading a thread later.
 
 ## Pull Request Closure
 
