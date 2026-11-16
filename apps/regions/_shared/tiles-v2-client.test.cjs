@@ -64,16 +64,16 @@ assert.doesNotMatch(unvalidated, /overviewKeep/);
 // every html page that loads a changed script carries the bumped query
 // one stamp per script: a script's stamp moves only when that script changes
 const stamps = {
-    "region-map.js": "20261015e", // street view resizes from its corner, no expand button
+    "region-map.js": "20261103e", // census panel opens folded on every screen
     "datamaps-switcher.js": "20261013a", // switcher rows prerender; warming waits for activation
     "unvalidated-places.js": "20261013b", // versioned grid places url; us, de and it use the grid tier from zoom 6
-    "verification-map.js": "20261019a", // two kinds of move on a period card, successor field (definition 0.1.6)
+    "verification-map.js": "20261111a", // photos attach to submitted portal records
     "occupancy-contract.js": "20261019a", // relocation rules follow definition 0.1.6
     "occupancy-review.js": "20261019a", // move wording and successor in the reviewer's period summary
     "task-presentation.js": "20261015c", // decided-status and reopen-flag helpers
-    "convex-task-client.js": "20261015d", // revertReopen client method
-    "review-portal.js": "20261019a", // identity bases of definition 0.1.6
-    "review-map.js": "20261013a", // tap on a grid-thinned fallback dot zooms in
+    "convex-task-client.js": "20261103a", // the sign-in button takes a width from its caller
+    "review-portal.js": "20261103e", // linked place: warn once on unmatched ids, record anyway
+    "review-map.js": "20261103a", // the legend becomes the folding map data panel
 };
 const scripts = Object.keys(stamps);
 const pages = [];

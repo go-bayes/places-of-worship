@@ -16,8 +16,8 @@ project's register and conventions rather than copying wholesale.
 
 ## Provenance
 
-`places-of-relief` (live at https://reliefmap.info, local
-`/Users/joseph/GIT/places-of-relief/`, private repo `go-bayes/places-of-relief`)
+`places-of-relief` (live at https://reliefmap.info, private repo
+`go-bayes/places-of-relief`)
 is a fork of THIS project's `apps/global/index.html`, so the two maps share a
 skeleton: MapLibre GL 3.6.1, `styles/maplibre-flat.css`, the dock/search UI,
 popup machinery, and Street View integration. The canonical implementation of

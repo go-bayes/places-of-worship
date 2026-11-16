@@ -42,7 +42,7 @@
       "provider": "geoBoundaries",
       "url": "https://www.geoboundaries.org/",
       "retrieval_date": "2026-07-13",
-      "local_path": "/Users/joseph/GIT/places-of-worship/data/raw/bt_census/geoBoundaries-BTN-ADM1.geojson",
+      "local_path": "data/raw/bt_census/geoBoundaries-BTN-ADM1.geojson",
       "licence": {
         "name": "Creative Commons Attribution 3.0",
         "url": "https://creativecommons.org/licenses/by/3.0/",

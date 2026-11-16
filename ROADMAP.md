@@ -19,7 +19,7 @@ Status:
 
 Use this file for the broad phase map. 
 
-Use `docs/system-map.md` for the module map, `PLANNING.md` for active design and next steps, `JOURNAL.md` for decisions and rationale, and `CHANGELOG.md` for a record of progress.
+Use `docs/system-map.md` for the module map and `CHANGELOG.md` for a record of progress. The project's private planning records hold the active design, the next steps, and the decisions with their rationale.
 
 Each phase should advance both tracks where possible. A data-management phase is
 not complete merely because intake works; it must also make the consequences of
@@ -112,7 +112,7 @@ Evidence And Governance:
   denomination sets, multi-denomination, multi-purpose use, organisation-site
   links, and target-year appeared/disappeared states.
 - `[ ]` Reviewer decision events and accept/reject/defer/revise semantics.
-- `[ ]` [Content-addressed review versions](docs/development/content-addressed-review.md), including deterministic payload hashing and accepted-event replay checks.
+- `[~]` [Content-addressed review versions](docs/development/content-addressed-review.md), including deterministic payload hashing and accepted-event replay checks. Canonical JSON hashing and immutable evidence versions are implemented; verification by replaying accepted events remains to be built.
 - `[ ]` Hash-backed accepted diff manifests with event ids, input manifests,
   target years, country/area partitions, output hashes, and replay command.
 - `[~]` OSM date-tag list: places with OSM opening or closure date tags, parsed
@@ -231,9 +231,9 @@ Evidence And Governance:
 - `[~]` First assigned web batch:
   `nz-temporal-ra-workpack-001` exposes 50 curated New Zealand temporal cases
   through the verification map once the hosted backend is seeded.
-- `[ ]` Authenticated review portal: role-gated queue where reviewers inspect
+- `[x]` Authenticated review portal: role-gated queue where reviewers inspect
   submitted evidence, record decisions, and push decision state back to the
-  RA-facing task history.
+  RA-facing task history. The review portal (`apps/regions/nz/review.html`) records decisions for reviewer, curator and admin roles, and the contributor portal shows each task's latest decision.
 - `[~]` Shared task-list model: treat prototype assignments as filtered batches
   over one task store, so later New Zealand batches, Vanuatu tasks, and
   missing-site nominations can merge without reconciling separate worksheets.

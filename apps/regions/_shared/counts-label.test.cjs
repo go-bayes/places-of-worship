@@ -3,7 +3,9 @@
 // tile the places source is drawing is unsampled (z8 or above): at camera zoom
 // 8 or more, a sampled z6 or z7 parent retained while the z8 tile loads or
 // fails must still read "Places shown". 2. a malformed #f= (%ZZ) is an absent
-// parameter and does not throw.
+// parameter and does not throw. 3. the key's accessible name lists its
+// categories, and 4. the onboarding copy keeps two sentences and up to three
+// bullets on the card (ui suggestions items 1 and 3, 2026-11-03).
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
@@ -62,5 +64,49 @@ assert.match(runtime, /map\.on\("idle", scheduleCountsRefresh\);/);
   assert.equal(run("#f=%E0%A4%A"), null, "truncated escape is an absent parameter");
   assert.equal(run("#6.5/52/5"), null);
   assert.equal(run("#f=%ZZ&d=x"), null);
+}
+
+// the key's accessible name lists the categories its dots show (ui
+// suggestions item 3), with their counts when the strip shows counts
+{
+  const context = vm.createContext({ countsUserEnabled: false, countsSampled: false });
+  vm.runInContext(`${lift("function countsToggleName(")}\nthis.name = countsToggleName;`, context);
+  const top = [
+    { label: "Christian", count: 3159 },
+    { label: "Muslim", count: 72 },
+    { label: "Hindu", count: 9 }
+  ];
+  assert.equal(context.name(top, "dots"), "Show denomination key: Christian, Muslim, Hindu");
+  assert.equal(context.name(top, "names"), "Show denomination key: Christian, Muslim, Hindu");
+  assert.match(context.name(top, "counts"), /^Show denomination key: Christian 3.?159, Muslim 72, Hindu 9$/);
+  // below zoom 8 the counts are sampled, and the name says so
+  context.countsSampled = true;
+  assert.match(context.name(top, "counts"), /^Show denomination key: Christian about 3.?159, Muslim about 72, Hindu about 9$/);
+  assert.equal(context.name(top, "names"), "Show denomination key: Christian, Muslim, Hindu");
+  context.countsUserEnabled = true;
+  assert.match(context.name(top, "dots"), /^Hide denomination key: /);
+}
+
+// the onboarding card leads with two sentences of its intro and up to
+// three bullets; the rest folds into Source notes (ui suggestions item 1)
+{
+  const context = vm.createContext({});
+  vm.runInContext(
+    `const ONBOARD_LEAD_SENTENCES = 2;\nconst ONBOARD_OPEN_BULLETS = 3;\n${lift("function onboardCopy(")}\nthis.copy = onboardCopy;`,
+    context
+  );
+  const short = context.copy({ intro: "One. Two.", bullets: ["a", "b", "c"] });
+  assert.equal(short.lead, "One. Two.");
+  assert.equal(short.notesIntro, "");
+  assert.deepEqual([...short.openBullets], ["a", "b", "c"]);
+  assert.equal(short.notesBullets.length, 0, "three bullets stay on the card");
+  const long = context.copy({ intro: "Church of Sweden data, 1972–2025. It is a register. See <strong>notes</strong>.", bullets: ["1", "2", "3", "4"] });
+  assert.equal(long.lead, "Church of Sweden data, 1972–2025. It is a register.");
+  assert.equal(long.notesIntro, "See <strong>notes</strong>.");
+  assert.equal(long.openBullets.length, 0, "a fourth bullet moves the list into the notes");
+  assert.deepEqual([...long.notesBullets], ["1", "2", "3", "4"]);
+  // abbreviations followed by a lower-case word do not end a sentence
+  assert.equal(context.copy({ intro: "Data from e.g. the census. Second. Third." }).lead, "Data from e.g. the census. Second.");
+  assert.equal(context.copy(null).lead, "");
 }
 console.log("counts-label.test.cjs ok");

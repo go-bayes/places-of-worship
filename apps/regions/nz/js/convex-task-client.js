@@ -353,7 +353,9 @@
                 theme: "outline",
                 size: "large",
                 text: "signin_with",
-                width: 300,
+                // a caller that lays the button beside another (the
+                // contributor portal on a phone) passes the width it has
+                width: options.width || 300,
             });
         }
 

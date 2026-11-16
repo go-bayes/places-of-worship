@@ -266,48 +266,39 @@
         // says uk); a country without one gets the slim overview sample
         const tileIso = String(registry?.iso2 || options.countryCode || "").toLowerCase();
         let dotLayers = places ? places.createLayers(L, { countryCode: tileIso }) : null;
-        let pointsMode = "off";
+        let pointsOn = false;
         function syncDots() {
             if (!places || !dotLayers) return;
-            if (pointsMode === "off") places.removeFrom(map, dotLayers);
-            else places.addTo(map, dotLayers);
-            const note = container.querySelector("#reviewPointsNote");
-            if (note) {
-                note.textContent = pointsMode === "off"
-                    ? "Unreviewed places are off; turn them on here to see every open case in amber."
-                    : "amber dots are today's OpenStreetMap places, every one an open case until reviewed";
-            }
+            if (pointsOn) places.addTo(map, dotLayers);
+            else places.removeFrom(map, dotLayers);
         }
 
-        const legend = L.control({ position: "bottomleft" });
-        legend.onAdd = () => {
-            const div = L.DomUtil.create("div", "points-legend-control");
-            div.innerHTML = `
-                ${dotLayers ? `
-                <select id="reviewPointsSelect" aria-label="Unreviewed places">
-                    <option value="off" selected>Unreviewed places: off</option>
-                    <option value="all">Unreviewed places: on</option>
-                </select>
-                <div id="reviewPointsNote" class="points-mode-note"></div>` : ""}
-                <div class="map-legend">
-                    <span class="legend-caption">Submissions in this queue</span>
-                    <span class="legend-row"><span class="legend-dot vm-nomination-swatch"></span>nomination awaiting review</span>
-                    <span class="legend-row"><span class="legend-dot vm-in-review-swatch"></span>in review</span>
-                    <span class="legend-row"><span class="legend-dot vm-disputed-swatch"></span>changes requested or reopened</span>
-                    <span class="legend-row"><span class="legend-dot vm-validated-present-swatch"></span>reviewed or exported</span>
-                    <span class="legend-row"><span class="legend-dot vm-unvalidated-swatch"></span>not yet reviewed (open case)</span>
-                    ${dotLayers ? `<span class="legend-row"><span class="legend-dot context-dot-swatch"></span>unreviewed place, no submission yet</span>` : ""}
-                </div>
-            `;
-            L.DomEvent.disableClickPropagation(div);
-            L.DomEvent.disableScrollPropagation(div);
-            div.querySelector("#reviewPointsSelect")?.addEventListener("change", event => {
-                pointsMode = event.target.value;
-                syncDots();
-            });
-            return div;
-        };
-        legend.addTo(map);
+        // the marker legend, in the ra portal's words for the same rings
+        const legendHtml = `
+            <div class="map-legend">
+                <span class="legend-caption">Submissions in this queue</span>
+                <span class="legend-row"><span class="legend-dot vm-nomination-swatch"></span>nomination awaiting review</span>
+                <span class="legend-row"><span class="legend-dot vm-in-review-swatch"></span>in review</span>
+                <span class="legend-row"><span class="legend-dot vm-disputed-swatch"></span>changes requested or reopened</span>
+                <span class="legend-row"><span class="legend-dot vm-validated-present-swatch"></span>reviewed or exported</span>
+                <span class="legend-row"><span class="legend-dot vm-unvalidated-swatch"></span>not yet reviewed (open case)</span>
+                ${dotLayers ? `<span class="legend-row"><span class="legend-dot context-dot-swatch"></span>unreviewed place, no submission yet</span>` : ""}
+            </div>
+        `;
+        // the map data panel (2026-11-03): it folds to one bar carrying the
+        // grip, a count of the queue on the map and the points switch, as
+        // on the ra portal (js/review-map-data.js); without that script the
+        // map has no legend and still works
+        const mapData = window.PowReviewMapData
+            ? window.PowReviewMapData.create(L, map, {
+                legendHtml,
+                pointsAvailable: Boolean(dotLayers),
+                onPointsChange: (on) => {
+                    pointsOn = on;
+                    syncDots();
+                },
+            })
+            : null;
         syncDots();
 
         const markerLayer = L.layerGroup().addTo(map);
@@ -321,8 +312,8 @@
         // else the queue as its first load framed it, else the country's
         // opening view. it sits under the basemap pill at the top right:
         // this map is short (440 px by default, 200 px at the least) and
-        // the legend at the bottom left reaches the column under the zoom
-        // buttons
+        // the map data panel at the bottom left opens upward into the
+        // column under the zoom buttons
         function recentreTarget() {
             const selected = markersByTaskId.get(selectedTaskId);
             if (selected) {
@@ -447,6 +438,7 @@
             rows = Array.isArray(nextRows) ? nextRows : [];
             selectedTaskId = nextSelectedId || "";
             rebuildMarkers();
+            mapData?.setCount(markersByTaskId.size, rows.length);
             const selected = rows.find(row => row?.task?.task_id === selectedTaskId)?.task || null;
             drawContext(selected);
             // the first load frames the queue; later loads keep the view
@@ -520,7 +512,7 @@
             });
         }
 
-        return { map, setQueue, select, setBasemap, validationState };
+        return { map, setQueue, select, setBasemap, validationState, mapData };
     }
 
     window.PowReviewMap = { create, validationState, isNomination };

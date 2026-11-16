@@ -79,6 +79,7 @@ docker-compose.override.yml
 *.swp
 *.swo
 *~
+.playwright-mcp/
 
 # OS Generated
 .DS_Store

@@ -31,7 +31,7 @@ function element(id) {
     elements.set(id, el);
     return el;
 }
-for (const id of ["authPanel", "authStatus", "detailPanel", "queueGroupBy", "queueClaimFilter", "queueList", "queueStatus", "queueStatusText", "refreshQueue", "signInButton", "reviewSnapshotHost"]) element(id);
+for (const id of ["authPanel", "authStatus", "detailPanel", "queueGroupBy", "queueClaimFilter", "queueList", "queueStatus", "queueStatusText", "refreshQueue", "signInButton", "reviewSnapshotHost", "headerAccount", "queueRollup", "queueControls", "pageHeading", "reviewBoundary"]) element(id);
 elements.get("queueStatus").value = "needs_review";
 
 const document = {
@@ -74,11 +74,29 @@ assert.doesNotMatch(list, /<span class="pill">needs_review</);
 assert.doesNotMatch(list, /unresolved note</);
 assert.match(list, /<span class="pill">Verify<\/span>/);
 
-// rollup: the act tone wins and counts only its rows
+// each row leads with its state pill (ui item 6, 2026-11-03): the pill
+// comes before the name, and the pill row under it does not repeat it
+const firstRow = list.split('data-task-id="t2"')[0];
+assert.match(firstRow, /<span class="task-row-head"><span class="state-pill tone-act"[^>]*>Needs review<\/span><strong>Task t1<\/strong><\/span>/);
+const firstPillRow = firstRow.match(/<span class="pill-row">([\s\S]*?)<\/span>\s*\n/)?.[1] || "";
+assert.doesNotMatch(firstPillRow, /state-pill/, "the pill row leaves the leading state out");
+assert.match(firstPillRow, /<span class="pill">Verify<\/span>/);
+assert.equal((list.match(/state-pill tone-/g) || []).length, 3, "one state pill per row");
+
+// rollup: the act tone wins and counts only its rows; it sits in the
+// queue's header, and the status line under the controls clears
+const statusLine = elements.get("queueStatusText");
+statusLine.className = "status";
+statusLine.textContent = "Loading review queue...";
 portal.renderQueueRollup();
-const roll = elements.get("queueStatusText");
+const roll = elements.get("queueRollup");
 assert.equal(roll.className, "state-rollup");
 assert.match(roll.innerHTML, /tone-act">2 to review<\/span><span>of 3 loaded<\/span>/);
+assert.equal(statusLine.textContent, "", "the loading line clears once the rollup shows");
+assert.equal(statusLine.hidden, true, "and the empty status box hides");
+assert.doesNotMatch(statusLine.innerHTML, /state-pill/, "the rollup is no longer in the status line");
+const reviewHtml = fs.readFileSync(path.join(__dirname, "..", "review.html"), "utf8");
+assert.match(reviewHtml, /<div class="queue-head">\s*<h2 id="queueHeading">Queue<\/h2>\s*<div id="queueRollup" class="state-rollup" aria-live="polite"><\/div>/, "the rollup host sits beside the queue heading");
 
 // empty queue: one line and one action; the filter case offers to clear it
 portal.state.queue = [];
@@ -115,6 +133,60 @@ for (const [value, label] of [["same_site", "same place"], ["conversion", "conve
 }
 assert.doesNotMatch(form, /value="relocation"/);
 
+// the linked place field and its client check, mirroring convex/lib/identityLinks.ts
+assert.match(form, /<label for="linkedSiteIds">Linked place<\/label>/);
+assert.match(form, /<input id="linkedSiteIds" name="linkedSiteIds" type="text"/);
+// the help names the identifier forms the server resolves, and what it stores
+assert.match(form, /site identifier, such as n123 or w456, an OpenStreetMap reference such as osm:node\/123, a candidate identifier, or the task identifier or source record of a place in the portal/);
+assert.match(form, /A place in any country may be linked; a task or source record is recorded as its place's site identifier/);
+// the box for the unmatched-link warning sits under the field, hidden until used
+assert.match(form, /<\/small>\s*<div id="linkedSiteWarning" class="review-warning" role="status" aria-live="polite" hidden><\/div>/);
+assert.deepEqual([...portal.parseLinkedSiteIds(" nz-a ,\n nz-b,, ")], ["nz-a", "nz-b"]);
+assert.deepEqual([...portal.parseLinkedSiteIds(undefined)], []);
+for (const basis of ["successor_at_new_site", "end_and_new_foundation", "split", "merge"]) {
+    assert.match(portal.linkedSiteIdsProblem(basis, []), /give the linked place's identifier/);
+    assert.equal(portal.linkedSiteIdsProblem(basis, ["nz-a"]), "");
+}
+for (const basis of ["duplicate", "uncertain"]) {
+    assert.equal(portal.linkedSiteIdsProblem(basis, []), "");
+    assert.equal(portal.linkedSiteIdsProblem(basis, ["nz-a"]), "");
+}
+for (const basis of ["same_site", "conversion", "new_candidate", undefined]) {
+    assert.match(portal.linkedSiteIdsProblem(basis, ["nz-a"]), /applies only to/);
+    assert.equal(portal.linkedSiteIdsProblem(basis, []), "");
+}
+assert.match(portal.linkedSiteIdsProblem("split", ["nz-a", "nz-a"]), /once/);
+assert.match(portal.linkedSiteIdsProblem("split", ["x".repeat(201)]), /200 characters/);
+assert.match(portal.linkedSiteIdsProblem("merge", Array.from({ length: 11 }, (_, i) => `nz-${i}`)), /at most 10/);
+assert.match(portal.linkedSiteIdsProblem("split", ["nz\u0007a"]), /control characters/);
+const ownTask = { task_id: "t1", matched_current_site_id: "nz-site-1", candidate_site_id: "candidate:nz:b:1" };
+for (const own of ["t1", "nz-site-1", "candidate:nz:b:1"]) {
+    assert.match(portal.linkedSiteIdsProblem("successor_at_new_site", [own], ownTask), /another place/);
+}
+const intakeTask = { task_id: "t2", source_record_id: "osm:node/123", osm_object_type: "way", matched_osm_id: "456" };
+for (const own of ["osm:node/123", "osm:way/456"]) {
+    assert.match(portal.linkedSiteIdsProblem("successor_at_new_site", [own], intakeTask), /another place/);
+}
+assert.equal(portal.linkedSiteIdsProblem("successor_at_new_site", ["osm:node/789"], intakeTask), "");
+// the bare spelling of the task's own osm object is its own place too
+for (const own of ["n123", "w456"]) {
+    assert.match(portal.linkedSiteIdsProblem("successor_at_new_site", [own], intakeTask), /another place/);
+}
+assert.equal(portal.linkedSiteIdsProblem("successor_at_new_site", ["n456"], intakeTask), "");
+assert.equal(portal.linkedSiteIdsProblem("successor_at_new_site", ["nz-site-2"], ownTask), "");
+
+// the last decision shows its identity basis and escaped links
+portal.state.attachments = [];
+portal.state.selected = {
+    task: { task_id: "t-linked", name: "Linked", status: "reviewed", task_type: "verify", priority: "high" },
+    latestReview: { decision_status: "accepted_for_export", identity_decision: "successor_at_new_site", linked_site_ids: ["nz-a", "<b>x</b>"], decision_note: "Moved to a new property." },
+};
+portal.renderDetail();
+const linkedDetail = elements.get("detailPanel").innerHTML;
+assert.match(linkedDetail, /<br>Identity: successor at a new site/);
+assert.match(linkedDetail, /<br>Linked place: nz-a, &lt;b&gt;x&lt;\/b&gt;/);
+assert.equal(portal.identityLabel("relocation"), "relocation (before definition 0.1.6)");
+
 // a task that cannot be decided offers no chooser menu and disables the two buttons
 const closed = portal.decisionForm(row("t9", "exported").task, null);
 assert.doesNotMatch(closed, /More outcomes/);
@@ -139,6 +211,77 @@ assert.doesNotMatch(reopenedForm, /More outcomes/);
 assert.match(reopenedForm, /data-decision="accepted_for_export" aria-pressed="false" disabled/);
 assert.match(fs.readFileSync(path.join(__dirname, "..", "review.html"), "utf8"), /<option value="reopened">reopened after a decision<\/option>/);
 
+// the one-line header (ui item 6, 2026-11-03): the surface and the country
+portal.setupPageLabel();
+assert.equal(elements.get("pageHeading").textContent, "Review · New Zealand");
+assert.match(reviewHtml, /<span class="product-name">religionmap\.org<\/span>\s*<h1 id="pageHeading">Review · New Zealand<\/h1>/);
+assert.match(reviewHtml, /<a class="header-guide" href="https:\/\/religionmap\.org\/apps\/guides\/pi\.html"/);
+const introText = (reviewHtml.match(/<p class="review-intro"[^>]*>([\s\S]*?)<\/p>/)?.[1] || "").replace(/<[^>]+>/g, "").trim();
+assert.ok(introText.length > 0, "the header carries a sentence");
+assert.equal((introText.match(/[.!?](\s|$)/g) || []).length, 1, "and only one");
+
+// signed in, the account, its transport dot and Sign out sit in the
+// header; the sign-in card hides and the queue controls show
+{
+    let signedOut = 0;
+    window.PowConvexTaskClient.prototype.signOut = () => { signedOut += 1; };
+    window.PowConvexTaskClient.prototype.renderSignInButton = async () => {};
+    element("signOut");
+    portal.state.user = { display_name: "Reviewer <b>", roles: ["reviewer", "curator"] };
+    elements.get("authPanel").hidden = false;
+    elements.get("queueControls").hidden = true;
+    portal.renderAuth();
+    const account = elements.get("headerAccount");
+    assert.equal(account.hidden, false);
+    assert.match(account.innerHTML, /<span id="transportDot" class="transport-dot tone-done" aria-live="polite">Connected<\/span>/);
+    assert.match(account.innerHTML, /class="account-name"[^>]*>Reviewer &lt;b&gt;<\/span>/, "the name is escaped");
+    assert.match(account.innerHTML, /class="account-roles">reviewer, curator</);
+    assert.match(account.innerHTML, /<button id="signOut" class="tertiary" type="button">Sign out<\/button>/);
+    assert.equal(elements.get("authPanel").hidden, true, "the sign-in card gives way");
+    assert.equal(elements.get("queueControls").hidden, false, "the queue's controls show once they can work");
+    assert.equal(elements.get("authStatus").textContent, "");
+    // sign out: the card returns, the header empties, the queue asks for a sign-in
+    for (const fn of elements.get("signOut").listeners.click || []) fn();
+    assert.equal(signedOut, 1);
+    assert.equal(account.hidden, true);
+    assert.equal(account.innerHTML, "");
+    assert.equal(elements.get("authPanel").hidden, false);
+    assert.equal(elements.get("queueControls").hidden, true);
+    assert.equal(statusLine.textContent, "Sign in to load the queue.");
+    assert.equal(statusLine.hidden, false);
+    assert.equal(roll.textContent, "", "no rollup speaks for a queue the page no longer holds");
+    delete window.PowConvexTaskClient.prototype.signOut;
+}
+
+// the queue comes first in the sidebar once signed in: the sign-in card
+// (signed out only), then the queue, then the review boundary
+{
+    const sidebar = reviewHtml.slice(reviewHtml.indexOf('<aside class="sidebar">'), reviewHtml.indexOf("</aside>"));
+    const at = (needle) => sidebar.indexOf(needle);
+    assert.ok(at('id="authPanel"') < at('id="queuePanel"'), "sign-in card before the queue");
+    assert.ok(at('id="queuePanel"') < at('id="reviewBoundary"'), "the queue before the boundary");
+    assert.match(sidebar, /<summary><h2>Review boundary<\/h2> <span class="summary-line">When to accept, keep a note open, or ask for more evidence<\/span><\/summary>/, "the boundary's summary says what it holds");
+}
+
+// r-d3 kept: the boundary is open on a reviewer's first visit and closed
+// after; without storage it stays open
+{
+    const saved = window.localStorage;
+    const store = new Map();
+    window.localStorage = { getItem: (k) => (store.has(k) ? store.get(k) : null), setItem: (k, v) => store.set(k, String(v)) };
+    const boundary = elements.get("reviewBoundary");
+    boundary.open = false;
+    portal.setupBoundary();
+    assert.equal(boundary.open, true, "open on the first visit");
+    assert.equal(store.get("pow-review-boundary-seen"), "1");
+    portal.setupBoundary();
+    assert.equal(boundary.open, false, "closed on a later visit");
+    window.localStorage = { getItem() { throw new Error("blocked"); }, setItem() { throw new Error("blocked"); } };
+    portal.setupBoundary();
+    assert.equal(boundary.open, true, "open every time without storage");
+    window.localStorage = saved;
+}
+
 // reverting a reopen (JB, 2026-10-15): the control shows only on a reopened
 // task that carries the flag, explains its condition, checks the reason
 // client-side and calls the client with the trimmed reason
@@ -146,7 +289,7 @@ assert.match(reopenedForm, /id="revertReopenButton">Revert the reopen</);
 assert.match(reopenedForm, /only while nothing has been written to the task since the reopen|works only while nothing has been written/);
 assert.doesNotMatch(portal.decisionForm(row("t-plain", "reopened").task, null), /revertReopenButton/, "no flag, no control");
 assert.doesNotMatch(portal.decisionForm(row("t-ex", "exported", null, { reopened_after_decision: { from_status: "exported", reason: "x" } }).task, null), /revertReopenButton/, "not reopened, no control");
-(async () => {
+const revertDone = (async () => {
     const reverted = [];
     window.PowConvexTaskClient.prototype.revertReopen = async (args) => { reverted.push(args); return { task_id: args.taskId, status: "pi_accepted" }; };
     window.PowConvexTaskClient.prototype.listReviewQueue = async () => [];
@@ -178,6 +321,129 @@ assert.doesNotMatch(portal.decisionForm(row("t-ex", "exported", null, { reopened
     assert.match(elements.get("revertReopenProblem").textContent, /written to this task since/);
     assert.equal(elements.get("revertReopenConfirm").disabled, false);
 })().catch((error) => { console.error(error); process.exit(1); });
+
+// unmatched links (jb, 2026-11-03): the server's warning shows beside the
+// linked-place field, the record button says it saves anyway, the next
+// submit of the same links carries confirm_unmatched_links, and editing the
+// field resets it; other refusals are unchanged. runs after the revert
+// block above, which shares the client and the selection
+revertDone.then(async () => {
+    const sent = [];
+    let refusal = null;
+    window.PowConvexTaskClient.prototype.recordReviewDecision = async (args) => {
+        sent.push(JSON.parse(JSON.stringify(args)));
+        if (refusal) throw new Error(refusal);
+        const ids = args.decision.linked_site_ids || [];
+        const unmatched = ids.filter((id) => id !== "n100");
+        if (unmatched.length > 0 && args.decision.confirm_unmatched_links !== true) {
+            // the shape convex gives a thrown error over http
+            throw new Error(`[Request ID: abc] Server Error\nUncaught Error: Unmatched linked place: "${unmatched[0]}" matches no place the review system knows. Check the identifier, or record the decision again to keep it.\n    at applyReviewDecision (../convex/reviews.ts:339:9)`);
+        }
+        return { task_id: args.taskId, review_decision_id: "r1", task_status: "provisionally_closed" };
+    };
+    window.PowConvexTaskClient.prototype.listReviewQueue = async () => [];
+    // the published nz sites, fetched once and only when a link is present
+    const fetched = [];
+    window.fetch = async (url) => { fetched.push(url); return { ok: true, json: async () => [{ id: "n306114295" }, { id: "w42" }] }; };
+
+    const warningBox = element("linkedSiteWarning");
+    warningBox.hidden = true;
+    const button = element("recordDecisionButton");
+    button.textContent = "Record decision";
+    const status = element("decisionStatusText");
+    const field = (value = "") => ({ value, addEventListener() {}, focus() {} });
+    const listeners = {};
+    const linkForm = {
+        decisionStatus: field("deferred"),
+        identityDecision: field("successor_at_new_site"),
+        linkedSiteIds: Object.assign(field("n12354"), { addEventListener(type, fn) { (listeners[type] ||= []).push(fn); }, focus() {} }),
+        acceptedAction: field(""),
+        requiredFollowUp: field(""),
+        decisionNote: Object.assign(field("Moved to a new property in 1990."), { focus() {} }),
+        addEventListener() {},
+        querySelectorAll: () => [],
+        querySelector: (selector) => (selector === 'button[type="submit"]' ? button : null),
+    };
+    const submit = () => portal.submitDecision({ preventDefault() {}, currentTarget: linkForm });
+    const edit = (value) => { linkForm.linkedSiteIds.value = value; for (const fn of listeners.input || []) fn(); };
+    portal.state.user = { display_name: "Reviewer", roles: ["reviewer"] };
+    portal.state.content = null;
+    portal.state.drafts = [];
+    portal.state.busy = false;
+    const select = () => { portal.state.selected = row("t-link", "needs_review"); portal.state.agentAgreementChoice = null; };
+    select();
+    portal.wireDecisionForm(linkForm);
+    assert.equal(portal.state.linkConfirmation, null);
+
+    // first submit: no flag, and the warning in place of an error
+    await submit();
+    assert.equal(sent.length, 1);
+    assert.equal("confirm_unmatched_links" in sent[0].decision, false, "the first submit asks the server");
+    assert.equal(warningBox.hidden, false);
+    assert.equal(warningBox.textContent, 'Unmatched linked place: "n12354" matches no place the review system knows. Check the identifier, or record the decision again to keep it.');
+    assert.equal(button.textContent, "Record anyway");
+    assert.equal(button.disabled, false);
+    assert.equal(status.className, "state-banner tone-act", "a warning, not an error");
+    assert.match(status.textContent, /Record anyway keeps it as entered/);
+    assert.deepEqual(fetched, ["data/nz_places.json"], "an nz link looks up the published sites");
+
+    // editing the field resets the confirmation; the next submit asks again
+    edit("n12345");
+    assert.equal(portal.state.linkConfirmation, null);
+    assert.equal(warningBox.hidden, true);
+    assert.equal(warningBox.textContent, "");
+    assert.equal(button.textContent, "Record decision");
+    await submit();
+    assert.equal(sent.length, 2);
+    assert.equal("confirm_unmatched_links" in sent[1].decision, false, "an edited link is asked about again");
+    assert.equal(warningBox.hidden, false);
+    assert.match(warningBox.textContent, /"n12345"/);
+
+    // pressing again with the same links sends the confirmation and records
+    await submit();
+    assert.equal(sent.length, 3);
+    assert.equal(sent[2].decision.confirm_unmatched_links, true);
+    assert.deepEqual(sent[2].decision.linked_site_ids, ["n12345"]);
+    assert.match(elements.get("detailPanel").innerHTML, /Decision recorded/);
+
+    // a fresh form starts unconfirmed
+    select();
+    portal.wireDecisionForm(linkForm);
+    assert.equal(portal.state.linkConfirmation, null);
+    // a published nz site needs no warning: the flag goes with the first submit
+    edit("osm:node/306114295, w42");
+    await submit();
+    assert.equal(sent.length, 4);
+    assert.equal(sent[3].decision.confirm_unmatched_links, true);
+    assert.equal(fetched.length, 1, "the published list is fetched once");
+    // a link no task or published site names is still asked about
+    select();
+    portal.wireDecisionForm(linkForm);
+    edit("w42, n7");
+    await submit();
+    assert.equal("confirm_unmatched_links" in sent[4].decision, false);
+    assert.equal(button.textContent, "Record anyway");
+
+    // another refusal stays an error, and the button keeps its label
+    select();
+    portal.wireDecisionForm(linkForm);
+    edit("n12354");
+    button.textContent = "Record decision";
+    refusal = "Linked place \"n12354\" resolves to this task's own place (n12354); a link must name another place.";
+    await submit();
+    assert.equal(status.className, "state-banner tone-broken");
+    assert.match(status.textContent, /own place.*Check the form and record again\./);
+    assert.equal(button.textContent, "Record decision");
+    assert.equal(portal.state.linkConfirmation, null);
+    // and no link means no lookup and no flag
+    refusal = null;
+    linkForm.identityDecision.value = "same_site";
+    edit("");
+    await submit();
+    assert.equal("confirm_unmatched_links" in sent[6].decision, false);
+    assert.equal(fetched.length, 1);
+    console.log("review unmatched-link dom test passed");
+}).catch((error) => { console.error(error); process.exit(1); });
 
 // the transport dot is its own axis
 element("transportDot");

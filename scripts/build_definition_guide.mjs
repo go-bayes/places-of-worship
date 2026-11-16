@@ -97,14 +97,17 @@ const render = (markdown) => {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Places of Worship — ${escapeHtml(title)}</title>
+  <title>religionmap.org · ${escapeHtml(title)}</title>
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="guide.css">
 </head>
 <body class="definition-guide">
+  <div class="guide-band">
+    <p class="guide-band-name"><a href="../global/">religionmap.org</a><span class="guide-band-sep" aria-hidden="true">·</span><span class="guide-band-guide">Operational definition</span></p>
+    <a class="guide-band-portal" href="../regions/nz/verification.html">Open the portal</a>
+  </div>
   <header class="page-header">
     <div class="header-inner">
-      <p class="eyebrow">Places of Worship research project</p>
       <h1>${escapeHtml(title)}</h1>
       <p class="purpose">${inline(lead)}</p>
       <nav class="site-nav" aria-label="Guide links">
@@ -126,7 +129,7 @@ ${toc}
 ${body}
   </main>
   <footer>
-    <p>Places of Worship research project · definition adopted ${escapeHtml(adopted)} · rendered from docs/operational-definition.md</p>
+    <p>religionmap.org · definition adopted ${escapeHtml(adopted)} · rendered from docs/operational-definition.md</p>
   </footer>
 </body>
 </html>

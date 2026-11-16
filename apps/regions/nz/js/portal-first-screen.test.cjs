@@ -168,6 +168,36 @@ const fresh = () => Object.create(window.NzVerificationMap.prototype);
   app.setMapDataFolded(false, { chosen: true });
   assert.equal(localStorage.getItem("pow-map-data-folded"), "0");
   assert.equal(fresh().setMapDataFolded(true), false, "no panel, nothing to fold");
+  // with no choice yet a phone opens the panel folded (jb 2026-11-03), and
+  // a choice made on the device stands either way
+  values.delete("pow-map-data-folded");
+  assert.equal(app.mapDataFoldedOnDevice(), false, "open by default on a wider screen");
+  phone = true;
+  assert.equal(app.mapDataFoldedOnDevice(), true, "folded by default on a phone");
+  localStorage.setItem("pow-map-data-folded", "0");
+  assert.equal(app.mapDataFoldedOnDevice(), false, "an unfold chosen on the phone stands");
+  phone = false;
+}
+
+// 3b. the google button takes its cell's width on a phone, within 200 to 300
+{
+  const app = fresh();
+  const host = (width) => ({ getBoundingClientRect() { return { width }; } });
+  assert.equal(app.signInButtonWidth(host(180)), 300, "a wider screen keeps the 300 px button");
+  phone = true;
+  assert.equal(app.signInButtonWidth(host(212.6)), 212, "a phone measures the cell");
+  assert.equal(app.signInButtonWidth(host(150)), 200, "never under 200");
+  assert.equal(app.signInButtonWidth(host(340)), 300, "never over 300");
+  assert.equal(app.signInButtonWidth(null), 300, "no host, the old width");
+  phone = false;
+  // after a sign-out or an expired session the card is rebuilt while the
+  // work sidebar's layout still holds: the signed-out layout goes on first,
+  // so the cell is measured where the button will sit (sonnet, pr #213)
+  const source = fs.readFileSync(path.join(__dirname, "verification-map.js"), "utf8");
+  const signedOutBranch = source.slice(source.indexOf('id="googleSignInButton"'));
+  const chrome = signedOutBranch.indexOf("this.syncPortalChrome();");
+  const measure = signedOutBranch.indexOf("this.signInButtonWidth(signInHost)");
+  assert.ok(chrome > 0 && measure > 0 && chrome < measure, "the signed-out layout is applied before the button is measured");
 }
 
 // 4. the floating sign-in panel drags by its header grip, bound once

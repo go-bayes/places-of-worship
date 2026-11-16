@@ -1,4 +1,8 @@
 const SEARCH_PARAMS = new URLSearchParams(window.location.search);
+// the public product name (jb ruling 2026-11-03): one name on every tab and
+// header, the country after it, and the surface as a muted sub-line; the
+// batch never names the page (jb 2026-09-20)
+const PRODUCT_NAME = "religionmap.org";
 const DEMO_MODE = SEARCH_PARAMS.get("demo") !== "0";
 const INTAKE_ENABLED = DEMO_MODE;
 const PATH_COUNTRY_PARAM = window.location.pathname.match(/\/regions\/([a-z]{2})\//)?.[1] || "";
@@ -19,7 +23,6 @@ const COUNTRY_CONFIGS = {
         nominationSource: "nz_verification_static_map_nomination",
         defaultAssignmentBatchId: "nz-temporal-ra-workpack-001",
         datedPlaces: "../nz/data/dated_places.geojson",
-        assignmentHeading: "New Zealand source-first test",
         // the pin panel's search and coordinate placeholders
         pinExample: { place: "St Paul's, Wellington", lat: -41.2865, lng: 174.7762 },
         // pure entry only: nz assigned tasks keep the guided form
@@ -49,7 +52,6 @@ const COUNTRY_CONFIGS = {
         mapSource: "vu_verification_static_map_workbench",
         nominationSource: "vu_verification_static_map_nomination",
         defaultAssignmentBatchId: "vu-source-first-test-001",
-        assignmentHeading: "Vanuatu source-first test",
         rapidCurrentEntry: true,
         rapidNominationEntry: true,
         temporalLossAction: {
@@ -78,7 +80,6 @@ const COUNTRY_CONFIGS = {
         nominationSource: "al_verification_static_map_nomination",
         defaultAssignmentBatchId: "al-source-first-test-001",
         datedPlaces: "../al/data/dated_places.geojson",
-        assignmentHeading: "Albania verification tasks",
         temporalLossAction: {
             value: "target_year_loss_or_changed_use",
             label: "Present in one target year, absent in a later target year",
@@ -103,7 +104,6 @@ const COUNTRY_CONFIGS = {
         nominationSource: "au_verification_static_map_nomination",
         defaultAssignmentBatchId: "au-source-first-test-001",
         datedPlaces: "../au/data/dated_places.geojson",
-        assignmentHeading: "Australia verification tasks",
         temporalLossAction: {
             value: "target_year_loss_or_changed_use",
             label: "Present in one target year, absent in a later target year",
@@ -128,7 +128,6 @@ const COUNTRY_CONFIGS = {
         nominationSource: "br_verification_static_map_nomination",
         defaultAssignmentBatchId: "br-source-first-test-001",
         datedPlaces: "../br/data/dated_places.geojson",
-        assignmentHeading: "Brazil verification tasks",
         temporalLossAction: {
             value: "target_year_loss_or_changed_use",
             label: "Present in one target year, absent in a later target year",
@@ -153,7 +152,6 @@ const COUNTRY_CONFIGS = {
         nominationSource: "bs_verification_static_map_nomination",
         defaultAssignmentBatchId: "bs-source-first-test-001",
         datedPlaces: "../bs/data/dated_places.geojson",
-        assignmentHeading: "Bahamas verification tasks",
         // single shipped wave: the loss action reads as closed/changed
         // use by the target year rather than a two-year contrast
         temporalLossAction: {
@@ -179,7 +177,6 @@ const COUNTRY_CONFIGS = {
         nominationSource: "ca_verification_static_map_nomination",
         defaultAssignmentBatchId: "ca-source-first-test-001",
         datedPlaces: "../ca/data/dated_places.geojson",
-        assignmentHeading: "Canada verification tasks",
         temporalLossAction: {
             value: "target_year_loss_or_changed_use",
             label: "Present in one target year, absent in a later target year",
@@ -204,7 +201,6 @@ const COUNTRY_CONFIGS = {
         nominationSource: "cz_verification_static_map_nomination",
         defaultAssignmentBatchId: "cz-source-first-test-001",
         datedPlaces: "../cz/data/dated_places.geojson",
-        assignmentHeading: "Czechia verification tasks",
         // single shipped wave: the loss action reads as closed/changed
         // use by the target year rather than a two-year contrast
         temporalLossAction: {
@@ -230,7 +226,6 @@ const COUNTRY_CONFIGS = {
         nominationSource: "gh_verification_static_map_nomination",
         defaultAssignmentBatchId: "gh-source-first-test-001",
         datedPlaces: "../gh/data/dated_places.geojson",
-        assignmentHeading: "Ghana verification tasks",
         // single shipped wave: the loss action reads as closed/changed
         // use by the target year rather than a two-year contrast
         temporalLossAction: {
@@ -256,7 +251,6 @@ const COUNTRY_CONFIGS = {
         nominationSource: "ie_verification_static_map_nomination",
         defaultAssignmentBatchId: "ie-source-first-test-001",
         datedPlaces: "../ie/data/dated_places.geojson",
-        assignmentHeading: "Ireland verification tasks",
         temporalLossAction: {
             value: "target_year_loss_or_changed_use",
             label: "Present in one target year, absent in a later target year",
@@ -281,7 +275,6 @@ const COUNTRY_CONFIGS = {
         nominationSource: "in_verification_static_map_nomination",
         defaultAssignmentBatchId: "in-source-first-test-001",
         datedPlaces: "../in/data/dated_places.geojson",
-        assignmentHeading: "India verification tasks",
         temporalLossAction: {
             value: "target_year_loss_or_changed_use",
             label: "Present in one target year, absent in a later target year",
@@ -306,7 +299,6 @@ const COUNTRY_CONFIGS = {
         nominationSource: "ke_verification_static_map_nomination",
         defaultAssignmentBatchId: "ke-source-first-test-001",
         datedPlaces: "../ke/data/dated_places.geojson",
-        assignmentHeading: "Kenya verification tasks",
         // single shipped wave: the loss action reads as closed/changed
         // use by the target year rather than a two-year contrast
         temporalLossAction: {
@@ -332,7 +324,6 @@ const COUNTRY_CONFIGS = {
         nominationSource: "kr_verification_static_map_nomination",
         defaultAssignmentBatchId: "kr-source-first-test-001",
         datedPlaces: "../kr/data/dated_places.geojson",
-        assignmentHeading: "South Korea verification tasks",
         temporalLossAction: {
             value: "target_year_loss_or_changed_use",
             label: "Present in one target year, absent in a later target year",
@@ -356,7 +347,6 @@ const COUNTRY_CONFIGS = {
         mapSource: "mw_verification_static_map_workbench",
         nominationSource: "mw_verification_static_map_nomination",
         defaultAssignmentBatchId: "mw-source-first-test-001",
-        assignmentHeading: "Malawi verification tasks",
         // single shipped wave: the loss action reads as closed/changed
         // use by the target year rather than a two-year contrast
         temporalLossAction: {
@@ -382,7 +372,6 @@ const COUNTRY_CONFIGS = {
         nominationSource: "mx_verification_static_map_nomination",
         defaultAssignmentBatchId: "mx-source-first-test-001",
         datedPlaces: "../mx/data/dated_places.geojson",
-        assignmentHeading: "Mexico verification tasks",
         temporalLossAction: {
             value: "target_year_loss_or_changed_use",
             label: "Present in one target year, absent in a later target year",
@@ -407,7 +396,6 @@ const COUNTRY_CONFIGS = {
         nominationSource: "pt_verification_static_map_nomination",
         defaultAssignmentBatchId: "pt-source-first-test-001",
         datedPlaces: "../pt/data/dated_places.geojson",
-        assignmentHeading: "Portugal verification tasks",
         temporalLossAction: {
             value: "target_year_loss_or_changed_use",
             label: "Present in one target year, absent in a later target year",
@@ -432,7 +420,6 @@ const COUNTRY_CONFIGS = {
         nominationSource: "ro_verification_static_map_nomination",
         defaultAssignmentBatchId: "ro-source-first-test-001",
         datedPlaces: "../ro/data/dated_places.geojson",
-        assignmentHeading: "Romania verification tasks",
         temporalLossAction: {
             value: "target_year_loss_or_changed_use",
             label: "Present in one target year, absent in a later target year",
@@ -456,7 +443,6 @@ const COUNTRY_CONFIGS = {
         mapSource: "rw_verification_static_map_workbench",
         nominationSource: "rw_verification_static_map_nomination",
         defaultAssignmentBatchId: "rw-source-first-test-001",
-        assignmentHeading: "Rwanda verification tasks",
         temporalLossAction: {
             value: "target_year_loss_or_changed_use",
             label: "Present in one target year, absent in a later target year",
@@ -481,7 +467,6 @@ const COUNTRY_CONFIGS = {
         nominationSource: "sk_verification_static_map_nomination",
         defaultAssignmentBatchId: "sk-source-first-test-001",
         datedPlaces: "../sk/data/dated_places.geojson",
-        assignmentHeading: "Slovakia verification tasks",
         // single shipped wave: the loss action reads as closed/changed
         // use by the target year rather than a two-year contrast
         temporalLossAction: {
@@ -507,7 +492,6 @@ const COUNTRY_CONFIGS = {
         nominationSource: "uk_verification_static_map_nomination",
         defaultAssignmentBatchId: "uk-source-first-test-001",
         datedPlaces: "../uk/data/dated_places.geojson",
-        assignmentHeading: "United Kingdom verification tasks",
         temporalLossAction: {
             value: "target_year_loss_or_changed_use",
             label: "Present in one target year, absent in a later target year",
@@ -532,7 +516,6 @@ const COUNTRY_CONFIGS = {
         nominationSource: "us_verification_static_map_nomination",
         defaultAssignmentBatchId: "us-source-first-test-001",
         datedPlaces: "../us/data/dated_places.geojson",
-        assignmentHeading: "United States verification tasks",
         temporalLossAction: {
             value: "target_year_loss_or_changed_use",
             label: "Present in one target year, absent in a later target year",
@@ -557,7 +540,6 @@ const COUNTRY_CONFIGS = {
         nominationSource: "za_verification_static_map_nomination",
         defaultAssignmentBatchId: "za-source-first-test-001",
         datedPlaces: "../za/data/dated_places.geojson",
-        assignmentHeading: "South Africa verification tasks",
         temporalLossAction: {
             value: "target_year_loss_or_changed_use",
             label: "Present in one target year, absent in a later target year",
@@ -581,7 +563,6 @@ const COUNTRY_CONFIGS = {
         mapSource: "zm_verification_static_map_workbench",
         nominationSource: "zm_verification_static_map_nomination",
         defaultAssignmentBatchId: "zm-source-first-test-001",
-        assignmentHeading: "Zambia verification tasks",
         temporalLossAction: {
             value: "target_year_loss_or_changed_use",
             label: "Present in one target year, absent in a later target year",
@@ -624,7 +605,6 @@ function registryCountryConfig(entry) {
         nominationSource: `${code}_verification_static_map_nomination`,
         defaultAssignmentBatchId: `manual-${code}`,
         assignmentsOffered: false,
-        assignmentHeading: `${name} evidence`,
         rapidCurrentEntry: true,
         rapidNominationEntry: true,
         fromRegistry: true,
@@ -991,6 +971,8 @@ const PANE_STACK_KEY = "pow-pane-stack";
 const PANE_COLS_KEY = "pow-pane-split-cols";
 // whether the map data panel is folded to its bar (per device)
 const MAP_DATA_FOLD_KEY = "pow-map-data-folded";
+// a phone width, where the panel opens folded until the contributor chooses
+const MAP_DATA_PHONE_QUERY = "(max-width: 700px)";
 const SIDEBAR_W_DEFAULT = 420;
 const SIDEBAR_W_MIN = 320;
 const SIDEBAR_W_MAX_SHARE = 0.6;
@@ -1425,11 +1407,13 @@ function statusLabel(status) {
 }
 
 // marker fill = target-year status, in the page's own tokens; not assessed
-// is hollow (createIcon), so it has no fill here
+// is hollow (createIcon), so it has no fill here. uncertain has its own
+// indigo mark (jb 2026-11-03, ui item 8), not the caution amber of the
+// uncertain pill, so it never sits amber on the open-case amber
 function statusColor(status) {
     if (status === "present") return "var(--present)";
     if (status === "absent") return "var(--absent)";
-    if (status === "uncertain") return "var(--caution-strong)";
+    if (status === "uncertain") return "var(--marker-uncertain)";
     return "";
 }
 
@@ -2256,7 +2240,13 @@ class NzVerificationMap {
                     ${this.backendLastError ? `<span class="copy-status${this.signedOutDeliberately ? "" : " error"}">${escapeHtml(this.backendLastError)}</span>` : ""}
                 </div>
             `;
-            this.backend.renderSignInButton(document.getElementById("googleSignInButton"), {
+            // the signed-out layout first, so the button's cell is measured
+            // in the one-row card and not in the work sidebar it leaves
+            // (sonnet review, pr #213: a sign-out or an expired session)
+            this.syncPortalChrome();
+            const signInHost = document.getElementById("googleSignInButton");
+            this.backend.renderSignInButton(signInHost, {
+                width: this.signInButtonWidth(signInHost),
                 initials: this.getRaInitials(),
                 onSignedIn: user => this.onBackendSignedIn(user),
                 onError: error => {
@@ -2267,7 +2257,6 @@ class NzVerificationMap {
                 this.backendLastError = error.message || "Could not initialise sign-in.";
                 this.renderBackendPanel();
             });
-            this.syncPortalChrome();
             return;
         }
 
@@ -2336,6 +2325,16 @@ class NzVerificationMap {
         if (this.transportBusy) return this.transportBusy;
         if (this.backendLastError && !this.signedOutDeliberately) return "error";
         return this.backendUser ? "ready" : "signed_out";
+    }
+
+    // the google button takes a width in pixels and never reflows. on a
+    // phone it shares a row with contact to join, so it takes its cell's
+    // width, within the 200 to 300 the button reads well at; elsewhere the
+    // 300 it has always had
+    signInButtonWidth(host) {
+        if (!window.matchMedia?.(MAP_DATA_PHONE_QUERY)?.matches) return 300;
+        const cell = Math.floor(host?.getBoundingClientRect?.().width || 0);
+        return cell > 0 ? Math.max(200, Math.min(300, cell)) : 300;
     }
 
     transportDotHtml() {
@@ -3609,11 +3608,52 @@ class NzVerificationMap {
         document.getElementById("pinSearchToggleButton")?.setAttribute?.("aria-expanded", open ? "true" : "false");
     }
 
-    // corner control: the points-mode select plus the one marker legend
-    // (fills, then rings, then the unvalidated dot, in the status pills'
-    // own words); period is offered only where the country
-    // ships a dated context layer with real features (config-gated, like
-    // the data maps)
+    // the map data legend (jb 2026-11-03, ui item 8): a grid of fill rows
+    // (target-year status) against ring columns (validation), so every cell
+    // is a marker the map can draw; then the marks that stand alone. each
+    // cell wears the map's own marker classes, so the key follows the
+    // basemap's halo as the markers do. without target years the fill
+    // carries no status, and one row stands for any place
+    mapDataLegendHtml(source) {
+        const fills = TARGET_YEARS.length
+            ? [
+                ["present", "legend-fill-present"],
+                ["absent", "legend-fill-absent"],
+                ["uncertain", "legend-fill-uncertain"],
+                ["not assessed", "vm-unknown"],
+            ]
+            : [["any place", "legend-fill-any"]];
+        const rings = [
+            ["open case", "vm-unvalidated"],
+            ["validated", "vm-validated-present"],
+            ["validated absent", "vm-validated-absent"],
+            ["disputed", "vm-disputed"],
+        ];
+        // a grid cell names its combination; a single mark sits beside
+        // its own words, so it is hidden from assistive technology
+        const cell = (classes, label) => `<span class="verification-marker legend-mark ${classes}" role="img" aria-label="${label}"></span>`;
+        const single = classes => `<span class="verification-marker legend-mark ${classes}" aria-hidden="true"></span>`;
+        const head = rings.map(([ring]) => `<th scope="col">${ring}</th>`).join("");
+        const rows = fills.map(([fill, fillClass]) => `
+                        <tr><th scope="row">${fill}</th>${rings.map(([ring, ringClass]) => `<td>${cell(`${fillClass} ${ringClass}`, `${fill}, ${ring}`)}</td>`).join("")}</tr>`).join("");
+        return `
+                <div class="map-legend">
+                    <table class="legend-grid">
+                        <caption>${TARGET_YEARS.length ? "Fill: status in the target year" : "Fill"} · Ring: validation</caption>
+                        <thead><tr><td></td>${head}</tr></thead>
+                        <tbody>${rows}
+                        </tbody>
+                    </table>
+                    <div class="legend-singles">
+                        <span class="legend-row">${single("vm-in-review")}in review</span>
+                        <span class="legend-row">${single("vm-nomination")}your nomination</span>
+                        ${source !== "none" ? `<span class="legend-row"><span class="legend-dot context-dot-swatch" aria-hidden="true"></span>place on today's map, tap to revise</span>` : ""}
+                    </div>
+                </div>`;
+    }
+
+    // corner control: the map data legend, then the points toggle where
+    // the country has unreviewed places to show
     addPointsLegendControl() {
         const control = L.control({ position: "bottomleft" });
         control.onAdd = () => {
@@ -3640,29 +3680,9 @@ class NzVerificationMap {
                     <button type="button" class="legend-fold" aria-expanded="true" aria-controls="portalMapData">Map data <span class="legend-caret" aria-hidden="true">▾</span></button>
                 </div>
                 <div id="portalMapData" class="legend-body">
+                ${this.mapDataLegendHtml(source)}
                 ${source !== "none" ? `
                 <button type="button" id="portalPointsToggle" class="points-toggle" aria-pressed="${this.pointsMode === "off" ? "false" : "true"}">${this.pointsMode === "off" ? "Show points" : "Hide points"}</button>` : ""}
-                <div class="map-legend">
-                    <div class="legend-group">
-                    ${TARGET_YEARS.length ? `
-                    <span class="legend-caption">Fill: status in the target year</span>
-                    <span class="legend-row"><span class="legend-dot fill-present-swatch"></span>present</span>
-                    <span class="legend-row"><span class="legend-dot fill-absent-swatch"></span>absent</span>
-                    <span class="legend-row"><span class="legend-dot fill-uncertain-swatch"></span>uncertain</span>
-                    <span class="legend-row"><span class="legend-dot fill-not-assessed-swatch"></span>not assessed</span>` : `
-                    <span class="legend-caption">Fill</span>`}
-                    <span class="legend-row"><span class="legend-dot vm-nomination-swatch"></span>your nomination</span>
-                    </div>
-                    <div class="legend-group">
-                    <span class="legend-caption">Ring: validation</span>
-                    <span class="legend-row"><span class="legend-dot vm-validated-present-swatch"></span>validated</span>
-                    <span class="legend-row"><span class="legend-dot vm-validated-absent-swatch"></span>validated absent</span>
-                    <span class="legend-row"><span class="legend-dot vm-disputed-swatch"></span>disputed</span>
-                    <span class="legend-row"><span class="legend-dot vm-in-review-swatch"></span>in review</span>
-                    <span class="legend-row"><span class="legend-dot vm-unvalidated-swatch"></span>not yet reviewed (open case)</span>
-                    ${source !== "none" ? `<span class="legend-row"><span class="legend-dot context-dot-swatch"></span>place on today's map, tap to revise</span>` : ""}
-                    </div>
-                </div>
                 </div>
             `;
             // keep map gestures away from the control
@@ -3673,7 +3693,7 @@ class NzVerificationMap {
             div.querySelector("#portalPointsToggle")?.addEventListener("click", () => {
                 this.setPointsMode(this.pointsMode === "off" ? "all" : "off");
             });
-            this.makeControlMovable(div, div.querySelector(".legend-grip"));
+            this.mapDataMovable = this.makeControlMovable(div, div.querySelector(".legend-grip"));
             this.mapDataPanel = div;
             div.querySelector(".legend-fold")?.addEventListener("click", () => {
                 this.setMapDataFolded(!div.classList.contains("folded"), { chosen: true });
@@ -3717,13 +3737,17 @@ class NzVerificationMap {
         return true;
     }
 
-    // the map data panel folds to its bar; the choice is kept per device
+    // the map data panel folds to its bar; the choice is kept per device.
+    // with no choice yet a phone opens it folded (jb 2026-11-03), since the
+    // open panel sits under the attribution and hides its own toggle
     mapDataFoldedOnDevice() {
         try {
-            return localStorage.getItem(MAP_DATA_FOLD_KEY) === "1";
+            const stored = localStorage.getItem(MAP_DATA_FOLD_KEY);
+            if (stored === "1" || stored === "0") return stored === "1";
         } catch (error) {
-            return false;
+            // storage unavailable: fall through to the width default
         }
+        return Boolean(window.matchMedia?.(MAP_DATA_PHONE_QUERY)?.matches);
     }
 
     setMapDataFolded(folded, { chosen = false } = {}) {
@@ -3737,6 +3761,12 @@ class NzVerificationMap {
         if (caret) caret.textContent = on ? "▸" : "▾";
         const body = div.querySelector(".legend-body");
         if (body) body.hidden = on;
+        // the open grid can be taller than a short map (a phone's even
+        // split), so the body is capped to the map and the panel pulled
+        // back inside it, keeping the bar and its fold in reach (greptile,
+        // pr #217)
+        this.fitMapDataBody();
+        this.mapDataMovable?.clamp();
         if (chosen) {
             try {
                 localStorage.setItem(MAP_DATA_FOLD_KEY, on ? "1" : "0");
@@ -3745,6 +3775,22 @@ class NzVerificationMap {
             }
         }
         return on;
+    }
+
+    // caps the open map data body to the map's height less the bar, so
+    // the whole panel fits the map and the body scrolls inside it
+    fitMapDataBody() {
+        const div = this.mapDataPanel;
+        const body = div?.querySelector?.(".legend-body");
+        if (!body || body.hidden) return null;
+        const mapHeight = this.map?.getContainer?.()?.clientHeight || 0;
+        // an unmeasured map leaves the stylesheet's viewport cap in place
+        if (!mapHeight) return null;
+        const barHeight = div.querySelector(".legend-bar")?.offsetHeight || 0;
+        // leaflet's corner margins and the panel's padding and gap
+        const cap = Math.max(48, mapHeight - barHeight - 40);
+        body.style.maxHeight = `${cap}px`;
+        return cap;
     }
 
     // drags a leaflet control by its grip (pointer events, so touch and
@@ -3774,8 +3820,12 @@ class NzVerificationMap {
             // inactive: paint nothing and leave the remembered spot alone
             if (!active()) { apply(); return; }
             const mapRect = this.map.getContainer().getBoundingClientRect();
+            // an unsized map or panel measures zero, which would wipe the
+            // remembered spot; leave it until it can be measured
+            if (!(mapRect.right - mapRect.left) || !(mapRect.bottom - mapRect.top) || div.isConnected === false) { apply(); return; }
             div.style.transform = "";
             const rest = div.getBoundingClientRect();
+            if (!(rest.right - rest.left) && !(rest.bottom - rest.top)) { apply(); return; }
             const minX = mapRect.left - rest.left;
             const maxX = mapRect.right - rest.right;
             const minY = mapRect.top - rest.top;
@@ -3822,9 +3872,14 @@ class NzVerificationMap {
             apply();
             save();
         });
-        this.map.on("resize", clamp);
+        this.map.on("resize", () => {
+            // a resized map re-caps the open map data body before clamping
+            if (div === this.mapDataPanel) this.fitMapDataBody();
+            clamp();
+        });
         // the corner is laid out after the control is added; clamp then
         setTimeout(clamp, 0);
+        return { clamp };
     }
 
     // where the unvalidated dots come from: the country's dated product
@@ -5143,12 +5198,10 @@ class NzVerificationMap {
 
     setupPageMode() {
         document.body.classList.toggle("assignment-mode", ASSIGNMENT_MODE);
-        document.title = `${COUNTRY_CONFIG.countryName} Verification Tasks`;
+        document.title = `${PRODUCT_NAME} · ${COUNTRY_CONFIG.countryName} · Contributor portal`;
         const title = document.querySelector(".sidebar-header h1");
         if (title) {
-            title.textContent = ASSIGNMENT_MODE
-                ? (COUNTRY_CONFIG.assignmentHeading || `${COUNTRY_CONFIG.countryName} source-first test`)
-                : `${COUNTRY_CONFIG.countryName} OSM Verification`;
+            title.textContent = `${PRODUCT_NAME} · ${COUNTRY_CONFIG.countryName}`;
         }
 
         this.renderModeNotice();
@@ -6032,9 +6085,10 @@ class NzVerificationMap {
         }
         // the validation state is worn as a RING (box-shadow) or, for in_review,
         // a dashed hollow border — never as the fill hue, so it never competes
-        // with the religion/context colour. Ring hues (blue, slate, amber,
-        // violet) are chosen colourblind-distinct from each other and from the
-        // religion palette. stale_validation is plumbed but unreachable today.
+        // with the religion/context colour. Ring hues (open-case amber,
+        // validated blue, validated-absent ink, disputed red-violet, stale
+        // violet) are chosen colourblind-distinct from each other and from
+        // the fills. stale_validation is plumbed but unreachable today.
         const stateClass = {
             validated_present: " vm-validated-present",
             validated_absent: " vm-validated-absent",
@@ -8019,6 +8073,7 @@ class NzVerificationMap {
                 </div>
                 ${canCorrect ? `<div class="copy-help">Correct only for a mistake or new information. Delete withdraws the draft from review; it stays in the audit history.</div>` : ""}
             ` : ""}
+            ${taskId ? `<div id="recordedAttachmentsBlock" class="attachments-block" hidden></div>` : ""}
             <div id="copyStatus" class="copy-status" aria-live="polite"></div>
         `;
     }
@@ -10696,6 +10751,9 @@ class NzVerificationMap {
             this.initAttachmentsBlock(props, document.getElementById("taskAttachmentsBlock"));
             return;
         }
+        // a submitted rapid record shows a summary rather than the form;
+        // photos attach beside the record and leave it unchanged
+        this.initAttachmentsBlock(props, document.getElementById("recordedAttachmentsBlock"));
         const actionSelect = document.getElementById("raActionSelect");
         const sourceUrl = document.getElementById("sourceUrlInput");
         const sourceTitle = document.getElementById("sourceTitleInput");
@@ -10898,11 +10956,14 @@ class NzVerificationMap {
     }
 
     setReviewFormReadOnly() {
+        // the photos block stays usable: an attachment sits beside the
+        // submitted record and does not rewrite it
+        const keepsAttachmentControl = element => Boolean(element.closest?.(".attachments-block:not(.attachments-inline)"));
         document.querySelectorAll(".review-form select, .review-form input, .review-form textarea").forEach(element => {
-            element.disabled = true;
+            if (!keepsAttachmentControl(element)) element.disabled = true;
         });
         document.querySelectorAll(".review-form button").forEach(element => {
-            if (element.id !== "reviseSubmissionButton") {
+            if (element.id !== "reviseSubmissionButton" && !keepsAttachmentControl(element)) {
                 element.disabled = true;
             }
         });
