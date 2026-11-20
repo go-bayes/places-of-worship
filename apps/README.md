@@ -1,6 +1,6 @@
 # Apps
 
-Static, browser-facing applications served via GitHub Pages.
+Cloudflare Pages publishes the static applications at `religionmap.org` when `main` advances. See the [hosting guide](../docs/development/cloudflare-pages-hosting.md).
 
 Structure:
 - global/ : global map experience (MapLibre GL JS)

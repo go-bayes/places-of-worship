@@ -43,6 +43,8 @@ Root manifests are load-bearing (`package.json` = Convex project, `tsconfig.json
 
 ## Decision list
 
+**Historical record.** The proposed deletions below reflect the 2026-08-14 stocktake. Check current code and decisions before deleting any of the listed files.
+
 ### Kill now (zero risk)
 
 - `research/` (no tracked files; also drop its stale `.gitignore` line), `frontend/.Rhistory` (tracked, zero bytes), `apps/regions/za/js/` (empty dir).
