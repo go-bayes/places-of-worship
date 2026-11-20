@@ -1406,6 +1406,21 @@ function statusLabel(status) {
     return "Not assessed";
 }
 
+// the theme control's phone copy, first in the map data panel so it shows
+// when the panel opens on a short map (proposed 2026-11-20): the header
+// carries it on a wider screen. theme.js marks the pressed choice when it
+// binds the panel
+function themeChoiceHtml(id) {
+    return `<div class="map-data-theme">
+                    <span class="map-data-theme-label" id="${id}Label">Theme</span>
+                    <div class="theme-control" role="group" aria-labelledby="${id}Label">
+                        <button type="button" data-theme-choice="dark" aria-pressed="false">Dark</button>
+                        <button type="button" data-theme-choice="light" aria-pressed="false">Light</button>
+                        <button type="button" data-theme-choice="auto" aria-pressed="false">Auto</button>
+                    </div>
+                </div>`;
+}
+
 // marker fill = target-year status, in the page's own tokens; not assessed
 // is hollow (createIcon), so it has no fill here. uncertain has its own
 // indigo mark (jb 2026-11-03, ui item 8), not the caution amber of the
@@ -3680,6 +3695,7 @@ class NzVerificationMap {
                     <button type="button" class="legend-fold" aria-expanded="true" aria-controls="portalMapData">Map data <span class="legend-caret" aria-hidden="true">▾</span></button>
                 </div>
                 <div id="portalMapData" class="legend-body">
+                ${themeChoiceHtml("portalMapTheme")}
                 ${this.mapDataLegendHtml(source)}
                 ${source !== "none" ? `
                 <button type="button" id="portalPointsToggle" class="points-toggle" aria-pressed="${this.pointsMode === "off" ? "false" : "true"}">${this.pointsMode === "off" ? "Show points" : "Hide points"}</button>` : ""}
@@ -3693,6 +3709,10 @@ class NzVerificationMap {
             div.querySelector("#portalPointsToggle")?.addEventListener("click", () => {
                 this.setPointsMode(this.pointsMode === "off" ? "all" : "off");
             });
+            // the phone's theme control (the header has no room for it
+            // under 700 px): bound here, since the panel is built after
+            // theme.js wires the page
+            window.PowTheme?.bind?.(div);
             this.mapDataMovable = this.makeControlMovable(div, div.querySelector(".legend-grip"));
             this.mapDataPanel = div;
             div.querySelector(".legend-fold")?.addEventListener("click", () => {

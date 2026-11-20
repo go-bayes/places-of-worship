@@ -244,7 +244,16 @@ If these colours change, update both the CSS and this table. Since PR-H3 (2026-0
 
 Both portals share one token sheet, `apps/regions/_shared/theme.css`, and dark is the one theme (JB, 2026-09-21: "the dark theme is beautiful. can we simply make that default with no options?"). This supersedes the three-state control of R-U2 (2026-09-19): there is no Auto, Light or Dark button, no stored choice, and no light set in the sheet; the light values stay in the table below as the record of what the pages carried. The meanings are ruled and the dark values are approved (JB, 2026-09-21); every later value change goes through this table as a dated ruling. `apps/regions/_shared/theme.js` runs in `<head>` before the stylesheets and marks `<html>` with `data-theme="dark"` and `data-theme-effective="dark"` before paint; `PowTheme.get()`, `effective()` and `set()` all answer `dark`, so callers keep their shape. The Streets basemap is MapTiler's `streets-v2-dark` raster where a key ships and the OpenStreetMap tiles under a CSS filter otherwise (`.streets-tiles-filtered`); Hybrid and Satellite are never darkened (R-U3: darkened imagery misreads buildings). Marker halos use `--marker-halo` (white on every surface), never `--panel`. Shadows and veils are tokens too (`--shade-*`, `--veil`, `--action-glow`, `--present-glow`); no `rgba()` literal remains in either page.
 
-| Token | Light (retired 2026-09-21, record only) | Dark (approved 2026-09-21) |
+**Proposal, 2026-11-20, pending Joseph's ruling: the three-state control returns, with Dark the default.** The 2026-09-21 ruling above stands until Joseph rules on this proposal. The reason is practical: research assistants record places outdoors on phones, and a dark interface is hard to read in sunlight. The proposal changes nobody's screen unless they choose.
+
+- The control offers `Dark`, `Light` and `Auto`; Auto follows the device's own setting. It is small and quiet, in the basemap switch's segmented idiom (the choice in force filled in `--action`), and no other colour, type or component is added.
+- Placement: on the contributor portal it sits at the end of the header's `Exit` / `Guide` row, where R-U2 put it; on the review portal it sits in the header beside `Guide`. At 700 px and under neither header has room, so a second copy sits in the `Map data` panel on the map (first in the panel on the contributor portal, beside the bar on the review portal), and the header copy hides. One copy shows at any width, and both follow the same choice.
+- `apps/regions/_shared/theme.js` reads the choice before the stylesheets load and marks `<html>` with `data-theme` (the choice) and `data-theme-effective` (`dark` or `light`) before paint, so nothing flashes. The device keeps the choice under a new key, `pow-theme-choice`, so a choice made on the day R-U2's control was live does not return. Blocked storage holds the choice in memory for the page's life. `theme.css` keeps the dark set on `:root` and carries the light set under `:root[data-theme-effective="light"]`. Making Auto the default is one line in `theme.js`: `DEFAULT_CHOICE = "auto"`.
+- Basemap: in Light, Streets is the ordinary OpenStreetMap street map; in Dark it stays as now. Hybrid and Satellite never change in either theme (R-U3).
+- Map marks keep their colours in both themes, since they sit on the basemap and the default basemap, Hybrid, never changes. Under the light set a mark (`.verification-marker`, `.legend-dot`) keeps the dark values of the tokens it draws in, and its edge and hollow centre take the new `--marker-edge` (`#17202a`, the dark panel colour, in both sets). One change is forced: on the light Streets map the pale rings fall under 3:1 against the land colour (OpenStreetMap's `#f2efe9`): the validated blue 1.9:1, the validated-absent ink ring 1.0:1, the nomination teal 1.6:1 and the open-case amber 1.9:1. So on the light Streets map and in the light legend each mark takes a thin dark outer edge in `--marker-edge` (a CSS `drop-shadow` on the marker and overlay panes and on the legend swatches), as on imagery it takes a white halo. The colours do not change.
+- The light values for the tokens added since 2026-09-21 are in the table below. The retired light value of `--action` (`#1f618d`) was not used for the validated ring: under protanopia it stands only 3.3 in ΔE00 from the red-violet disputed ring, against 32.2 for the dark value the ring keeps.
+
+| Token | Light (retired 2026-09-21; proposed for restoration 2026-11-20) | Dark (approved 2026-09-21) |
 | --- | --- | --- |
 | `--bg` | `#f4f6f8` | `#0f1620` |
 | `--panel` | `#ffffff` | `#17202a` |
@@ -261,10 +270,10 @@ Both portals share one token sheet, `apps/regions/_shared/theme.css`, and dark i
 | `--caution` | `#6b4e00` | `#f2c14e` |
 | `--caution-soft` | `#fff4dc` | `#3f3110` |
 | `--caution-strong` | `#9a6700` | `#e0a800` |
-| `--marker-uncertain` | none (added 2026-11-03) | `#6366f1` |
-| `--marker-disputed` | none (added 2026-11-03) | `#c8218e` |
-| `--uncertain` | none (added 2026-11-03) | `#a5b4fc` |
-| `--uncertain-soft` | none (added 2026-11-03) | `#262a52` |
+| `--marker-uncertain` | `#6366f1` (proposed 2026-11-20, as dark) | `#6366f1` |
+| `--marker-disputed` | `#c8218e` (proposed 2026-11-20, as dark) | `#c8218e` |
+| `--uncertain` | `#4338ca` (proposed 2026-11-20) | `#a5b4fc` |
+| `--uncertain-soft` | `#eef0ff` (proposed 2026-11-20) | `#262a52` |
 | `--present` | `#145a32` | `#6fcf97` |
 | `--present-soft` | `#dff3e6` | `#163a26` |
 | `--absent` | `#374151` | `#b8c2d0` |
@@ -276,6 +285,7 @@ Both portals share one token sheet, `apps/regions/_shared/theme.css`, and dark i
 | `--stale` | `#7d3c98` | `#c69ae0` |
 | `--marker-unvalidated` | `#f59e0b` | `#f59e0b` |
 | `--marker-halo` | `#ffffff` | `#ffffff` |
+| `--marker-edge` | `#17202a` (added 2026-11-20, as dark) | `#17202a` (added 2026-11-20; the dark `--panel`) |
 | `--shade-soft` | `rgba(15, 23, 42, 0.12)` | `rgba(0, 0, 0, 0.35)` |
 | `--shade` | `rgba(15, 23, 42, 0.25)` | `rgba(0, 0, 0, 0.5)` |
 | `--shade-deep` | `rgba(15, 23, 42, 0.35)` | `rgba(0, 0, 0, 0.6)` |
@@ -297,15 +307,33 @@ Contrast (WCAG relative luminance) on the pairs the pages actually draw; the Dar
 | `--danger` on `--panel` | 6.6:1 | 6.9:1 |
 | `--caution` on `--panel` | 7.7:1 | 9.8:1 |
 | `--panel` on `--caution-strong` | 4.9:1 | 7.7:1 |
-| `--marker-uncertain` on `--panel` (the fill inside the marker's border) | none | 3.7:1 |
-| `--uncertain` on `--uncertain-soft` (the uncertain tag) | none | 6.9:1 |
-| `--marker-disputed` on `--panel` (the ring on the dark Streets map) | none | 3.2:1 |
-| `--marker-disputed` on `--marker-halo` (the ring between its halos) | none | 5.2:1 |
+| `--marker-uncertain` on `--panel` (the fill inside the marker's border) | 3.7:1 (the border is `--marker-edge` in both themes) | 3.7:1 |
+| `--uncertain` on `--uncertain-soft` (the uncertain tag) | 7.0:1 | 6.9:1 |
+| `--marker-disputed` on `--panel` (the ring on the dark Streets map) | 5.2:1 on the light legend | 3.2:1 |
+| `--marker-disputed` on `--marker-halo` (the ring between its halos) | 5.2:1 | 5.2:1 |
 | `--present` on `--panel` | 8.3:1 | 8.7:1 |
 | `--entry` on `--panel` | 5.5:1 | 9.1:1 |
 | `--not-assessed` on `--panel` | 8.7:1 | 7.9:1 |
 | `--absent` on `--panel` | 10.3:1 | 9.1:1 |
 | `--ink` on `--bg` | 15.2:1 | 15.4:1 |
+| `--marker-edge` on the light Streets land (`#f2efe9`), the marks' outer edge (proposed 2026-11-20) | 14.3:1 | not drawn |
+| `--marker-edge` on the light legend (`--veil` over the map, near `#ffffff`) | 16.5:1 | not drawn |
+| Rings and fills against `--marker-edge`, the weakest pairs: `--marker-disputed`, `--marker-uncertain`, the validated blue `#7fb3e6`, the open-case amber | 3.2:1, 3.7:1, 7.4:1, 7.7:1 | as Light |
+
+Marker separation, proposed 2026-11-20. The marker colours are the same in both themes, so the 2026-11-03 test applies unchanged; the table records it for the light set. CIEDE2000 colour difference (ΔE00) under normal vision and under simulated deuteranopia and protanopia (Machado, Oliveira and Fernandes 2009, full severity), for the pairs a reader must tell apart:
+
+| Pair | Normal | Deuteranopia | Protanopia |
+| --- | --- | --- | --- |
+| `--marker-uncertain` fill / open-case amber | 62.6 | 69.1 | 64.3 |
+| `--marker-disputed` ring / open-case amber | 58.9 | 44.7 | 58.6 |
+| `--marker-disputed` ring / validated ring (`#7fb3e6`) | 48.1 | 20.3 | 32.2 |
+| `--marker-uncertain` fill / `--marker-disputed` ring | 27.6 | 18.8 | 16.8 |
+| validated ring / open-case amber | 47.1 | 52.3 | 49.5 |
+| validated ring / validated-absent ring (`#e8edf3`) | 21.6 | 22.8 | 20.1 |
+| nomination ring (`#5fd3c4`) / validated ring | 25.3 | 15.2 | 21.5 |
+| `--marker-uncertain` fill / present fill (`#6fcf97`) | 52.5 | 48.8 | 52.5 |
+| `--marker-uncertain` fill / absent fill (`#b8c2d0`) | 28.3 | 31.3 | 29.4 |
+| Rejected: the retired light `--action` (`#1f618d`) as the validated ring / `--marker-disputed` ring | 43.5 | 15.7 | 3.3 |
 
 ## Status Components
 
