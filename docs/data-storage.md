@@ -51,12 +51,13 @@ generation.
     archives stay in R2 under their immutable names.
   - Local copies of the archives are kept outside the repo; the worker
     README records the upload and rebuild procedure.
-- Cloudflare Pages publishes `religionmap.org` when `main` advances, and Cloudflare manages DNS. The redirect domains (`placesmap.org`, `powmap.org`) and the tiles host are Worker custom domains on separate zones. For hosting and GitHub Pages rollback, see the [hosting guide](development/cloudflare-pages-hosting.md).
-  - **GitHub Pages rollback only.** Use DNS-only (grey cloud) records for the GitHub Pages apex A/AAAA records and the `www` CNAME. Proxying those records interrupted GitHub Pages certificate renewal (`https_certificate.state = bad_authz`). An expired origin certificate can produce Cloudflare error 526 when strict origin-certificate validation is enabled. To recover, set the records to DNS only, remove and re-add the custom domain under Settings → Pages to restart issuance, wait for the state to read `approved`, then enable Enforce HTTPS. Inspect the certificate with `gh api repos/go-bayes/places-of-worship/pages --jq .https_certificate`.
+- Site domain: `religionmap.org` is served by GitHub Pages (`CNAME` at the repo root) with DNS on Cloudflare. The redirect domains (`placesmap.org`, `powmap.org`) and the tiles host are Worker custom domains on separate zones.
+  - Keep the apex A/AAAA records and the `www` CNAME **DNS only** (grey cloud) for the GitHub Pages setup. Proxying these records interrupted GitHub Pages certificate renewal (`https_certificate.state = bad_authz`). An expired origin certificate can produce Cloudflare error 526 when strict origin-certificate validation is enabled. To recover, set the records to DNS only, remove and re-add the custom domain under Settings → Pages to restart issuance, wait until GitHub Pages reports `approved`, then enable Enforce HTTPS. Inspect the certificate with `gh api repos/go-bayes/places-of-worship/pages --jq .https_certificate`.
   - **GitHub Pages certificate repair, 2026-09-18.** GitHub Pages reported an approved replacement certificate valid until 2026-12-17. HTTPS enforcement was enabled, and the HTTPS apex returned 200.
+  - Cloudflare Pages serves the same repository at `places-of-worship.pages.dev` and its preview subdomains. The cutover of `religionmap.org` to Cloudflare Pages is planned. See the [hosting guide](development/cloudflare-pages-hosting.md).
 
 ### Repository (tracked)
-- Regional app data (served directly by Cloudflare Pages):
+- Regional app data (served directly by GitHub Pages in production):
   - `apps/regions/nz/data/*.json`, `apps/regions/nz/data/*.geojson`
 - Global datasets and extracts:
   - `data/global/*_places.json`
@@ -75,7 +76,7 @@ generation.
 2) Processing scripts read from `data/raw/` and `data/global/`.
 3) Regional app data is emitted to `apps/regions/<iso2>/data/`.
 4) Custom tiles are generated locally as PMTiles archives, uploaded to Cloudflare R2, and served by the tile Worker.
-5) The frontend fetches regional JSON and GeoJSON from Cloudflare Pages and custom tiles from the tile Worker.
+5) In production, the frontend fetches regional JSON and GeoJSON from GitHub Pages and custom tiles from the tile Worker.
 
 ## Gaps / Uncertainties to Confirm
 - Archive rebuild and upload automation beyond the procedure in `tools/tiles-r2/README.md`.
