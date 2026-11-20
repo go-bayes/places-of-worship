@@ -105,6 +105,9 @@ jobs:
         run: |
           python3 -m unittest scripts/test_area_summary_columns.py
           python3 scripts/build_area_summary_columns.py --check
+      - name: labs tests
+        # quoted so node expands the glob; the shell's ** stops one level down
+        run: node --test 'apps/labs/**/*.node-test.mjs'
 
   rust:
     runs-on: ubuntu-latest

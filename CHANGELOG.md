@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### 2026-11-20 (labs: Lamps and Relief, experimental)
+
+- Lamps is an unlinked experimental globe that shows mapped places of worship as lights and pillars under the sun for a selected time.
+- Relief is an unlinked experimental map and table that show the density and diversity of mapped places of worship across a city in hexagonal cells.
+
 ### 2026-11-16 (review rulings carried into the standing documents)
 
 - `docs/ai-assisted-research.md`, `docs/portal-claude-batch-review.md`, the "How human review decides" section of `docs/confidence-standard.md`, `docs/development/human-review-and-release.md` and the agent-assisted lane of `docs/portal-free-contribution-design.md` now state JB's review rulings of 2026-11-16 as recorded in the publication pipeline brief: an agent may author the ordinary draft through a deterministic conversion, the named reviewer may be an agent from another provider, free text is withheld from public outputs unless chosen and cleared by a person, batch release by the lead replaces per-item acceptance once it passes its tests, and a named person authorises every release. Each passage keeps the ruling apart from current behaviour, which is still per-item human preparation, review and PI acceptance until that pipeline work is built.
