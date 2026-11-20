@@ -37,49 +37,28 @@ jobs:
           npm run typecheck
           npm run test:concept
       - name: portal unit tests
+        shell: bash
         run: |
-          node apps/regions/nz/js/claude-review-panel.test.cjs
-          node apps/regions/nz/js/confidence-panel.test.cjs
-          node apps/regions/nz/js/historical-claim-contract.test.cjs
-          node apps/regions/nz/js/location-assertion-contract.test.cjs
-          node apps/regions/nz/js/rapid-entry-contract.test.cjs
-          node apps/regions/nz/js/occupancy-contract.test.cjs
-          node apps/regions/nz/js/review-snapshot-content.test.cjs
-          node apps/regions/nz/js/assigned-periods-dom.test.cjs
-          node apps/regions/nz/js/portal-walkthrough-dom.test.cjs
-          node apps/regions/nz/js/occupancy-review.test.cjs
-          node apps/regions/nz/js/pane-divider.test.cjs
-          node apps/regions/nz/js/phone-walkthrough-dom.test.cjs
-          node apps/regions/nz/js/portal-first-screen.test.cjs
-          node apps/regions/_shared/theme.test.cjs
-          node apps/regions/_shared/region-map-startup.test.cjs
-          node apps/regions/_shared/census-chrome.test.cjs
-          node apps/regions/_shared/tiles-v2-client.test.cjs
-          node apps/regions/_shared/denomination-filter.test.cjs
-          node apps/regions/_shared/counts-label.test.cjs
-          node apps/regions/_shared/escape-map-text.test.cjs
-          node apps/regions/_shared/area-summary-columns.test.cjs
-          node apps/regions/nz/js/refresh-merge.test.cjs
-          node apps/regions/nz/js/ra-landing.test.cjs
-          node apps/regions/nz/js/convex-task-client.test.cjs
-          node apps/regions/nz/js/task-presentation.test.cjs
-          node apps/regions/nz/js/task-state-dom.test.cjs
-          node apps/regions/nz/js/add-revise-control.test.cjs
-          node apps/regions/nz/js/quick-photo.test.cjs
-          node apps/regions/nz/js/entry-country.test.cjs
-          node apps/regions/nz/js/unvalidated-places.test.cjs
-          node apps/regions/nz/js/map-loading.test.cjs
-          node apps/regions/nz/js/review-state-dom.test.cjs
-          node apps/regions/nz/js/review-panes.test.cjs
-          node apps/regions/nz/js/review-map-data.test.cjs
-          node apps/regions/nz/js/recentre-control.test.cjs
-          node apps/regions/nz/js/osm-history.test.cjs
-          node apps/regions/nz/js/deep-link-context.test.cjs
-          node apps/regions/nz/js/country-config.test.cjs
-          node apps/regions/nz/js/link-nearby-place-dom.test.cjs
-          node apps/regions/nz/js/marker-tooltip-escape.test.cjs
-          node apps/regions/nz/js/map-legend-grid.test.cjs
-          node apps/shared/region-resolve.test.cjs
+          shopt -s nullglob
+          status=0
+          count=0
+          for test_dir in apps/regions/nz/js apps/regions/_shared apps/shared; do
+            test_files=("$test_dir"/*.test.cjs)
+            if (( ${#test_files[@]} == 0 )); then
+              echo "::error::No *.test.cjs files found in $test_dir"
+              status=1
+            fi
+            for test_file in "${test_files[@]}"; do
+              echo "Running $test_file"
+              if ! node "$test_file"; then
+                echo "::error file=$test_file::Test failed"
+                status=1
+              fi
+              count=$((count + 1))
+            done
+          done
+          echo "Ran $count browser-side test files"
+          exit "$status"
       - name: dated-places builder tests
         run: python3 -m unittest scripts/test_build_occupancy_dated_places.py
       - name: woodberry import builder tests
