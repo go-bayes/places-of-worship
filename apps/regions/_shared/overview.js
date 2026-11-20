@@ -8,8 +8,6 @@
   "use strict";
 
   var CONFIG = window.OVERVIEW_CONFIG || {};
-  // the repo lives here; script and card links resolve into it on GitHub
-  var GITHUB_BLOB = "https://github.com/go-bayes/places-of-worship/blob/main/";
   var GITHUB_REPO = "https://github.com/go-bayes/places-of-worship";
 
   // small DOM helpers so the render functions read as structure, not plumbing
@@ -200,16 +198,13 @@
     return a;
   }
 
-  // footer: back to the hub, out to the global map, and to the country card
+  // footer: back to the hub and out to the global map
   function renderFooter() {
     var footer = el("footer", "overview-footer");
     var row = el("div", "overview-link-row");
     var f = CONFIG.footerLinks || {};
     row.appendChild(link("← Data maps", f.hub || "../", false));
     row.appendChild(link("Global map", f.global || "../../global/", false));
-    var cc = (CONFIG.countryCode || "").toLowerCase();
-    var cardHref = f.card || (GITHUB_BLOB + "research/countries/" + cc + "/README.md");
-    row.appendChild(link("Country card on GitHub", cardHref, true));
     footer.appendChild(row);
     // project-licence line on every overview; source terms per product prevail
     var lic = el("p", "overview-licence-note");
