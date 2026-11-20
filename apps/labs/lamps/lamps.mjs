@@ -358,7 +358,11 @@ function applyScene() {
 // the terrain caches the layers it drapes over the ground and redraws a
 // cached tile when the set of visible layers changes, not when a paint
 // value does. switching an empty layer makes the ground redraw in the new
-// tones. at most every 150 ms, so each switch is drawn before the next
+// tones. at most every 150 ms, so each switch is drawn before the next.
+// suspected maplibre gl js 6.19 bug: the render-to-texture fingerprint
+// (src/webgl/rtt_fingerprint.ts) compares source revision, tile keys, zoom
+// and the visible layer list but no paint state, so setPaintProperty on a
+// draped layer leaves stale drape textures until something else changes
 let drapeTimer = 0;
 let drapeLast = 0;
 let drapeFlip = false;
