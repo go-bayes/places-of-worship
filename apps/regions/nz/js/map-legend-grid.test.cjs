@@ -10,6 +10,7 @@ const vm = require("node:vm");
 
 const read = (...parts) => fs.readFileSync(path.join(__dirname, ...parts), "utf8");
 const theme = read("..", "..", "_shared", "theme.css");
+const state = read("..", "..", "_shared", "state.css");
 const page = read("..", "verification.html");
 const review = read("..", "review.html");
 const source = read("verification-map.js");
@@ -52,7 +53,7 @@ const token = (name) => {
 // 3. the text pills keep the amber caution triad
 {
     assert.match(page, /\.status-uncertain \{\s*background: var\(--uncertain-soft\);\s*color: var\(--uncertain\);/);
-    assert.match(page, /\.skip-badge \{[^}]*var\(--caution-strong\)/);
+    assert.match(state, /\.state-pill\.tone-act \{\s*border-color: var\(--caution-strong\);\s*background: var\(--caution-soft\);\s*color: var\(--caution\);/);
 }
 
 // 4. the corrected comment: the validated-absent ring is --ink, near-white

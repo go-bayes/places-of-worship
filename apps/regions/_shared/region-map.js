@@ -360,8 +360,6 @@ const GOOGLE_MAPS_KEY = window.GOOGLE_MAPS_API_KEY || "";
 const MAPTILER_API_KEY = window.MAPTILER_API_KEY || "";
 const NOMINATIM_EMAIL = window.NOMINATIM_EMAIL || "";
 const BACKDROP_BASEMAP_ID = "backdrop";
-let terrainToggle = null;
-let terrainOn = false;
 const IS_MOBILE = window.matchMedia && window.matchMedia("(max-width: 640px)").matches;
 
 const religionColors = [
@@ -471,27 +469,6 @@ function nudgeMap() {
   map.triggerRepaint();
 }
 
-function syncTerrainToggleLabel() {
-  if (!terrainToggle) return;
-  terrainToggle.textContent = terrainOn ? "Carto" : "Backdrop";
-}
-
-function setTerrainStateFromBasemap(basemapId) {
-  terrainOn = basemapId === BACKDROP_BASEMAP_ID;
-  syncTerrainToggleLabel();
-}
-
-function updateTerrainToggleAvailability() {
-  if (!terrainToggle) return;
-  const hasBackdrop = basemapOptions.some((style) => style.id === BACKDROP_BASEMAP_ID);
-  terrainToggle.disabled = !hasBackdrop;
-  terrainToggle.setAttribute("aria-disabled", hasBackdrop ? "false" : "true");
-  if (!hasBackdrop) {
-    terrainOn = false;
-    syncTerrainToggleLabel();
-  }
-}
-
 function refreshMapLayers() {
   ensureCustomLayers();
   updateCounts();
@@ -552,7 +529,6 @@ map.on("error", (e) => {
   maptilerFallbackDone = true;
   activeBasemapId = cartoStyle.id;
   if (basemapSelect) basemapSelect.value = cartoStyle.id;
-  setTerrainStateFromBasemap(cartoStyle.id);
   map.setStyle(cartoStyle.style, { diff: false });
   map.once("style.load", () => refreshMapLayers());
 });
@@ -1111,13 +1087,11 @@ function initBasemapSelect() {
     basemapSelect.appendChild(option);
   });
   basemapSelect.value = defaultBasemapId;
-  setTerrainStateFromBasemap(defaultBasemapId);
   // No need to setStyle here; initial style is already chosen above.
   basemapSelect.addEventListener("change", (event) => {
     const selected = basemapOptions.find((style) => style.id === event.target.value);
     if (selected) {
       activeBasemapId = selected.id;
-      setTerrainStateFromBasemap(selected.id);
       map.setStyle(selected.style || selected.url, { diff: false });
       map.once("style.load", () => {
         addCustomLayers();
@@ -1141,7 +1115,6 @@ function initBasemapSelect() {
     }
   });
   basemapSelect.disabled = basemapOptions.length <= 1;
-  updateTerrainToggleAvailability();
 }
 
 // street view comes from google's maps embed iframe, so google's script never
@@ -2165,17 +2138,13 @@ const cityChips = document.getElementById("cityChips");
 const searchInput = document.getElementById("searchInput");
 const searchButton = document.getElementById("searchButton");
 const resetButton = document.getElementById("corner-reset");
-terrainToggle = document.getElementById("terrain-toggle");
 const dock = document.getElementById("dock");
 const dockToggle = document.getElementById("dock-toggle");
 const tileStatus = document.getElementById("tile-status");
 const clickHint = document.getElementById("click-hint");
 const cornerInfo = document.getElementById("corner-info");
-const infoToggle = document.getElementById("corner-info-toggle");
-const infoMenu = document.getElementById("corner-info-menu");
 const onboard = document.getElementById("onboard");
 const onboardDismiss = document.getElementById("onboard-dismiss");
-const onboardToggle = document.getElementById("onboard-toggle");
 // per-country dismissal key, so one country's "got it" does not
 // silence the card everywhere; the global map overrides via config to
 // keep its pre-convergence dismissals (short-circuit leaves countryCode
@@ -2275,22 +2244,6 @@ if (cityChips) {
     event.preventDefault();
     event.stopPropagation();
   }, true);
-}
-
-if (terrainToggle) {
-  updateTerrainToggleAvailability();
-  syncTerrainToggleLabel();
-  terrainToggle.addEventListener("click", () => {
-    if (terrainToggle.disabled) {
-      showClickHint("Backdrop Unavailable");
-      return;
-    }
-    const targetId = terrainOn ? cartoStyle.id : BACKDROP_BASEMAP_ID;
-    if (basemapSelect) {
-      basemapSelect.value = targetId;
-      basemapSelect.dispatchEvent(new Event("change"));
-    }
-  });
 }
 
 resetButton.addEventListener("click", () => {
