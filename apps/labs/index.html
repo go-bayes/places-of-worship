@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en-NZ">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Labs: religionmap.org</title>
+  <meta name="description" content="Experiments with the religionmap.org data.">
+  <meta name="robots" content="noindex">
+  <link rel="preload" href="shared/fonts/source-sans-3-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link href="shared/labs.css" rel="stylesheet">
+  <link href="shared/landing.css" rel="stylesheet">
+</head>
+<body>
+  <main class="landing">
+    <header>
+      <p class="crumb"><a class="wordmark" href="../global/">religionmap.org</a></p>
+      <h1>Labs</h1>
+      <p class="lede">These pages are experiments with the same data, and the <a href="../global/">main map</a> remains the map of record.</p>
+    </header>
+
+    <ul class="experiments">
+      <li>
+        <h2><a href="lamps/">Lamps</a></h2>
+        <p>Every mapped place of worship as a light on a globe, under the real sun for the moment you choose. Zoom in and each place becomes a pillar standing on the terrain of its city.</p>
+      </li>
+      <li class="coming">
+        <h2>Relief: density and diversity in three dimensions</h2>
+        <p>Coming.</p>
+      </li>
+    </ul>
+
+    <footer>
+      <p>Places © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>. Project compilation <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a>.</p>
+    </footer>
+  </main>
+</body>
+</html>

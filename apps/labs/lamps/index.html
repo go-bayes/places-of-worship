@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en-NZ" data-sky="day">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lamps: religionmap.org labs</title>
+  <meta name="description" content="An experiment: every mapped place of worship as a light, under the real sun for the moment shown.">
+  <meta name="robots" content="noindex">
+  <link rel="preload" href="../shared/fonts/source-sans-3-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="../shared/fonts/source-serif-4-latin-wght-italic.woff2" as="font" type="font/woff2" crossorigin>
+  <link href="../vendor/maplibre-gl@6.19.0/maplibre-gl.css" rel="stylesheet">
+  <link href="../shared/labs.css" rel="stylesheet">
+  <link href="lamps.css" rel="stylesheet">
+</head>
+<body>
+  <div id="map" class="map"></div>
+
+  <div class="topbar">
+  <header class="crumbs panel">
+    <nav aria-label="Breadcrumb">
+      <ol>
+        <li><a class="wordmark" href="../../global/">religionmap.org</a></li>
+        <li><a href="../">Labs</a></li>
+        <li><span aria-current="page">Lamps</span></li>
+      </ol>
+    </nav>
+    <p id="scale-status" class="status" aria-live="polite"></p>
+  </header>
+
+  <div id="fly" class="fly">
+    <button id="fly-toggle" class="button" type="button" aria-expanded="false" aria-controls="fly-list">Fly to</button>
+    <ul id="fly-list" class="fly-list panel" hidden></ul>
+  </div>
+  </div>
+
+  <section id="sun" class="sun panel" aria-labelledby="sun-readout">
+    <p id="sun-readout" class="sun-readout sky-type"></p>
+    <div id="sun-track" class="sun-track">
+      <span class="tick" data-hour="6" aria-hidden="true"><span class="tick-label sky-type">06</span></span>
+      <span class="tick" data-hour="12" aria-hidden="true"><span class="tick-label sky-type">12</span></span>
+      <span class="tick" data-hour="18" aria-hidden="true"><span class="tick-label sky-type">18</span></span>
+      <span id="sunrise-mark" class="mark" hidden><span class="mark-time sky-type"></span></span>
+      <span id="sunset-mark" class="mark" hidden><span class="mark-time sky-type"></span></span>
+      <span id="sun-handle" class="sun-handle" role="slider" tabindex="0" aria-label="Time of day" aria-valuemin="0" aria-valuemax="1439" aria-valuenow="0" aria-orientation="vertical"></span>
+    </div>
+    <p id="sun-polar" class="sun-polar sky-type" hidden></p>
+    <button id="sun-now" class="button" type="button" aria-pressed="true">Now</button>
+  </section>
+
+  <section class="key panel" aria-labelledby="key-title">
+    <h2 id="key-title" class="key-title">Traditions</h2>
+    <ul id="key-list" class="key-list"></ul>
+    <button id="about-toggle" class="about-toggle" type="button" aria-expanded="false" aria-controls="caption">About these lights</button>
+    <p id="caption" class="caption">Each light is a place of worship mapped in OpenStreetMap (July 2026 snapshot). Lights show where places are mapped, not how many people worship there. Pillar height is symbolic.</p>
+  </section>
+
+  <aside id="card" class="card panel" aria-labelledby="card-name" hidden>
+    <button id="card-close" class="card-close" type="button" aria-label="Close place details">Close</button>
+    <h2 id="card-name" class="card-name" tabindex="-1"></h2>
+    <dl class="card-facts">
+      <div><dt>Tradition</dt><dd><span id="card-swatch" class="swatch" aria-hidden="true"></span><span id="card-tradition"></span></dd></div>
+      <div id="card-denomination-row"><dt>Denomination</dt><dd id="card-denomination"></dd></div>
+      <div id="card-start-row"><dt>Recorded start date</dt><dd id="card-start"></dd></div>
+    </dl>
+    <p class="card-links">
+      <a id="card-main" href="../../global/">Open on the main map</a>
+      <a id="card-streetview" href="https://www.google.com/maps" target="_blank" rel="noopener">Street View<span class="visually-hidden"> (opens Google Maps in a new tab)</span></a>
+    </p>
+  </aside>
+
+  <div id="notice" class="notice panel" role="status" hidden>
+    <p class="notice-text"></p>
+    <p><a href="../../global/">Open the main map</a></p>
+  </div>
+
+  <footer class="credits">
+    <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a>
+    <a href="https://www.maptiler.com/copyright/" target="_blank" rel="noopener">© MapTiler</a>
+    <a href="https://www.openmaptiles.org/" target="_blank" rel="noopener">© OpenMapTiles</a>
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener">Project compilation CC BY-NC-SA 4.0</a>
+  </footer>
+
+  <div id="no-webgl" class="no-webgl-message panel" role="alert" hidden>
+    <h1>Lamps cannot run here</h1>
+    <p id="no-webgl-reason"></p>
+    <p>The main map shows the same places without it.</p>
+    <p><a class="button" href="../../global/">Open the main map</a></p>
+  </div>
+
+  <noscript>
+    <div class="no-webgl-message panel">
+      <h1>Lamps needs JavaScript</h1>
+      <p>The main map shows the same places. <a href="../../global/">Open the main map</a></p>
+    </div>
+  </noscript>
+
+  <script src="../../global/config.public.js"></script>
+  <script src="../../shared/data/tz-home.js?v=20261013a"></script>
+  <script type="module" src="lamps.mjs"></script>
+</body>
+</html>
