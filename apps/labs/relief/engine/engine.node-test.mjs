@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { test } from "node:test";
 import { gunzipSync, gzipSync } from "node:zlib";
+import { ownershipProperties } from "../../shared/tile-ownership.mjs";
 import { categoriseReligion, religionCategories } from "./categories.js";
 import { collectPlaces, tilesCoveringBbox } from "./extent.js";
 import { binPlaces, MAX_LINEAR_DISTORTION_AT_50_KM } from "./hexbin.js";
@@ -39,23 +40,35 @@ test("Wellington MVT fixtures have the pinned point counts and names", async (t)
   for (const [x, y, count, names] of fixtures) {
     const tile = { z: zoom, x, y };
     const bytes = await fixtureTile(tile);
-    const points = decodeMvtPoints(bytes, tile, "places");
+    const { foundLayer, points } = decodeMvtPoints(bytes, tile, "places");
+    assert.equal(foundLayer, true);
     const records = points.map(({ properties }) => properties);
     t.diagnostic(`${zoom}/${x}/${y} · ${points.length} points · ${records.slice(0, 3).map(({ name }) => name).join(", ")}`);
     assert.equal(new Uint8Array(bytes, 0, 2)[0], 0x1a);
     assert.equal(points.length, count);
     assert.ok(records.every(({ id }) => /^[nw]\d+$/.test(id)));
     for (const name of names) assert.ok(records.some((p) => p.name === name), name);
-    assert.deepEqual(decodeMvtPoints(bytes, tile, "missing"), []);
+    assert.deepEqual(decodeMvtPoints(bytes, tile, "missing"), { foundLayer: false, points: [] });
   }
   const tile = { z: zoom, x: 4036, y: 2564 };
-  const [barnabas] = decodeMvtPoints(await fixtureTile(tile), tile, "places");
+  const { points: [barnabas] } = decodeMvtPoints(await fixtureTile(tile), tile, "places");
   assert.equal(barnabas.lon.toFixed(8), "174.79125738");
   assert.equal(barnabas.lat.toFixed(8), "-41.24462714");
   assert.equal(barnabas.properties.osm_id, 397049902);
   assert.equal(barnabas.properties.religion, "christian");
   assert.equal(barnabas.properties.denomination, "anglican");
   assert.equal(barnabas.properties.start_date, "1920");
+});
+
+test("Wellington fixtures contain only the engine and ownership properties", async () => {
+  const allowed = new Set([...ownershipProperties, "start_date"]);
+  for (const [x, y] of fixtures) {
+    const tile = { z: zoom, x, y };
+    const { points } = decodeMvtPoints(await fixtureTile(tile), tile, "places");
+    for (const { properties } of points) {
+      for (const key of Object.keys(properties)) assert.ok(allowed.has(key), `unexpected property ${key}`);
+    }
+  }
 });
 
 test("bounding box selects all four XYZ tiles and includes an exact east/south edge", () => {
@@ -128,7 +141,7 @@ test("decoder handles buffered multipoints, non-default extent and integer prope
   ], ["id", "signed", "zigzag", "bool"], [
     scalar(40, 18446744073709551615n), scalar(32, -3), scalar(48, 13), scalar(56, 1)
   ], 2048);
-  const points = decodeMvtPoints(tile, { z: 1, x: 0, y: 0 }, "places");
+  const { points } = decodeMvtPoints(tile, { z: 1, x: 0, y: 0 }, "places");
   assert.equal(points.length, 2);
   assert.equal(points[0].lon, 180 / 2048);
   assert.ok(points[0].lat > 66 && points[0].lat < 67);
@@ -137,33 +150,37 @@ test("decoder handles buffered multipoints, non-default extent and integer prope
   assert.throws(() => decodeMvtPoints(tile.slice(0, -1), { z: 1, x: 0, y: 0 }, "places"), /Truncated/);
 });
 
-test("keyless fallback uses rounded coordinates and name, and clipping precedes deduplication", async () => {
-  const tile = syntheticTile([
-    feature([0, 0], [[2048, 2048]]),
-    feature([0, 0], [[2048, 2048]]),
-    feature([0, 1], [[2048, 2048]]),
-    feature([0, 0], [[2049, 2048]]),
-    feature([1, 2], [[2000, 2048]]),
-    feature([1, 2], [[2048, 2048]])
-  ], ["name", "id"], [string(10, "A"), string(10, "B"), scalar(40, 0)], 2 ** 28);
-  // each unit is about 1.34 microdegrees here. two nearby coordinates with
-  // the same name round together. numeric ID zero is a valid key.
-  const edge = -180 + (2048 / 2 ** 28) * 360;
+test("tile ownership preserves coincident records and reconciles far-edge multiplicity", async () => {
+  const keys = ["name", "religion", "id"];
+  const values = [string(10, "A"), string(10, "sikh"), string(10, "hindu"), scalar(40, 0)];
+  const west = syntheticTile([
+    feature([0, 0], [[4097, 2048], [4097, 2048]]),
+    feature([0, 0, 1, 2], [[4097, 2048]]),
+    feature([2, 3], [[4097, 2048]]),
+    feature([0, 0, 1, 1], [[4096, 2048], [4096, 2048]])
+  ], keys, values);
+  const east = syntheticTile([
+    feature([0, 0], [[1, 2048], [1, 2048]]),
+    feature([0, 0, 1, 2], [[1, 2048]]),
+    feature([2, 3], [[1, 2048], [2, 2048]]),
+    feature([0, 0, 1, 1], [[0, 2048]])
+  ], keys, values);
   const { points, reconciliation } = await collectPlaces({
-    bbox: [edge, 85.050, -179.99, 85.0511287798066], zoom: 0, fetchTile: () => tile
+    bbox: [-1, 65, 1, 70], zoom: 1, fetchTile: ({ x }) => x === 0 ? west : east
   });
-  assert.equal(points[0].lon, edge);
-  assert.deepEqual(points.map(({ properties }) => properties), [{ name: "A" }, { name: "B" }, { id: 0 }]);
+  assert.equal(points.filter(({ properties }) => properties.id === 0).length, 2);
+  assert.equal(points.filter(({ properties }) => properties.religion === "sikh").length, 2);
+  assert.equal(points.filter(({ properties }) => properties.religion === "hindu").length, 1);
   assert.deepEqual(reconciliation, {
-    tilesRequested: 1, tilesEmpty: 0, rawFeatures: 6, duplicatesRemoved: 2,
-    outsideExtentRemoved: 1, kept: 3, keyless: 2
+    tilesRequested: 2, tilesEmpty: 0, rawFeatures: 12, duplicatesRemoved: 5,
+    outsideExtentRemoved: 0, kept: 7, keyless: 5
   });
 });
 
 test("collector detects gzip by magic bytes and uses the injected Node gunzip", async () => {
   const fetchTile = async (tile) => {
     const buffer = await fixtureTile(tile);
-    return tile.x === 4036 ? gzip(buffer) : buffer;
+    return tile.x === 4036 && tile.y === 2564 ? gzip(buffer) : buffer;
   };
   assert.deepEqual(await collectPlaces({ bbox, zoom, fetchTile, gunzip }), await collectWellington());
   await assert.rejects(collectPlaces({ bbox, zoom, fetchTile }), /Tile 12\/4036\/2564: Gzip tile requires/);
@@ -171,7 +188,7 @@ test("collector detects gzip by magic bytes and uses the injected Node gunzip", 
 
 test("collector counts empty tiles and identifies malformed tiles", async () => {
   const { reconciliation } = await collectPlaces({
-    bbox, zoom, fetchTile: ({ y }) => y === 2564 ? null : new ArrayBuffer(0)
+    bbox, zoom, fetchTile: () => null
   });
   assert.deepEqual(reconciliation, {
     tilesRequested: 4, tilesEmpty: 4, rawFeatures: 0, duplicatesRemoved: 0,
@@ -302,4 +319,24 @@ test("worker builds GeoJSON using plain and gzip responses and reports HTTP fail
   await assert.rejects(buildRelief(request, {
     fetchResponse: () => new Response(null, { status: 404 })
   }), /Tile 12\/4036\/2564: HTTP 404/);
+});
+
+test("worker refuses partial, empty and non-point HTTP 200 tile data", async () => {
+  const request = { ...grid, zoom, tileUrlTemplate: "https://example.test/places/{z}/{x}/{y}" };
+  const address = /Tile 12\/4036\/2564:/;
+  const unrelated = Uint8Array.from(message(26, string(10, "other")));
+  for (const [label, response] of [
+    ["HTTP 206", new Response(syntheticTile([feature([], [[1, 1]])], [], []), { status: 206 })],
+    ["HTTP 200 with Content-Range", new Response(syntheticTile([feature([], [[1, 1]])], [], []), {
+      headers: { "Content-Range": "bytes 0-99/200" }
+    })],
+    ["empty HTTP 200", new Response(null)],
+    ["missing layer", new Response(unrelated)],
+    ["empty places layer", new Response(syntheticTile([], [], []))],
+    ["mixed geometry", new Response(syntheticTile([feature([], [[1, 1]]), feature([], [[1, 1]], 2)], [], []))]
+  ]) {
+    await assert.rejects(buildRelief(request, {
+      fetchResponse: (url) => url.endsWith("/4036/2564") ? response : new Response(null, { status: 204 })
+    }), address, label);
+  }
 });

@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { metresPerPixel, pillarRadius, pillarHeight, hexagon, dedupeById, PILLAR } from "./geometry.mjs";
+import { metresPerPixel, pillarRadius, pillarHeight, hexagon, placesInTiles, PILLAR } from "./geometry.mjs";
 
 test("a pixel spans about 0.3 m on the equator at zoom 18", () => {
   const m = metresPerPixel(18, 0);
@@ -27,8 +27,28 @@ test("a hexagon has six corners at the radius", () => {
   }
 });
 
-test("features from overlapping tiles collapse to one place each", () => {
-  const f = (id, x) => ({ properties: { id }, geometry: { type: "Point", coordinates: [x, 1] } });
-  const places = dedupeById([f("n1", 1), f("n1", 1.0000001), f("w2", 2), { properties: {}, geometry: { type: "Point", coordinates: [3, 3] } }]);
-  assert.deepEqual(places.map((p) => p.id), ["n1", "w2", "3.000000,3.000000"]);
+function tilePoint(tile, x, y, properties) {
+  return {
+    tile, properties,
+    _vectorTileFeature: { extent: 4096, loadGeometry: () => [[{ x, y }]] },
+    geometry: { type: "Point", coordinates: [(tile.x + x / 4096) / 2 ** tile.z * 360 - 180, 1] }
+  };
+}
+
+test("pillars keep owning occurrences including keyless twins and ID zero", () => {
+  const west = { z: 8, x: 127, y: 127 };
+  const east = { z: 8, x: 128, y: 127 };
+  const props = { name: "Shared name" };
+  const places = placesInTiles([
+    tilePoint(west, 4097, 2048, props),
+    tilePoint(east, 1, 2048, props),
+    tilePoint(east, 1, 2048, props),
+    tilePoint(east, 1, 2048, { ...props, id: 0 }),
+    tilePoint(east, 1, 2048, { ...props, id: 0 }),
+    tilePoint(west, 4096, 2048, { id: "edge" })
+  ]);
+  assert.equal(places.length, 5);
+  assert.equal(new Set(places.map(({ id }) => id)).size, 5);
+  assert.equal(places.filter(({ props }) => props.id === 0).length, 2);
+  assert.equal(places.filter(({ props }) => props.id == null).length, 2);
 });

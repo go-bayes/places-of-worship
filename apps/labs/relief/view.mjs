@@ -139,7 +139,9 @@ export function describeCell(cell) {
 
 export function countLine(totals) {
   if (totals.count === 0) return "No mapped places of worship fall inside this study area.";
-  return `${plural(totals.count, "place", "places")} in the study area, each counted once.`;
+  return totals.count === 1
+    ? "1 mapped place in the study area. Each record is counted once."
+    : `${totals.count} mapped places in the study area. Each record is counted once.`;
 }
 
 // the reconciliation record, line by line, and the identity it satisfies
@@ -147,7 +149,7 @@ export function reconciliationLines(r, totals, cellMetres) {
   const lines = [
     `Tiles read: ${r.tilesRequested} at zoom 12${r.tilesEmpty ? `, ${r.tilesEmpty} of them empty` : ""}.`,
     `Records in those tiles: ${r.rawFeatures}.`,
-    `Duplicates removed (one place carried by more than one tile): ${r.duplicatesRemoved}.`,
+    `Tile-buffer copies removed: ${r.duplicatesRemoved}.`,
     `Outside the study area: ${r.outsideExtentRemoved}.`,
     `Kept, each counted once: ${r.kept}.`,
     `${r.rawFeatures} = ${r.duplicatesRemoved} + ${r.outsideExtentRemoved} + ${r.kept}.`

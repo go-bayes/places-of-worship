@@ -8,6 +8,7 @@ import {
   solarMinutes,
   capRing,
   nightCaps,
+  NIGHT_BANDS,
   zoneOffsetMinutes,
   clockMinutes,
   clockDayStart,
@@ -87,6 +88,40 @@ test("zone offsets and clock minutes", () => {
   near(((solarB - solarA) + 1440) % 1440, 60, 1e-6, "an hour per fifteen degrees");
 });
 
+test("Auckland's spring slider day skips the missing hour", () => {
+  const clock = { zone: "Pacific/Auckland" };
+  const date = Date.parse("2026-09-27T00:00:00Z");
+  const day = dayProfile(date, clock, 174.76, -36.85);
+  assert.equal(clockDayStart(date, clock), Date.parse("2026-09-26T12:00:00Z"));
+  assert.equal(day.dayEnd, Date.parse("2026-09-27T11:00:00Z"));
+  assert.equal(day.duration, 23 * 60);
+  assert.equal(clockMinutes(day.dayStart + 119 * 60000, clock), 119);
+  assert.equal(clockMinutes(day.dayStart + 120 * 60000, clock), 180);
+  near(sunPosition(day.dayStart + day.sunrise * 60000, 174.76, -36.85).altitude, -0.833, 1e-5, "sunrise");
+});
+
+test("Auckland's autumn slider day includes both occurrences of the repeated hour", () => {
+  const clock = { zone: "Pacific/Auckland" };
+  const date = Date.parse("2026-04-05T00:00:00Z");
+  const day = dayProfile(date, clock, 174.76, -36.85);
+  assert.equal(clockDayStart(date, clock), Date.parse("2026-04-04T11:00:00Z"));
+  assert.equal(day.dayEnd, Date.parse("2026-04-05T12:00:00Z"));
+  assert.equal(day.duration, 25 * 60);
+  assert.equal(clockMinutes(day.dayStart + 150 * 60000, clock), 150);
+  assert.equal(clockMinutes(day.dayStart + 210 * 60000, clock), 150);
+});
+
+test("the slider spans 24 hours in a zone without daylight saving", () => {
+  const clock = { zone: "Asia/Kolkata" };
+  const date = Date.parse("2026-09-27T00:00:00Z");
+  const day = dayProfile(date, clock, 77.21, 28.61, 17);
+  assert.equal(day.dayStart, Date.parse("2026-09-26T18:30:00Z"));
+  assert.equal(day.dayEnd, Date.parse("2026-09-27T18:30:00Z"));
+  assert.equal(day.duration, 1440);
+  assert.equal(day.samples.at(-1)[0], 1440);
+  assert.equal(clockMinutes(day.dayStart + 12 * 3600000, clock), 720);
+});
+
 test("altitude in words", () => {
   assert.equal(describeAltitude(-12.4), "sun 12° below the horizon");
   assert.equal(describeAltitude(33.6), "sun 34° above the horizon");
@@ -125,6 +160,22 @@ const MOMENTS = [
   Date.UTC(2026, 10, 20, 8, 14),
   Date.UTC(2026, 8, 23, 0, 5)
 ];
+
+test("every deployed night band encloses the night side at the March equinox", () => {
+  const t = Date.UTC(2026, 2, 20, 14, 46);
+  const [lng, lat] = subsolarPoint(t);
+  const rand = lcg(20260320);
+  for (const { properties: { altitude }, geometry: { coordinates: [ring] } } of nightCaps(t, NIGHT_BANDS).features) {
+    assert.equal(inside(ring, lng, lat), false, `subsolar point at ${altitude}°`);
+    assert.equal(inside(ring, lng + 180, -lat), true, `antisolar point at ${altitude}°`);
+    for (let i = 0; i < 300; i++) {
+      const x = rand() * 360 - 180;
+      const y = rand() * 180 - 90;
+      const h = sunPosition(t, x, y).altitude;
+      if (Math.abs(h - altitude) >= 1.5) assert.equal(inside(ring, x, y), h < altitude);
+    }
+  }
+});
 
 test("terminator rings follow the iso-altitude line", () => {
   for (const t of MOMENTS) {

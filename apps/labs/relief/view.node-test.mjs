@@ -54,7 +54,7 @@ test("the table's cells sum to the total at every cell size", async () => {
     const rows = tableRows(cells);
     assert.equal(result.totals.count, 117);
     assert.equal(rows.reduce((a, r) => a + r.count, 0), 117);
-    assert.equal(countLine(result.totals), "117 places in the study area, each counted once.");
+    assert.equal(countLine(result.totals), "117 mapped places in the study area. Each record is counted once.");
     const lines = reconciliationLines(result.reconciliation, result.totals, size);
     assert.ok(lines.includes("137 = 8 + 12 + 117."));
   }

@@ -33,11 +33,13 @@
       </p>
     </div>
 
+    <p id="basemap-notice" class="count" role="status" hidden>The base map could not be loaded. The study area and table use the places tiles.</p>
+
     <div id="sheet-body" class="sheet-body">
       <details id="how" class="how">
         <summary>How this is counted</summary>
         <ul id="how-lines" class="how-lines"></ul>
-        <p class="how-note">Every zoom-12 tile that touches the study area is read in full. A place carried by more than one tile is kept once, by its OpenStreetMap identifier, and a place outside the square is set aside. The map view never changes these numbers.</p>
+        <p class="how-note">Every zoom-12 tile that touches the study area is read in full. Each mapped record is counted in its owning tile. Copies in neighbouring tile buffers are removed, and records outside the square are set aside. The map view never changes these numbers.</p>
       </details>
 
       <div class="controls">

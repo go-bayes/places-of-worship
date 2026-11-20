@@ -8,6 +8,8 @@
 
 const RAD = Math.PI / 180;
 const DEG = 180 / Math.PI;
+const MINUTE_MS = 60000;
+const DAY_MS = 1440 * MINUTE_MS;
 
 // the sun's centre is at this altitude when its upper limb touches the
 // horizon, after standard refraction (34') and the solar semidiameter (16')
@@ -145,6 +147,9 @@ export function capRing(centerLng, centerLat, radius, steps = 360) {
   return [...run, [east, pole], [west, pole], run[0]];
 }
 
+// a band above the horizon can contain both poles near an equinox
+export const NIGHT_BANDS = Array.from({ length: 33 }, (_, i) => 0 - i * 0.5);
+
 // nested caps, one per altitude, as a feature collection. stacking them in
 // one translucent fill gives the night side a soft edge through twilight
 // `alpha` gives each cap's own opacity, when the stack should follow a
@@ -214,20 +219,46 @@ export function clockMinutes(date, clock) {
   return solarMinutes(ms, clock.lng);
 }
 
-// the instant of that clock's most recent midnight
-export function clockDayStart(date, clock) {
-  const ms = date instanceof Date ? date.getTime() : Number(date);
-  return ms - clockMinutes(ms, clock) * 60000;
+function civilDate(ms, zone) {
+  const wall = ms + zoneOffsetMinutes(ms, zone) * MINUTE_MS;
+  return Math.floor(wall / DAY_MS) * DAY_MS;
 }
 
-// sunrise and sunset within the clock's day at a place, as minutes after
-// the clock's midnight, plus altitude samples for drawing the day. a day
-// with no crossing is all day or all night (polar summer or winter)
+function civilMidnight(wall, zone) {
+  const before = zoneOffsetMinutes(wall - DAY_MS, zone);
+  const after = zoneOffsetMinutes(wall + DAY_MS, zone);
+  const candidates = [wall - before * MINUTE_MS, wall - after * MINUTE_MS].sort((a, b) => a - b);
+  for (const ms of candidates) {
+    if (ms + zoneOffsetMinutes(ms, zone) * MINUTE_MS === wall) return ms;
+  }
+  // if midnight is skipped, start at the first instant after the jump
+  let [lo, hi] = candidates;
+  while (hi - lo > 1) {
+    const mid = Math.floor((lo + hi) / 2);
+    if (mid + zoneOffsetMinutes(mid, zone) * MINUTE_MS < wall) lo = mid;
+    else hi = mid;
+  }
+  return hi;
+}
+
+// the earliest instant of midnight, or the first instant after a gap
+export function clockDayStart(date, clock) {
+  const ms = date instanceof Date ? date.getTime() : Number(date);
+  if (clock.zone) return civilMidnight(civilDate(ms, clock.zone), clock.zone);
+  return ms - clockMinutes(ms, clock) * MINUTE_MS;
+}
+
+// the slider advances in elapsed minutes between local midnights, skipping
+// missing wall times and visiting both occurrences of a repeated wall time
 export function dayProfile(date, clock, lng, lat, stepMinutes = 10) {
+  const ms = date instanceof Date ? date.getTime() : Number(date);
   const start = clockDayStart(date, clock);
-  const alt = (min) => sunPosition(start + min * 60000, lng, lat).altitude;
+  const end = clock.zone ? civilMidnight(civilDate(ms, clock.zone) + DAY_MS, clock.zone) : start + DAY_MS;
+  const duration = (end - start) / MINUTE_MS;
+  const alt = (min) => sunPosition(start + min * MINUTE_MS, lng, lat).altitude;
   const samples = [];
-  for (let m = 0; m <= 1440; m += stepMinutes) samples.push([m, alt(m)]);
+  for (let m = 0; m < duration; m += stepMinutes) samples.push([m, alt(m)]);
+  samples.push([duration, alt(duration)]);
   const crossings = [];
   for (let i = 1; i < samples.length; i += 1) {
     const [m0, a0] = samples[i - 1];
@@ -249,6 +280,8 @@ export function dayProfile(date, clock, lng, lat, stepMinutes = 10) {
   const above = samples.filter(([, a]) => a > SUNRISE_ALTITUDE).length;
   return {
     dayStart: start,
+    dayEnd: end,
+    duration,
     samples,
     sunrise: sunrise ? sunrise.minutes : null,
     sunset: sunset ? sunset.minutes : null,

@@ -106,7 +106,7 @@ function appendPacked(bytes, values) {
   while (!reader.done) values.push(reader.uint32());
 }
 
-function readPointFeature(bytes, keys, values, toLonLat, points) {
+function readPointFeature(bytes, keys, values, toLonLat, points, requirePoints) {
   const reader = new Reader(bytes);
   const tags = [];
   const geometry = [];
@@ -122,7 +122,10 @@ function readPointFeature(bytes, keys, values, toLonLat, points) {
       default: reader.skip(tag);
     }
   }
-  if (type !== 1) return;
+  if (type !== 1) {
+    if (requirePoints) throw new Error("Expected MVT point geometry");
+    return;
+  }
   if (tags.length % 2 !== 0) throw new Error("Unpaired MVT feature tags");
 
   const entries = [];
@@ -149,7 +152,8 @@ function readPointFeature(bytes, keys, values, toLonLat, points) {
   }
 }
 
-function readLayer(bytes, { z, x, y }, layerName, points) {
+function readLayer(bytes, tile, layerName, points, requirePoints) {
+  const { z, x, y } = tile;
   const reader = new Reader(bytes);
   const features = [];
   const keys = [];
@@ -161,7 +165,7 @@ function readLayer(bytes, { z, x, y }, layerName, points) {
     switch (tag) {
       case 10:
         name = reader.string();
-        if (name !== layerName) return;
+        if (name !== layerName) return false;
         break;
       case 18: features.push(reader.bytesField()); break;
       case 26: keys.push(reader.string()); break;
@@ -170,30 +174,33 @@ function readLayer(bytes, { z, x, y }, layerName, points) {
       default: reader.skip(tag);
     }
   }
-  if (name !== layerName) return;
+  if (name !== layerName) return false;
   if (extent === 0) throw new Error("MVT layer extent must be positive");
   const values = encodedValues.map(readValue);
   const scale = 2 ** z;
   const toLonLat = (localX, localY) => ({
+    tile, localX, localY, extent,
     lon: ((x + localX / extent) / scale) * 360 - 180,
     lat: Math.atan(Math.sinh(Math.PI * (1 - 2 * (y + localY / extent) / scale))) * 180 / Math.PI
   });
-  for (const feature of features) readPointFeature(feature, keys, values, toLonLat, points);
+  for (const feature of features) readPointFeature(feature, keys, values, toLonLat, points, requirePoints);
+  return true;
 }
 
 // expected tile coordinates are XYZ. buffers can extend beyond the tile edges.
-// returns one row per point coordinate, with the feature's MVT properties
-export function decodeMvtPoints(buffer, tile, layerName) {
+// reports layer presence and one row per point coordinate
+export function decodeMvtPoints(buffer, tile, layerName, { requirePoints = false } = {}) {
   if (!(buffer instanceof ArrayBuffer)) throw new Error("Expected an uncompressed MVT ArrayBuffer");
   const reader = new Reader(new Uint8Array(buffer));
   const points = [];
+  let foundLayer = false;
   while (!reader.done) {
     const tag = reader.tag();
     if (tag === 26) {
-      readLayer(reader.bytesField(), tile, layerName, points);
+      if (readLayer(reader.bytesField(), tile, layerName, points, requirePoints)) foundLayer = true;
     } else {
       reader.skip(tag);
     }
   }
-  return points;
+  return { foundLayer, points };
 }

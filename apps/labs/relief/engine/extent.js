@@ -1,3 +1,4 @@
+import { hasPlaceId, ownedTilePoints } from "../../shared/tile-ownership.mjs";
 import { decodeMvtPoints } from "./mvt-points.js";
 
 const mercatorLimit = 85.0511287798066;
@@ -51,7 +52,10 @@ async function decodeTile(tile, fetchTile, gunzip) {
       if (!gunzip) throw new Error("Gzip tile requires a gunzip function");
       buffer = await gunzip(buffer);
     }
-    return decodeMvtPoints(buffer, tile, "places");
+    const { foundLayer, points } = decodeMvtPoints(buffer, tile, "places", { requirePoints: true });
+    if (!foundLayer) throw new Error("Missing places layer");
+    if (!points.length) throw new Error("Empty places layer");
+    return points;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     throw new Error(`Tile ${tile.z}/${tile.x}/${tile.y}: ${message}`, { cause: error });
@@ -63,9 +67,7 @@ async function decodeTile(tile, fetchTile, gunzip) {
 export async function collectPlaces({ bbox, zoom, fetchTile, gunzip }) {
   const tiles = tilesCoveringBbox(bbox, zoom);
   const [west, south, east, north] = bbox;
-  const points = [];
-  const seenIds = new Set();
-  const seenKeyless = new Set();
+  const inExtent = [];
   const reconciliation = {
     tilesRequested: 0,
     tilesEmpty: 0,
@@ -88,23 +90,14 @@ export async function collectPlaces({ bbox, zoom, fetchTile, gunzip }) {
           reconciliation.outsideExtentRemoved++;
           continue;
         }
-        const { id, name } = properties;
-        const keyless = id == null || String(id).trim() === "";
-        const keys = keyless ? seenKeyless : seenIds;
-        const key = keyless
-          ? JSON.stringify([Math.round(lon * 1e5), Math.round(lat * 1e5), name ?? ""])
-          : String(id);
-        if (keys.has(key)) {
-          reconciliation.duplicatesRemoved++;
-          continue;
-        }
-        keys.add(key);
-        points.push(point);
+        inExtent.push(point);
       }
     }
   }
+  const points = ownedTilePoints(inExtent);
+  reconciliation.duplicatesRemoved = inExtent.length - points.length;
   reconciliation.kept = points.length;
-  reconciliation.keyless = seenKeyless.size;
+  reconciliation.keyless = points.filter(({ properties }) => !hasPlaceId(properties.id)).length;
   const { rawFeatures, duplicatesRemoved, outsideExtentRemoved, kept } = reconciliation;
   if (rawFeatures !== outsideExtentRemoved + duplicatesRemoved + kept) {
     throw new Error("Tile point counts failed to reconcile");

@@ -7,6 +7,7 @@ import {
   sunPosition,
   subsolarPoint,
   nightCaps,
+  NIGHT_BANDS,
   shadeAlphas,
   clockMinutes,
   dayProfile,
@@ -31,7 +32,7 @@ import {
   sceneTones
 } from "../shared/palette.mjs";
 import { buildStyle, PLACE_LAYERS, traditionFilter, pillarFilter, traditionColor, presence, SCALE } from "./style.mjs";
-import { metresPerPixel, pillarRadius, pillarHeight, hexagon, dedupeById, PILLAR } from "./geometry.mjs";
+import { metresPerPixel, pillarRadius, pillarHeight, hexagon, placesInTiles, PILLAR } from "./geometry.mjs";
 import { CITIES } from "../shared/cities.mjs";
 
 const MAIN_MAP = "../../global/";
@@ -84,15 +85,15 @@ function hasWebgl2() {
 
 // ---- the night shade -----------------------------------------------------
 
-// altitudes of the nested caps: the shade begins just above the horizon
+// the shade begins at the horizon
 // and deepens over sixteen degrees, past nautical twilight, in half-degree
 // steps fine enough that the edge reads as a gradient
-const BANDS = Array.from({ length: 34 }, (_, i) => 0.5 - i * 0.5);
 const NIGHT_DEPTH = 0.9;
-const ALPHAS = shadeAlphas(BANDS.length, NIGHT_DEPTH);
+// keep the opacity of each band that remains after dropping the +0.5° cap
+const ALPHAS = shadeAlphas(NIGHT_BANDS.length + 1, NIGHT_DEPTH).slice(1);
 
 function nightData() {
-  return nightCaps(state.moment, BANDS, ALPHAS);
+  return nightCaps(state.moment, NIGHT_BANDS, ALPHAS);
 }
 
 // ---- the map -------------------------------------------------------------
@@ -154,6 +155,7 @@ function startMap() {
     if (intro) playIntro(home.center);
   });
   map.on("move", scheduleScene);
+  map.on("styledata", applyFilter);
   map.on("zoom", scheduleReshape);
   map.on("moveend", () => {
     refreshClock();
@@ -162,10 +164,19 @@ function startMap() {
     refreshPlacesList();
   });
   map.on("sourcedata", (e) => {
+    if (e.tile || e.sourceDataType === "metadata") recoverSource(e.sourceId);
     if (e.sourceId === "places" && e.isSourceLoaded) schedulePillars();
-    if (e.sourceId === "overview" && e.isSourceLoaded && !state.clockSettled) refreshClock();
+    if (e.sourceId === "overview" && e.isSourceLoaded && !state.clockSettled) {
+      refreshClock();
+      refreshSun();
+    }
   });
   map.on("error", onMapError);
+  map.on("idle", () => {
+    for (const [id, failure] of failed) {
+      if (failure.hasTile) recoverSource(id);
+    }
+  });
   for (const layer of ["pillars", "crowns", "pools", "places-core"]) {
     map.on("mouseenter", layer, () => { map.getCanvas().style.cursor = "pointer"; });
     map.on("mouseleave", layer, () => { map.getCanvas().style.cursor = ""; });
@@ -185,7 +196,10 @@ function startMap() {
     }
     const light = hits.find((f) => f.layer.id === "places-core");
     if (light && map.getZoom() < 13) {
-      state.pendingSelect = String(light.properties.id || "");
+      // the hit retains its source zoom, even while MapLibre draws a parent tile
+      const individual = map.getZoom() >= 8 && light._z >= 8 && !(light.properties.n > 1);
+      state.pendingSelect = individual && light.properties.id != null ? String(light.properties.id) : null;
+      if (!individual) deselect();
       fly({ center: light.geometry.coordinates, zoom: 15.2 });
       return;
     }
@@ -398,17 +412,22 @@ function applyPanels(t) {
 
 const SCALE_WORDS = {
   world: "World scale. Each light stands for the places of worship mapped nearby; larger lights stand for more of them.",
-  region: "Region scale. Each light is one place of worship.",
-  city: "City scale. Each pillar is one place of worship; select one to see its details."
+  region: "Regional scale. Each light stands for one or more places mapped nearby.",
+  city: "City scale",
+  pillars: "City scale. Each pillar is one place of worship; select one to see its details."
 };
 
 function updateScale() {
   const z = map.getZoom();
   const scale = z < SCALE.regionFrom ? "world" : z < SCALE.cityFrom + 1 ? "region" : "city";
-  if (scale === state.scale) return;
-  state.scale = scale;
-  $("scale-status").textContent = SCALE_WORDS[scale];
-  document.documentElement.dataset.scale = scale;
+  if (scale !== state.scale) {
+    state.scale = scale;
+    document.documentElement.dataset.scale = scale;
+  }
+  const hasPillars = scale === "city" && pillarPlaces.some(({ props }) => state.enabled.has(traditionKey(props)));
+  const words = hasPillars ? SCALE_WORDS.pillars : SCALE_WORDS[scale];
+  const status = $("scale-status");
+  if (status.textContent !== words) status.textContent = words;
 }
 
 // ---- the clock: which place, which zone ---------------------------------
@@ -519,7 +538,7 @@ function refreshSun() {
   const stops = p.samples.map(([m, alt]) => {
     const t = daylight(alt);
     const tone = mix(mix(NIGHT.sky, "#9fb7c6", t), "#e3a67d", twilight(alt) * 0.7);
-    return `${tone} ${((m / 1440) * 100).toFixed(2)}%`;
+    return `${tone} ${((m / p.duration) * 100).toFixed(2)}%`;
   });
   track.style.setProperty("--day", `linear-gradient(var(--track-dir), ${stops.join(", ")})`);
   placeMark("sunrise", p.sunrise);
@@ -536,21 +555,25 @@ function placeMark(kind, minutes) {
     return;
   }
   mark.hidden = false;
-  mark.style.setProperty("--pos", String(minutes / 1440));
-  mark.querySelector(".mark-time").textContent = `${kind === "sunrise" ? "Sunrise" : "Sunset"} ${formatClock(minutes)}`;
+  const { dayStart, duration } = state.profile;
+  const wall = clockMinutes(dayStart + minutes * 60000, state.clock);
+  mark.style.setProperty("--pos", String(minutes / duration));
+  mark.querySelector(".mark-time").textContent = `${kind === "sunrise" ? "Sunrise" : "Sunset"} ${formatClock(wall)}`;
 }
 
 function updateReadout() {
   const c = map.getCenter();
   const sun = sunPosition(state.moment, c.lng, c.lat);
-  const minutes = clockMinutes(state.moment, state.clock);
-  const time = formatClock(minutes);
+  const { dayStart, duration } = state.profile;
+  const elapsed = (state.moment - dayStart) / 60000;
+  const time = formatClock(clockMinutes(state.moment, state.clock));
   const where = state.clockName ? `${state.clockName} time` : "Local solar time";
   const words = describeAltitude(sun.altitude);
   $("sun-readout").textContent = `${where} ${time}, ${words}`;
-  handle.style.setProperty("--pos", String(minutes / 1440));
-  track.style.setProperty("--pos", String(minutes / 1440));
-  handle.setAttribute("aria-valuenow", String(Math.round(minutes)));
+  handle.style.setProperty("--pos", String(elapsed / duration));
+  track.style.setProperty("--pos", String(elapsed / duration));
+  handle.setAttribute("aria-valuemax", String(duration - 1));
+  handle.setAttribute("aria-valuenow", String(Math.min(duration - 1, Math.round(elapsed))));
   handle.setAttribute("aria-valuetext", `${where} ${time}, ${words}`);
   // while the scene follows the clock there is nothing for "Now" to do
   $("sun-now").disabled = state.live;
@@ -566,7 +589,7 @@ function setMoment(ms, live = false) {
     applyScene();
     // a new day at the place redraws the track; otherwise only the handle
     const p = state.profile;
-    if (!p || ms < p.dayStart || ms >= p.dayStart + 86400000) refreshSun();
+    if (!p || ms < p.dayStart || ms >= p.dayEnd) refreshSun();
     else updateReadout();
   }
 }
@@ -575,24 +598,25 @@ function minutesFromPointer(event) {
   const rect = track.getBoundingClientRect();
   const horizontal = PHONE.matches;
   const f = horizontal ? (event.clientX - rect.left) / rect.width : (event.clientY - rect.top) / rect.height;
-  return clamp(f, 0, 0.9993) * 1440;
+  return clamp(f, 0, 1) * state.profile.duration;
 }
 
-function setClockMinutes(minutes) {
+function setElapsedMinutes(minutes) {
   const p = state.profile;
   if (!p) return;
-  setMoment(p.dayStart + clamp(minutes, 0, 1439) * 60000, false);
+  setMoment(p.dayStart + clamp(minutes, 0, p.duration - 1) * 60000, false);
 }
 
 let dragging = false;
 track.addEventListener("pointerdown", (e) => {
+  if (!state.profile) return;
   dragging = true;
   track.setPointerCapture(e.pointerId);
   handle.focus({ preventScroll: true });
-  setClockMinutes(minutesFromPointer(e));
+  setElapsedMinutes(minutesFromPointer(e));
 });
 track.addEventListener("pointermove", (e) => {
-  if (dragging) setClockMinutes(minutesFromPointer(e));
+  if (dragging) setElapsedMinutes(minutesFromPointer(e));
 });
 const endDrag = (e) => {
   if (!dragging) return;
@@ -607,14 +631,15 @@ track.addEventListener("pointerup", endDrag);
 track.addEventListener("pointercancel", endDrag);
 
 handle.addEventListener("keydown", (e) => {
-  const now = clockMinutes(state.moment, state.clock);
+  if (!state.profile) return;
+  const now = (state.moment - state.profile.dayStart) / 60000;
   const steps = { ArrowUp: -5, ArrowLeft: -5, ArrowDown: 5, ArrowRight: 5, PageUp: -60, PageDown: 60 };
   if (e.key in steps) {
-    setClockMinutes(now + steps[e.key]);
+    setElapsedMinutes(now + steps[e.key]);
   } else if (e.key === "Home") {
-    setClockMinutes(0);
+    setElapsedMinutes(0);
   } else if (e.key === "End") {
-    setClockMinutes(1439);
+    setElapsedMinutes(state.profile.duration - 1);
   } else {
     return;
   }
@@ -654,24 +679,13 @@ function buildPillars() {
   if (!map || !map.getSource("pillars")) return;
   const zoom = map.getZoom();
   const src = map.getSource("pillars");
-  if (zoom < SCALE.cityFrom + 0.5) {
-    if (pillarKey !== "empty") {
-      src.setData({ type: "FeatureCollection", features: [] });
-      pillarKey = "empty";
-      pillarPlaces = [];
-      placesById = new Map();
-      refreshPlacesList();
-    }
-    return;
-  }
   let feats = [];
-  try {
+  if (zoom >= SCALE.cityFrom + 0.5) {
     feats = map.querySourceFeatures("places", { sourceLayer: "places" });
-  } catch {
-    feats = [];
   }
-  const places = dedupeById(feats);
-  const key = `${places.length}:${places.length ? places[0].id : ""}`;
+  const places = placesInTiles(feats);
+  const key = JSON.stringify(places.map(({ id, coords, props }) =>
+    [id, coords, props.religion, props.denomination, props.start_date, placeName(props)]));
   if (key === pillarKey) {
     reshapePillars();
     return;
@@ -679,13 +693,20 @@ function buildPillars() {
   pillarKey = key;
   pillarPlaces = places;
   placesById = new Map(places.map((p) => [p.id, p]));
+  if (state.selected !== null && !placesById.has(state.selected)) clearUnavailableSelection();
   pillarRadiusInUse = 0;
-  reshapePillars();
-  sizePillars(map.getCenter().lat);
-  if (state.pendingSelect && placesById.has(state.pendingSelect)) {
-    select(state.pendingSelect, false);
-    state.pendingSelect = null;
+  if (places.length) {
+    reshapePillars();
+    sizePillars(map.getCenter().lat);
+  } else {
+    src.setData({ type: "FeatureCollection", features: [] });
   }
+  if (state.pendingSelect !== null) {
+    const matches = places.filter(({ props }) => props.id != null && String(props.id) === state.pendingSelect);
+    if (matches.length === 1) select(matches[0].id, false);
+    if (matches.length) state.pendingSelect = null;
+  }
+  updateScale();
   refreshPlacesList();
 }
 
@@ -779,7 +800,7 @@ function drawSelection(place) {
 
 function select(id, fromPointer) {
   const place = placesById.get(id);
-  if (!place) return;
+  if (!place || !state.enabled.has(traditionKey(place.props))) return;
   state.selected = id;
   drawSelection(place);
   const props = place.props;
@@ -810,6 +831,11 @@ function deselect() {
   if (map && map.getSource("selection")) map.getSource("selection").setData({ type: "FeatureCollection", features: [] });
   $("card").hidden = true;
   delete document.documentElement.dataset.card;
+}
+
+function clearUnavailableSelection() {
+  if ($("card").contains(document.activeElement)) leaveCard();
+  else deselect();
 }
 
 // focus goes back where the visitor came from: the list, or the map
@@ -849,6 +875,7 @@ function buildChips() {
       if (on) state.enabled.add(t.key); else state.enabled.delete(t.key);
       b.setAttribute("aria-pressed", on ? "true" : "false");
       applyFilter();
+      if (map) updateScale();
       refreshPlacesList();
     });
     li.append(b);
@@ -857,12 +884,20 @@ function buildChips() {
 }
 
 function applyFilter() {
-  if (!map || !map.isStyleLoaded()) return;
-  const f = traditionFilter(state.enabled);
-  for (const layer of PLACE_LAYERS) map.setFilter(layer, f);
-  map.setFilter("pillars", pillarFilter(state.enabled, "Polygon"));
-  map.setFilter("crowns", pillarFilter(state.enabled, "Polygon"));
-  map.setFilter("pools", pillarFilter(state.enabled, "Point"));
+  if (!map) return;
+  const dots = traditionFilter(state.enabled);
+  const polygons = pillarFilter(state.enabled, "Polygon");
+  const points = pillarFilter(state.enabled, "Point");
+  for (const [id, filter] of [
+    ...PLACE_LAYERS.map((id) => [id, dots]),
+    ["pillars", polygons], ["crowns", polygons], ["pools", points]
+  ]) {
+    if (map.getLayer(id) && JSON.stringify(map.getFilter(id)) !== JSON.stringify(filter)) {
+      map.setFilter(id, filter);
+    }
+  }
+  const selected = placesById.get(state.selected);
+  if (selected && !state.enabled.has(traditionKey(selected.props))) clearUnavailableSelection();
 }
 
 // ---- fly to -----------------------------------------------------------------
@@ -917,11 +952,15 @@ function refreshPlacesList() {
   if (!map || panel.hidden) return;
   const list = $("inview-list");
   const note = $("inview-note");
+  const active = document.activeElement;
+  const focusedId = list.contains(active) ? active.dataset.placeId : undefined;
+  let nextFocus;
   list.replaceChildren();
   if (state.scale !== "city" || !pillarPlaces.length) {
     note.textContent = state.scale === "city"
       ? "No places are drawn in this view."
       : "Zoom in to a city, where each place stands as a pillar, to list them here.";
+    if (focusedId !== undefined) $("inview-toggle").focus();
     return;
   }
   const bounds = map.getBounds();
@@ -933,6 +972,7 @@ function refreshPlacesList() {
     .sort((a, b) => a.d - b.d);
   if (!shown.length) {
     note.textContent = "No places are drawn in this view.";
+    if (focusedId !== undefined) $("inview-toggle").focus();
     return;
   }
   note.textContent = shown.length > INVIEW_CAP
@@ -943,6 +983,8 @@ function refreshPlacesList() {
     const li = document.createElement("li");
     const b = document.createElement("button");
     b.type = "button";
+    b.dataset.placeId = p.id;
+    if (p.id === focusedId) nextFocus = b;
     const sw = document.createElement("span");
     sw.className = "swatch";
     sw.style.setProperty("--swatch", COLORS[key]);
@@ -963,6 +1005,7 @@ function refreshPlacesList() {
     li.append(b);
     list.append(li);
   }
+  if (focusedId !== undefined) (nextFocus || $("inview-toggle")).focus({ preventScroll: true });
 }
 
 function closeInView(returnFocus = false) {
@@ -998,25 +1041,41 @@ $("about-toggle").addEventListener("click", () => {
 
 // ---- failures ---------------------------------------------------------------
 
-const failed = new Set();
+const warningKinds = new Map([
+  ["places", "places"], ["overview", "places"],
+  ["omt", "basemap"], ["dem", "basemap"], ["relief", "basemap"]
+]);
+const failed = new Map();
+
 function onMapError(e) {
-  const id = e && e.sourceId;
-  const status = e && e.error && e.error.status;
-  let what = null;
-  if (id === "places" || id === "overview") what = "places";
-  else if (id === "omt" || id === "dem" || id === "relief" || (e.error && /maptiler/.test(String(e.error.url || "")))) what = "basemap";
-  if (!what || failed.has(what)) return;
-  failed.add(what);
-  const text = {
+  const providerError = /maptiler/.test(String(e.error?.url || ""));
+  const kind = warningKinds.get(e.sourceId) || (providerError ? "basemap" : null);
+  if (!kind) return;
+  failed.set(e.sourceId || "omt", { kind, hasTile: Boolean(e.tile) });
+  renderWarnings();
+}
+
+function recoverSource(id) {
+  if (!failed.has(id)) return;
+  // MapLibre considers errored tiles settled. A success in the same source
+  // only clears its warning once the affected viewport has no errored tiles.
+  const tiles = map.style?.tileManagers?.[id];
+  if (tiles?.getIds().some((key) => tiles.getTileByID(key)?.state === "errored")) return;
+  failed.delete(id);
+  renderWarnings();
+}
+
+function renderWarnings() {
+  const kinds = new Set([...failed.values()].map(({ kind }) => kind));
+  const messages = {
     places: "The lights could not be loaded just now, so places of worship are missing from this view. The main map may still show them.",
     basemap: "The base map could not be loaded just now, so land, water and terrain are drawn plainly."
-  }[what];
+  };
   const notice = $("notice");
-  notice.hidden = false;
-  notice.querySelector(".notice-text").textContent = [...failed].length > 1
+  notice.hidden = kinds.size === 0;
+  notice.querySelector(".notice-text").textContent = kinds.size > 1
     ? "Map tiles could not be loaded just now. The lights and the base map may be incomplete."
-    : text;
-  if (status) notice.dataset.status = String(status);
+    : messages[[...kinds][0]] || "";
 }
 
 // ---- layout on a phone ---------------------------------------------------------

@@ -1,3 +1,5 @@
+import { hasPlaceId, ownedTilePoints, ownershipProperties } from "../shared/tile-ownership.mjs";
+
 // pillar geometry: hexagonal prisms around each place, and the sizes that
 // keep a pillar visible as the camera pulls back. dependency-free so the
 // node tests can check it.
@@ -37,17 +39,45 @@ export function hexagon([lng, lat], radius, rotation = 0) {
   return ring;
 }
 
-// keep the first feature seen for each id; tiles overlap at their edges, so
-// one place can arrive from several tiles. features without an id are kept
-// by position instead
-export function dedupeById(features) {
-  const seen = new Map();
-  for (const f of features) {
-    const props = f.properties || {};
-    const coords = f.geometry && f.geometry.type === "Point" ? f.geometry.coordinates : null;
-    if (!coords) continue;
-    const key = props.id ? String(props.id) : `${coords[0].toFixed(6)},${coords[1].toFixed(6)}`;
-    if (!seen.has(key)) seen.set(key, { id: key, coords, props });
+// MapLibre 6.19 source-query features retain their canonical tile and raw
+// geometry. Exact tile units decide ownership, including quantised edges.
+export function placesInTiles(features) {
+  const points = [];
+  const tiles = new Set();
+  const zooms = new Set();
+  for (const feature of features) {
+    const { tile, _vectorTileFeature: raw, properties } = feature;
+    if (!tile || tile.z < 8 || !raw) continue;
+    tiles.add(`${tile.z}/${tile.x}/${tile.y}`);
+    zooms.add(tile.z);
+    const { geometry } = feature;
+    if (geometry.type !== "Point" && geometry.type !== "MultiPoint") continue;
+    const coords = geometry.type === "MultiPoint" ? geometry.coordinates : [geometry.coordinates];
+    raw.loadGeometry().forEach(([{ x, y }], i) => {
+      points.push({ tile, localX: x, localY: y, extent: raw.extent, coords: coords[i], properties });
+    });
   }
-  return [...seen.values()];
+  // during a tile transition, use finer tiles where they cover a point
+  const owned = ownedTilePoints(points).filter(({ tile, localX, localY, extent }) => {
+    for (const z of zooms) {
+      if (z <= tile.z) continue;
+      const scale = 2 ** (z - tile.z);
+      const x = Math.floor((tile.x + localX / extent) * scale) % 2 ** z;
+      const y = Math.floor((tile.y + localY / extent) * scale);
+      if (tiles.has(`${z}/${x}/${y}`)) return false;
+    }
+    return true;
+  });
+  owned.sort((a, b) => a.coords[0] - b.coords[0] || a.coords[1] - b.coords[1]);
+  const occurrences = new Map();
+  return owned.map(({ coords, properties: props }) => {
+    // coordinates and attributes distinguish records that share a source id
+    const group = JSON.stringify([
+      hasPlaceId(props.id) ? String(props.id) : null,
+      coords, ...ownershipProperties.slice(1).map((name) => props[name] ?? null)
+    ]);
+    const ordinal = occurrences.get(group) ?? 0;
+    occurrences.set(group, ordinal + 1);
+    return { id: `${group}:${ordinal}`, coords, props };
+  });
 }

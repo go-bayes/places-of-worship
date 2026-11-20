@@ -19,7 +19,9 @@ export async function buildRelief(
     const url = tileUrlTemplate.replaceAll("{z}", z).replaceAll("{x}", x).replaceAll("{y}", y);
     const response = await fetchResponse(url);
     if (response.status === 204) return null;
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    if (response.status !== 200 || response.headers.has("content-range")) {
+      throw new Error(`HTTP ${response.status}${response.status === 200 ? " with Content-Range" : ""}`);
+    }
     return response.arrayBuffer();
   };
   const { points, reconciliation } = await collectPlaces({ bbox, zoom, fetchTile, gunzip });

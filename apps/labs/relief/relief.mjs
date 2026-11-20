@@ -237,6 +237,11 @@ function startMap() {
     applyMode();
     if (state.result) drawResult();
   });
+  map.on("error", (event) => {
+    if (event.sourceId === "omt" || /maptiler/.test(String(event.error?.url || ""))) {
+      $("basemap-notice").hidden = false;
+    }
+  });
   map.on("click", onMapClick);
   for (const layer of ["segments", "diversity", "bands", "bands-diversity"]) {
     map.on("mouseenter", layer, () => { map.getCanvas().style.cursor = "pointer"; });
@@ -295,29 +300,43 @@ function drawStudyArea() {
 let worker = null;
 let requestId = 0;
 
+function stopWorker() {
+  worker?.terminate();
+  worker = null;
+}
+
 function compute() {
   const id = ++requestId;
-  if (worker) worker.terminate();
-  const bbox = studyArea(state.city, state.area);
-  const tiles = [...tilesCoveringBbox(bbox, 12)].length;
-  state.result = null;
-  state.unit = null;
+  stopWorker();
+  setStatus({ loading: "Reading tiles" });
   clearResult();
-  renderHeightNote();
-  setStatus({ loading: `Reading ${plural(tiles, "tile", "tiles")} for ${state.city.label}` });
-  worker = new Worker(new URL("./engine/relief-worker.js", import.meta.url), { type: "module" });
-  worker.addEventListener("message", ({ data }) => {
-    if (id !== requestId) return;
-    worker.terminate();
-    worker = null;
-    if (data.error) showFailure(data.error);
-    else showResult(data);
-  });
-  worker.addEventListener("error", (event) => {
-    if (id !== requestId) return;
-    showFailure(event.message || "the counting worker stopped");
-  });
-  worker.postMessage({ bbox, zoom: 12, cellMetres: state.cell, tileUrlTemplate: TILE_URL });
+  try {
+    const bbox = studyArea(state.city, state.area);
+    const tiles = [...tilesCoveringBbox(bbox, 12)].length;
+    setStatus({ loading: `Reading ${plural(tiles, "tile", "tiles")} for ${state.city.label}` });
+    worker = new Worker(new URL("./engine/relief-worker.js", import.meta.url), { type: "module" });
+    worker.addEventListener("message", ({ data }) => {
+      if (id !== requestId || !worker) return;
+      stopWorker();
+      try {
+        if (data.error) showFailure(data.error);
+        else showResult(data);
+      } catch {
+        showFailure("the counting worker returned an invalid result");
+      }
+    });
+    function onWorkerError(event) {
+      if (id !== requestId || !worker) return;
+      stopWorker();
+      showFailure(event.message || "the counting worker stopped");
+    }
+    worker.addEventListener("error", onWorkerError);
+    worker.addEventListener("messageerror", onWorkerError);
+    worker.postMessage({ bbox, zoom: 12, cellMetres: state.cell, tileUrlTemplate: TILE_URL });
+  } catch (error) {
+    stopWorker();
+    showFailure(error.message);
+  }
 }
 
 function setStatus({ loading = null, failure = null, line = null }) {
@@ -330,6 +349,7 @@ function setStatus({ loading = null, failure = null, line = null }) {
     fail.hidden = true;
   } else if (failure) {
     count.hidden = true;
+    count.textContent = "";
     fail.hidden = false;
     $("failure-text").textContent = failure;
   } else {
@@ -343,29 +363,31 @@ function showFailure(message) {
   const { tile, reason } = tileFailure(message);
   const where = tile ? `Tile ${tile} could not be read (${reason}).` : `The tiles could not be read (${reason}).`;
   setStatus({ failure: `${where} No totals are shown until every tile in the study area is read.` });
-  $("how-lines").replaceChildren();
-  renderLegendCounts(null);
-  renderTable();
+  clearResult();
 }
 
 function clearResult() {
+  state.result = null;
+  state.unit = null;
   state.cells = [];
   state.cellIndex = new Map();
+  state.returnFocus = null;
   deselect();
+  $("how-lines").replaceChildren();
+  renderLegendCounts(null);
+  renderTable();
+  renderHeightNote();
   if (!map || !map.getSource("columns")) return;
   for (const id of ["ground", "columns", "flat", "selected"]) map.getSource(id).setData(EMPTY);
 }
 
 function showResult(result) {
-  state.result = result;
   const footprints = result.cells.features.filter((f) => f.properties.kind === "footprint");
   // name cells by rank, most places first, so the table and the card agree
   const ranked = footprints
     .map((f) => ({ ...f.properties, ring: f.geometry.coordinates[0] }))
     .sort((a, b) => b.count - a.count || (a.cell_id < b.cell_id ? -1 : 1));
   ranked.forEach((c, i) => { c.label = `Cell ${i + 1}`; });
-  state.cells = ranked;
-  state.cellIndex = new Map(ranked.map((c) => [c.cell_id, c]));
   const segmentsByCell = new Map();
   for (const f of result.cells.features) {
     if (f.properties.kind !== "segment") continue;
@@ -377,9 +399,12 @@ function showResult(result) {
   if (sum !== result.totals.count) {
     // the engine already checks this; the page refuses to show a total
     // that its own cells do not add up to
-    showFailure(`cells sum to ${sum} but the total is ${result.totals.count}`);
+    showFailure("the cell counts do not match the total");
     return;
   }
+  state.result = result;
+  state.cells = ranked;
+  state.cellIndex = new Map(ranked.map((c) => [c.cell_id, c]));
   const maxCount = ranked.reduce((a, c) => Math.max(a, c.count), 0);
   state.unit = heightUnit(state.cell, maxCount);
   setStatus({ line: countLine(result.totals) });
@@ -613,7 +638,7 @@ function renderTable() {
       : "Reading the tiles for this study area.";
     return;
   }
-  $("table-caption").textContent = `${countLine(result.totals)} ${plural(state.cells.length, "occupied cell", "occupied cells")} of ${formatArea(state.cells[0] ? state.cells[0].area_km2 : 0)} km² each, in ${state.city.label}. Select a cell to show it on the map and read its details.`;
+  $("table-caption").textContent = `${countLine(result.totals)} ${plural(state.cells.length, "occupied cell", "occupied cells")} of ${formatArea(state.cells[0] ? state.cells[0].area_km2 : 0)} km² each, in ${state.city.label}. A cell on the study boundary reports density over its whole hexagon. Select a cell to show it on the map and read its details.`;
   const labels = new Map(state.cells.map((c) => [c.cell_id, c.label]));
   const rows = sortRows(tableRows(state.cells), state.sort.key, state.sort.direction);
   for (const r of rows) {
