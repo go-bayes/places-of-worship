@@ -45,6 +45,10 @@ export const NIGHT = {
   highlight: "#2d3566"
 };
 
+// over the whole globe by day the land takes a mid stone tone, so yellow
+// and orange lights keep their edge against it
+export const DAY_GLOBE = { land: "#bdb5a3", water: "#9db3bd" };
+
 export const LAMP_GOLD = "#ffc66b";
 export const INK = "#1d2233";
 export const VELLUM = "#f3efe4";

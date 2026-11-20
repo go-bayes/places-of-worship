@@ -38,8 +38,12 @@ const crownColor = [
   mix(TRADITIONS.find((t) => t.key === "other").color, "#fff4dc", 0.55)
 ];
 
-// how many places an overview light stands for, as a radius factor
-const weight = ["interpolate", ["linear"], ["coalesce", ["get", "n"], 1], 1, 1, 10, 1.45, 100, 2.1, 1000, 2.9, 4000, 3.4];
+// how many places an overview light stands for. a light for one place is
+// small and faint; lights for more grow and brighten, so a dense region
+// builds up brightness where its lights overlap instead of saturating
+const places = ["coalesce", ["get", "n"], 1];
+const weight = ["interpolate", ["linear"], places, 1, 0.7, 10, 1.2, 100, 1.9, 1000, 2.7, 4000, 3.2];
+export const presence = ["interpolate", ["linear"], places, 1, 0.38, 5, 0.55, 30, 0.78, 300, 0.95];
 
 export const SCALE = { regionFrom: 5.6, cityFrom: 11 };
 
@@ -86,6 +90,9 @@ export function buildStyle({ key, tones, nightData }) {
         id: "relief",
         type: "hillshade",
         source: "relief",
+        // from zoom 3: the relief tiles stop short of the poles, and over
+        // the whole globe the bare polar cap showed as a pale disc
+        minzoom: 3,
         maxzoom: 15,
         paint: {
           "hillshade-exaggeration": 0.32,
@@ -180,7 +187,7 @@ export function buildStyle({ key, tones, nightData }) {
           "circle-color": traditionColor(),
           "circle-blur": 1,
           "circle-radius": ["interpolate", ["linear"], ["zoom"], 0, ["*", 1.8, weight], 3, ["*", 2.6, weight], 6, ["*", 5, weight]],
-          "circle-opacity": 0.2,
+          "circle-opacity": ["*", 0.22, presence],
           "circle-pitch-alignment": "map"
         }
       },
@@ -192,11 +199,8 @@ export function buildStyle({ key, tones, nightData }) {
         maxzoom: 6.2,
         paint: {
           "circle-color": traditionColor(),
-          "circle-radius": ["interpolate", ["linear"], ["zoom"], 0, ["*", 0.55, weight], 3, ["*", 0.8, weight], 6, ["*", 1.6, weight]],
-          "circle-opacity": ["interpolate", ["linear"], ["zoom"], 5.6, 0.95, 6.2, 0],
-          "circle-stroke-width": 0.5,
-          "circle-stroke-color": "rgba(29, 34, 51, 0.35)",
-          "circle-stroke-opacity": ["interpolate", ["linear"], ["zoom"], 5.6, 1, 6.2, 0],
+          "circle-radius": ["interpolate", ["linear"], ["zoom"], 0, ["*", 0.75, weight], 3, ["*", 1.05, weight], 6, ["*", 1.9, weight]],
+          "circle-opacity": ["interpolate", ["linear"], ["zoom"], 5.6, presence, 6.2, 0],
           "circle-pitch-alignment": "map"
         }
       },

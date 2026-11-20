@@ -26,9 +26,18 @@
     <p id="scale-status" class="status" aria-live="polite"></p>
   </header>
 
-  <div id="fly" class="fly">
-    <button id="fly-toggle" class="button" type="button" aria-expanded="false" aria-controls="fly-list">Fly to</button>
-    <ul id="fly-list" class="fly-list panel" hidden></ul>
+  <div class="actions">
+    <div id="fly" class="fly">
+      <button id="fly-toggle" class="button" type="button" aria-expanded="false" aria-controls="fly-list">Fly to</button>
+      <ul id="fly-list" class="fly-list panel" hidden></ul>
+    </div>
+    <div id="inview" class="fly">
+      <button id="inview-toggle" class="button" type="button" aria-expanded="false" aria-controls="inview-panel">Places in view</button>
+      <div id="inview-panel" class="inview-panel panel" hidden>
+        <p id="inview-note" class="inview-note" tabindex="-1"></p>
+        <ul id="inview-list" class="inview-list"></ul>
+      </div>
+    </div>
   </div>
   </div>
 

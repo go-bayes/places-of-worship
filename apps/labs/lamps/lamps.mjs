@@ -19,6 +19,7 @@ import {
   KNOWN_TRADITIONS,
   DAY,
   NIGHT,
+  DAY_GLOBE,
   INK,
   VELLUM,
   PANEL_ALPHA,
@@ -29,8 +30,8 @@ import {
   panelTones,
   sceneTones
 } from "../shared/palette.mjs";
-import { buildStyle, PLACE_LAYERS, traditionFilter, pillarFilter, traditionColor, SCALE } from "./style.mjs";
-import { metresPerPixel, pillarRadius, pillarHeight, hexagon, dedupeById } from "./geometry.mjs";
+import { buildStyle, PLACE_LAYERS, traditionFilter, pillarFilter, traditionColor, presence, SCALE } from "./style.mjs";
+import { metresPerPixel, pillarRadius, pillarHeight, hexagon, dedupeById, PILLAR } from "./geometry.mjs";
 
 const MAIN_MAP = "../../global/";
 const REDUCED_MOTION = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -174,10 +175,12 @@ function startMap() {
     if (intro) playIntro(home.center);
   });
   map.on("move", scheduleScene);
+  map.on("zoom", scheduleReshape);
   map.on("moveend", () => {
     refreshClock();
     refreshSun();
     schedulePillars();
+    refreshPlacesList();
   });
   map.on("sourcedata", (e) => {
     if (e.sourceId === "places" && e.isSourceLoaded) schedulePillars();
@@ -297,6 +300,8 @@ function applyScene() {
   lastSceneKey = key;
 
   const base = sceneTones(tEff, 0);
+  base.land = mix(base.land, DAY_GLOBE.land, world);
+  base.water = mix(base.water, DAY_GLOBE.water, world);
   const sky = sceneTones(t, w);
   const set = (layer, prop, value) => {
     if (map.getLayer(layer)) map.setPaintProperty(layer, prop, value);
@@ -322,12 +327,13 @@ function applyScene() {
   // white so they read as light rather than paint
   const dark = 1 - tEff;
   const lift = Math.round(20 * (1 - t)) / 100;
+  // by day a glow only tints the ground, so it is held back
+  set("overview-glow", "circle-opacity", ["*", Number((0.22 * (0.35 + 0.65 * (1 - t))).toFixed(3)), presence]);
   if (lift !== state.lift) {
     state.lift = lift;
     set("overview-core", "circle-color", traditionColor(lift));
     set("places-core", "circle-color", traditionColor(lift));
   }
-  set("overview-glow", "circle-opacity", 0.32);
   set("places-glow", "circle-opacity", ["interpolate", ["linear"], ["zoom"], 12.6, 0.12 + 0.4 * dark, 13.6, 0]);
   set("pools", "circle-opacity", 0.22 + 0.5 * dark);
   set("places-core", "circle-stroke-color", `rgba(29, 34, 51, ${(0.4 * tEff).toFixed(3)})`);
@@ -339,7 +345,7 @@ function applyScene() {
     "sky-horizon-blend": 0.65,
     "horizon-fog-blend": 0.55,
     "fog-ground-blend": 0.8,
-    "atmosphere-blend": ["interpolate", ["linear"], ["zoom"], 0, 0.2, 5, 0.12, 8, 0]
+    "atmosphere-blend": ["interpolate", ["linear"], ["zoom"], 0, 0.14, 5, 0.1, 8, 0]
   });
   map.setLight(lightFor(sun, zoom, t));
 
@@ -647,6 +653,20 @@ function schedulePillars() {
 }
 
 let pillarKey = "";
+let pillarPlaces = [];
+let pillarRadiusInUse = 0;
+
+// pillar width is geometry, not paint, so it cannot follow a zoom
+// expression the way height does. instead the hexagons are redrawn as the
+// zoom changes, whenever the width they call for moves by a step of about
+// six per cent, which reads as a smooth easing rather than a jump
+const WIDTH_STEP = Math.log(1.06);
+function easedRadius(zoom, lat) {
+  const r = pillarRadius(zoom, lat);
+  const k = Math.round(Math.log(r / PILLAR.radius) / WIDTH_STEP);
+  return PILLAR.radius * Math.exp(k * WIDTH_STEP);
+}
+
 function buildPillars() {
   if (!map || !map.getSource("pillars")) return;
   const zoom = map.getZoom();
@@ -655,12 +675,12 @@ function buildPillars() {
     if (pillarKey !== "empty") {
       src.setData({ type: "FeatureCollection", features: [] });
       pillarKey = "empty";
+      pillarPlaces = [];
+      placesById = new Map();
+      refreshPlacesList();
     }
     return;
   }
-  const lat = map.getCenter().lat;
-  const z = Math.floor(zoom);
-  const radius = pillarRadius(z, lat);
   let feats = [];
   try {
     feats = map.querySourceFeatures("places", { sourceLayer: "places" });
@@ -668,25 +688,49 @@ function buildPillars() {
     feats = [];
   }
   const places = dedupeById(feats);
-  const key = `${z}:${places.length}:${places.length ? places[0].id : ""}`;
-  if (key === pillarKey) return;
+  const key = `${places.length}:${places.length ? places[0].id : ""}`;
+  if (key === pillarKey) {
+    reshapePillars();
+    return;
+  }
   pillarKey = key;
+  pillarPlaces = places;
+  placesById = new Map(places.map((p) => [p.id, p]));
+  pillarRadiusInUse = 0;
+  reshapePillars();
+  sizePillars(map.getCenter().lat);
+  if (state.pendingSelect && placesById.has(state.pendingSelect)) {
+    select(state.pendingSelect, false);
+    state.pendingSelect = null;
+  }
+  refreshPlacesList();
+}
+
+// redraw the hexagons at the width the current zoom calls for
+function reshapePillars() {
+  if (!pillarPlaces.length || map.getZoom() < SCALE.cityFrom + 0.5) return;
+  const radius = easedRadius(map.getZoom(), map.getCenter().lat);
+  if (radius === pillarRadiusInUse) return;
+  pillarRadiusInUse = radius;
   const features = [];
-  for (const p of places) {
+  for (const p of pillarPlaces) {
     const tradition = KNOWN_TRADITIONS.includes(p.props.religion) ? p.props.religion : "other";
     const props = { id: p.id, tradition };
     features.push({ type: "Feature", properties: props, geometry: { type: "Polygon", coordinates: [hexagon(p.coords, radius, Math.PI / 6)] } });
     features.push({ type: "Feature", properties: props, geometry: { type: "Point", coordinates: p.coords } });
   }
-  placesById = new Map(places.map((p) => [p.id, p]));
-  src.setData({ type: "FeatureCollection", features });
-  sizePillars(lat);
-  if (state.pendingSelect && placesById.has(state.pendingSelect)) {
-    select(state.pendingSelect, false);
-    state.pendingSelect = null;
-  } else if (state.selected && placesById.has(state.selected)) {
-    drawSelection(placesById.get(state.selected));
-  }
+  map.getSource("pillars").setData({ type: "FeatureCollection", features });
+  if (state.selected && placesById.has(state.selected)) drawSelection(placesById.get(state.selected));
+}
+
+let reshapeQueued = false;
+function scheduleReshape() {
+  if (reshapeQueued) return;
+  reshapeQueued = true;
+  setTimeout(() => {
+    reshapeQueued = false;
+    reshapePillars();
+  }, 80);
 }
 
 let placesById = new Map();
@@ -740,7 +784,7 @@ function placeName(props) {
 function drawSelection(place) {
   const lat = place.coords[1];
   const z = Math.floor(map.getZoom());
-  const r = pillarRadius(z, lat);
+  const r = pillarRadiusInUse || pillarRadius(z, lat);
   map.getSource("selection").setData({
     type: "FeatureCollection",
     features: [
@@ -779,22 +823,26 @@ function select(id, fromPointer) {
 
 function deselect() {
   state.selected = null;
+  if (!document.activeElement || !$("card").contains(document.activeElement)) state.returnFocus = null;
   if (map && map.getSource("selection")) map.getSource("selection").setData({ type: "FeatureCollection", features: [] });
   $("card").hidden = true;
   delete document.documentElement.dataset.card;
 }
 
-$("card-close").addEventListener("click", () => {
+// focus goes back where the visitor came from: the list, or the map
+function leaveCard() {
+  const back = state.returnFocus;
+  state.returnFocus = null;
   deselect();
-  map.getCanvas().focus();
-});
+  (back || map.getCanvas()).focus();
+}
+
+$("card-close").addEventListener("click", leaveCard);
 document.addEventListener("keydown", (e) => {
   if (e.key !== "Escape") return;
-  if (!$("card").hidden) {
-    deselect();
-    map.getCanvas().focus();
-  }
+  if (!$("card").hidden) leaveCard();
   closeFlyMenu(true);
+  closeInView(true);
 });
 
 // ---- tradition chips --------------------------------------------------------
@@ -818,6 +866,7 @@ function buildChips() {
       if (on) state.enabled.add(t.key); else state.enabled.delete(t.key);
       b.setAttribute("aria-pressed", on ? "true" : "false");
       applyFilter();
+      refreshPlacesList();
     });
     li.append(b);
     list.append(li);
@@ -852,6 +901,7 @@ function buildFlyMenu() {
   }
   $("fly-toggle").addEventListener("click", () => {
     const open = $("fly-toggle").getAttribute("aria-expanded") !== "true";
+    closeInView();
     $("fly-toggle").setAttribute("aria-expanded", open ? "true" : "false");
     list.hidden = !open;
     if (open) list.querySelector("button").focus();
@@ -868,6 +918,92 @@ function closeFlyMenu(returnFocus = false) {
   $("fly-list").hidden = true;
   if (returnFocus && inside) $("fly-toggle").focus();
 }
+
+// ---- places in view: the keyboard and screen-reader route to the pillars ----
+
+// a plain list of the places drawn as pillars in the view, nearest the
+// centre first. long lists are cut, and the note says so without a count
+const INVIEW_CAP = 40;
+
+function traditionKey(props) {
+  return KNOWN_TRADITIONS.includes(props.religion) ? props.religion : "other";
+}
+
+function refreshPlacesList() {
+  const panel = $("inview-panel");
+  if (!map || panel.hidden) return;
+  const list = $("inview-list");
+  const note = $("inview-note");
+  list.replaceChildren();
+  if (state.scale !== "city" || !pillarPlaces.length) {
+    note.textContent = state.scale === "city"
+      ? "No places are drawn in this view."
+      : "Zoom in to a city, where each place stands as a pillar, to list them here.";
+    return;
+  }
+  const bounds = map.getBounds();
+  const c = map.getCenter();
+  const centre = [c.lng, c.lat];
+  const shown = pillarPlaces
+    .filter((p) => bounds.contains(p.coords) && state.enabled.has(traditionKey(p.props)))
+    .map((p) => ({ p, d: distanceKm(centre, p.coords) }))
+    .sort((a, b) => a.d - b.d);
+  if (!shown.length) {
+    note.textContent = "No places are drawn in this view.";
+    return;
+  }
+  note.textContent = shown.length > INVIEW_CAP
+    ? "The places nearest the centre of the view. More are drawn than listed here; zoom in or move the map to list the others."
+    : "Every place drawn in this view, nearest the centre first.";
+  for (const { p } of shown.slice(0, INVIEW_CAP)) {
+    const key = traditionKey(p.props);
+    const li = document.createElement("li");
+    const b = document.createElement("button");
+    b.type = "button";
+    const sw = document.createElement("span");
+    sw.className = "swatch";
+    sw.style.setProperty("--swatch", COLORS[key]);
+    sw.setAttribute("aria-hidden", "true");
+    const name = document.createElement("span");
+    name.className = "inview-name";
+    name.dir = "auto";
+    name.textContent = placeName(p.props);
+    const trad = document.createElement("span");
+    trad.className = "inview-tradition";
+    trad.textContent = LABELS[key];
+    b.append(sw, name, trad);
+    b.addEventListener("click", () => {
+      closeInView();
+      state.returnFocus = $("inview-toggle");
+      select(p.id, false);
+    });
+    li.append(b);
+    list.append(li);
+  }
+}
+
+function closeInView(returnFocus = false) {
+  if ($("inview-toggle").getAttribute("aria-expanded") !== "true") return;
+  const inside = $("inview-panel").contains(document.activeElement);
+  $("inview-toggle").setAttribute("aria-expanded", "false");
+  $("inview-panel").hidden = true;
+  if (returnFocus && inside) $("inview-toggle").focus();
+}
+
+$("inview-toggle").addEventListener("click", () => {
+  const open = $("inview-toggle").getAttribute("aria-expanded") !== "true";
+  closeFlyMenu();
+  $("inview-toggle").setAttribute("aria-expanded", open ? "true" : "false");
+  $("inview-panel").hidden = !open;
+  if (open) {
+    refreshPlacesList();
+    const first = $("inview-list").querySelector("button");
+    (first || $("inview-note")).focus?.();
+  }
+});
+document.addEventListener("click", (e) => {
+  if (!$("inview").contains(e.target)) closeInView();
+});
 
 // ---- about (the caption on a phone) ----------------------------------------
 
