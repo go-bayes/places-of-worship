@@ -7,8 +7,9 @@ import * as palette from "../shared/palette.mjs";
 import * as style from "./style.mjs";
 import * as sun from "../shared/sun.mjs";
 import { hasPlaceId } from "../shared/tile-ownership.mjs";
+import * as maplibre from "../vendor/maplibre-gl@6.19.0/maplibre-gl.mjs";
 
-async function lampsPage() {
+async function lampsPage({ addProtocol = () => {}, fetch } = {}) {
   const elements = new Map();
   const document = {
     documentElement: { dataset: {} }, body: {}, addEventListener() {},
@@ -52,7 +53,12 @@ async function lampsPage() {
     {
       ...geometry, ...palette, ...style, ...sun, hasPlaceId, document, URLSearchParams, setInterval() {},
       window: { matchMedia: () => ({ matches: false }) }, location: { search: "", hash: "" },
-      maplibregl: { Map: function () { return map; }, NavigationControl: class {} }
+      fetch,
+      maplibregl: {
+        Map: function (options) { map.options = options; return map; },
+        NavigationControl: class {},
+        addProtocol
+      }
     }
   );
   page.setMap(map);
@@ -187,6 +193,24 @@ test("a different occurrence with the same source ID cannot inherit the selectio
   assert.equal(state.selected, null);
 });
 
+test("an open card closes when a distant sole match replaces the selected occurrence", async () => {
+  const { map, state, startMap, buildPillars, get } = await lampsPage();
+  startMap();
+  const original = point("shared");
+  original.properties.name = "Chapel A";
+  map.features = [original];
+  buildPillars();
+  openFirstPillar(map);
+  assert.equal(get("card").hidden, false);
+
+  const replacement = point("shared", 2);
+  replacement.properties.name = "Chapel B";
+  map.features = [replacement];
+  buildPillars();
+  assert.equal(state.selected, null);
+  assert.equal(get("card").hidden, true);
+});
+
 test("an open card follows a unique source ID across tile precision changes", async () => {
   const { map, state, startMap, buildPillars, get } = await lampsPage();
   startMap();
@@ -194,7 +218,7 @@ test("an open card follows a unique source ID across tile precision changes", as
   buildPillars();
   openFirstPillar(map);
   assert.equal(get("card").hidden, false);
-  const finer = point(0, 1.00012);
+  const finer = point(0, 1.00001);
   finer.tile = { z: 14, x: 8200, y: 8144 };
   map.zoom = 14;
   map.features = [finer];
@@ -202,7 +226,48 @@ test("an open card follows a unique source ID across tile precision changes", as
   assert.equal(get("card").hidden, false);
   assert.equal(state.selected, map.data.pillars.features[0].properties.id);
   assert.deepEqual(map.data.selection.features[1].geometry.coordinates, finer.geometry.coordinates);
-  assert.match(get("card-main").href, /\/1\.00012$/);
+  assert.match(get("card-main").href, /\/1\.00001$/);
+});
+
+test("the Lamps places protocol reports 404 and preserves empty and populated tiles", async (t) => {
+  const controller = new AbortController();
+  const bytes = new Uint8Array([26, 0]);
+  let status = 404;
+  const { map, startMap } = await lampsPage({
+    addProtocol: (scheme, handler) => {
+      maplibre.addProtocol(scheme, handler);
+      t.after(() => maplibre.removeProtocol(scheme));
+    },
+    fetch: async (url, options) => {
+      assert.match(url, /^https:\/\/tiles\.placemap\.org\/places-(overview-)?v2-20260722-grid\/0\/0\/0$/);
+      assert.equal(options.signal, controller.signal);
+      return new Response(status === 200 ? bytes : null, { status, headers: { "Cache-Control": "max-age=60" } });
+    }
+  });
+  startMap();
+  const { sources } = map.options.style;
+  const customSources = Object.entries(sources)
+    .filter(([, source]) => source.tiles?.some((url) => url.startsWith("places-tile://")))
+    .map(([id]) => id);
+  assert.deepEqual(customSources, ["overview", "places"]);
+  // use the vendored handler that dispatches protocol requests from workers
+  const request = maplibre.getGlobalDispatcher().messageHandlers.GR;
+  for (const id of customSources) {
+    const url = sources[id].tiles[0].replace("{z}/{x}/{y}", "0/0/0");
+    const loadTile = () => request(null, { url, type: "arrayBuffer" }, controller);
+    status = 404;
+    await assert.rejects(loadTile, (error) => {
+      assert.match(error.message, /Places archive not found \(HTTP 404\)/);
+      assert.notEqual(error.status, 404);
+      return true;
+    });
+    status = 204;
+    assert.equal((await loadTile()).data.byteLength, 0);
+    status = 200;
+    const result = await loadTile();
+    assert.deepEqual(new Uint8Array(result.data), bytes);
+    assert.equal(result.cacheControl, "max-age=60");
+  }
 });
 
 test("an open card refreshes a revised start date without moving focus", async () => {

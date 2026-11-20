@@ -31,8 +31,8 @@ import {
   panelTones,
   sceneTones
 } from "../shared/palette.mjs";
-import { buildStyle, PLACE_LAYERS, traditionFilter, pillarFilter, traditionColor, presence, SCALE } from "./style.mjs";
-import { metresPerPixel, pillarRadius, pillarHeight, hexagon, placesInTiles, PILLAR } from "./geometry.mjs";
+import { buildStyle, PLACES_TILE_PROTOCOL, PLACE_LAYERS, traditionFilter, pillarFilter, traditionColor, presence, SCALE } from "./style.mjs";
+import { metresPerPixel, pillarRadius, pillarHeight, hexagon, placesInTiles, tileMatchDistance, PILLAR } from "./geometry.mjs";
 import { CITIES } from "../shared/cities.mjs";
 import { hasPlaceId } from "../shared/tile-ownership.mjs";
 
@@ -124,12 +124,34 @@ function globeZoom() {
   return PHONE.matches ? 1.05 : 1.85;
 }
 
+async function loadPlacesTile(request, controller) {
+  const url = request.url.replace(`${PLACES_TILE_PROTOCOL}://`, "https://");
+  const response = await fetch(url, {
+    signal: controller.signal,
+    headers: request.headers,
+    credentials: request.credentials,
+    cache: request.cache,
+    referrerPolicy: request.referrerPolicy
+  });
+  // the tile service uses 204 for empty tiles and 404 for a missing archive.
+  // MapLibre 6.19 consumes errors with status 404 as empty vector tiles.
+  if (response.status === 404) throw new Error(`Places archive not found (HTTP 404): ${url}`);
+  if (!response.ok) throw new Error(`Places tile request failed (HTTP ${response.status}): ${url}`);
+  return {
+    data: await response.arrayBuffer(),
+    cacheControl: response.headers.get("Cache-Control"),
+    expires: response.headers.get("Expires"),
+    etag: response.headers.get("ETag")
+  };
+}
+
 function startMap() {
   const home = homeCamera();
   const hasHash = /(^|&|#)map=/.test(location.hash);
   const intro = !hasHash && !REDUCED_MOTION.matches;
   const startCenter = intro ? [home.center[0] - 95, home.center[1] * 0.4] : home.center;
 
+  maplibregl.addProtocol(PLACES_TILE_PROTOCOL, loadPlacesTile);
   map = new maplibregl.Map({
     container: "map",
     style: buildStyle({ key: KEY, tones: initialTones(), nightData: nightData() }),
@@ -685,8 +707,8 @@ function buildPillars() {
     feats = map.querySourceFeatures("places", { sourceLayer: "places" });
   }
   const places = placesInTiles(feats);
-  const key = JSON.stringify(places.map(({ id, coords, props }) =>
-    [id, coords, props.religion, props.denomination, props.start_date, placeName(props)]));
+  const key = JSON.stringify(places.map(({ id, coords, props, gridStep }) =>
+    [id, coords, gridStep, props.religion, props.denomination, props.start_date, placeName(props)]));
   if (key === pillarKey) {
     reshapePillars();
     return;
@@ -812,13 +834,13 @@ function drawSelection(place) {
 function followSourceId(previous, previousPlaces, places) {
   const sourceId = previous?.props.id;
   if (!hasPlaceId(sourceId)) return;
-  // decoded coordinates can move with tile precision. a shared source ID
-  // is safe to follow only if it names a single occurrence in both sets.
+  // decoded coordinates can move with tile precision. follow a unique source
+  // ID in both sets when the positions agree within their quantisation.
   const id = String(sourceId);
   const sameSource = ({ props }) => props.id != null && String(props.id) === id;
   if (previousPlaces.filter(sameSource).length !== 1) return;
   const matches = places.filter(sameSource);
-  return matches.length === 1 ? matches[0] : undefined;
+  if (matches.length === 1 && Number.isFinite(tileMatchDistance(previous, matches[0]))) return matches[0];
 }
 
 function select(id, fromPointer) {

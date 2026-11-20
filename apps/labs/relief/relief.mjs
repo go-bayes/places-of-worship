@@ -249,6 +249,14 @@ function startMap() {
     if (tiles?.getIds().some((key) => tiles.getTileByID(key)?.state === "errored")) return;
     notice.hidden = true;
   });
+  map.on("idle", () => {
+    const notice = $("basemap-notice");
+    if (notice.hidden) return;
+    // cached tiles can return to view without a new sourcedata event
+    const tiles = map.style?.tileManagers?.omt;
+    const ids = tiles?.getIds();
+    if (ids?.length && ids.every((id) => tiles.getTileByID(id)?.state === "loaded")) notice.hidden = true;
+  });
   map.on("click", onMapClick);
   for (const layer of ["segments", "diversity", "bands", "bands-diversity"]) {
     map.on("mouseenter", layer, () => { map.getCanvas().style.cursor = "pointer"; });

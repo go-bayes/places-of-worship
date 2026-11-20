@@ -28,10 +28,13 @@ test("a hexagon has six corners at the radius", () => {
 });
 
 function tilePoint(tile, x, y, properties) {
+  const scale = 2 ** tile.z;
+  const lng = (tile.x + x / 4096) / scale * 360 - 180;
+  const lat = Math.atan(Math.sinh(Math.PI * (1 - 2 * (tile.y + y / 4096) / scale))) * 180 / Math.PI;
   return {
     tile, properties,
     _vectorTileFeature: { extent: 4096, loadGeometry: () => [[{ x, y }]] },
-    geometry: { type: "Point", coordinates: [(tile.x + x / 4096) / 2 ** tile.z * 360 - 180, 1] }
+    geometry: { type: "Point", coordinates: [lng, lat] }
   };
 }
 
@@ -63,4 +66,15 @@ test("a retained child edge replaces only matching parent occurrences", () => {
   assert.deepEqual(places.map(({ props }) => props.id).sort(), ["edge", "other"]);
   assert.equal(places.find(({ props }) => props.id === "edge").props.start_date, "1952");
   assert.equal(placesInTiles([parentCopy, parentCopy, childCopy]).length, 2);
+});
+
+test("a child edge one tile unit away replaces its parent while the owning child loads", () => {
+  const parent = { z: 12, x: 4036, y: 2564 };
+  const west = { z: 13, x: 8072, y: 5128 };
+  const parentCopy = tilePoint(parent, 2048, 1024, { id: "shared", name: "Chapel A" });
+  const childCopy = tilePoint(west, 4096, 2049, { id: "shared", name: "Chapel A" });
+  const other = tilePoint(parent, 2072, 1024, { id: "shared", name: "Chapel B" });
+  const places = placesInTiles([other, parentCopy, childCopy]);
+  assert.deepEqual(places.map(({ props }) => props.name), ["Chapel A", "Chapel B"]);
+  assert.deepEqual(places[0].coords, childCopy.geometry.coordinates);
 });

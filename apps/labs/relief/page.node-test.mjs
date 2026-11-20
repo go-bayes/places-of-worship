@@ -118,3 +118,23 @@ test("the Relief basemap warning clears on successful basemap recovery", async (
   map.handlers.sourcedata?.({ sourceId: "omt", tile: failedTile });
   assert.equal(notice.hidden, true);
 });
+
+test("Relief clears the basemap warning when an idle pan returns to loaded cached tiles", async () => {
+  const { map, startMap, get } = await reliefPage();
+  const notice = get("basemap-notice");
+  notice.hidden = true;
+  const cached = { state: "loaded" };
+  const failed = { state: "errored" };
+  let visible = { failed, cached };
+  map.style = { tileManagers: { omt: { getIds: () => Object.keys(visible), getTileByID: (id) => visible[id] } } };
+  startMap();
+  map.handlers.error({ sourceId: "omt", tile: failed, error: { status: 503 } });
+  for (const tiles of [visible, {}, { cached, pending: { state: "loading" } }]) {
+    visible = tiles;
+    map.handlers.idle?.();
+    assert.equal(notice.hidden, false);
+  }
+  visible = { cached };
+  map.handlers.idle?.();
+  assert.equal(notice.hidden, true);
+});

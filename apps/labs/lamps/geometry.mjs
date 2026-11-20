@@ -13,6 +13,25 @@ export function metresPerPixel(zoom, lat) {
   return (EQUATOR_METRES_PER_PIXEL_Z0 * Math.cos((lat * Math.PI) / 180)) / 2 ** zoom;
 }
 
+function mercatorY(lat) {
+  return Math.asinh(Math.tan(lat * Math.PI / 180)) / (2 * Math.PI);
+}
+
+export function tileMatchDistance(a, b) {
+  const [lngA, latA] = a.coords;
+  const [lngB, latB] = b.coords;
+  const dx = ((lngB - lngA + 540) % 360 - 180) / 360;
+  const dy = mercatorY(latB) - mercatorY(latA);
+  const metresPerWorld = 512 * metresPerPixel(0, (latA + latB) / 2);
+  // each grid step spans one tile width / extent at the place's latitude.
+  // allow one step on each axis of the coarser grid (its cell diagonal) to
+  // cover quantisation between zooms 8 and 18, about 41 m at z8 in Wellington
+  // for extent 4096, and half as much for each additional zoom level.
+  const bound = Math.SQRT2 * Math.max(a.gridStep, b.gridStep);
+  const distance = Math.hypot(dx, dy);
+  return distance <= bound + Number.EPSILON ? distance * metresPerWorld : Infinity;
+}
+
 // the symbolic pillar: 14 m across and 60 m tall where that reads on screen.
 // further out both grow so a pillar keeps at least `minWidthPx` of width and
 // `minHeightPx` of height; they reach their true size near zoom 15
@@ -46,37 +65,47 @@ function worldPointKey({ tile, localX, localY, extent, properties }) {
   return JSON.stringify([x, y, ...ownershipProperties.map((name) => properties[name] ?? null)]);
 }
 
+function edgeMatchKey(point) {
+  const id = point.properties.id;
+  return hasPlaceId(id) ? `id:${id}` : worldPointKey(point);
+}
+
 function replaceParentEdgeCopies(points) {
-  const edgeCounts = new Map();
+  const edges = new Map();
   for (const point of points) {
     if (point.localX !== point.extent && point.localY !== point.extent) continue;
-    const key = worldPointKey(point);
-    if (!edgeCounts.has(key)) edgeCounts.set(key, new Map());
-    const byZoom = edgeCounts.get(key);
-    const { z } = point.tile;
-    byZoom.set(z, (byZoom.get(z) ?? 0) + 1);
+    const key = edgeMatchKey(point);
+    if (!edges.has(key)) edges.set(key, []);
+    edges.get(key).push(point);
   }
-  if (!edgeCounts.size) return points;
+  if (!edges.size) return points;
 
-  // a child can supply a copy from its far edge before the owning child
-  // loads. use the largest finer count so copies across zooms count once.
-  const parentCounts = new Map();
-  return points.filter((point) => {
-    const key = worldPointKey(point);
-    const byZoom = edgeCounts.get(key);
-    if (!byZoom) return true;
-    const { z } = point.tile;
-    let finer = 0;
-    for (const [zoom, count] of byZoom) {
-      if (zoom > z) finer = Math.max(finer, count);
+  const matches = [];
+  for (const parent of points) {
+    const children = edges.get(edgeMatchKey(parent));
+    if (!children) continue;
+    const keyed = hasPlaceId(parent.properties.id);
+    for (const child of children) {
+      if (child.tile.z <= parent.tile.z) continue;
+      const distance = keyed ? tileMatchDistance(parent, child) : 0;
+      if (Number.isFinite(distance)) matches.push({ parent, child, distance });
     }
-    if (!finer) return true;
+  }
 
-    const parentKey = `${z}:${key}`;
-    const count = (parentCounts.get(parentKey) ?? 0) + 1;
-    parentCounts.set(parentKey, count);
-    return count > finer;
-  });
+  // use the finest surviving edges first, with one match per parent zoom
+  // for each edge so extra occurrences at the same zoom remain visible.
+  matches.sort((a, b) => b.child.tile.z - a.child.tile.z || a.distance - b.distance);
+  const replaced = new Set();
+  const matchedZooms = new Map();
+  for (const { parent, child } of matches) {
+    if (replaced.has(parent) || replaced.has(child)) continue;
+    if (!matchedZooms.has(child)) matchedZooms.set(child, new Set());
+    const zooms = matchedZooms.get(child);
+    if (zooms.has(parent.tile.z)) continue;
+    zooms.add(parent.tile.z);
+    replaced.add(parent);
+  }
+  return points.filter((point) => !replaced.has(point));
 }
 
 // MapLibre 6.19 source-query features retain their canonical tile and raw
@@ -93,8 +122,9 @@ export function placesInTiles(features) {
     const { geometry } = feature;
     if (geometry.type !== "Point" && geometry.type !== "MultiPoint") continue;
     const coords = geometry.type === "MultiPoint" ? geometry.coordinates : [geometry.coordinates];
+    const gridStep = 1 / (raw.extent * 2 ** tile.z);
     raw.loadGeometry().forEach(([{ x, y }], i) => {
-      points.push({ tile, localX: x, localY: y, extent: raw.extent, coords: coords[i], properties });
+      points.push({ tile, localX: x, localY: y, extent: raw.extent, coords: coords[i], properties, gridStep });
     });
   }
   // during a tile transition, use finer tiles where they cover a point
@@ -111,7 +141,7 @@ export function placesInTiles(features) {
   const distinct = zooms.size > 1 ? replaceParentEdgeCopies(owned) : owned;
   distinct.sort((a, b) => a.coords[0] - b.coords[0] || a.coords[1] - b.coords[1]);
   const occurrences = new Map();
-  return distinct.map(({ coords, properties: props }) => {
+  return distinct.map(({ coords, properties: props, gridStep }) => {
     // coordinates and attributes distinguish records that share a source id
     const group = JSON.stringify([
       hasPlaceId(props.id) ? String(props.id) : null,
@@ -119,6 +149,6 @@ export function placesInTiles(features) {
     ]);
     const ordinal = occurrences.get(group) ?? 0;
     occurrences.set(group, ordinal + 1);
-    return { id: `${group}:${ordinal}`, coords, props };
+    return { id: `${group}:${ordinal}`, coords, props, gridStep };
   });
 }
