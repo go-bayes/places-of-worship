@@ -294,43 +294,54 @@ assert.equal(feature.properties.country_code, "NZ");
         assert.equal(both[1].fillColor, "#f59e0b");
         assert.equal(typeof mod.styleFor(zoomed), "object", "no test, no edge");
     }
-    // both tiers stay attached while the points show; leaflet's redraw()
-    // fetches tiles at the map's zoom without checking the layer's range,
-    // as these fakes do, so the redraw must pick the tier in range: at zoom
-    // 5 only the overview fetches, at zoom 16 only the places tier
+    // both tiers stay attached while the points show. model leaflet's
+    // redraw() using the map zoom and _setView() rounding and checking the range.
     for (const countryCode of ["nz", ""]) {
         const requests = [];
         let zoom = 5;
+        const map = { hasLayer: layer => layer._map === map, getZoom: () => zoom, getCenter: () => [0, 0] };
         const tileL = {
             vectorGrid: {
                 protobuf(url, options) {
-                    const tier = { url, options, redraw() { requests.push([tier.name, zoom]); } };
-                    return tier;
+                    const request = tileZoom => {
+                        const nativeZoom = Math.min(tileZoom, options.maxNativeZoom);
+                        requests.push(url.replace("{z}/{x}/{y}", `${nativeZoom}/0/0`));
+                    };
+                    return {
+                        url, options, _map: map,
+                        redraw() { request(zoom); },
+                        _removeAllTiles() {},
+                        _setView(_centre, mapZoom) {
+                            const tileZoom = Math.round(mapZoom);
+                            const { minZoom = -Infinity, maxZoom = Infinity } = options;
+                            if (tileZoom >= minZoom && tileZoom <= maxZoom) request(tileZoom);
+                        },
+                    };
                 },
             },
         };
         const both = mod.createLayers(tileL, { countryCode, edged: () => true });
-        both.overview.name = "overview";
-        both.places.name = "places";
-        const map = { hasLayer: () => true, getZoom: () => zoom };
+        const tileAt = (layer, z) => layer.url.replace("{z}/{x}/{y}", `${z}/0/0`);
         mod.redraw(map, both);
-        assert.deepEqual(requests, [["overview", 5]], `${countryCode || "world"}: at zoom 5 only the overview fetches`);
+        assert.deepEqual(requests, [tileAt(both.overview, 5)], `${countryCode || "world"}: at zoom 5 only the overview fetches`);
         requests.length = 0;
         zoom = 16;
         mod.redraw(map, both);
-        assert.deepEqual(requests, [["places", 16]], `${countryCode || "world"}: at zoom 16 only the places tier fetches`);
+        assert.deepEqual(requests, [tileAt(both.places, 16)], `${countryCode || "world"}: at zoom 16 only the places tier fetches`);
         requests.length = 0;
         // the hand-off zooms: the last overview zoom and the first places zoom
-        zoom = mod.placesMinZoom(countryCode) - 1;
+        zoom = 7;
         mod.redraw(map, both);
-        assert.deepEqual(requests, [["overview", zoom]]);
+        assert.deepEqual(requests, [tileAt(both.overview, countryCode ? 7 : 5)]);
         requests.length = 0;
-        zoom = mod.placesMinZoom(countryCode) - 0.4;
+        zoom = 7.6;
         mod.redraw(map, both);
-        assert.deepEqual(requests, [["places", zoom]], "tile zoom is the rounded map zoom");
+        assert.deepEqual(requests, [tileAt(both.places, 8)], "at zoom 7.6 only the /8/ places tile is requested");
         requests.length = 0;
         // a tier off the map is not redrawn
-        mod.redraw({ hasLayer: (l) => l === both.overview, getZoom: () => 16 }, both);
+        zoom = 16;
+        both.places._map = null;
+        mod.redraw(map, both);
         assert.deepEqual(requests, []);
     }
 }

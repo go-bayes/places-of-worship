@@ -317,10 +317,10 @@ Contrast (WCAG relative luminance) on the pairs the pages actually draw; the Dar
 | `--absent` on `--panel` | 10.3:1 | 9.1:1 |
 | `--ink` on `--bg` | 15.2:1 | 15.4:1 |
 | `--marker-edge` on the light Streets land (`#f2efe9`), the marks' outer edge as specified (proposed 2026-11-20) | 14.3:1 | not drawn |
-| The edge as rendered on the DOM markers (validated, validated absent, open case, disputed, in review, nomination), at 1x; at 2x | 6.6:1 to 11.9:1; 14.3:1 | not drawn |
+| The edge as rendered on the DOM markers (validated, validated absent, open case, disputed, in review, nomination) | 6.6:1 to 13.01:1 at 1x, 12.51:1 to 14.3:1 at 2x | not drawn |
 | The dropped pin's edge as rendered, at 1x; at 2x | 6.8:1 to 12.2:1; 14.3:1 | not drawn |
-| The places-tier dots' edge as rendered (zoom 8 and above), median and tenth percentile, at 1x; at 2x | 14.0:1 to 14.3:1 and 7.6:1 to 9.6:1; 8.8:1 to 8.9:1 and 6.0:1 to 6.1:1 | not drawn |
-| The overview dots' edge as rendered (below zoom 8), median and tenth percentile, at 1x; at 2x | 14.3:1 and 11.3:1; 9.6:1 and 7.4:1 | not drawn |
+| The places-tier dots' edge as rendered (from zoom 8 in New Zealand and from zoom 6 in Germany, Italy and the United States), median and tenth percentile, at 1x; at 2x | 14.0:1 to 14.3:1 and 7.6:1 to 9.6:1; 8.8:1 to 8.9:1 and 6.0:1 to 6.1:1 | not drawn |
+| The overview dots' edge as rendered (below zoom 8 in New Zealand and below zoom 6 in Germany, Italy and the United States), median and tenth percentile, at 1x; at 2x | 14.3:1 and 11.3:1; 9.6:1 and 7.4:1 | not drawn |
 | `--marker-edge` on the light legend (`--veil` over the map, near `#ffffff`) | 16.5:1 | not drawn |
 | Rings and fills against `--marker-edge`, the weakest pairs: `--marker-disputed`, `--marker-uncertain`, the validated blue `#7fb3e6`, the open-case amber | 3.2:1, 3.7:1, 7.4:1, 7.7:1 | as Light |
 

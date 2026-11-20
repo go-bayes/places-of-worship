@@ -67,7 +67,7 @@ assert.doesNotMatch(unvalidated, /overviewKeep/);
 const stamps = {
     "region-map.js": "20261103e", // census panel opens folded on every screen
     "datamaps-switcher.js": "20261013a", // switcher rows prerender; warming waits for activation
-    "unvalidated-places.js": "20261120b", // the edge redraw keeps to the tier in range
+    "unvalidated-places.js": "20261120c", // the edge redraw resets the grid at the rounded zoom
     "verification-map.js": "20261120c", // one rebuild of the fallback dots on a basemap switch
     "occupancy-contract.js": "20261019a", // relocation rules follow definition 0.1.6
     "occupancy-review.js": "20261019a", // move wording and successor in the reviewer's period summary
