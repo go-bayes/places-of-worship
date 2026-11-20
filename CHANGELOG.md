@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### 2026-11-20 (maintenance documents corrected)
+
+- Documented GitHub Pages as the production host for `religionmap.org` and Cloudflare Pages as the host for the project and preview addresses. The custom-domain cutover to Cloudflare Pages remains planned.
+- Corrected the schema inventory to identify which area-summary schemas use the source dataset and visual layer schemas. Labelled the August repository stocktake's proposed deletions as historical.
+- Updated the notes on submission receipts and evidence versions to record that PR #153 closed unmerged. The original plan relied on the pull request for the client switch and end-to-end verification of provider linking.
+
 ### 2026-11-16 (review rulings carried into the standing documents)
 
 - `docs/ai-assisted-research.md`, `docs/portal-claude-batch-review.md`, the "How human review decides" section of `docs/confidence-standard.md`, `docs/development/human-review-and-release.md` and the agent-assisted lane of `docs/portal-free-contribution-design.md` now state JB's review rulings of 2026-11-16 as recorded in the publication pipeline brief: an agent may author the ordinary draft through a deterministic conversion, the named reviewer may be an agent from another provider, free text is withheld from public outputs unless chosen and cleared by a person, batch release by the lead replaces per-item acceptance once it passes its tests, and a named person authorises every release. Each passage keeps the ruling apart from current behaviour, which is still per-item human preparation, review and PI acceptance until that pipeline work is built.

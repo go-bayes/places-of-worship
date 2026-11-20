@@ -1,10 +1,12 @@
 # Cloudflare Pages hosting
 
-Status: repository side only. The hosting move follows the maintainer's decision of 2026-10-13. The dashboard steps below are the maintainer's. Statements marked "to confirm on the first deploy" are expectations that Cloudflare's header documentation does not support; the checks at the end settle them.
+As of 2026-11-20, the Cloudflare Pages project serves `places-of-worship.pages.dev` and its previews, where `_headers` takes effect (a vendor file returned a single `Cache-Control: public, max-age=31536000, immutable` header), and the custom-domain cutover is pending.
+
+The hosting move follows the maintainer's decision of 2026-10-13. The dashboard steps below are the maintainer's. Statements marked "to confirm on the first deploy" are expectations that Cloudflare's header documentation does not support; the checks at the end settle them.
 
 ## Direction
 
-religionmap.org is served from GitHub Pages (`main`, directory `/`). The move serves the same repository root from Cloudflare Pages, with no build step. DNS is already on Cloudflare. GitHub Pages stamps every asset with one deploy-wide ETag and `max-age=600`, so a returning visitor's cache seldom survives a working session. Expected, to confirm on the first deploy: Cloudflare Pages ETags are content hashes, so a file left unchanged by a deploy revalidates with 304, and the platform serves Brotli and HTTP/3.
+religionmap.org is served from GitHub Pages (`main`, directory `/`). The move serves the same repository root from Cloudflare Pages, with no build step. DNS is already on Cloudflare. On 2026-11-20, GitHub Pages responses included `max-age=600`, and four responses had distinct ETags sharing a prefix. Check whether GitHub Pages ETags for unchanged files stay the same across deploys. Expected, to confirm on the first deploy: Cloudflare Pages ETags are content hashes, so a file left unchanged by a deploy revalidates with 304, and the platform serves Brotli and HTTP/3.
 
 ## Header policy
 
@@ -28,11 +30,11 @@ The `CNAME` file in the root is a GitHub Pages convention. Cloudflare Pages is e
 
 ## Rollback
 
-Restore the four GitHub Pages A records (`185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`) and the `www` CNAME to `go-bayes.github.io`.
+Restore the four GitHub Pages A records (`185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`) and the `www` CNAME to `go-bayes.github.io`. The apex also has four GitHub Pages AAAA records. Restore any of those records changed at cutover.
 
 ## Preview origins
 
-The tile Worker, the basemap referrer lock and the sign-in origins are configured for the unchanged production origin. A `pages.dev` preview origin is not among them, so previews show the basemap without place dots until the Worker, the referrer lock and the sign-in origins add that origin.
+The tile Worker, the basemap referrer lock and the sign-in origins are configured for the unchanged production origin. The tile Worker's `originAllowed` accepts `https://places-of-worship.pages.dev` and HTTPS origins on its single-label preview subdomains. On 2026-11-20, a preview showed place dots. Check the basemap provider's referrer lock and the sign-in provider's allowed origins separately on a preview.
 
 ## Checks after cutover
 

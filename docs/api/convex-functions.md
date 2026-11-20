@@ -107,7 +107,7 @@ change.
 
 ## `submissionReceipts.ts`
 
-The additive `submission-request.v1` API implements JB's R-I1–R-I4(a) rulings of 2026-10-02. The endpoints are implemented in source and verified against an anonymous local backend. Hosted deployment requires a separate instruction; the client switch follows PR #153. Existing mutation validators and return shapes remain unchanged. The [evidence-version notes](../development/evidence-versions.md#atomic-client-submission-receipts) describe request descriptors and local reproduction.
+The additive `submission-request.v1` API implements JB's R-I1–R-I4(a) rulings of 2026-10-02. The endpoints are implemented in source and verified against an anonymous local backend. Hosted deployment requires a separate instruction. The portal client still calls the unversioned mutations. PR #153, after which the client switch was planned, closed on 2026-11-16. Existing mutation validators and return shapes remain unchanged. The [evidence-version notes](../development/evidence-versions.md#atomic-client-submission-receipts) describe request descriptors and local reproduction.
 
 | Function | Kind | Roles | Result and workflow position |
 | --- | --- | --- | --- |

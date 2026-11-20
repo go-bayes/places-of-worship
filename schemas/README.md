@@ -64,11 +64,9 @@ JSON Schemas that define the core data structures used across the project.
 - `indicator.schema.json`: preserved legacy indicator contract with an open unit string, used by the base area-summary schema.
 - `indicator.v2.schema.json`: versioned successor with a closed measurement-unit enum and optional construct, variable-kind, and native-period metadata. The area-summary.v2 schema explicitly references this version.
 - site.schema.json: place-of-worship site record.
-- source-dataset.schema.json: provenance for source datasets (aspirational:
-  no consumer yet; manifests carry provenance under data-manifest.v2).
+- `source-dataset.schema.json`: source dataset metadata referenced by the base area-summary schema. The area-summary.v2 schema defines its own variant, which accepts a date or a date-time for `retrieval_date`.
 - structure.schema.json: physical structure details.
-- visual-layer.schema.json: map and portal layer metadata (aspirational: no
-  consumer yet).
+- `visual-layer.schema.json`: map and portal layer metadata referenced by both the base and v2 area-summary schemas.
 
 Keep these schemas versioned and update them before changing any dataset shape
 that depends on them. Schemas marked aspirational (audit of 2026-08-25) have no
