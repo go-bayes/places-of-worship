@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### 2026-11-20 (country overview footer and the Germany map)
+
+- Country overviews no longer show the "Country card on GitHub" footer link. The link pointed at `research/countries/`, which moved to the private research tier in July, so it returned a 404 on all 102 overviews. The hub and global-map links are unchanged.
+- The Germany map no longer offers "Points: period". Its configuration declared a dated-places file that was never shipped, so the option failed silently. A new test, `apps/regions/_shared/country-data-paths.test.cjs`, fails when any country configuration declares a local data file that is absent.
+
 ### 2026-11-16 (review rulings carried into the standing documents)
 
 - `docs/ai-assisted-research.md`, `docs/portal-claude-batch-review.md`, the "How human review decides" section of `docs/confidence-standard.md`, `docs/development/human-review-and-release.md` and the agent-assisted lane of `docs/portal-free-contribution-design.md` now state JB's review rulings of 2026-11-16 as recorded in the publication pipeline brief: an agent may author the ordinary draft through a deterministic conversion, the named reviewer may be an agent from another provider, free text is withheld from public outputs unless chosen and cleared by a person, batch release by the lead replaces per-item acceptance once it passes its tests, and a named person authorises every release. Each passage keeps the ruling apart from current behaviour, which is still per-item human preparation, review and PI acceptance until that pipeline work is built.
