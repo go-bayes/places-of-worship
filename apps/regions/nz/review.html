@@ -14,13 +14,13 @@
     <link rel="preconnect" href="https://accounts.google.com">
     <link rel="stylesheet" href="../../vendor/leaflet@1.9.4/dist/leaflet.css">
     <!-- theme: the choice is applied to <html> before paint (r-u2) -->
-    <script src="../_shared/theme.js?v=20260921a"></script>
-    <link rel="stylesheet" href="../_shared/theme.css?v=20261103a">
+    <script src="../_shared/theme.js?v=20261120b"></script>
+    <link rel="stylesheet" href="../_shared/theme.css?v=20261120c">
     <link rel="stylesheet" href="../_shared/state.css?v=20260921a">
     <link rel="stylesheet" href="../_shared/map-data-panel.css?v=20261103a">
     <style>
         /* colour, type, spacing and radius tokens live in
-           ../_shared/theme.css (dark) */
+           ../_shared/theme.css (dark and light) */
 
         * {
             box-sizing: border-box;
@@ -237,6 +237,8 @@
             .review-intro { order: 3; flex-basis: 100%; }
             .header-account { order: 4; flex-basis: 100%; flex-wrap: wrap; }
             .header-account .account-roles { display: none; }
+            /* the theme control moves to the map data panel on a phone */
+            .review-header .theme-control { display: none; }
         }
 
         /* side by side only: the two sets of named positions above the
@@ -1239,6 +1241,13 @@
         </div>
         <p class="review-intro" id="pageIntro">Decisions here reach the public map only after an export bundle passes <code>pow</code> validation.</p>
         <div id="headerAccount" class="header-account" hidden></div>
+        <!-- theme choice (proposed 2026-11-20): dark by default, light for
+             sunlight, auto follows the device -->
+        <div class="theme-control" role="group" aria-label="Theme">
+            <button type="button" data-theme-choice="dark" aria-pressed="true">Dark</button>
+            <button type="button" data-theme-choice="light" aria-pressed="false">Light</button>
+            <button type="button" data-theme-choice="auto" aria-pressed="false">Auto</button>
+        </div>
         <a class="header-guide" href="https://religionmap.org/apps/guides/pi.html" target="_blank" rel="noopener">Guide</a>
     </header>
 
@@ -1345,11 +1354,11 @@
     <script src="../../vendor/leaflet.vectorgrid@1.3.0/dist/Leaflet.VectorGrid.bundled.js"></script>
     <script src="../../shared/data/country-registry.js?v=20260903a"></script>
     <script src="../../global/config.public.js"></script>
-    <script src="js/unvalidated-places.js?v=20261013b"></script>
+    <script src="js/unvalidated-places.js?v=20261120c"></script>
     <script src="js/source-links.js?v=20260904a"></script>
     <script src="js/recentre-control.js?v=20261001a"></script>
     <script src="js/review-map-data.js?v=20261103a"></script>
-    <script src="js/review-map.js?v=20261103a"></script>
+    <script src="js/review-map.js?v=20261120b"></script>
     <script src="js/review-panes.js?v=20261103a"></script>
     <script src="js/convex-config.js?v=20260523-vanuatu"></script>
     <script src="js/convex-task-client.js?v=20261103a"></script>

@@ -27,6 +27,9 @@
 (function () {
     const COLOUR = "#f59e0b";
     const HALO = "#ffffff";
+    // the dark outer edge a dot takes on the light streets map (proposed
+    // 2026-11-20); mirrors --marker-edge in ../_shared/theme.css
+    const EDGE = "#17202a";
     const PLACES_TILE_LAYER = "places";
     const PLACES_TILE_MAX_NATIVE_ZOOM = 18;
     // tiles v2 (build 20260722). the overview is the grid-thinned tier of
@@ -98,6 +101,45 @@
         };
     }
 
+    // the edge is a stroke 1.5 px wider each side than the halo, drawn
+    // first, so it shows as a solid ring outside the halo; 1.5 px keeps one
+    // whole device pixel dark where the canvas is drawn at css size and
+    // scaled up on a 2x screen
+    function edgeStyle(zoomed) {
+        const base = dotStyle(zoomed);
+        return { radius: base.radius, color: EDGE, weight: base.weight + 3, opacity: 1, fill: false };
+    }
+
+    // with an edged() test the style is decided per draw: the edge and the
+    // dot while it answers true, the dot alone otherwise
+    function styleFor(zoomed, edged) {
+        const base = dotStyle(zoomed);
+        if (typeof edged !== "function") return base;
+        const edge = edgeStyle(zoomed);
+        return () => (edged() ? [edge, base] : base);
+    }
+
+    // the light streets map: the page is light and the basemap is not imagery
+    function edgeWanted(map) {
+        const root = typeof document !== "undefined" ? document.documentElement : null;
+        const light = Boolean(root && root.getAttribute && root.getAttribute("data-theme-effective") === "light");
+        const container = map && typeof map.getContainer === "function" ? map.getContainer() : null;
+        const imagery = Boolean(container && container.classList && container.classList.contains("basemap-imagery"));
+        return light && !imagery;
+    }
+
+    // reset the grids when the edge changes. leaflet's redraw() uses the
+    // raw map zoom, which can be fractional during flyTo. _setView() rounds
+    // the zoom and requests tiles only within each tier's range.
+    function redraw(map, layers) {
+        if (!map || !layers) return;
+        [layers.overview, layers.places].forEach(layer => {
+            if (!layer?._map || !map.hasLayer(layer) || typeof layer._removeAllTiles !== "function" || typeof layer._setView !== "function") return;
+            layer._removeAllTiles();
+            layer._setView(map.getCenter(), map.getZoom());
+        });
+    }
+
     // both tile layers for a leaflet map; neither is interactive (an
     // interactive path swallows the click before the map sees it). the
     // dots paint on canvas tiles: vectorgrid's default svg renderer makes
@@ -126,7 +168,7 @@
         const overview = raUrl
             ? L.vectorGrid.protobuf(raUrl, {
                 ...common,
-                vectorTileLayerStyles: { [RA_DOTS_TILE_LAYER]: dotStyle(false) },
+                vectorTileLayerStyles: { [RA_DOTS_TILE_LAYER]: styleFor(false, options.edged) },
                 maxZoom: placesFrom - 1,
                 // the zoom floor: leaflet's minNativeZoom alone only clamps
                 // requests to z3, so a zoom-out to z1 still fetched the
@@ -141,13 +183,13 @@
             })
             : L.vectorGrid.protobuf(OVERVIEW_TILE_URL, {
                 ...common,
-                vectorTileLayerStyles: { [OVERVIEW_TILE_LAYER]: dotStyle(false) },
+                vectorTileLayerStyles: { [OVERVIEW_TILE_LAYER]: styleFor(false, options.edged) },
                 maxZoom: placesFrom - 1,
                 maxNativeZoom: OVERVIEW_TILE_MAX_NATIVE_ZOOM,
             });
         const places = L.vectorGrid.protobuf(PLACES_TILE_URL, {
             ...common,
-            vectorTileLayerStyles: { [PLACES_TILE_LAYER]: dotStyle(true) },
+            vectorTileLayerStyles: { [PLACES_TILE_LAYER]: styleFor(true, options.edged) },
             minZoom: placesFrom,
             maxNativeZoom: PLACES_TILE_MAX_NATIVE_ZOOM,
         });
@@ -296,7 +338,12 @@
         applyZoomFloor,
         releaseZoomFloor,
         raDotsTileUrl,
+        EDGE,
         dotStyle,
+        edgeStyle,
+        styleFor,
+        edgeWanted,
+        redraw,
         createLayers,
         addTo,
         removeFrom,

@@ -222,6 +222,7 @@
                 layers[next].bringToBack();
                 basemap = next;
                 map.getContainer().classList.toggle("basemap-imagery", next !== "streets");
+                syncMarkEdges();
             }
             container.querySelectorAll(".basemap-toggle button").forEach(button => {
                 button.setAttribute("aria-pressed", button.dataset.basemap === basemap ? "true" : "false");
@@ -265,7 +266,18 @@
         // archive (the tiles name a country by iso code, gb where the project
         // says uk); a country without one gets the slim overview sample
         const tileIso = String(registry?.iso2 || options.countryCode || "").toLowerCase();
-        let dotLayers = places ? places.createLayers(L, { countryCode: tileIso }) : null;
+        // on the light streets map each dot takes a dark outer edge
+        // (proposed 2026-11-20); syncMarkEdges redraws when that changes
+        let dotLayers = places ? places.createLayers(L, { countryCode: tileIso, edged: () => places.edgeWanted(map) }) : null;
+        let markEdgesOn = places ? places.edgeWanted(map) : false;
+        function syncMarkEdges() {
+            if (!places || !dotLayers) return;
+            const on = places.edgeWanted(map);
+            if (on === markEdgesOn) return;
+            markEdgesOn = on;
+            places.redraw(map, dotLayers);
+        }
+        window.addEventListener?.("pow-theme-change", syncMarkEdges);
         let pointsOn = false;
         function syncDots() {
             if (!places || !dotLayers) return;
@@ -273,7 +285,8 @@
             else places.removeFrom(map, dotLayers);
         }
 
-        // the marker legend, in the ra portal's words for the same rings
+        // the marker legend, in the ra portal's words for the same rings, and
+        // under it, beside the bar, the phone's copy of the theme control
         const legendHtml = `
             <div class="map-legend">
                 <span class="legend-caption">Submissions in this queue</span>
@@ -283,6 +296,14 @@
                 <span class="legend-row"><span class="legend-dot vm-validated-present-swatch"></span>reviewed or exported</span>
                 <span class="legend-row"><span class="legend-dot vm-unvalidated-swatch"></span>not yet reviewed (open case)</span>
                 ${dotLayers ? `<span class="legend-row"><span class="legend-dot context-dot-swatch"></span>unreviewed place, no submission yet</span>` : ""}
+            </div>
+            <div class="map-data-theme">
+                <span class="map-data-theme-label" id="reviewMapThemeLabel">Theme</span>
+                <div class="theme-control" role="group" aria-labelledby="reviewMapThemeLabel">
+                    <button type="button" data-theme-choice="dark" aria-pressed="false">Dark</button>
+                    <button type="button" data-theme-choice="light" aria-pressed="false">Light</button>
+                    <button type="button" data-theme-choice="auto" aria-pressed="false">Auto</button>
+                </div>
             </div>
         `;
         // the map data panel (2026-11-03): it folds to one bar carrying the
@@ -299,6 +320,10 @@
                 },
             })
             : null;
+        // the phone's theme control sits in the panel (proposed 2026-11-20;
+        // the header has no room for it under 700 px), built after theme.js
+        // wires the page, so it is bound here
+        if (mapData?.parts?.root) window.PowTheme?.bind?.(mapData.parts.root);
         syncDots();
 
         const markerLayer = L.layerGroup().addTo(map);
