@@ -12,6 +12,18 @@ import { assertOccupancySegment } from "./occupancies.ts";
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, "..", "..");
 
+test("Convex target years match the portal's shipped census waves", () => {
+  const source = fs.readFileSync(path.join(repoRoot, "apps/regions/nz/js/verification-map.js"), "utf8");
+  const declaration = source.match(/^const COUNTRY_CONFIGS = \{\r?\n[\s\S]*?^\};\r?$/m);
+  assert.ok(declaration, "could not locate the portal's COUNTRY_CONFIGS declaration");
+  const configs = vm.runInNewContext(`${declaration[0]}\nCOUNTRY_CONFIGS`);
+  const portalYears = Object.values(configs)
+    .filter(({ targetYears }) => targetYears.length > 0)
+    .map(({ countryCode, targetYears }) => [countryCode, Array.from(targetYears, Number)]);
+
+  assert.deepEqual(Object.entries(DEFAULT_TARGET_YEARS).sort(), portalYears.sort());
+});
+
 function portalMirror(pageFloor) {
   const source = fs.readFileSync(path.join(repoRoot, "apps/regions/nz/js/date-floor.js"), "utf8");
   const context = { window: pageFloor === undefined ? {} : { POW_DATE_FLOOR_YEAR: pageFloor } };
@@ -20,12 +32,14 @@ function portalMirror(pageFloor) {
   return context.window.PowDateFloor;
 }
 
-test("every country with census waves has a date floor, and the mirror matches", () => {
+test("portal and Convex date floors match for explicit floors and census countries", () => {
   const mirror = portalMirror();
   assert.equal(mirror.DEFAULT_DATE_FLOOR_YEAR, DEFAULT_DATE_FLOOR_YEAR);
   assert.deepEqual({ ...mirror.DATE_FLOOR_YEARS }, DATE_FLOOR_YEARS);
   for (const code of Object.keys(DEFAULT_TARGET_YEARS)) {
-    assert.ok(Number.isInteger(DATE_FLOOR_YEARS[code]), `${code} lacks a date floor`);
+    const effectiveFloor = DATE_FLOOR_YEARS[code] ?? DEFAULT_DATE_FLOOR_YEAR;
+    assert.equal(dateFloorYear(code), effectiveFloor, `${code} has a different Convex floor`);
+    assert.equal(mirror.yearFor(code.toLowerCase()), effectiveFloor, `${code} has a different portal floor`);
   }
   for (const [code, floor] of Object.entries(DATE_FLOOR_YEARS)) {
     assert.ok(floor >= 1000 && floor <= DEFAULT_DATE_FLOOR_YEAR, `${code} floor ${floor} outside 1000..${DEFAULT_DATE_FLOOR_YEAR}`);
