@@ -222,6 +222,7 @@
                 layers[next].bringToBack();
                 basemap = next;
                 map.getContainer().classList.toggle("basemap-imagery", next !== "streets");
+                syncMarkEdges();
             }
             container.querySelectorAll(".basemap-toggle button").forEach(button => {
                 button.setAttribute("aria-pressed", button.dataset.basemap === basemap ? "true" : "false");
@@ -265,7 +266,18 @@
         // archive (the tiles name a country by iso code, gb where the project
         // says uk); a country without one gets the slim overview sample
         const tileIso = String(registry?.iso2 || options.countryCode || "").toLowerCase();
-        let dotLayers = places ? places.createLayers(L, { countryCode: tileIso }) : null;
+        // on the light streets map each dot takes a dark outer edge
+        // (proposed 2026-11-20); syncMarkEdges redraws when that changes
+        let dotLayers = places ? places.createLayers(L, { countryCode: tileIso, edged: () => places.edgeWanted(map) }) : null;
+        let markEdgesOn = places ? places.edgeWanted(map) : false;
+        function syncMarkEdges() {
+            if (!places || !dotLayers) return;
+            const on = places.edgeWanted(map);
+            if (on === markEdgesOn) return;
+            markEdgesOn = on;
+            places.redraw(map, dotLayers);
+        }
+        window.addEventListener?.("pow-theme-change", syncMarkEdges);
         let pointsOn = false;
         function syncDots() {
             if (!places || !dotLayers) return;

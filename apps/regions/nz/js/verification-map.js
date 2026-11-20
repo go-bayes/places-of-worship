@@ -2942,7 +2942,10 @@ class NzVerificationMap {
         // the layer's container is made anew each time a basemap swap puts
         // it back, so the filter class is set again on each add
         this.streetsLayer.on("add", () => this.syncStreetsTheme());
-        window.addEventListener?.("pow-theme-change", () => this.syncStreetsTheme());
+        window.addEventListener?.("pow-theme-change", () => {
+            this.syncStreetsTheme();
+            this.syncMarkEdges();
+        });
         if (SATELLITE_TILE_URL) {
             // imagery so the pin can be steered onto the real building;
             // maptiler serves z20 (upsampled where no aerial exists)
@@ -3963,7 +3966,12 @@ class NzVerificationMap {
             // full tier draws every place, a neighbour's dot with its own
             // portal named in the popup
             const ownIso = this.ownIsoCode();
-            this.tileDotLayers = UNVALIDATED_PLACES.createLayers(L, { countryCode: ownIso === "ZZ" ? "" : ownIso });
+            // on the light streets map each dot takes a dark outer edge
+            // (proposed 2026-11-20); syncMarkEdges redraws when that changes
+            this.tileDotLayers = UNVALIDATED_PLACES.createLayers(L, {
+                countryCode: ownIso === "ZZ" ? "" : ownIso,
+                edged: () => this.markEdgesWanted(),
+            });
             if (!this.tileDotLayers) return;
             // vectorgrid's own hit-testing never fires here (see the module),
             // so the map's click is hit-tested against the rendered dots
@@ -4777,6 +4785,24 @@ class NzVerificationMap {
         return this.datedLoadPromise;
     }
 
+    // the light streets map: the page is light and the basemap is not
+    // imagery. there every map mark takes a dark outer edge (proposed
+    // 2026-11-20): the dom markers through theme.css, the canvas dots here
+    markEdgesWanted() {
+        if (UNVALIDATED_PLACES?.edgeWanted) return UNVALIDATED_PLACES.edgeWanted(this.map);
+        return document.documentElement?.getAttribute?.("data-theme-effective") === "light"
+            && !this.map?.getContainer?.()?.classList?.contains("basemap-imagery");
+    }
+
+    // redraws the dots when the edge test changes its answer
+    syncMarkEdges() {
+        const on = Boolean(this.markEdgesWanted());
+        if (on === this.markEdgesOn) return;
+        this.markEdgesOn = on;
+        if (this.tileDotLayers) UNVALIDATED_PLACES?.redraw?.(this.map, this.tileDotLayers);
+        this.syncContextDots();
+    }
+
     // context dots for the current mode; period mirrors the data maps'
     // DATED filter: start_year present and <= year, end_year absent, null,
     // or >= year (open-ended places carry an explicit null end_year)
@@ -4795,9 +4821,14 @@ class NzVerificationMap {
             const coords = feature.geometry?.coordinates || [];
             if (coords.length < 2) return;
             const latlng = [coords[1], coords[0]];
+            const edged = this.markEdgesWanted();
             this.contextDotLayer.addLayer(L.circleMarker(latlng, {
                 radius: 7.5,
-                stroke: false,
+                // the halo's dark outer edge on the light streets map
+                stroke: edged,
+                color: UNVALIDATED_PLACES?.EDGE || "#17202a",
+                weight: 1,
+                opacity: 1,
                 fillColor: CONTEXT_DOT_HALO,
                 fillOpacity: 0.9,
                 interactive: false,
@@ -5550,6 +5581,7 @@ class NzVerificationMap {
             // context dots switch treatment on this class (jb 2026-09-02)
             this.map.getContainer().classList.toggle("basemap-imagery", next !== "streets");
             this.syncContextDots();
+            this.syncMarkEdges();
         }
         document.querySelectorAll(".basemap-toggle button").forEach(button => {
             button.setAttribute("aria-pressed", button.dataset.basemap === this.basemap ? "true" : "false");

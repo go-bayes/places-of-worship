@@ -270,4 +270,35 @@ assert.equal(feature.properties.country_code, "NZ");
     mod.removeFrom(idle, null);
 }
 
+// the light streets map (proposed 2026-11-20): each dot takes a solid dark
+// edge, a stroke 1.5 px wider each side than its halo, drawn first; the
+// edge comes and goes with the test the portal hands in, and without one
+// the style is the plain dot it always was
+{
+    assert.equal(mod.EDGE, "#17202a");
+    for (const zoomed of [true, false]) {
+        const base = mod.dotStyle(zoomed);
+        const edge = mod.edgeStyle(zoomed);
+        assert.equal(edge.radius, base.radius);
+        assert.equal(edge.weight, base.weight + 3);
+        assert.equal(edge.color, "#17202a");
+        assert.equal(edge.fill, false);
+        let on = false;
+        const style = mod.styleFor(zoomed, () => on);
+        assert.equal(typeof style, "function");
+        assert.equal(style().fillColor, "#f59e0b", "off: the dot alone");
+        on = true;
+        const both = style();
+        assert.equal(both.length, 2);
+        assert.equal(both[0].color, "#17202a", "the edge draws first");
+        assert.equal(both[1].fillColor, "#f59e0b");
+        assert.equal(typeof mod.styleFor(zoomed), "object", "no test, no edge");
+    }
+    const redrawn = [];
+    const layer = (name) => ({ redraw: () => redrawn.push(name) });
+    const shown = { overview: layer("overview"), places: layer("places") };
+    mod.redraw({ hasLayer: (l) => l === shown.places }, shown);
+    assert.deepEqual(redrawn, ["places"], "only a tier on the map redraws");
+}
+
 console.log("unvalidated-places: ok");

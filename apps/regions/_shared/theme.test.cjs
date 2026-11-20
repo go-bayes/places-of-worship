@@ -18,37 +18,76 @@ function boot({ stored = null, deviceDark = false, storageThrows = false, legacy
     ? { getItem() { throw new Error("blocked"); }, setItem() { throw new Error("blocked"); }, removeItem() { throw new Error("blocked"); } }
     : { getItem: (k) => (values.has(k) ? values.get(k) : null), setItem: (k, v) => values.set(k, String(v)), removeItem: (k) => values.delete(k) };
   const attrs = {};
-  const root = { setAttribute: (k, v) => { attrs[k] = v; }, removeAttribute: (k) => { delete attrs[k]; }, getAttribute: (k) => attrs[k] ?? null };
-  const makeButtons = () => ["dark", "light", "auto"].map((choice) => {
-    const a = { "data-theme-choice": choice, "aria-pressed": "false" };
-    const handlers = {};
-    return { attrs: a, getAttribute: (k) => a[k] ?? null, setAttribute: (k, v) => { a[k] = v; }, addEventListener: (t, fn) => { handlers[t] = fn; }, click: () => handlers.click?.() };
-  });
-  // the header copy is in the page; the phone copy arrives later in the map data panel
-  const buttons = makeButtons();
-  const panelButtons = makeButtons();
-  let panelBuilt = false;
-  const listeners = {};
+  const root = { nodeType: 1, setAttribute: (k, v) => { attrs[k] = v; }, removeAttribute: (k) => { delete attrs[k]; }, getAttribute: (k) => attrs[k] ?? null };
+  // every listener is kept, as a browser keeps them, so a second binding
+  // would show as a second handler
+  const docListeners = [];
+  // a group of three buttons; a press runs the document's capture listeners,
+  // the button's own, then bubbles unless the group stops it (leaflet's
+  // disableClickPropagation does, on the map data panel)
+  const makeGroup = ({ stopsPropagation = false } = {}) => {
+    const group = { nodeType: 1, getAttribute: () => null, parentNode: null };
+    const buttons = ["dark", "light", "auto"].map((choice) => {
+      const a = { "data-theme-choice": choice, "aria-pressed": "false" };
+      const own = [];
+      const button = {
+        nodeType: 1, attrs: a, own, parentNode: group,
+        getAttribute: (k) => a[k] ?? null, setAttribute: (k, v) => { a[k] = v; },
+        addEventListener: (t, fn) => own.push({ t, fn }),
+        click() {
+          const event = { type: "click", target: button, stopped: false, stopPropagation() { this.stopped = true; } };
+          docListeners.filter((l) => l.t === "click" && l.capture).forEach((l) => l.fn(event));
+          own.filter((l) => l.t === "click").forEach((l) => l.fn(event));
+          if (stopsPropagation) event.stopped = true;
+          if (!event.stopped) docListeners.filter((l) => l.t === "click" && !l.capture).forEach((l) => l.fn(event));
+        },
+      };
+      return button;
+    });
+    group.querySelector = () => buttons[0];
+    group.querySelectorAll = () => buttons;
+    return { group, buttons };
+  };
+  const header = makeGroup();
+  const panel = makeGroup({ stopsPropagation: true });
+  const parsed = [];
   const document = {
     documentElement: root,
-    querySelectorAll: () => (panelBuilt ? buttons.concat(panelButtons) : buttons),
-    addEventListener: (t, fn) => { listeners[t] = fn; },
+    querySelectorAll: () => parsed.slice(),
+    addEventListener: (t, fn, capture = false) => docListeners.push({ t, fn, capture: Boolean(capture) }),
   };
-  const panel = { querySelectorAll: () => panelButtons };
+  const observers = [];
+  class MutationObserver {
+    constructor(callback) { this.callback = callback; this.active = false; observers.push(this); }
+    observe() { this.active = true; }
+    disconnect() { this.active = false; }
+  }
   const events = [];
   const queryListeners = [];
   const query = { matches: deviceDark, addEventListener: (t, fn) => queryListeners.push(fn) };
   const window = {
-    localStorage,
+    localStorage, MutationObserver,
     CustomEvent: class { constructor(type, init) { this.type = type; this.detail = init?.detail; } },
     dispatchEvent: (event) => events.push(event),
   };
   if (!noMatchMedia) window.matchMedia = () => query;
   const context = vm.createContext({ window, document, localStorage });
   vm.runInContext(source, context, { filename: "theme.js" });
-  const buildPanel = () => { panelBuilt = true; window.PowTheme.bind(panel); };
-  return { attrs, buttons, panelButtons, buildPanel, events, values, window, query, queryListeners, listeners, PowTheme: window.PowTheme };
+  // the parser adds the header: the observer hears of it at once, long
+  // before DOMContentLoaded
+  const parseHeader = () => {
+    parsed.push(...header.buttons);
+    observers.filter((o) => o.active).forEach((o) => o.callback([{ addedNodes: [header.group] }]));
+  };
+  const contentLoaded = () => docListeners.filter((l) => l.t === "DOMContentLoaded").forEach((l) => l.fn());
+  const buildPanel = () => { parsed.push(...panel.buttons); window.PowTheme.bind(panel.group); };
+  return {
+    attrs, buttons: header.buttons, panelButtons: panel.buttons, parseHeader, contentLoaded, buildPanel,
+    observers, docListeners, events, values, window, query, queryListeners, PowTheme: window.PowTheme,
+  };
 }
+
+const pressed = (buttons) => buttons.filter((b) => b.attrs["aria-pressed"] === "true").map((b) => b.attrs["data-theme-choice"]).join();
 
 const deviceChanges = (t, matches) => { t.query.matches = matches; t.queryListeners.forEach((fn) => fn()); };
 
@@ -86,12 +125,13 @@ const deviceChanges = (t, matches) => { t.query.matches = matches; t.queryListen
 }
 
 // 3. set persists, applies, announces, and syncs every copy of the control,
-//    including the phone copy bound after the map data panel is built
+//    including the phone copy marked after the map data panel is built,
+//    whose panel stops a click from bubbling
 {
   const t = boot();
-  t.listeners.DOMContentLoaded();
-  assert.equal(t.buttons[0].attrs["aria-pressed"], "true");
-  assert.equal(t.buttons[1].attrs["aria-pressed"], "false");
+  t.parseHeader();
+  t.contentLoaded();
+  assert.equal(pressed(t.buttons), "dark");
   t.buttons[1].click();
   assert.equal(t.values.get("pow-theme-choice"), "light");
   assert.equal(t.attrs["data-theme"], "light");
@@ -100,24 +140,48 @@ const deviceChanges = (t, matches) => { t.query.matches = matches; t.queryListen
   // the detail comes from the vm realm, so compare its fields
   assert.equal(t.events.at(-1).detail.choice, "light");
   assert.equal(t.events.at(-1).detail.effective, "light");
-  assert.equal(t.buttons[1].attrs["aria-pressed"], "true");
-  assert.equal(t.buttons[0].attrs["aria-pressed"], "false");
+  assert.equal(pressed(t.buttons), "light");
   t.buildPanel();
-  assert.equal(t.panelButtons[1].attrs["aria-pressed"], "true", "the phone copy shows the choice in hand");
+  assert.equal(pressed(t.panelButtons), "light", "the phone copy shows the choice in hand");
   t.panelButtons[2].click();
-  assert.equal(t.values.get("pow-theme-choice"), "auto");
-  assert.equal(t.buttons[2].attrs["aria-pressed"], "true", "a press on the phone copy moves the header copy too");
-  assert.equal(t.buttons[1].attrs["aria-pressed"], "false");
+  assert.equal(t.values.get("pow-theme-choice"), "auto", "a press in a panel that stops propagation still counts");
+  assert.equal(pressed(t.buttons), "auto", "a press on the phone copy moves the header copy too");
   // an explicit dark is stored, so a later change of default leaves it alone
   t.PowTheme.set("dark");
   assert.equal(t.values.get("pow-theme-choice"), "dark");
   assert.equal(t.PowTheme.set("nonsense"), "dark");
-  // binding twice does not wire twice
-  const before = t.events.length;
+  // binding again, and again after the page has loaded, adds no handler:
+  // one press announces once
   t.PowTheme.bind();
-  t.listeners.DOMContentLoaded();
+  t.PowTheme.bind(t.buttons[0].parentNode);
+  t.contentLoaded();
+  const before = t.events.length;
   t.buttons[1].click();
-  assert.equal(t.events.length, before + 1);
+  assert.equal(t.events.length, before + 1, "one press, one announcement");
+  for (const button of t.buttons.concat(t.panelButtons)) assert.equal(button.own.length, 0, "no handler on the button itself");
+  assert.equal(t.docListeners.filter((l) => l.t === "click").length, 1, "one click listener on the document");
+}
+
+// 3a. a saved light or auto choice with a later script still loading: the
+//     header copy is marked as soon as it is parsed, before DOMContentLoaded
+//     (so before the delayed script and first paint), and a press made then
+//     takes effect; the watch on the parser ends at DOMContentLoaded
+{
+  for (const [stored, deviceDark, effective] of [["light", true, "light"], ["auto", false, "light"], ["auto", true, "dark"]]) {
+    const t = boot({ stored, deviceDark });
+    assert.equal(t.attrs["data-theme-effective"], effective, `${stored}: painted ${effective}`);
+    assert.equal(pressed(t.buttons), "", "nothing parsed yet");
+    t.parseHeader();
+    assert.equal(pressed(t.buttons), stored, `${stored}: the parsed header shows the saved choice before the page loads`);
+    t.buttons[0].click();
+    assert.equal(t.values.get("pow-theme-choice"), "dark", `${stored}: an early press is not lost`);
+    assert.equal(t.attrs["data-theme-effective"], "dark");
+    assert.equal(t.events.length, 1);
+    assert.equal(pressed(t.buttons), "dark");
+    t.contentLoaded();
+    assert.equal(pressed(t.buttons), "dark", "loading the page keeps the early press");
+    assert.equal(t.observers.every((o) => !o.active), true, "the parser watch ends with parsing");
+  }
 }
 
 // 4. the device preference changes while auto is chosen: followed and
@@ -138,7 +202,8 @@ const deviceChanges = (t, matches) => { t.query.matches = matches; t.queryListen
 
 // 5. blocked storage: the page still paints dark, and a choice lives for the
 //    page: get and effective report it, a device change does not overwrite
-//    it, and the buttons show it (greptile p1 on #130)
+//    it, and the buttons show it (a set must not be lost when storage
+//    throws)
 {
   const t = boot({ storageThrows: true });
   assert.equal(t.attrs["data-theme-effective"], "dark");
@@ -148,9 +213,9 @@ const deviceChanges = (t, matches) => { t.query.matches = matches; t.queryListen
   assert.equal(t.PowTheme.effective(), "light");
   deviceChanges(t, true);
   assert.equal(t.attrs["data-theme-effective"], "light");
-  t.listeners.DOMContentLoaded();
-  assert.equal(t.buttons[1].attrs["aria-pressed"], "true");
-  assert.equal(t.buttons[0].attrs["aria-pressed"], "false");
+  t.parseHeader();
+  t.contentLoaded();
+  assert.equal(pressed(t.buttons), "light");
 }
 
 // 6. the sheet: the dark set on :root by default, the light set under
@@ -181,12 +246,27 @@ const deviceChanges = (t, matches) => { t.query.matches = matches; t.queryListen
   // the uncertain tag stays indigo in light (7.0:1 on its soft)
   assert.equal(light["--uncertain"], "#4338ca");
   assert.equal(light["--uncertain-soft"], "#eef0ff");
-  // the map marks keep the dark values of the tokens they draw in
-  const pinned = tokens(block(':root[data-theme-effective="light"] .legend-dot'));
+  // the map marks keep the dark values of the tokens they draw in,
+  // including the dropped pin and the selected case's outline (--danger)
+  const pinnedSelector = ':root[data-theme-effective="light"] .verification-marker,\n:root[data-theme-effective="light"] .legend-dot,\n:root[data-theme-effective="light"] .pin-drop-marker';
+  const pinned = tokens(block(pinnedSelector));
   for (const [name, value] of Object.entries(pinned)) assert.equal(value, dark[name], `a mark keeps the dark ${name}`);
+  for (const name of ["--present", "--absent", "--action", "--ink", "--entry", "--danger", "--shade-deep", "--shade-ink"]) {
+    assert.ok(pinned[name], `a mark pins ${name}`);
+  }
+  assert.equal(pinned["--danger"], "#f28b82");
   assert.match(block(':root[data-theme-effective="light"] .verification-marker'), /--panel: var\(--marker-edge\);/);
-  // the dark outer edge applies on the light streets map and the light legend only
-  assert.match(sheet, /:root\[data-theme-effective="light"\] \.leaflet-container:not\(\.basemap-imagery\) \.leaflet-marker-pane,/);
+  // the outer edge is a solid 1 px outline in --marker-edge, on the dom
+  // markers and the pin over the light streets map and on the legend
+  // swatches; no blurred filter, and the overlay pane is left alone
+  assert.equal(/drop-shadow/.test(sheet), false, "no blurred drop-shadow edge");
+  assert.equal(/leaflet-overlay-pane/.test(sheet), false, "the other overlays are untouched");
+  const edge = block(':root[data-theme-effective="light"] .leaflet-container:not(.basemap-imagery) .leaflet-marker-pane .verification-marker:not(.vm-selected),\n:root[data-theme-effective="light"] .leaflet-container:not(.basemap-imagery) .leaflet-marker-pane .pin-drop-marker,\n:root[data-theme-effective="light"] .legend-mark,\n:root[data-theme-effective="light"] .legend-dot');
+  assert.match(edge, /outline: 1px solid var\(--marker-edge\);/);
+  assert.match(edge, /outline-offset: var\(--mark-reach, 0px\);/);
+  assert.match(sheet, /\.vm-selected::after \{[^}]*inset: -8px;[^}]*border: 1px solid var\(--marker-edge\);/);
+  // the pressed button keeps a visible focus ring
+  assert.match(block('.theme-control button[aria-pressed="true"]:focus-visible'), /outline-color: var\(--panel\);/);
   assert.match(sheet, /\.theme-control button\[aria-pressed="true"\]/);
   assert.match(sheet, /:root\[data-theme-effective="dark"\] \.streets-tiles-filtered/);
 }
@@ -220,4 +300,4 @@ const deviceChanges = (t, matches) => { t.query.matches = matches; t.queryListen
   }
 }
 
-console.log("theme: 7 checks passed");
+console.log("theme: 8 checks passed");

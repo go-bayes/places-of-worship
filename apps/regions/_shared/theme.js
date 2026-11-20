@@ -9,7 +9,9 @@
 //   window.PowTheme.get()        -> "dark" | "light" | "auto" (the choice)
 //   window.PowTheme.effective()  -> "dark" | "light" (what paints)
 //   window.PowTheme.set(choice)  -> stores, applies, fires pow-theme-change
-//   window.PowTheme.bind(root)   -> wires [data-theme-choice] buttons
+//   window.PowTheme.bind(root)   -> marks the pressed [data-theme-choice] button
+// a press on any [data-theme-choice] button sets the choice, through one
+// listener on the document
 (function () {
     // a new key: the retired control's "pow-theme" may still hold a choice
     // from the day it was live, and reading it would change a screen its
@@ -81,20 +83,31 @@
         return next;
     }
 
+    // marks the pressed copy in a scope; presses are handled by the one
+    // listener below, so binding never adds a handler and a copy built
+    // later (the map data panel) needs only this
     function bind(scope) {
-        var target = scope || document;
-        if (!target || typeof target.querySelectorAll !== "function") return;
-        var buttons = target.querySelectorAll("[data-theme-choice]");
-        for (var i = 0; i < buttons.length; i += 1) {
-            (function (button) {
-                if (button.getAttribute("data-theme-bound") === "1") return;
-                button.setAttribute("data-theme-bound", "1");
-                button.addEventListener("click", function () {
-                    set(button.getAttribute("data-theme-choice"));
-                });
-            })(buttons[i]);
+        syncButtons(scope || document, current);
+    }
+
+    function choiceButton(target) {
+        var node = target;
+        while (node && typeof node.getAttribute === "function") {
+            if (node.getAttribute("data-theme-choice")) return node;
+            node = node.parentNode;
         }
-        syncButtons(target, current);
+        return null;
+    }
+
+    // one delegated listener, registered here in <head>: a press works the
+    // moment its button is parsed, even while a later script still loads.
+    // it listens in the capture phase, because the map's panels stop a
+    // click from bubbling (leaflet's disableClickPropagation)
+    if (typeof document.addEventListener === "function") {
+        document.addEventListener("click", function (event) {
+            var button = choiceButton(event && event.target);
+            if (button) set(button.getAttribute("data-theme-choice"));
+        }, true);
     }
 
     // the device's preference changes while auto is chosen: follow it
@@ -110,8 +123,35 @@
     }
 
     apply(current);
+
+    // the header copy is marked as soon as the parser adds it, before the
+    // page's later scripts run and before first paint, so the pressed button
+    // matches the painted theme; the watch ends with parsing
+    function holdsChoice(node) {
+        if (!node || node.nodeType !== 1) return false;
+        if (typeof node.getAttribute === "function" && node.getAttribute("data-theme-choice")) return true;
+        return typeof node.querySelector === "function" && Boolean(node.querySelector("[data-theme-choice]"));
+    }
+    var watcher = null;
+    if (typeof window.MutationObserver === "function" && root) {
+        watcher = new window.MutationObserver(function (records) {
+            for (var i = 0; i < records.length; i += 1) {
+                var added = records[i].addedNodes || [];
+                for (var j = 0; j < added.length; j += 1) {
+                    if (holdsChoice(added[j])) {
+                        syncButtons(document, current);
+                        return;
+                    }
+                }
+            }
+        });
+        watcher.observe(root, { childList: true, subtree: true });
+    }
     if (typeof document.addEventListener === "function") {
-        document.addEventListener("DOMContentLoaded", function () { bind(document); });
+        document.addEventListener("DOMContentLoaded", function () {
+            if (watcher) watcher.disconnect();
+            bind(document);
+        });
     }
 
     window.PowTheme = {

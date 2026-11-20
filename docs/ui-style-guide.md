@@ -250,7 +250,7 @@ Both portals share one token sheet, `apps/regions/_shared/theme.css`, and dark i
 - Placement: on the contributor portal it sits at the end of the header's `Exit` / `Guide` row, where R-U2 put it; on the review portal it sits in the header beside `Guide`. At 700 px and under neither header has room, so a second copy sits in the `Map data` panel on the map (first in the panel on the contributor portal, beside the bar on the review portal), and the header copy hides. One copy shows at any width, and both follow the same choice.
 - `apps/regions/_shared/theme.js` reads the choice before the stylesheets load and marks `<html>` with `data-theme` (the choice) and `data-theme-effective` (`dark` or `light`) before paint, so nothing flashes. The device keeps the choice under a new key, `pow-theme-choice`, so a choice made on the day R-U2's control was live does not return. Blocked storage holds the choice in memory for the page's life. `theme.css` keeps the dark set on `:root` and carries the light set under `:root[data-theme-effective="light"]`. Making Auto the default is one line in `theme.js`: `DEFAULT_CHOICE = "auto"`.
 - Basemap: in Light, Streets is the ordinary OpenStreetMap street map; in Dark it stays as now. Hybrid and Satellite never change in either theme (R-U3).
-- Map marks keep their colours in both themes, since they sit on the basemap and the default basemap, Hybrid, never changes. Under the light set a mark (`.verification-marker`, `.legend-dot`) keeps the dark values of the tokens it draws in, and its edge and hollow centre take the new `--marker-edge` (`#17202a`, the dark panel colour, in both sets). One change is forced: on the light Streets map the pale rings fall under 3:1 against the land colour (OpenStreetMap's `#f2efe9`): the validated blue 1.9:1, the validated-absent ink ring 1.0:1, the nomination teal 1.6:1 and the open-case amber 1.9:1. So on the light Streets map and in the light legend each mark takes a thin dark outer edge in `--marker-edge` (a CSS `drop-shadow` on the marker and overlay panes and on the legend swatches), as on imagery it takes a white halo. The colours do not change.
+- Map marks keep their colours in both themes, since they sit on the basemap and the default basemap, Hybrid, never changes. Under the light set a mark (`.verification-marker`, `.legend-dot`) keeps the dark values of the tokens it draws in, and its edge and hollow centre take the new `--marker-edge` (`#17202a`, the dark panel colour, in both sets). One change is forced: on the light Streets map the pale rings fall under 3:1 against the land colour (OpenStreetMap's `#f2efe9`): the validated blue 1.9:1, the validated-absent ink ring 1.0:1, the nomination teal 1.6:1 and the open-case amber 1.9:1. So on the light Streets map and in the light legend each mark takes a solid 1 px outer edge in `--marker-edge` just outside its outermost ring, as on imagery it takes a white halo: a CSS `outline` set off by the ring's reach on the DOM markers, the dropped pin and the legend swatches, a ring outside the selection outline on the review portal's selected case, and on the canvas dots of unreviewed places a dark stroke drawn under the white halo, reaching 1.5 px beyond it (`js/unvalidated-places.js`). The other overlays (the position's accuracy circle, approximate-location areas, relocation lines) are left alone. The colours do not change; the dropped pin and the selected case's outline keep their dark red (`#f28b82`) in both themes.
 - The light values for the tokens added since 2026-09-21 are in the table below. The retired light value of `--action` (`#1f618d`) was not used for the validated ring: under protanopia it stands only 3.3 in ΔE00 from the red-violet disputed ring, against 32.2 for the dark value the ring keeps.
 
 | Token | Light (retired 2026-09-21; proposed for restoration 2026-11-20) | Dark (approved 2026-09-21) |
@@ -307,7 +307,7 @@ Contrast (WCAG relative luminance) on the pairs the pages actually draw; the Dar
 | `--danger` on `--panel` | 6.6:1 | 6.9:1 |
 | `--caution` on `--panel` | 7.7:1 | 9.8:1 |
 | `--panel` on `--caution-strong` | 4.9:1 | 7.7:1 |
-| `--marker-uncertain` on `--panel` (the fill inside the marker's border) | 3.7:1 (the border is `--marker-edge` in both themes) | 3.7:1 |
+| `--marker-uncertain` on `--marker-edge` (the fill inside the marker's border, which is `--marker-edge`, `#17202a`, in both themes) | 3.7:1 | 3.7:1 |
 | `--uncertain` on `--uncertain-soft` (the uncertain tag) | 7.0:1 | 6.9:1 |
 | `--marker-disputed` on `--panel` (the ring on the dark Streets map) | 5.2:1 on the light legend | 3.2:1 |
 | `--marker-disputed` on `--marker-halo` (the ring between its halos) | 5.2:1 | 5.2:1 |
@@ -316,7 +316,11 @@ Contrast (WCAG relative luminance) on the pairs the pages actually draw; the Dar
 | `--not-assessed` on `--panel` | 8.7:1 | 7.9:1 |
 | `--absent` on `--panel` | 10.3:1 | 9.1:1 |
 | `--ink` on `--bg` | 15.2:1 | 15.4:1 |
-| `--marker-edge` on the light Streets land (`#f2efe9`), the marks' outer edge (proposed 2026-11-20) | 14.3:1 | not drawn |
+| `--marker-edge` on the light Streets land (`#f2efe9`), the marks' outer edge as specified (proposed 2026-11-20) | 14.3:1 | not drawn |
+| The same edge as rendered, measured in Chromium against `#f2efe9` (the strongest pixel of the outer edge along each axis, basemap tiles hidden): DOM markers (validated, validated absent, open case, disputed, in review, nomination) at 1x | 11.1:1 to 11.9:1 | not drawn |
+| The same, at 2x | 14.3:1 | not drawn |
+| The dropped pin's edge, rendered, at 1x and 2x | 6.8:1 to 8.3:1; 14.3:1 | not drawn |
+| The canvas dots' edge, rendered, along rays from each disc's centre (median, tenth percentile) at 1x and 2x | 14.3:1, 7.6:1; 8.8:1, 6.0:1 | not drawn |
 | `--marker-edge` on the light legend (`--veil` over the map, near `#ffffff`) | 16.5:1 | not drawn |
 | Rings and fills against `--marker-edge`, the weakest pairs: `--marker-disputed`, `--marker-uncertain`, the validated blue `#7fb3e6`, the open-case amber | 3.2:1, 3.7:1, 7.4:1, 7.7:1 | as Light |
 

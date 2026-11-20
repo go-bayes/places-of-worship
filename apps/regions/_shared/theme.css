@@ -130,8 +130,11 @@
   --panel: var(--marker-edge);
 }
 
+/* the pin a contributor drops and the selected case's outline are map
+   marks too: they keep their dark red and shadow */
 :root[data-theme-effective="light"] .verification-marker,
-:root[data-theme-effective="light"] .legend-dot {
+:root[data-theme-effective="light"] .legend-dot,
+:root[data-theme-effective="light"] .pin-drop-marker {
   --present: #6fcf97;
   --absent: #b8c2d0;
   --muted: #a7b3c2;
@@ -139,20 +142,67 @@
   --action: #7fb3e6;
   --entry: #5fd3c4;
   --stale: #c69ae0;
+  --danger: #f28b82;
+  --shade-deep: rgba(0, 0, 0, 0.6);
   --shade-ink: rgba(0, 0, 0, 0.6);
   --shade-ink-deep: rgba(0, 0, 0, 0.8);
 }
 
-/* the one change the light surfaces force (2026-11-20): the pale rings and
-   the open-case amber fall under 3:1 on the light streets map and on the
-   light legend, so there each mark takes a thin dark outer edge in
-   --marker-edge, as on imagery it takes a white halo. the colours are
-   unchanged */
-:root[data-theme-effective="light"] .leaflet-container:not(.basemap-imagery) .leaflet-marker-pane,
-:root[data-theme-effective="light"] .leaflet-container:not(.basemap-imagery) .leaflet-overlay-pane,
-:root[data-theme-effective="light"] .legend-dot,
-:root[data-theme-effective="light"] .legend-mark {
-  filter: drop-shadow(0 0 0.6px var(--marker-edge)) drop-shadow(0 0 0.6px var(--marker-edge));
+/* the one change the light surfaces force (2026-11-20): the pale rings, the
+   pin's white halo and the open-case amber fall under 3:1 on the light
+   streets map and on the light legend, so there each mark takes a solid
+   1 px outer edge in --marker-edge just outside its outermost ring, as on
+   imagery it takes a white halo. the colours are unchanged, and the other
+   overlays (the accuracy circle, approximate areas, relocation lines) are
+   left alone. --mark-reach is how far a mark's ring reaches past its
+   border; the canvas dots take the same edge in js/unvalidated-places.js */
+.verification-marker.vm-validated-present,
+.verification-marker.vm-validated-absent {
+  --mark-reach: 5px;
+}
+
+.verification-marker.vm-disputed,
+.verification-marker.vm-stale {
+  --mark-reach: 4px;
+}
+
+.verification-marker.vm-unvalidated,
+.legend-dot.vm-validated-present-swatch,
+.legend-dot.vm-validated-absent-swatch {
+  --mark-reach: 3.5px;
+}
+
+.legend-dot.vm-disputed-swatch,
+.legend-dot.vm-stale-swatch,
+.legend-dot.vm-unvalidated-swatch {
+  --mark-reach: 3px;
+}
+
+:root[data-theme-effective="light"] .leaflet-container:not(.basemap-imagery) .leaflet-marker-pane .verification-marker:not(.vm-selected),
+:root[data-theme-effective="light"] .leaflet-container:not(.basemap-imagery) .leaflet-marker-pane .pin-drop-marker,
+:root[data-theme-effective="light"] .legend-mark,
+:root[data-theme-effective="light"] .legend-dot {
+  outline: 1px solid var(--marker-edge);
+  outline-offset: var(--mark-reach, 0px);
+}
+
+/* the selected case already draws its outline (3 px at 2 px off the
+   border), so its edge is a ring just outside that outline */
+:root[data-theme-effective="light"] .leaflet-container:not(.basemap-imagery) .leaflet-marker-pane .verification-marker.vm-selected {
+  position: relative;
+}
+
+:root[data-theme-effective="light"] .leaflet-container:not(.basemap-imagery) .leaflet-marker-pane .verification-marker.vm-selected::after {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  border: 1px solid var(--marker-edge);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+:root[data-theme-effective="light"] .leaflet-container:not(.basemap-imagery) .leaflet-marker-pane .verification-marker.vm-selected:is(.vm-in-review, .vm-nomination)::after {
+  inset: -9px;
 }
 
 /* the theme control: dark, light, auto (auto follows the device). small
@@ -201,6 +251,11 @@
 .theme-control button:focus-visible {
   outline: 3px solid var(--action);
   outline-offset: -3px;
+}
+
+/* the pressed button is filled in --action, so its ring is --panel */
+.theme-control button[aria-pressed="true"]:focus-visible {
+  outline-color: var(--panel);
 }
 
 /* on a phone the header has no room, so the control's second copy sits in

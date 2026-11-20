@@ -56,8 +56,9 @@ assert.match(runtime, /const preferredLayer = zoom < 6 \? LAYERS\.overview : LAY
 
 // portals: the country is handed to the module; the filter is gone
 assert.doesNotMatch(verification, /overviewKeep/);
-assert.match(verification, /createLayers\(L, \{ countryCode: ownIso === "ZZ" \? "" : ownIso \}\)/);
-assert.match(review, /createLayers\(L, \{ countryCode: tileIso \}\)/);
+// (with the light streets edge test beside the country, 2026-11-20)
+assert.match(verification, /createLayers\(L, \{\s*countryCode: ownIso === "ZZ" \? "" : ownIso,\s*edged: \(\) => this\.markEdgesWanted\(\),\s*\}\)/);
+assert.match(review, /createLayers\(L, \{ countryCode: tileIso, edged: \(\) => places\.edgeWanted\(map\) \}\)/);
 assert.match(review, /registry\?\.iso2 \|\| options\.countryCode/);
 assert.doesNotMatch(unvalidated, /overviewKeep/);
 
@@ -66,14 +67,14 @@ assert.doesNotMatch(unvalidated, /overviewKeep/);
 const stamps = {
     "region-map.js": "20261103e", // census panel opens folded on every screen
     "datamaps-switcher.js": "20261013a", // switcher rows prerender; warming waits for activation
-    "unvalidated-places.js": "20261013b", // versioned grid places url; us, de and it use the grid tier from zoom 6
-    "verification-map.js": "20261120a", // the phone's theme control in the map data panel
+    "unvalidated-places.js": "20261120a", // a solid dark edge on the light streets map
+    "verification-map.js": "20261120b", // the phone's theme control; dot edges on light streets
     "occupancy-contract.js": "20261019a", // relocation rules follow definition 0.1.6
     "occupancy-review.js": "20261019a", // move wording and successor in the reviewer's period summary
     "task-presentation.js": "20261015c", // decided-status and reopen-flag helpers
     "convex-task-client.js": "20261103a", // the sign-in button takes a width from its caller
     "review-portal.js": "20261103e", // linked place: warn once on unmatched ids, record anyway
-    "review-map.js": "20261120a", // the phone's theme control in the map data panel
+    "review-map.js": "20261120b", // the phone's theme control; dot edges on light streets
 };
 const scripts = Object.keys(stamps);
 const pages = [];
