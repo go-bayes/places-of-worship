@@ -30,11 +30,10 @@ body {
 
 h1 {
   margin: 0 0 12px;
-  font-family: var(--serif);
-  font-style: italic;
-  font-weight: 400;
-  font-size: 44px;
+  font-weight: 600;
+  font-size: 40px;
   line-height: 1.1;
+  letter-spacing: -0.005em;
 }
 
 .lede {

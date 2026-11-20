@@ -733,7 +733,7 @@ function prettify(value) {
 function placeName(props) {
   const name = String(props["name:en"] || props.name_en || props.name || "").trim();
   // the tiles give unnamed places a placeholder built from the osm id
-  if (!name || /^Place of Worship \d+$/i.test(name)) return "Unnamed place of worship";
+  if (!name || /^(Place of Worship \d+|unnamed)$/i.test(name)) return "Unnamed place of worship";
   return name;
 }
 
