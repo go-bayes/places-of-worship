@@ -4794,13 +4794,16 @@ class NzVerificationMap {
             && !this.map?.getContainer?.()?.classList?.contains("basemap-imagery");
     }
 
-    // redraws the dots when the edge test changes its answer
+    // redraws the dots when the edge test changes its answer; returns
+    // whether it rebuilt the fallback dots, so a caller about to rebuild
+    // them does not do it twice
     syncMarkEdges() {
         const on = Boolean(this.markEdgesWanted());
-        if (on === this.markEdgesOn) return;
+        if (on === this.markEdgesOn) return false;
         this.markEdgesOn = on;
         if (this.tileDotLayers) UNVALIDATED_PLACES?.redraw?.(this.map, this.tileDotLayers);
         this.syncContextDots();
+        return true;
     }
 
     // context dots for the current mode; period mirrors the data maps'
@@ -5580,8 +5583,9 @@ class NzVerificationMap {
             // imagery needs haloed markers: the css rings and the canvas
             // context dots switch treatment on this class (jb 2026-09-02)
             this.map.getContainer().classList.toggle("basemap-imagery", next !== "streets");
-            this.syncContextDots();
-            this.syncMarkEdges();
+            // one rebuild of the fallback dots: syncMarkEdges makes it when
+            // the edge changes, and this line otherwise
+            if (!this.syncMarkEdges()) this.syncContextDots();
         }
         document.querySelectorAll(".basemap-toggle button").forEach(button => {
             button.setAttribute("aria-pressed", button.dataset.basemap === this.basemap ? "true" : "false");

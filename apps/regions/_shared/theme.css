@@ -178,6 +178,29 @@
   --mark-reach: 3px;
 }
 
+/* the contributor's legend draws the map's own marker classes, so over
+   imagery its swatches take the imagery halos too; the edge sits outside
+   those halos */
+.basemap-imagery .verification-marker.legend-mark {
+  --mark-reach: 1px;
+}
+
+.basemap-imagery .verification-marker.legend-mark:is(.vm-in-review, .vm-nomination) {
+  --mark-reach: 2px;
+}
+
+.basemap-imagery .verification-marker.legend-mark.vm-unvalidated {
+  --mark-reach: 5px;
+}
+
+.basemap-imagery .verification-marker.legend-mark:is(.vm-disputed, .vm-stale) {
+  --mark-reach: 6px;
+}
+
+.basemap-imagery .verification-marker.legend-mark:is(.vm-validated-present, .vm-validated-absent) {
+  --mark-reach: 7px;
+}
+
 :root[data-theme-effective="light"] .leaflet-container:not(.basemap-imagery) .leaflet-marker-pane .verification-marker:not(.vm-selected),
 :root[data-theme-effective="light"] .leaflet-container:not(.basemap-imagery) .leaflet-marker-pane .pin-drop-marker,
 :root[data-theme-effective="light"] .legend-mark,

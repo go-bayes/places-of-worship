@@ -128,11 +128,27 @@
         return light && !imagery;
     }
 
-    // redraws the shown tiers after the edge test changes its answer
+    // whether a tier draws at this zoom: both tiers stay attached while the
+    // points show, and leaflet's gridlayer redraw() fetches tiles at the
+    // map's zoom without checking the layer's own zoom range, so only the
+    // tier in range may be redrawn. tile zoom is the rounded map zoom
+    function tierActive(map, layer) {
+        if (!layer || typeof map.getZoom !== "function") return false;
+        const zoom = Math.round(map.getZoom());
+        const min = layer.options ? layer.options.minZoom : undefined;
+        const max = layer.options ? layer.options.maxZoom : undefined;
+        if (typeof min === "number" && zoom < min) return false;
+        if (typeof max === "number" && zoom > max) return false;
+        return true;
+    }
+
+    // redraws the tier in use after the edge test changes its answer; the
+    // other tier holds no tiles out of its range, so it draws afresh, with
+    // the edge test's current answer, when the zoom reaches it
     function redraw(map, layers) {
         if (!map || !layers) return;
         [layers.overview, layers.places].forEach(layer => {
-            if (layer && map.hasLayer(layer) && typeof layer.redraw === "function") layer.redraw();
+            if (layer && map.hasLayer(layer) && typeof layer.redraw === "function" && tierActive(map, layer)) layer.redraw();
         });
     }
 
@@ -339,6 +355,7 @@
         edgeStyle,
         styleFor,
         edgeWanted,
+        tierActive,
         redraw,
         createLayers,
         addTo,

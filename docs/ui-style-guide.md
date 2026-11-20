@@ -317,12 +317,14 @@ Contrast (WCAG relative luminance) on the pairs the pages actually draw; the Dar
 | `--absent` on `--panel` | 10.3:1 | 9.1:1 |
 | `--ink` on `--bg` | 15.2:1 | 15.4:1 |
 | `--marker-edge` on the light Streets land (`#f2efe9`), the marks' outer edge as specified (proposed 2026-11-20) | 14.3:1 | not drawn |
-| The same edge as rendered, measured in Chromium against `#f2efe9` (the strongest pixel of the outer edge along each axis, basemap tiles hidden): DOM markers (validated, validated absent, open case, disputed, in review, nomination) at 1x | 11.1:1 to 11.9:1 | not drawn |
-| The same, at 2x | 14.3:1 | not drawn |
-| The dropped pin's edge, rendered, at 1x and 2x | 6.8:1 to 8.3:1; 14.3:1 | not drawn |
-| The canvas dots' edge, rendered, along rays from each disc's centre (median, tenth percentile) at 1x and 2x | 14.3:1, 7.6:1; 8.8:1, 6.0:1 | not drawn |
+| The edge as rendered on the DOM markers (validated, validated absent, open case, disputed, in review, nomination), at 1x; at 2x | 6.6:1 to 11.9:1; 14.3:1 | not drawn |
+| The dropped pin's edge as rendered, at 1x; at 2x | 6.8:1 to 12.2:1; 14.3:1 | not drawn |
+| The places-tier dots' edge as rendered (zoom 8 and above), median and tenth percentile, at 1x; at 2x | 14.0:1 to 14.3:1 and 7.6:1 to 9.6:1; 8.8:1 to 8.9:1 and 6.0:1 to 6.1:1 | not drawn |
+| The overview dots' edge as rendered (below zoom 8), median and tenth percentile, at 1x; at 2x | 14.3:1 and 11.3:1; 9.6:1 and 7.4:1 | not drawn |
 | `--marker-edge` on the light legend (`--veil` over the map, near `#ffffff`) | 16.5:1 | not drawn |
 | Rings and fills against `--marker-edge`, the weakest pairs: `--marker-disputed`, `--marker-uncertain`, the validated blue `#7fb3e6`, the open-case amber | 3.2:1, 3.7:1, 7.4:1, 7.7:1 | as Light |
+
+The rendered figures were measured in Chromium against `#f2efe9`, with the basemap tiles hidden so that land is the only neighbour: DOM markers 13 and 14 px wide, at both whole-pixel positions and the fractional positions Leaflet gives markers on a desktop map, reading the strongest pixel of the outer edge along rays from each mark's centre (the four axes for a DOM mark, from the centre of every isolated disc for the dots); each range spans two independent measurements, except the overview dots, whose small discs one sampler could not isolate at 1x, so their 1x figures are the other measurement's and their 2x figures this one's. Every figure clears 3:1.
 
 Marker separation, proposed 2026-11-20. The marker colours are the same in both themes, so the 2026-11-03 test applies unchanged; the table records it for the light set. CIEDE2000 colour difference (ΔE00) under normal vision and under simulated deuteranopia and protanopia (Machado, Oliveira and Fernandes 2009, full severity), for the pairs a reader must tell apart:
 
