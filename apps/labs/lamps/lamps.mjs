@@ -34,6 +34,7 @@ import {
 import { buildStyle, PLACE_LAYERS, traditionFilter, pillarFilter, traditionColor, presence, SCALE } from "./style.mjs";
 import { metresPerPixel, pillarRadius, pillarHeight, hexagon, placesInTiles, PILLAR } from "./geometry.mjs";
 import { CITIES } from "../shared/cities.mjs";
+import { hasPlaceId } from "../shared/tile-ownership.mjs";
 
 const MAIN_MAP = "../../global/";
 const REDUCED_MOTION = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -691,9 +692,19 @@ function buildPillars() {
     return;
   }
   pillarKey = key;
+  const previousPlaces = pillarPlaces;
+  const previous = placesById.get(state.selected);
   pillarPlaces = places;
   placesById = new Map(places.map((p) => [p.id, p]));
-  if (state.selected !== null && !placesById.has(state.selected)) clearUnavailableSelection();
+  if (state.selected !== null) {
+    const selected = placesById.get(state.selected) ?? followSourceId(previous, previousPlaces, places);
+    if (selected && state.enabled.has(traditionKey(selected.props))) {
+      state.selected = selected.id;
+      updateCard(selected);
+    } else {
+      clearUnavailableSelection();
+    }
+  }
   pillarRadiusInUse = 0;
   if (places.length) {
     reshapePillars();
@@ -798,11 +809,30 @@ function drawSelection(place) {
   });
 }
 
+function followSourceId(previous, previousPlaces, places) {
+  const sourceId = previous?.props.id;
+  if (!hasPlaceId(sourceId)) return;
+  // decoded coordinates can move with tile precision. a shared source ID
+  // is safe to follow only if it names a single occurrence in both sets.
+  const id = String(sourceId);
+  const sameSource = ({ props }) => props.id != null && String(props.id) === id;
+  if (previousPlaces.filter(sameSource).length !== 1) return;
+  const matches = places.filter(sameSource);
+  return matches.length === 1 ? matches[0] : undefined;
+}
+
 function select(id, fromPointer) {
   const place = placesById.get(id);
   if (!place || !state.enabled.has(traditionKey(place.props))) return;
   state.selected = id;
   drawSelection(place);
+  updateCard(place);
+  $("card").hidden = false;
+  document.documentElement.dataset.card = "open";
+  if (!fromPointer || document.activeElement === document.body) $("card-name").focus({ preventScroll: true });
+}
+
+function updateCard(place) {
   const props = place.props;
   const key = KNOWN_TRADITIONS.includes(props.religion) ? props.religion : "other";
   const [lng, lat] = place.coords;
@@ -819,10 +849,6 @@ function select(id, fromPointer) {
   $("card-start").textContent = start;
   $("card-main").href = `${MAIN_MAP}#map=17.00/${lat.toFixed(5)}/${lng.toFixed(5)}`;
   $("card-streetview").href = `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${lat.toFixed(6)},${lng.toFixed(6)}`;
-  const card = $("card");
-  card.hidden = false;
-  document.documentElement.dataset.card = "open";
-  if (!fromPointer || document.activeElement === document.body) $("card-name").focus({ preventScroll: true });
 }
 
 function deselect() {

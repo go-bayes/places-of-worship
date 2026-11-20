@@ -242,6 +242,13 @@ function startMap() {
       $("basemap-notice").hidden = false;
     }
   });
+  map.on("sourcedata", (event) => {
+    const notice = $("basemap-notice");
+    if (notice.hidden || event.sourceId !== "omt" || (!event.tile && event.sourceDataType !== "metadata")) return;
+    const tiles = map.style?.tileManagers?.omt;
+    if (tiles?.getIds().some((key) => tiles.getTileByID(key)?.state === "errored")) return;
+    notice.hidden = true;
+  });
   map.on("click", onMapClick);
   for (const layer of ["segments", "diversity", "bands", "bands-diversity"]) {
     map.on("mouseenter", layer, () => { map.getCanvas().style.cursor = "pointer"; });

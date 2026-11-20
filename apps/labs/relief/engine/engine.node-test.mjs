@@ -82,6 +82,9 @@ test("bounding box selects all four XYZ tiles and includes an exact east/south e
   assert.deepEqual([...tilesCoveringBbox([-180, row1024Latitude, -179.98, 66.52], 12)], [
     { z: 12, x: 0, y: 1023 }, { z: 12, x: 0, y: 1024 }
   ]);
+  assert.deepEqual([...tilesCoveringBbox([-180, 66.51, -179.98, row1024Latitude], 12)], [
+    { z: 12, x: 0, y: 1023 }, { z: 12, x: 0, y: 1024 }
+  ]);
   assert.throws(() => tilesCoveringBbox([175, -42, -179, -40], zoom), /non-wrapping bbox/);
 });
 
@@ -133,6 +136,27 @@ function syntheticTile(features, keys, values, extent = 4096) {
   ];
   return Uint8Array.from(message(26, layer)).buffer;
 }
+
+test("exact west and north boundaries retain places from touching tiles and reconcile counts", async () => {
+  const keys = ["id"];
+  const values = [string(10, "boundary"), string(10, "outside")];
+  for (const { edge, bbox, coordinates, tileX, tileY } of [
+    { edge: "west", bbox: [0, 30, 10, 70], coordinates: [[4096, 2048], [4095, 2048]], tileX: 0, tileY: 0 },
+    { edge: "north", bbox: [80, -10, 100, 0], coordinates: [[2048, 4096], [2048, 4095]], tileX: 1, tileY: 0 },
+    { edge: "north-west", bbox: [0, -10, 10, 0], coordinates: [[4096, 4096], [4095, 4095]], tileX: 0, tileY: 0 }
+  ]) {
+    const tile = syntheticTile(coordinates.map((point, i) => feature([0, i], [point])), keys, values);
+    const { points, reconciliation } = await collectPlaces({
+      bbox, zoom: 1, fetchTile: ({ x, y }) => x === tileX && y === tileY ? tile : null
+    });
+    assert.deepEqual(points.map(({ properties }) => properties.id), ["boundary"], edge);
+    const tilesRequested = edge === "north-west" ? 4 : 2;
+    assert.deepEqual(reconciliation, {
+      tilesRequested, tilesEmpty: tilesRequested - 1, rawFeatures: 2, duplicatesRemoved: 0,
+      outsideExtentRemoved: 1, kept: 1, keyless: 0
+    }, edge);
+  }
+});
 
 test("decoder handles buffered multipoints, non-default extent and integer property types", () => {
   const tile = syntheticTile([

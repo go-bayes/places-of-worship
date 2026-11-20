@@ -101,3 +101,20 @@ test("a basemap error leaves the Relief counting status and worker independent",
   assert.equal(get("count-line").textContent, countStatus);
   assert.equal(currentWorker(), worker);
 });
+
+test("the Relief basemap warning clears on successful basemap recovery", async () => {
+  const { map, startMap, get } = await reliefPage();
+  const notice = get("basemap-notice");
+  notice.hidden = true;
+  const failedTile = { state: "errored" };
+  map.style = { tileManagers: { omt: { getIds: () => ["failed"], getTileByID: () => failedTile } } };
+  startMap();
+  map.handlers.error({ sourceId: "omt", tile: failedTile, error: { status: 503 } });
+  assert.equal(notice.hidden, false);
+  map.handlers.sourcedata?.({ sourceId: "ground", tile: { state: "loaded" } });
+  map.handlers.sourcedata?.({ sourceId: "omt", tile: { state: "loaded" } });
+  assert.equal(notice.hidden, false);
+  failedTile.state = "loaded";
+  map.handlers.sourcedata?.({ sourceId: "omt", tile: failedTile });
+  assert.equal(notice.hidden, true);
+});

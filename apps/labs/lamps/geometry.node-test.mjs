@@ -52,3 +52,15 @@ test("pillars keep owning occurrences including keyless twins and ID zero", () =
   assert.equal(places.filter(({ props }) => props.id === 0).length, 2);
   assert.equal(places.filter(({ props }) => props.id == null).length, 2);
 });
+
+test("a retained child edge replaces only matching parent occurrences", () => {
+  const parent = { z: 12, x: 4036, y: 2564 };
+  const west = { z: 13, x: 8072, y: 5128 };
+  const parentCopy = tilePoint(parent, 2048, 1024, { id: "edge", start_date: "1920" });
+  const childCopy = tilePoint(west, 4096, 2048, { id: "edge", start_date: "1952" });
+  const otherPlace = tilePoint(parent, 2048, 1024, { id: "other" });
+  const places = placesInTiles([parentCopy, childCopy, otherPlace]);
+  assert.deepEqual(places.map(({ props }) => props.id).sort(), ["edge", "other"]);
+  assert.equal(places.find(({ props }) => props.id === "edge").props.start_date, "1952");
+  assert.equal(placesInTiles([parentCopy, parentCopy, childCopy]).length, 2);
+});

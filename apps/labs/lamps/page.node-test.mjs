@@ -6,6 +6,7 @@ import * as geometry from "./geometry.mjs";
 import * as palette from "../shared/palette.mjs";
 import * as style from "./style.mjs";
 import * as sun from "../shared/sun.mjs";
+import { hasPlaceId } from "../shared/tile-ownership.mjs";
 
 async function lampsPage() {
   const elements = new Map();
@@ -24,6 +25,9 @@ async function lampsPage() {
     return elements.get(id);
   };
   document.getElementById("inview-panel").hidden = true;
+  const card = document.getElementById("card");
+  card.hidden = true;
+  card.append(document.getElementById("card-main"));
   const map = {
     zoom: 12, features: [], hits: [], data: {}, handlers: {}, filters: new Map(), layers: new Set(),
     getZoom() { return this.zoom; },
@@ -46,7 +50,7 @@ async function lampsPage() {
     source.slice(source.indexOf("const MAIN_MAP"), source.lastIndexOf("\nbuildChips();"))
       + "\n({ state, buildPillars, updateScale, startMap, applyFilter, refreshPlacesList, setMap(m) { map = m; } })",
     {
-      ...geometry, ...palette, ...style, ...sun, document, URLSearchParams, setInterval() {},
+      ...geometry, ...palette, ...style, ...sun, hasPlaceId, document, URLSearchParams, setInterval() {},
       window: { matchMedia: () => ({ matches: false }) }, location: { search: "", hash: "" },
       maplibregl: { Map: function () { return map; }, NavigationControl: class {} }
     }
@@ -62,6 +66,12 @@ function point(id, lng = 1, religion = "christian") {
     _vectorTileFeature: { extent: 4096, loadGeometry: () => [[{ x: 10, y: 20 }]] },
     geometry: { type: "Point", coordinates: [lng, 1] }
   };
+}
+
+function openFirstPillar(map) {
+  map.layers.add("pillars");
+  map.hits = [{ layer: { id: "pillars" }, properties: map.data.pillars.features[0].properties }];
+  map.handlers.click({ point: { x: 1, y: 1 } });
 }
 
 test("pillar refresh replaces a changed tail, updates coordinates and publishes empty data", async () => {
@@ -170,4 +180,48 @@ test("a different occurrence with the same source ID cannot inherit the selectio
   map.features = [point("shared", 2)];
   buildPillars();
   assert.equal(state.selected, null);
+
+  state.selected = map.data.pillars.features[0].properties.id;
+  map.features = [point("shared", 2.001), point("shared", 3)];
+  buildPillars();
+  assert.equal(state.selected, null);
+});
+
+test("an open card follows a unique source ID across tile precision changes", async () => {
+  const { map, state, startMap, buildPillars, get } = await lampsPage();
+  startMap();
+  map.features = [point(0)];
+  buildPillars();
+  openFirstPillar(map);
+  assert.equal(get("card").hidden, false);
+  const finer = point(0, 1.00012);
+  finer.tile = { z: 14, x: 8200, y: 8144 };
+  map.zoom = 14;
+  map.features = [finer];
+  buildPillars();
+  assert.equal(get("card").hidden, false);
+  assert.equal(state.selected, map.data.pillars.features[0].properties.id);
+  assert.deepEqual(map.data.selection.features[1].geometry.coordinates, finer.geometry.coordinates);
+  assert.match(get("card-main").href, /\/1\.00012$/);
+});
+
+test("an open card refreshes a revised start date without moving focus", async () => {
+  const { map, document, startMap, buildPillars, get } = await lampsPage();
+  startMap();
+  const original = point("A");
+  original.properties.start_date = "1920";
+  map.features = [original];
+  buildPillars();
+  openFirstPillar(map);
+  assert.equal(get("card-start").textContent, "1920");
+  get("card-main").focus();
+
+  for (const startDate of ["1952", undefined]) {
+    map.features = [{ ...original, properties: { ...original.properties, start_date: startDate } }];
+    buildPillars();
+    assert.equal(get("card-start").textContent, startDate ?? "");
+    assert.equal(get("card-start-row").hidden, startDate === undefined);
+    assert.equal(get("card").hidden, false);
+    assert.equal(document.activeElement, get("card-main"));
+  }
 });

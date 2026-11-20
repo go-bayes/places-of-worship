@@ -39,7 +39,7 @@
       <details id="how" class="how">
         <summary>How this is counted</summary>
         <ul id="how-lines" class="how-lines"></ul>
-        <p class="how-note">Every zoom-12 tile that touches the study area is read in full. Each mapped record is counted in its owning tile. Copies in neighbouring tile buffers are removed, and records outside the square are set aside. The map view never changes these numbers.</p>
+        <p class="how-note">The count uses every zoom-12 tile that touches the study area. A neighbouring tile can supply a record on a shared edge. The total excludes extra copies and records outside the study area. Panning and zooming leave the total unchanged.</p>
       </details>
 
       <div class="controls">

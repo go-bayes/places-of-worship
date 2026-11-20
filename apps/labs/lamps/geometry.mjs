@@ -39,6 +39,46 @@ export function hexagon([lng, lat], radius, rotation = 0) {
   return ring;
 }
 
+function worldPointKey({ tile, localX, localY, extent, properties }) {
+  const size = 2 ** tile.z;
+  const x = ((tile.x + localX / extent) % size) / size;
+  const y = (tile.y + localY / extent) / size;
+  return JSON.stringify([x, y, ...ownershipProperties.map((name) => properties[name] ?? null)]);
+}
+
+function replaceParentEdgeCopies(points) {
+  const edgeCounts = new Map();
+  for (const point of points) {
+    if (point.localX !== point.extent && point.localY !== point.extent) continue;
+    const key = worldPointKey(point);
+    if (!edgeCounts.has(key)) edgeCounts.set(key, new Map());
+    const byZoom = edgeCounts.get(key);
+    const { z } = point.tile;
+    byZoom.set(z, (byZoom.get(z) ?? 0) + 1);
+  }
+  if (!edgeCounts.size) return points;
+
+  // a child can supply a copy from its far edge before the owning child
+  // loads. use the largest finer count so copies across zooms count once.
+  const parentCounts = new Map();
+  return points.filter((point) => {
+    const key = worldPointKey(point);
+    const byZoom = edgeCounts.get(key);
+    if (!byZoom) return true;
+    const { z } = point.tile;
+    let finer = 0;
+    for (const [zoom, count] of byZoom) {
+      if (zoom > z) finer = Math.max(finer, count);
+    }
+    if (!finer) return true;
+
+    const parentKey = `${z}:${key}`;
+    const count = (parentCounts.get(parentKey) ?? 0) + 1;
+    parentCounts.set(parentKey, count);
+    return count > finer;
+  });
+}
+
 // MapLibre 6.19 source-query features retain their canonical tile and raw
 // geometry. Exact tile units decide ownership, including quantised edges.
 export function placesInTiles(features) {
@@ -68,9 +108,10 @@ export function placesInTiles(features) {
     }
     return true;
   });
-  owned.sort((a, b) => a.coords[0] - b.coords[0] || a.coords[1] - b.coords[1]);
+  const distinct = zooms.size > 1 ? replaceParentEdgeCopies(owned) : owned;
+  distinct.sort((a, b) => a.coords[0] - b.coords[0] || a.coords[1] - b.coords[1]);
   const occurrences = new Map();
-  return owned.map(({ coords, properties: props }) => {
+  return distinct.map(({ coords, properties: props }) => {
     // coordinates and attributes distinguish records that share a source id
     const group = JSON.stringify([
       hasPlaceId(props.id) ? String(props.id) : null,
