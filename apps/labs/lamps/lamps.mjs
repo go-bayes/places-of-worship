@@ -64,7 +64,8 @@ const state = {
   pendingSelect: null,
   profile: null,
   autoPitch: true,
-  lastAutoPitch: null
+  lastAutoPitch: null,
+  flying: false
 };
 
 // ---- webgl check -------------------------------------------------------
@@ -242,6 +243,8 @@ function pitchFor(zoom) {
 }
 
 function autoPitchTransform({ zoom, pitch }) {
+  // a flight sets its own pitch (see fly)
+  if (state.flying) return {};
   if (!state.autoPitch) {
     // over the globe the camera is always level, and leaving the city
     // hands pitch back to the zoom
@@ -282,8 +285,21 @@ function playIntro(center) {
 function fly(camera) {
   state.autoPitch = true;
   state.lastAutoPitch = null;
-  if (REDUCED_MOTION.matches) map.jumpTo(camera);
-  else map.flyTo({ ...camera, speed: 1.1, curve: 1.5, essential: false });
+  // a flight carries its own pitch to the tilt its destination zoom calls
+  // for. left to the per-frame transform, the flight's interpolated pitch
+  // (level, from the globe) reads as the visitor tilting the map, which
+  // switches the automatic tilt off and lands the city view flat
+  const target = { ...camera, pitch: pitchFor(camera.zoom ?? map.getZoom()) };
+  if (REDUCED_MOTION.matches) {
+    map.jumpTo(target);
+    return;
+  }
+  state.flying = true;
+  map.once("moveend", () => {
+    state.flying = false;
+    state.lastAutoPitch = map.getPitch();
+  });
+  map.flyTo({ ...target, speed: 1.1, curve: 1.5, essential: false });
 }
 
 // ---- scene tones by the sun -----------------------------------------------

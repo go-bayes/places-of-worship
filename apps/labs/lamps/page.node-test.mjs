@@ -49,7 +49,7 @@ async function lampsPage({ addProtocol = () => {}, fetch } = {}) {
   const source = await readFile(new URL("./lamps.mjs", import.meta.url), "utf8");
   const page = runInNewContext(
     source.slice(source.indexOf("const MAIN_MAP"), source.lastIndexOf("\nbuildChips();"))
-      + "\n({ state, buildPillars, updateScale, startMap, applyFilter, refreshPlacesList, setMap(m) { map = m; } })",
+      + "\n({ state, buildPillars, updateScale, startMap, applyFilter, refreshPlacesList, autoPitchTransform, setMap(m) { map = m; } })",
     {
       ...geometry, ...palette, ...style, ...sun, hasPlaceId, document, URLSearchParams, setInterval() {},
       window: { matchMedia: () => ({ matches: false }) }, location: { search: "", hash: "" },
@@ -103,9 +103,12 @@ test("pillar refresh replaces a changed tail, updates coordinates and publishes 
 });
 
 test("regional lights and retained low-zoom tiles fly without opening a place card", async () => {
-  const { state, map, startMap, updateScale, get } = await lampsPage();
+  const { state, map, startMap, updateScale, get, autoPitchTransform } = await lampsPage();
   const flights = [];
   map.flyTo = (camera) => flights.push(camera);
+  const landed = [];
+  map.once = (type, fn) => { if (type === "moveend") landed.push(fn); };
+  map.getPitch = () => 66;
   map.stop = () => {};
   startMap();
   map.layers.add("places-core");
@@ -123,6 +126,15 @@ test("regional lights and retained low-zoom tiles fly without opening a place ca
     assert.equal(state.selected, null);
   }
   assert.equal(flights.length, 3);
+  // a flight carries the tilt its destination zoom calls for, and the
+  // per-frame transform leaves the pitch alone until the flight lands
+  for (const flight of flights) assert.equal(flight.pitch, 66);
+  assert.equal(state.flying, true);
+  assert.equal(Object.keys(autoPitchTransform({ zoom: 9, pitch: 0 })).length, 0);
+  for (const fn of landed) fn();
+  assert.equal(state.flying, false);
+  assert.equal(state.lastAutoPitch, 66);
+  assert.equal(autoPitchTransform({ zoom: 15.2, pitch: 66 }).pitch, 66);
 });
 
 test("tradition filters apply while tiles load and close a hidden selection", async () => {
