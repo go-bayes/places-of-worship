@@ -29,7 +29,7 @@ import {
   panelTones,
   sceneTones
 } from "../shared/palette.mjs";
-import { buildStyle, PLACE_LAYERS, traditionFilter, pillarFilter, SCALE } from "./style.mjs";
+import { buildStyle, PLACE_LAYERS, traditionFilter, pillarFilter, traditionColor, SCALE } from "./style.mjs";
 import { metresPerPixel, pillarRadius, pillarHeight, hexagon, dedupeById } from "./geometry.mjs";
 
 const MAIN_MAP = "../../global/";
@@ -139,7 +139,7 @@ function homeCamera() {
 }
 
 function globeZoom() {
-  return PHONE.matches ? 0.9 : 1.75;
+  return PHONE.matches ? 1.05 : 1.85;
 }
 
 function startMap() {
@@ -164,6 +164,11 @@ function startMap() {
   map.addControl(new maplibregl.NavigationControl({ visualizePitch: true, showCompass: true }), "top-right");
 
   map.on("load", () => {
+    // a shared link without a tilt takes the pitch its zoom calls for
+    if (!/map=[^&]*\/[^&/]*\/[^&/]*\/[^&/]*\/[^&/]+/.test(location.hash)) {
+      map.jumpTo({ pitch: pitchFor(map.getZoom()) });
+      state.lastAutoPitch = map.getPitch();
+    }
     applyFilter();
     refreshAll();
     if (intro) playIntro(home.center);
@@ -179,27 +184,30 @@ function startMap() {
     if (e.sourceId === "overview" && e.isSourceLoaded && !state.clockSettled) refreshClock();
   });
   map.on("error", onMapError);
-  map.on("click", "crowns", (e) => {
-    const f = e.features && e.features[0];
-    if (f) select(String(f.properties.id), true);
-  });
-  map.on("click", "pillars", (e) => {
-    const f = e.features && e.features[0];
-    if (f) select(String(f.properties.id), true);
-  });
-  map.on("click", "places-core", (e) => {
-    const f = e.features && e.features[0];
-    if (!f || map.getZoom() >= 13) return;
-    state.pendingSelect = String(f.properties.id || "");
-    fly({ center: f.geometry.coordinates, zoom: 15.2 });
-  });
-  for (const layer of ["pillars", "crowns", "places-core"]) {
+  for (const layer of ["pillars", "crowns", "pools", "places-core"]) {
     map.on("mouseenter", layer, () => { map.getCanvas().style.cursor = "pointer"; });
     map.on("mouseleave", layer, () => { map.getCanvas().style.cursor = ""; });
   }
+  // one handler decides what a click meant: a pillar or its pool opens
+  // the card, a light further out flies to its place, anything else
+  // closes the card. a few pixels of slack make slender pillars easy to hit
   map.on("click", (e) => {
-    const hits = map.queryRenderedFeatures(e.point, { layers: ["pillars", "crowns", "places-core"] });
-    if (!hits.length) deselect();
+    const { x, y } = e.point;
+    const box = [[x - 6, y - 6], [x + 6, y + 6]];
+    const layers = ["crowns", "pillars", "pools", "places-core"].filter((id) => map.getLayer(id));
+    const hits = map.queryRenderedFeatures(box, { layers });
+    const pillar = hits.find((f) => f.layer.id !== "places-core");
+    if (pillar) {
+      select(String(pillar.properties.id), true);
+      return;
+    }
+    const light = hits.find((f) => f.layer.id === "places-core");
+    if (light && map.getZoom() < 13) {
+      state.pendingSelect = String(light.properties.id || "");
+      fly({ center: light.geometry.coordinates, zoom: 15.2 });
+      return;
+    }
+    deselect();
   });
 }
 
@@ -310,8 +318,15 @@ function applyScene() {
   // the shade fades as the base palette itself turns to night
   map.setGlobalStateProperty("shade", tEff);
 
-  // lights glow more in the dark
+  // lights glow more in the dark, and their cores pale a little toward
+  // white so they read as light rather than paint
   const dark = 1 - tEff;
+  const lift = Math.round(20 * (1 - t)) / 100;
+  if (lift !== state.lift) {
+    state.lift = lift;
+    set("overview-core", "circle-color", traditionColor(lift));
+    set("places-core", "circle-color", traditionColor(lift));
+  }
   set("overview-glow", "circle-opacity", 0.32);
   set("places-glow", "circle-opacity", ["interpolate", ["linear"], ["zoom"], 12.6, 0.12 + 0.4 * dark, 13.6, 0]);
   set("pools", "circle-opacity", 0.22 + 0.5 * dark);
@@ -324,7 +339,7 @@ function applyScene() {
     "sky-horizon-blend": 0.65,
     "horizon-fog-blend": 0.55,
     "fog-ground-blend": 0.8,
-    "atmosphere-blend": ["interpolate", ["linear"], ["zoom"], 0, 0.3, 5, 0.2, 8, 0]
+    "atmosphere-blend": ["interpolate", ["linear"], ["zoom"], 0, 0.2, 5, 0.12, 8, 0]
   });
   map.setLight(lightFor(sun, zoom, t));
 
@@ -548,7 +563,7 @@ function updateReadout() {
   track.style.setProperty("--pos", String(minutes / 1440));
   handle.setAttribute("aria-valuenow", String(Math.round(minutes)));
   handle.setAttribute("aria-valuetext", `${where} ${time}, ${words}`);
-  $("sun-now").setAttribute("aria-pressed", state.live ? "true" : "false");
+  // while the scene follows the clock there is nothing for "Now" to do
   $("sun-now").disabled = state.live;
 }
 
@@ -779,7 +794,7 @@ document.addEventListener("keydown", (e) => {
     deselect();
     map.getCanvas().focus();
   }
-  closeFlyMenu();
+  closeFlyMenu(true);
 });
 
 // ---- tradition chips --------------------------------------------------------
@@ -846,10 +861,12 @@ function buildFlyMenu() {
   });
 }
 
-function closeFlyMenu() {
+function closeFlyMenu(returnFocus = false) {
   if ($("fly-toggle").getAttribute("aria-expanded") !== "true") return;
+  const inside = $("fly-list").contains(document.activeElement);
   $("fly-toggle").setAttribute("aria-expanded", "false");
   $("fly-list").hidden = true;
+  if (returnFocus && inside) $("fly-toggle").focus();
 }
 
 // ---- about (the caption on a phone) ----------------------------------------

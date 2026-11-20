@@ -11,12 +11,16 @@ export const TILES = {
 
 const OSM_CREDIT = '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors';
 
-export const traditionColor = [
-  "match",
-  ["coalesce", ["get", "religion"], "unknown"],
-  ...TRADITIONS.filter((t) => t.key !== "other").flatMap((t) => [t.key, t.color]),
-  TRADITIONS.find((t) => t.key === "other").color
-];
+// lift > 0 moves every colour toward white, to read as light in the dark
+export function traditionColor(lift = 0) {
+  const c = (hex) => (lift > 0 ? mix(hex, "#ffffff", lift) : hex);
+  return [
+    "match",
+    ["coalesce", ["get", "religion"], "unknown"],
+    ...TRADITIONS.filter((t) => t.key !== "other").flatMap((t) => [t.key, c(t.color)]),
+    c(TRADITIONS.find((t) => t.key === "other").color)
+  ];
+}
 
 // pillars carry their tradition key already
 const pillarColor = [
@@ -173,10 +177,10 @@ export function buildStyle({ key, tones, nightData }) {
         "source-layer": "places_overview",
         maxzoom: 6.2,
         paint: {
-          "circle-color": traditionColor,
+          "circle-color": traditionColor(),
           "circle-blur": 1,
-          "circle-radius": ["interpolate", ["linear"], ["zoom"], 0, ["*", 2.4, weight], 3, ["*", 3.4, weight], 6, ["*", 5.5, weight]],
-          "circle-opacity": 0.3,
+          "circle-radius": ["interpolate", ["linear"], ["zoom"], 0, ["*", 1.8, weight], 3, ["*", 2.6, weight], 6, ["*", 5, weight]],
+          "circle-opacity": 0.2,
           "circle-pitch-alignment": "map"
         }
       },
@@ -187,8 +191,8 @@ export function buildStyle({ key, tones, nightData }) {
         "source-layer": "places_overview",
         maxzoom: 6.2,
         paint: {
-          "circle-color": traditionColor,
-          "circle-radius": ["interpolate", ["linear"], ["zoom"], 0, ["*", 0.75, weight], 3, ["*", 1.1, weight], 6, ["*", 1.8, weight]],
+          "circle-color": traditionColor(),
+          "circle-radius": ["interpolate", ["linear"], ["zoom"], 0, ["*", 0.55, weight], 3, ["*", 0.8, weight], 6, ["*", 1.6, weight]],
           "circle-opacity": ["interpolate", ["linear"], ["zoom"], 5.6, 0.95, 6.2, 0],
           "circle-stroke-width": 0.5,
           "circle-stroke-color": "rgba(29, 34, 51, 0.35)",
@@ -203,7 +207,7 @@ export function buildStyle({ key, tones, nightData }) {
         "source-layer": "places",
         minzoom: 5.6,
         paint: {
-          "circle-color": traditionColor,
+          "circle-color": traditionColor(),
           "circle-blur": 1,
           "circle-radius": ["interpolate", ["linear"], ["zoom"], 6, 6, 10, 10, 13, 16],
           "circle-opacity": ["interpolate", ["linear"], ["zoom"], 12.6, 0.3, 13.6, 0],
@@ -219,7 +223,7 @@ export function buildStyle({ key, tones, nightData }) {
         // stays on past the city fade, so the places tiles stay loaded for
         // the pillars that are built from them
         paint: {
-          "circle-color": traditionColor,
+          "circle-color": traditionColor(),
           "circle-radius": ["interpolate", ["linear"], ["zoom"], 6, 1.5, 10, 2.6, 13, 3.6],
           "circle-opacity": ["interpolate", ["linear"], ["zoom"], 5.6, 0, 6.2, 0.95, 12.6, 0.95, 13.6, 0],
           "circle-stroke-width": 0.5,
@@ -304,7 +308,11 @@ export function buildStyle({ key, tones, nightData }) {
         type: "symbol",
         source: "omt",
         "source-layer": "water_name",
-        filter: ["match", ["get", "class"], ["ocean", "sea", "lake", "bay"], true, false],
+        // oceans over the globe; seas, lakes and bays once a region fills the view
+        filter: ["any",
+          ["==", ["get", "class"], "ocean"],
+          ["all", [">=", ["zoom"], 3.5], ["match", ["get", "class"], ["sea", "lake", "bay"], true, false]]
+        ],
         layout: {
           "text-field": ["coalesce", ["get", "name:en"], ["get", "name"]],
           "text-font": sky,

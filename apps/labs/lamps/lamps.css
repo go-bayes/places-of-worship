@@ -10,9 +10,12 @@ body {
   transition: background-color 0.4s ease;
 }
 
+/* the map comes last in the document, so keyboard order meets the chrome
+   first; it sits beneath the chrome all the same */
 .map {
   position: fixed;
   inset: 0;
+  z-index: 0;
 }
 
 .maplibregl-canvas:focus-visible {
