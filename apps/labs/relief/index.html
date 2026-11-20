@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en-NZ">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Relief: religionmap.org labs</title>
+  <meta name="description" content="An experiment: the density and diversity of mapped places of worship across one city, in three dimensions, with complete counts.">
+  <meta name="robots" content="noindex">
+  <link rel="preload" href="../shared/fonts/source-sans-3-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link href="../vendor/maplibre-gl@6.19.0/maplibre-gl.css" rel="stylesheet">
+  <link href="../shared/labs.css" rel="stylesheet">
+  <link href="relief.css" rel="stylesheet">
+</head>
+<body>
+  <section id="sheet" class="sheet panel" aria-labelledby="sheet-title" data-folded="false">
+    <header class="sheet-head">
+      <nav aria-label="Breadcrumb">
+        <ol class="crumbs">
+          <li><a class="wordmark" href="../../global/">religionmap.org</a></li>
+          <li><a href="../">Labs</a></li>
+          <li><span id="sheet-title" aria-current="page">Relief</span></li>
+        </ol>
+      </nav>
+      <button id="fold" class="fold" type="button" aria-expanded="true" aria-controls="sheet-body">Hide controls</button>
+    </header>
+
+    <div class="count" aria-live="polite">
+      <p id="count-line" class="count-line">Reading tiles</p>
+      <p id="failure" class="failure" hidden>
+        <span id="failure-text"></span>
+        <button id="retry" class="button" type="button">Retry</button>
+      </p>
+    </div>
+
+    <div id="sheet-body" class="sheet-body">
+      <details id="how" class="how">
+        <summary>How this is counted</summary>
+        <ul id="how-lines" class="how-lines"></ul>
+        <p class="how-note">Every zoom-12 tile that touches the study area is read in full. A place carried by more than one tile is kept once, by its OpenStreetMap identifier, and a place outside the square is set aside. The map view never changes these numbers.</p>
+      </details>
+
+      <div class="controls">
+        <label class="field">
+          <span class="field-label">City</span>
+          <select id="city"></select>
+        </label>
+        <label class="field">
+          <span class="field-label">Study area</span>
+          <select id="area"></select>
+        </label>
+        <fieldset class="field segmented">
+          <legend class="field-label">Cell size</legend>
+          <div id="cell-sizes" class="segments"></div>
+        </fieldset>
+        <fieldset class="field segmented">
+          <legend class="field-label">Colour by</legend>
+          <div class="segments">
+            <label><input type="radio" name="by" value="traditions" checked><span>Traditions</span></label>
+            <label><input type="radio" name="by" value="diversity"><span>Diversity</span></label>
+          </div>
+        </fieldset>
+      </div>
+
+      <div id="legend" class="legend">
+        <div class="legend-scale" aria-hidden="true">
+          <div class="ref-column">
+            <span class="ref-mark" data-n="10"><span>10</span></span>
+            <span class="ref-mark" data-n="5"><span>5</span></span>
+            <span class="ref-mark" data-n="1"><span>1</span></span>
+          </div>
+        </div>
+        <div class="legend-body">
+          <p id="height-note" class="legend-note"></p>
+          <ul id="legend-traditions" class="legend-list"></ul>
+          <div id="legend-diversity" class="legend-diversity" hidden>
+            <p class="legend-note">Diversity: how evenly the classified places in a cell are spread across traditions.</p>
+            <div class="ramp" aria-hidden="true"></div>
+            <p class="ramp-ends"><span>0 bits, one tradition</span><span>2 bits or more, many</span></p>
+            <p class="legend-note"><span class="swatch swatch-none" aria-hidden="true"></span> No place in the cell has a recorded tradition</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="views">
+        <button id="flat" class="button" type="button" aria-pressed="false">Flat view</button>
+        <button id="table-open" class="button" type="button" aria-controls="table-panel" aria-expanded="false">Table</button>
+      </div>
+
+      <p class="sheet-credits"><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a>, <a href="https://www.maptiler.com/copyright/" target="_blank" rel="noopener">© MapTiler</a>, <a href="https://www.openmaptiles.org/" target="_blank" rel="noopener">© OpenMapTiles</a>. Project compilation <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a>.</p>
+      <p class="caption">Columns count places of worship mapped in OpenStreetMap (July 2026 snapshot), not worshippers. Where mapping is sparse, columns are lower.</p>
+    </div>
+  </section>
+
+  <aside id="card" class="card panel" aria-labelledby="card-title" hidden>
+    <button id="card-close" class="card-close" type="button" aria-label="Close cell details">Close</button>
+    <h2 id="card-title" class="card-title" tabindex="-1"></h2>
+    <div id="card-text" class="card-text"></div>
+  </aside>
+
+  <section id="table-panel" class="table-panel panel" aria-labelledby="table-title" hidden>
+    <header class="table-head">
+      <h2 id="table-title" tabindex="-1">Cells in the study area</h2>
+      <button id="table-close" class="button" type="button">Close table</button>
+    </header>
+    <p id="table-caption" class="table-caption"></p>
+    <div class="table-scroll">
+      <table id="cells-table">
+        <thead><tr id="table-headrow"></tr></thead>
+        <tbody id="table-body"></tbody>
+        <tfoot><tr id="table-foot"></tr></tfoot>
+      </table>
+    </div>
+  </section>
+
+  <footer class="credits">
+    <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a>
+    <a href="https://www.maptiler.com/copyright/" target="_blank" rel="noopener">© MapTiler</a>
+    <a href="https://www.openmaptiles.org/" target="_blank" rel="noopener">© OpenMapTiles</a>
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener">Project compilation CC BY-NC-SA 4.0</a>
+  </footer>
+
+  <div id="no-webgl" class="no-webgl-message panel" role="alert" hidden>
+    <h2>The 3D map cannot run here</h2>
+    <p id="no-webgl-reason"></p>
+    <p>The counts and the table below the controls work without it.</p>
+  </div>
+
+  <div id="map" class="map"></div>
+
+  <noscript>
+    <div class="no-webgl-message panel">
+      <h2>Relief needs JavaScript</h2>
+      <p>The main map shows the same places. <a href="../../global/">Open the main map</a></p>
+    </div>
+  </noscript>
+
+  <script src="../../global/config.public.js"></script>
+  <script type="module" src="relief.mjs"></script>
+</body>
+</html>
