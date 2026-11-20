@@ -250,41 +250,6 @@
             color: var(--ink);
         }
 
-        .chooser-option {
-            width: 100%;
-            text-align: left;
-            display: grid;
-            gap: 4px;
-            padding: 12px 14px;
-            min-height: 64px;
-            border: 1px solid var(--action);
-            border-radius: var(--r-sm);
-            background: var(--panel);
-            color: var(--ink);
-            cursor: pointer;
-            font-weight: 400;
-            line-height: 1.4;
-        }
-
-        .chooser-option strong {
-            font-size: var(--fs-md);
-            color: var(--action);
-        }
-
-        .chooser-option span {
-            font-size: var(--fs-sm);
-            color: var(--ink);
-        }
-
-        .chooser-option:hover {
-            background: var(--action-soft);
-        }
-
-        .chooser-option:focus-visible {
-            outline: 3px solid var(--action);
-            outline-offset: 2px;
-        }
-
         /* per-mode bar: names the activity and offers the way back */
         .portal-mode-bar {
             display: flex;
@@ -1283,17 +1248,6 @@
             border-radius: var(--r-sm);
         }
 
-        .pin-locate-me {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin: 6px 0 8px;
-        }
-
-        .pin-locate-me .copy-help {
-            margin: 0;
-        }
-
         .pin-locate-row {
             display: grid;
             grid-template-columns: 1fr auto;
@@ -1628,10 +1582,6 @@
            action button keeps its one blue meaning (ui-style-guide) */
         .portal-mode-bar.mode-add {
             background: var(--entry-soft);
-            color: var(--entry);
-        }
-
-        .chooser-option#chooseAddButton strong {
             color: var(--entry);
         }
 
@@ -1977,18 +1927,6 @@
             border-color: var(--control-line);
         }
 
-        .backend-badge {
-            display: inline-block;
-            margin-left: 6px;
-            padding: 1px 6px;
-            border-radius: var(--r-sm);
-            background: var(--action-soft);
-            color: var(--ink);
-            border: 1px solid var(--line);
-            font-size: var(--fs-xs);
-            font-weight: 600;
-        }
-
         .session-panel summary {
             cursor: pointer;
             font-size: var(--fs-sm);
@@ -2185,30 +2123,6 @@
             background: var(--caution-soft);
             border-color: var(--caution-strong);
             color: var(--caution);
-        }
-
-        .skip-badge {
-            display: inline-block;
-            margin-left: 6px;
-            padding: 1px 6px;
-            border-radius: var(--r-sm);
-            background: var(--caution-soft);
-            color: var(--caution);
-            border: 1px solid var(--caution-strong);
-            font-size: var(--fs-xs);
-            font-weight: 600;
-        }
-
-        .closed-badge {
-            display: inline-block;
-            margin-left: 6px;
-            padding: 1px 6px;
-            border-radius: var(--r-sm);
-            background: var(--present-soft);
-            color: var(--present);
-            border: 1px solid var(--present);
-            font-size: var(--fs-xs);
-            font-weight: 600;
         }
 
         #map {
