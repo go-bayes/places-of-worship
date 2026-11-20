@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-11-20 (country portal redirects share one script)
+
+- The contributor and reviewer redirect pages of the 22 countries outside New Zealand now load one shared script, `apps/regions/_shared/portal-redirect.js`, in place of 44 inline copies. Addresses, query strings and the no-JavaScript link behave as before. A URL fragment is now carried through the redirect; the inline scripts dropped it.
+
 ### 2026-11-16 (review rulings carried into the standing documents)
 
 - `docs/ai-assisted-research.md`, `docs/portal-claude-batch-review.md`, the "How human review decides" section of `docs/confidence-standard.md`, `docs/development/human-review-and-release.md` and the agent-assisted lane of `docs/portal-free-contribution-design.md` now state JB's review rulings of 2026-11-16 as recorded in the publication pipeline brief: an agent may author the ordinary draft through a deterministic conversion, the named reviewer may be an agent from another provider, free text is withheld from public outputs unless chosen and cleared by a person, batch release by the lead replaces per-item acceptance once it passes its tests, and a named person authorises every release. Each passage keeps the ruling apart from current behaviour, which is still per-item human preparation, review and PI acceptance until that pipeline work is built.
