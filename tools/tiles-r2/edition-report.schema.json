@@ -38,7 +38,7 @@
         "edition_candidates_by_country_and_basis", "edition_candidates_by_country_method",
         "without_geometry_by_basis", "incomplete_geometry_by_basis",
         "missing_member_geometry_by_basis", "cyclic_geometry_by_basis", "main",
-        "possible_layer_features", "country_comparison", "boundary_comparison", "extract_hashes",
+        "possible_layer_features", "possible_by_country", "country_comparison", "boundary_comparison", "extract_hashes",
         "osm_boundary", "osm_overlaps", "buildings_withheld"
       ],
       "properties": {
@@ -65,6 +65,7 @@
           }
         },
         "possible_layer_features": {"$ref": "#/$defs/count"},
+        "possible_by_country": {"$ref": "#/$defs/countries"},
         "country_comparison": {
           "type": "object",
           "additionalProperties": false,
@@ -116,7 +117,11 @@
             "buffer_metres": {"type": "number", "exclusiveMinimum": 0}
           }
         },
-        "extract_hashes": {"$ref": "#/$defs/hashes"}
+        "extract_hashes": {
+          "$ref": "#/$defs/hashes",
+          "required": ["candidates_pbf", "osm_iso_boundaries", "edition.ndjson", "places.ndjson", "places-possible.ndjson"],
+          "maxProperties": 5
+        }
       }
     },
     "zoom": {
@@ -161,7 +166,23 @@
         "status": {"const": "passed"},
         "snapshot": {"type": "string", "pattern": "^[0-9]{8}$"},
         "provenance": {"type": "object"},
-        "boundary": {"type": "object"},
+        "boundary": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["osm", "dataset", "version", "sha256", "nearest_km", "unassigned_code"],
+          "properties": {
+            "osm": {"$ref": "#/$defs/osm-boundary"},
+            "dataset": {"const": "ne_10m_admin_0_map_units"},
+            "version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+            "sha256": {
+              "$ref": "#/$defs/hashes",
+              "required": ["ne_10m_admin_0_map_units.shp", "ne_10m_admin_0_map_units.dbf"],
+              "maxProperties": 2
+            },
+            "nearest_km": {"const": 25},
+            "unassigned_code": {"const": "ZZ"}
+          }
+        },
         "sample_only": {"type": "boolean"},
         "software_versions": {"type": "object", "additionalProperties": {"type": "string"}},
         "inputs": {"$ref": "#/$defs/input-stats"},

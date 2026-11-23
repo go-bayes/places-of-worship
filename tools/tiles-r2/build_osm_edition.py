@@ -22,7 +22,7 @@ from build_census_tiles import replace_metadata
 from build_tiles_v2 import _sha256
 from extract_osm_edition import (
     FILES, FILTER_RULES, JULY_STATS, OSM_TYPES, PUBLIC_OPTIONAL, PUBLIC_REQUIRED,
-    UNKNOWN_COUNTRY, check_reconstruction, check_timestamp, classify, edition_source,
+    UNKNOWN_COUNTRY, check_reconstruction, check_release_version, check_timestamp, classify, edition_source,
     json_line, public_properties, read_json, write_json,
 )
 from scrub_build_records import LEAK
@@ -42,7 +42,7 @@ REPORT_SCHEMA = Path(__file__).with_name("edition-report.schema.json")
 VERSION = re.compile(r"v?[0-9]+\.[0-9]+\.[0-9]+(?:[a-z]+[0-9]+|[.][a-z0-9]+|[-+][a-z0-9.]+)?")
 VERSION_FIELDS = frozenset({
     "osmium_cli", "python", "osmium", "shapely", "pyshp", "tippecanoe",
-    "pmtiles_cli", "validation_python", "mapbox-vector-tile", "pmtiles", "jsonschema",
+    "pmtiles_cli", "pmtiles_cli_package", "validation_python", "mapbox-vector-tile", "pmtiles", "jsonschema",
 })
 PRIVATE_KEY = re.compile(r"(?:build[_-])?host(?:name)?|(?:user|account)[_-]?(?:id|name)")
 PRIVATE_PATH = re.compile(r"/(?:Users|home|private|var|tmp|Volumes|mnt|root|opt|srv|etc)/|(?<![\w.])~/|[A-Za-z]:\\")
@@ -656,6 +656,9 @@ def check_versions(versions, permitted):
     for key, value in versions.items():
         if not isinstance(value, str):
             raise ValueError("invalid tool version format in provenance")
+        if key == "pmtiles_cli_package":
+            check_release_version(value, key)
+            continue
         if key == "osmium_cli":
             valid = re.fullmatch(r"v?[0-9]+\.[0-9]+\.[0-9]+", value)
         else:
@@ -686,8 +689,11 @@ def provenance(a, stats):
     if source != stats["source"]:
         raise ValueError("provenance source or timestamp differs from the extraction")
     fields = {"planet_file", "planet_md5", "change_sequences", "input_sha256"} if p["source_kind"] == "planet" else {"sample_source"}
-    if set(p) != common | fields:
+    if set(p) - {"pmtiles_package_release"} != common | fields:
         raise ValueError("invalid edition provenance fields")
+    if "pmtiles_package_release" in p:
+        check_release_version(p["pmtiles_package_release"], "pmtiles_package_release")
+    check_release_version(p["boundary_version"], "boundary_version")
     check_versions(p["tool_versions"], {"osmium_cli"})
     if (p["filter_rules"] != stats["filter_rules"] or p["filter_rules"] != FILTER_RULES
             or p["boundary_version"] != stats["boundary"]["version"]):
@@ -703,8 +709,10 @@ def provenance(a, stats):
                 or "osmium_cli" not in p["tool_versions"]):
             raise ValueError("invalid planet filename, checksum, change sequences, snapshot or tool versions")
         check_reconstruction(p, stats["hashes"])
-    elif not re.fullmatch(r"[A-Za-z0-9_.-]+\.osm\.pbf", p["sample_source"]):
+    elif not isinstance(p["sample_source"], str) or not re.fullmatch(r"[A-Za-z0-9_.-]+\.osm\.pbf", p["sample_source"]):
         raise ValueError("invalid sample filename")
+    # sample filenames can contain local identifiers and are unnecessary in a public record.
+    p.pop("sample_source", None)
     boundary = stats["boundary"]["osm"]
     return {**p, "osm_boundaries": {
         "source": "OpenStreetMap",
@@ -729,6 +737,7 @@ def summary(stats, main, possible):
         "cyclic_geometry_by_basis": {basis: len(ids) for basis, ids in stats["cyclic_geometry"].items()},
         "main": {"total": len(main), "by_country": by_country, "by_religion": public_religions(composition(main))},
         "possible_layer_features": len(possible),
+        "possible_by_country": country_counts(possible),
         "country_comparison": {
             "july_codes": len(july), "edition_codes": len(by_country),
             "retained_codes": len(by_country.keys() & july.keys()),
@@ -773,19 +782,35 @@ def validate(a):
     tools = {**edition_provenance["tool_versions"], **stats["software_versions"], **info["software_versions"],
              "validation_python": platform.python_version(),
              **{package: version(package) for package in ("mapbox-vector-tile", "pmtiles", "jsonschema")}}
+    if "pmtiles_package_release" in edition_provenance:
+        tools["pmtiles_cli_package"] = edition_provenance["pmtiles_package_release"]
     check_versions(tools, VERSION_FIELDS)
     report = {
         "status": "passed", "snapshot": a.snapshot, "sample_only": sample, "provenance": edition_provenance,
         "boundary": stats["boundary"],
         "software_versions": tools, "inputs": inputs, "archives": files, "grid_cell_css_pixels": info["cell_px"],
     }
-    check_public_record(report)
+    check_edition_records({"validation-report": report})
     report_path = a.work / "validation-report.json"
     write_json(report_path, report)
     write_json(a.work / "validation-receipt.json", {"inputs": hashes, "report_sha256": _sha256(report_path)})
 
 
-def manifest(a):
+def check_edition_records(documents):
+    import jsonschema
+
+    definitions = read_json(REPORT_SCHEMA)["$defs"]
+    for kind, document in documents.items():
+        jsonschema.Draft202012Validator({"$ref": f"#/$defs/{kind}", "$defs": definitions}).validate(document)
+        check_public_record(document)
+
+
+def country_counts_from_ndjson(path):
+    with path.open(encoding="utf-8") as source:
+        return Counter(json.loads(line)["properties"]["country_code"] for line in source)
+
+
+def manifest_records(a):
     import jsonschema
 
     hashes, stats = bound_inputs(a)
@@ -793,9 +818,21 @@ def manifest(a):
     report = read_json(report_path)
     receipt = read_json(a.work / "validation-receipt.json")
     if (report["status"] != "passed" or report["snapshot"] != a.snapshot
-            or receipt != {"inputs": hashes, "report_sha256": _sha256(report_path)}
-            or report["provenance"] != provenance(a, stats)):
+            or receipt != {"inputs": hashes, "report_sha256": _sha256(report_path)}):
         raise ValueError("edition inputs changed after validation")
+    # earlier sample reports retained the basename. the receipt binds the original input file.
+    report["provenance"].pop("sample_source", None)
+    if report["provenance"] != provenance(a, stats) or report["boundary"] != stats["boundary"]:
+        raise ValueError("edition provenance differs from the validation report")
+    release = getattr(a, "pmtiles_package_release", None)
+    if release is not None:
+        check_release_version(release, "pmtiles_package_release")
+        recorded = report["provenance"].get("pmtiles_package_release", release)
+        if recorded != release:
+            raise ValueError("PMTiles package release differs from the validation record")
+        report["provenance"]["pmtiles_package_release"] = release
+        report["software_versions"]["pmtiles_cli_package"] = release
+    check_versions(report["software_versions"], VERSION_FIELDS)
     tracked = Path(__file__).resolve().parent / "manifests"
     if report["provenance"]["source_kind"] == "sample" and a.manifest_dir.resolve().is_relative_to(tracked):
         raise ValueError("sample manifests require a work directory outside the tracked manifest directory")
@@ -803,7 +840,26 @@ def manifest(a):
         if _sha256(a.work / "out" / f"{name}.pmtiles") != record["sha256"]:
             raise ValueError(f"{name}: archive changed after validation")
 
-    def make_manifest(dataset, archives, counts, snapshot_date):
+    inputs = report["inputs"]
+    by_country = country_counts_from_ndjson(a.edition / FILES["tag"])
+    possible_by_country = country_counts_from_ndjson(a.edition / FILES["building"])
+    if by_country != inputs["main"]["by_country"] or sum(by_country.values()) != inputs["main"]["total"]:
+        raise ValueError("published main countries disagree with validation")
+    if (sum(possible_by_country.values()) != inputs["possible_layer_features"]
+            or possible_by_country != inputs.get("possible_by_country", possible_by_country)):
+        raise ValueError("published extras countries disagree with validation")
+    inputs["possible_by_country"] = dict(possible_by_country)
+    sample = report["sample_only"]
+    archive_stats = report["archives"]
+    if set(archive_stats) != set(layout(a.snapshot, by_country, bool(possible_by_country), sample)):
+        raise ValueError("validated archive names disagree with the published country coverage")
+    overview, places, possible = edition_names(a.snapshot, sample)
+
+    def make_manifest(dataset, counts, countries):
+        archives = {name: archive_stats[name] for name in counts}
+        snapshot_date = report["provenance"]["edition_timestamp"][:10]
+        scope = {"level": "global", "snapshot_date": snapshot_date, "pipeline_stage": "staged",
+                 "country_codes": sorted(countries)}
         missing = report["inputs"]["without_geometry_by_basis"]
         warnings = [f"{missing[basis]} {basis} candidates have no usable geometry and remain in the private edition."
                     for basis in ("tag", "building") if missing.get(basis)]
@@ -822,7 +878,7 @@ def manifest(a):
             "bytes": record["bytes"], "sha256": record["sha256"], "feature_count": counts[name],
             "notes": "Validated build output. Archive availability is recorded separately.",
         } for name, record in archives.items()]
-        identity = {"parameters": parameters, "files": files, "hashes": hashes,
+        identity = {"scope": scope, "parameters": parameters, "files": files, "hashes": hashes,
                     "software_versions": report["software_versions"]}
         ident = hashlib.sha256(json_line(identity).encode("utf-8")).hexdigest()
         return {
@@ -830,8 +886,7 @@ def manifest(a):
             "manifest_id": f"manifest:{dataset}-{ident[:12]}", "dataset_id": dataset,
             "dataset_version_id": f"{dataset}:{ident[:16]}", "dataset_family": "places-tiles",
             "dataset_role": "public_product",
-            "scope": {"level": "global", "snapshot_date": snapshot_date, "pipeline_stage": "staged",
-                      "country_codes": sorted(report["inputs"]["main"]["by_country"])},
+            "scope": scope,
             "created_at": datetime.now(timezone.utc).isoformat(timespec="seconds"), "created_by": "Places of Worship project",
             "source": {"provider": "OpenStreetMap and Natural Earth", "licence": "ODbL 1.0 (OpenStreetMap)"},
             "pipeline": {
@@ -850,27 +905,28 @@ def manifest(a):
 
     schema = read_json(SCHEMA)
     validator = jsonschema.Draft202012Validator(schema, format_checker=jsonschema.FormatChecker())
-    archive_stats = report["archives"]
-    by_country = report["inputs"]["main"]["by_country"]
-    sample = report["sample_only"]
-    overview, places, possible = edition_names(a.snapshot, sample)
-    ra_counts = {ra_name(a.snapshot, cc, sample): count for cc, count in by_country.items()}
-    archives = [(overview, {overview: sum(by_country.values())}), (places, {places: sum(by_country.values())}),
-                (f"ra-dots-{a.snapshot}" + ("-sample" if sample else ""), ra_counts)]
+    ra_counts = {ra_name(a.snapshot, cc, sample): by_country[cc] for cc in sorted(by_country)}
+    archives = [(overview, {overview: inputs["main"]["total"]}, by_country),
+                (places, {places: inputs["main"]["total"]}, by_country),
+                (f"ra-dots-{a.snapshot}" + ("-sample" if sample else ""), ra_counts, by_country)]
     if possible in archive_stats:
-        archives.append((possible, {possible: report["inputs"]["possible_layer_features"]}))
+        archives.append((possible, {possible: inputs["possible_layer_features"]}, possible_by_country))
     records = {}
-    for dataset, counts in archives:
-        doc = make_manifest(dataset, {name: archive_stats[name] for name in counts}, counts,
-                            report["provenance"]["edition_timestamp"][:10])
+    for dataset, counts, countries in archives:
+        doc = make_manifest(dataset, counts, countries)
         validator.validate(doc)
         records[f"{dataset}.manifest.json"] = doc
 
-    checks = read_json(REPORT_SCHEMA)
-    for kind, document in (("input-stats", report["inputs"]), ("validation-report", report)):
-        jsonschema.Draft202012Validator({"$ref": f"#/$defs/{kind}", "$defs": checks["$defs"]}).validate(document)
+    reports = {"input-stats": inputs, "validation-report": report}
+    check_edition_records(reports)
+    for kind, document in reports.items():
         records[f"{kind}-osm-edition-{a.snapshot}.json"] = document
     check_public_record(records)
+    return records
+
+
+def manifest(a):
+    records = manifest_records(a)
     a.manifest_dir.mkdir(parents=True, exist_ok=True)
     for filename, document in records.items():
         write_json(a.manifest_dir / filename, document)
@@ -889,7 +945,10 @@ def main():
     parser.add_argument("--manifest-dir", type=Path,
                         default=Path(__file__).parent / "manifests")
     parser.add_argument("--git-commit")
+    parser.add_argument("--pmtiles-package-release", help="installed PMTiles converter release for manifest provenance")
     a = parser.parse_args()
+    if a.pmtiles_package_release is not None and a.stage not in ("manifest", "all"):
+        parser.error("--pmtiles-package-release applies to manifest generation")
     try:
         if not re.fullmatch(r"[0-9]{8}", a.snapshot):
             raise ValueError("snapshot must be yyyymmdd")

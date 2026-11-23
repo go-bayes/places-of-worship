@@ -582,3 +582,94 @@ class TestEditionRules(unittest.TestCase):
                 build.check_public_record({"pipeline": {"software_versions": {"build_host": "review-host"}}})
             with self.assertRaisesRegex(ValueError, "private path"):
                 build.check_public_record({"source": {"citation": "/home/operator/reconstruction"}})
+
+    def test_matching_non_numeric_boundary_version_fails(self):
+        with tempfile.TemporaryDirectory() as work:
+            a = fixture(Path(work), [public_feature()], [])
+            stats = extract.read_json(a.edition / "edition-stats.json")
+            stats["boundary"]["version"] = "review-host"
+            p = extract.read_json(a.provenance)
+            extract.write_json(a.provenance, {**p, "boundary_version": "review-host"})
+            with self.assertRaisesRegex(ValueError, "boundary_version must be a numeric release"):
+                build.provenance(a, stats)
+
+    def test_sample_basename_stays_private_and_package_release_is_validated(self):
+        with tempfile.TemporaryDirectory() as work:
+            a = fixture(Path(work), [public_feature()], [])
+            stats = extract.read_json(a.edition / "edition-stats.json")
+            p = {**extract.read_json(a.provenance), "sample_source": "review-host.osm.pbf"}
+            extract.write_json(a.provenance, {**p, "pmtiles_package_release": "1.31.2"})
+            public = build.provenance(a, stats)
+            self.assertNotIn("sample_source", public)
+            self.assertEqual(public["pmtiles_package_release"], "1.31.2")
+            extract.write_json(a.provenance, {**p, "pmtiles_package_release": "review-host"})
+            with self.assertRaisesRegex(ValueError, "pmtiles_package_release must be a numeric release"):
+                build.provenance(a, stats)
+
+    @unittest.skipUnless(has_packages("jsonschema"), "jsonschema unavailable")
+    def test_regenerate_legacy_receipt_with_correct_scopes_and_package_release(self):
+        with tempfile.TemporaryDirectory() as work:
+            main = [public_feature(1, "NZ"), public_feature(2, "US")]
+            extras = [public_feature(3, "NZ"), public_feature(4, "UM")]
+            a = fixture(Path(work), main, extras)
+            a.manifest_dir = Path(work) / "manifests"
+            a.git_commit = None
+            a.pmtiles_package_release = "1.31.2"
+            stats_path = a.edition / "edition-stats.json"
+            stats = extract.read_json(stats_path)
+            osm = stats["boundary"]["osm"]
+            osm.update(bytes=10, vertex_count=8, invalid_polygons=0, by_code={"NZ": 1, "US": 1},
+                       additional_boundary_codes={}, missing_july_codes={})
+            stats["boundary"].update(dataset=extract.BOUNDARY_NAME, nearest_km=extract.NEAREST_KM,
+                                     unassigned_code=extract.UNKNOWN_COUNTRY,
+                                     sha256={extract.BOUNDARY_NAME + ext: "b"*64 for ext in (".shp", ".dbf")})
+            stats["hashes"].update(candidates_pbf="c"*64, osm_iso_boundaries=osm["sha256"])
+            stats.update(by_basis={"tag": 2, "building": 2}, by_object_type={"node": 4},
+                         by_country_and_basis={}, by_country_method={"osm": 4}, boundary_comparison={},
+                         osm_overlaps={"records": 0, "by_pair": {}},
+                         buildings_withheld={"total": 0, "by_country": {}, "buffer_metres": 10})
+            extract.write_json(stats_path, stats)
+            hashes, _ = build.bound_inputs(a)
+            main_places, possible_places = build.input_sets(a, stats)
+            inputs = build.summary(stats, main_places, possible_places)
+            del inputs["possible_by_country"]
+            report = {"status": "passed", "snapshot": a.snapshot, "sample_only": True, "inputs": inputs,
+                      "boundary": stats["boundary"], "provenance": {
+                          **build.provenance(a, stats), "sample_source": "fixture.osm.pbf"
+                      }, "software_versions": {"pmtiles_cli": "dev"}, "grid_cell_css_pixels": {}, "archives": {}}
+            out = a.work / "out"
+            out.mkdir(parents=True)
+            for name in build.layout(a.snapshot, ["NZ", "US"], True, sample=True):
+                path = out / f"{name}.pmtiles"
+                path.write_bytes(name.encode("ascii"))
+                report["archives"][name] = {"bytes": path.stat().st_size, "sha256": build._sha256(path),
+                                            "zooms": {}, "edge_features_processed": 0}
+            report_path = a.work / "validation-report.json"
+            extract.write_json(report_path, report)
+            report_sha = build._sha256(report_path)
+            receipt_path = a.work / "validation-receipt.json"
+            extract.write_json(receipt_path, {"inputs": hashes, "report_sha256": report_sha})
+            original_receipt = receipt_path.read_bytes()
+
+            build.manifest(a)
+
+            for path in sorted(a.manifest_dir.glob("*.manifest.json")):
+                doc = extract.read_json(path)
+                self.assertEqual(doc["scope"]["country_codes"], ["NZ", "UM"] if "possible" in path.name else ["NZ", "US"])
+                self.assertEqual(doc["pipeline"]["parameters"]["provenance"]["pmtiles_package_release"], "1.31.2")
+                self.assertEqual(doc["pipeline"]["software_versions"], {"pmtiles_cli": "dev", "pmtiles_cli_package": "1.31.2"})
+                for file in doc["durable_files"]:
+                    self.assertEqual(file["sha256"], build._sha256(out / file["uri"].split(":", 1)[1]))
+            regenerated = extract.read_json(a.manifest_dir / f"validation-report-osm-edition-{a.snapshot}.json")
+            self.assertEqual(regenerated["inputs"]["possible_by_country"], {"NZ": 1, "UM": 1})
+            self.assertEqual(build._sha256(report_path), report_sha)
+            self.assertEqual(receipt_path.read_bytes(), original_receipt)
+            self.assertEqual(build._sha256(a.provenance), hashes["provenance"])
+            self.assertEqual(len(list(a.manifest_dir.iterdir())), 6)
+            a.pmtiles_package_release = "review-host"
+            with self.assertRaisesRegex(ValueError, "pmtiles_package_release must be a numeric release"):
+                build.manifest_records(a)
+            a.pmtiles_package_release = "1.31.2"
+            next(out.glob("*.pmtiles")).write_bytes(b"changed archive")
+            with self.assertRaisesRegex(ValueError, "archive changed after validation"):
+                build.manifest_records(a)

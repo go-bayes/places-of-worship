@@ -1,11 +1,11 @@
 {
   "$schema": "../../../schemas/data-manifest.schema.json",
-  "created_at": "2026-11-23T08:15:33+00:00",
+  "created_at": "2026-11-23T08:28:15+00:00",
   "created_by": "Places of Worship project",
   "dataset_family": "places-tiles",
   "dataset_id": "places-overview-v2-20260901-grid",
   "dataset_role": "public_product",
-  "dataset_version_id": "places-overview-v2-20260901-grid:478d7a37d028ac79",
+  "dataset_version_id": "places-overview-v2-20260901-grid:3093584bf0045241",
   "downstream_status": "staged",
   "durable_files": [
     {
@@ -19,7 +19,7 @@
     }
   ],
   "licence_status": "needs_review",
-  "manifest_id": "manifest:places-overview-v2-20260901-grid-478d7a37d028",
+  "manifest_id": "manifest:places-overview-v2-20260901-grid-3093584bf004",
   "pipeline": {
     "command": "python tools/tiles-r2/build_osm_edition.py all --edition <edition> --work <work> --provenance <provenance.json> --pbf <candidates.pbf> --osm-boundaries <osm.geojsonseq> --snapshot <yyyymmdd>",
     "git_commit": "80ae9ea30b5f4e489193b8da5c9c0927f29d349a",
@@ -400,6 +400,7 @@
         },
         "planet_file": "planet-260831.osm.pbf",
         "planet_md5": "c67437924cf55de40e8708c7192f354d",
+        "pmtiles_package_release": "1.31.2",
         "source_kind": "planet",
         "tool_versions": {
           "osmium_cli": "1.19.1"
@@ -437,6 +438,7 @@
       "osmium_cli": "1.19.1",
       "pmtiles": "3.8.1",
       "pmtiles_cli": "dev",
+      "pmtiles_cli_package": "1.31.2",
       "pyshp": "3.1.9",
       "python": "3.12.13",
       "shapely": "2.2.0",

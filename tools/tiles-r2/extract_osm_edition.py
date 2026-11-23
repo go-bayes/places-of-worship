@@ -62,6 +62,11 @@ def read_json(path):
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def check_release_version(value, field):
+    if not isinstance(value, str) or not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", value):
+        raise ValueError(f"{field} must be a numeric release version")
+
+
 def edition_source(provenance):
     kind = provenance.get("source_kind")
     stamp = provenance.get("edition_timestamp")
@@ -627,6 +632,11 @@ def extract(pbf, boundaries, osm_boundaries, work, provenance):
 
     source = edition_source(provenance)
     selected = boundary_path(boundaries, BOUNDARY_NAME)
+    boundary_version = selected.with_suffix(".VERSION.txt").read_text(encoding="utf-8").strip()
+    check_release_version(boundary_version, "boundary_version")
+    check_release_version(provenance.get("boundary_version"), "boundary_version")
+    if provenance["boundary_version"] != boundary_version:
+        raise ValueError("boundary version differs from Natural Earth release")
     work.mkdir(parents=True, exist_ok=True)
     july = read_json(JULY_STATS)["by_country"]
     osm, osm_metadata = OsmBoundaries.load(osm_boundaries, july)
@@ -639,7 +649,7 @@ def extract(pbf, boundaries, osm_boundaries, work, provenance):
     stats["boundary"] = {
         "osm": osm_metadata,
         "dataset": BOUNDARY_NAME,
-        "version": selected.with_suffix(".VERSION.txt").read_text(encoding="utf-8").strip(),
+        "version": boundary_version,
         "sha256": {selected.with_suffix(ext).name: _sha256(selected.with_suffix(ext))
                    for ext in (".shp", ".dbf")},
         "nearest_km": NEAREST_KM, "unassigned_code": UNKNOWN_COUNTRY,
