@@ -12,6 +12,7 @@ conditional PUT. It verifies the size and SHA-256 of each uploaded object by rea
 it back from R2.
 
   uv run tools/tiles-r2/upload_versioned_r2.py --dir <folder of .pmtiles> [--only <name> ...] [--dry-run]
+  uv run tools/tiles-r2/upload_versioned_r2.py --check-credentials
 
 Requires R2_ACCESS_KEY_ID and R2_SECRET_ACCESS_KEY in the environment, or
 CLOUDFLARE_API_TOKEN as upload_r2.py uses it. Each verified
@@ -105,12 +106,41 @@ def upload(s3, path, key):
         s3.put_object(Bucket=BUCKET, Key=key, Body=handle, ContentLength=size, IfNoneMatch="*")
 
 
+def check_credentials(s3):
+    """Confirm the credentials can read and write the bucket without storing anything.
+
+    Reading is a HEAD on a missing key (403 means refused, 404 means allowed). Writing is
+    a multipart upload that is started and aborted at once, which creates no object.
+    """
+    from botocore.exceptions import ClientError
+
+    probe = f"credential-check-{os.urandom(6).hex()}"
+    try:
+        if head(s3, probe) is not None:
+            sys.exit("unexpected: the probe key exists")
+        print("read: allowed", flush=True)
+        started = s3.create_multipart_upload(Bucket=BUCKET, Key=probe)
+        s3.abort_multipart_upload(Bucket=BUCKET, Key=probe, UploadId=started["UploadId"])
+        print("write: allowed (probe upload started and aborted; nothing stored)", flush=True)
+    except ClientError as error:
+        code = error.response.get("Error", {}).get("Code", "unknown")
+        sys.exit(f"credentials refused by {BUCKET}: {code}")
+    print("credentials work", flush=True)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--dir", type=Path, required=True, help="folder holding <name>.pmtiles files")
+    parser.add_argument("--dir", type=Path, help="folder holding <name>.pmtiles files")
+    parser.add_argument("--check-credentials", action="store_true",
+                        help="test read and write access to the bucket, store nothing, and stop")
     parser.add_argument("--only", nargs="+", help="archive names to upload (default: every .pmtiles in --dir)")
     parser.add_argument("--dry-run", action="store_true", help="list what would be uploaded and stop")
     args = parser.parse_args()
+    if args.check_credentials:
+        check_credentials(client())
+        return
+    if args.dir is None:
+        parser.error("--dir is required")
 
     paths = sorted(args.dir.glob("*.pmtiles"))
     if args.only:
