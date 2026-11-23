@@ -4766,6 +4766,18 @@ function openCensusPopup(feature, lngLat) {
   const levelDef = censusLevelDef();
   const code = feature.properties[levelDef.codeProp];
   const name = feature.properties[levelDef.nameProp];
+  const placeSnapshotLabel = (row) => {
+    if (!RC.popupPlaceSnapshotNote || !Number.isFinite(row?.place_count)) return "";
+    const basis = row.place_count_basis?.replace(/^current /i, "");
+    const date = row.site_snapshot_date;
+    const timestamp = date && `${date}T00:00:00Z`;
+    const dateLabel = date && new Date(timestamp).toLocaleDateString("en-NZ", {
+      day: "numeric", month: "long", year: "numeric", timeZone: "UTC",
+    });
+    if (timestamp && basis?.includes(timestamp)) return basis.replace(timestamp, dateLabel);
+    if (!basis && !dateLabel) return "";
+    return `${basis || "OpenStreetMap snapshot"}${dateLabel ? ` as at ${dateLabel}` : ""}`;
+  };
   // boundaries-only scaffold: no row for this area carries a population
   // total or a religious-affiliation/no-religion metric (survey products,
   // for example Italy, carry the latter with population_total null by
@@ -4808,10 +4820,12 @@ function openCensusPopup(feature, lngLat) {
     // pending) and drops the OSM credit, which only backs placeInfo lines
     const pendingNote = RC.pendingAreaNote ||
       `Place density from OpenStreetMap. ${RC.dataNoun || "Census"} religious-affiliation data are pending for this area.`;
+    const snapshot = placeSnapshotLabel(row);
     const html =
       censusAreaHeaderHtml(name) +
       placeInfo +
       `<div class="place-note">${pendingNote}</div>` +
+      (snapshot ? `<div class="place-note">Place counts use the ${escText(snapshot)}.</div>` : "") +
       `<div class="place-note">${levelDef.credit}${placeInfo ? " · places © OpenStreetMap (ODbL)" : ""}</div>`;
     trackPlacePopup(new maplibregl.Popup({ maxWidth: "320px" }).setLngLat(lngLat).setHTML(html).addTo(map));
     return;
@@ -4873,11 +4887,8 @@ function openCensusPopup(feature, lngLat) {
   const rowsHtml = store.years.map((year) => {
     const row = store.byAreaYear.get(`${code}|${year}`);
     if (!row) return "";
-    if (RC.popupPlaceSnapshotNote && hasPlaces && Number.isFinite(row.place_count)) {
-      const basis = row.place_count_basis?.replace(/^current /i, "");
-      const date = row.site_snapshot_date;
-      if (basis || date) placeSnapshots.add(`${basis || "OpenStreetMap snapshot"}${date ? ` as at ${date}` : ""}`);
-    }
+    const snapshot = hasPlaces && placeSnapshotLabel(row);
+    if (snapshot) placeSnapshots.add(snapshot);
     const flagged = rowNoted(row, store.universalFlags);
     if (flagged) anyFlagged = true;
     const selected = year === censusState.year ? ' class="census-year-selected"' : "";
@@ -4891,7 +4902,7 @@ function openCensusPopup(feature, lngLat) {
     </tr>`;
   }).join("");
   const placeCountNote = placeSnapshots.size
-    ? ` Place counts use the ${escText([...placeSnapshots].join(" · "))}, repeated across census years.`
+    ? ` Place counts use the ${escText([...placeSnapshots].join(" · "))}. The same counts are used for all census years.`
     : " Place counts are the current snapshot repeated across census years.";
   const flagNote = anyFlagged && RC.censusFlagNote
     ? `<div class="place-note">${RC.censusFlagNote}</div>`

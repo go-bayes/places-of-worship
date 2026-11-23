@@ -85,9 +85,10 @@ assert.match(runtime, /the OpenStreetMap snapshot as at 1 September 2026 is hidd
 assert.doesNotMatch(runtime, /census-legend-note[^\n]*today's/);
 
 // every html page that loads a changed script carries the bumped query
-// the assets for the september tile switch share a release stamp
+// the assets for the september tile switch share a release stamp; region-map.js
+// carries a later one for the area-count snapshot footnote
 const stamps = {
-    "region-map.js": "20261123c", // september tiles and popup behaviour
+    "region-map.js": "20261124a", // september tiles, popup behaviour, snapshot footnote
     "datamaps-switcher.js": "20261013a", // switcher rows prerender; warming waits for activation
     "unvalidated-places.js": "20261123c", // september archives and country lists; feature id from properties
     "verification-map.js": "20261123c", // match typed osm objects during hand-off
@@ -115,7 +116,7 @@ pages.forEach(page => {
     scripts.forEach(name => {
         const pattern = new RegExp(`${name.replace(".", "\\.")}\\?v=(\\w+)`, "g");
         for (const match of html.matchAll(pattern)) {
-            assert.equal(match[1], stamps[name],`${path.relative(apps, page)}: ${name} is ?v=${match[1]}`);
+            assert.equal(match[1], stamps[name], `${path.relative(apps, page)}: ${name} is ?v=${match[1]}`);
             checked += 1;
         }
     });

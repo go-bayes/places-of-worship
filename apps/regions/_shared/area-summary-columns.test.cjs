@@ -72,13 +72,18 @@ const { expandSummaryColumns, fetchCensusSummary } = sandbox;
   };
   const auckland = ta.rows.filter((row) => row.area_code === "076");
   const aucklandPopup = render(auckland);
-  eq((aucklandPopup.match(/<td>1053<\/td>/g) || []).length, 3, "the Auckland counts still come from the area summary");
-  ok(aucklandPopup.includes("Place counts use the committed nz_places.json snapshot"), "Auckland's footnote names its own snapshot");
-  ok(!aucklandPopup.includes("1 September 2026"), "the current tiles' date does not appear as the product date");
+  const snapshotNote = "OpenStreetMap objects tagged amenity=place_of_worship as at 1 September 2026";
+  eq((aucklandPopup.match(/<td>1018<\/td>/g) || []).length, 3, "the Auckland counts come from the September area summary");
+  ok(aucklandPopup.includes(snapshotNote), "Auckland's footnote names its own snapshot");
+  ok(!aucklandPopup.includes("2026-09-01"), "the popup shows the snapshot date once in display format");
   const firstSa2 = sa2.rows.filter((row) => row.area_code === sa2.rows[0].area_code);
-  ok(render(firstSa2).includes("Place counts use the committed nz_places.json snapshot"), "the columnar SA2 product supplies the same basis field");
-  const datedRows = auckland.map((row) => ({ ...row, site_snapshot_date: "2026-06-01" }));
-  ok(render(datedRows).includes("snapshot as at 2026-06-01"), "a supplied snapshot date is shown");
+  ok(render(firstSa2).includes(snapshotNote), "the columnar SA2 product supplies the same snapshot");
+  const suppressedSa2 = sa2.rows.filter((row) => row.area_name === "Botany Central");
+  ok(render(suppressedSa2).includes(snapshotNote), "the SA2 count has a snapshot footnote even when census denominators are suppressed");
+  const datedRows = auckland.map((row) => ({
+    ...row, place_count_basis: "OpenStreetMap snapshot", site_snapshot_date: "2026-06-01",
+  }));
+  ok(render(datedRows).includes("snapshot as at 1 June 2026"), "the displayed date follows the supplied date field");
   ok(fs.readFileSync(path.join(data, "..", "index.html"), "utf8").includes("popupPlaceSnapshotNote: true"), "the New Zealand page enables the footnote");
 }
 

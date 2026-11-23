@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-11-24
+
+- New Zealand's census popups use the 1 September 2026 OpenStreetMap snapshot for place counts and rates and display the date given in the area summary. Of the 3,422 mapped places, 3,417 fall within a territorial authority and 3,419 fall within a statistical area 2 (SA2) under the polygons used for assignment. For SA2s, the builder uses 2023 polygons archived in June 2026 before the July generalisation. The map draws the generalised polygons. Auckland's territorial authority count falls from 1,053 to 1,018. Every page that loads `region-map.js` carries `?v=20261124a` for the updated footnote.
+
 ### 2026-11-23 (maps switched to the 1 September 2026 OpenStreetMap edition)
 
 - What a visitor will notice. The map draws about 450,000 fewer dots: 1,618,270 places in place of the July tiles' 2,072,349. The July tiles in 33 countries also drew other objects carrying a religion tag that OpenStreetMap does not tag as places of worship (church grounds, graveyards, wayside crosses and shrines, and worship-type buildings without the tag), and every country now follows the one rule, `amenity=place_of_worship`, so the drop falls mostly on those countries: Germany shows 71,872 places in place of 135,242, Italy 68,723 in place of 119,721 and Poland 23,483 in place of 80,529 (the July comparison is `tools/tiles-r2/manifests/input-stats-tiles-v2-20260722-0ce3c532af1e.json` against `input-stats-osm-edition-20260901.json`). Every place now carries its OpenStreetMap key, and a place popup's *Open OSM* opens that record rather than the map at the point. 37 territories have their own country code for the first time, among them Hong Kong, Puerto Rico, Réunion, Kosovo and the Palestinian territories, and places outside every country carry `ZZ`. An unnamed place reads "Unnamed place" in every popup and label (the new tiles give it an empty name).
