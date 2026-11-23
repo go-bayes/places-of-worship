@@ -1,0 +1,2069 @@
+{
+  "boundary_comparison": {
+    "ne_10m_admin_0_countries": {
+      "additional_boundary_codes": {
+        "AQ": 1,
+        "AS": 1,
+        "AW": 1,
+        "AX": 1,
+        "BL": 1,
+        "CW": 1,
+        "GL": 1,
+        "GS": 1,
+        "GU": 1,
+        "HK": 1,
+        "HM": 1,
+        "IO": 1,
+        "MF": 1,
+        "MO": 1,
+        "MP": 1,
+        "NC": 1,
+        "NF": 1,
+        "PF": 1,
+        "PM": 1,
+        "PN": 1,
+        "PR": 1,
+        "PS": 1,
+        "SH": 1,
+        "SX": 1,
+        "TF": 1,
+        "UM": 1,
+        "VI": 1,
+        "WF": 1,
+        "XK": 1
+      },
+      "matches": 210,
+      "missing_july_codes": {},
+      "unassigned_boundary_records": 13
+    },
+    "ne_10m_admin_0_map_units": {
+      "additional_boundary_codes": {
+        "AQ": 1,
+        "AS": 1,
+        "AW": 1,
+        "AX": 1,
+        "BL": 1,
+        "BQ": 1,
+        "BV": 1,
+        "CC": 1,
+        "CW": 1,
+        "CX": 1,
+        "GF": 1,
+        "GL": 1,
+        "GP": 1,
+        "GS": 1,
+        "GU": 1,
+        "HK": 1,
+        "HM": 1,
+        "IO": 1,
+        "MF": 1,
+        "MO": 1,
+        "MP": 1,
+        "MQ": 1,
+        "NC": 1,
+        "NF": 1,
+        "PF": 1,
+        "PM": 1,
+        "PN": 1,
+        "PR": 1,
+        "PS": 2,
+        "RE": 1,
+        "SH": 1,
+        "SJ": 1,
+        "SX": 1,
+        "TF": 1,
+        "TK": 1,
+        "UM": 9,
+        "VI": 1,
+        "WF": 1,
+        "XK": 1,
+        "YT": 1
+      },
+      "matches": 210,
+      "missing_july_codes": {},
+      "unassigned_boundary_records": 17
+    }
+  },
+  "buildings_withheld": {
+    "buffer_metres": 10,
+    "by_country": {
+      "AE": 188,
+      "AF": 65,
+      "AG": 4,
+      "AI": 1,
+      "AL": 21,
+      "AM": 66,
+      "AO": 12,
+      "AR": 683,
+      "AT": 169,
+      "AU": 630,
+      "AX": 3,
+      "AZ": 23,
+      "BA": 50,
+      "BB": 3,
+      "BD": 309,
+      "BE": 311,
+      "BF": 2306,
+      "BG": 113,
+      "BH": 4,
+      "BI": 14,
+      "BJ": 16,
+      "BN": 2,
+      "BO": 361,
+      "BR": 1417,
+      "BS": 64,
+      "BT": 10,
+      "BW": 4,
+      "BY": 100,
+      "BZ": 7,
+      "CA": 585,
+      "CD": 38,
+      "CF": 2,
+      "CG": 2,
+      "CH": 181,
+      "CI": 136,
+      "CL": 264,
+      "CM": 148,
+      "CN": 551,
+      "CO": 224,
+      "CR": 9,
+      "CU": 19,
+      "CV": 80,
+      "CY": 23,
+      "CZ": 109,
+      "DE": 2801,
+      "DJ": 9,
+      "DK": 11,
+      "DM": 2,
+      "DO": 24,
+      "DZ": 299,
+      "EC": 149,
+      "EE": 2,
+      "EG": 35,
+      "EH": 9,
+      "ER": 25,
+      "ES": 764,
+      "ET": 31,
+      "FI": 66,
+      "FJ": 10,
+      "FM": 17,
+      "FR": 349,
+      "GA": 8,
+      "GB": 1304,
+      "GE": 79,
+      "GF": 1,
+      "GG": 1,
+      "GH": 240,
+      "GI": 3,
+      "GL": 9,
+      "GM": 12,
+      "GN": 59,
+      "GP": 1,
+      "GR": 435,
+      "GT": 64,
+      "GU": 5,
+      "GW": 1,
+      "GY": 2,
+      "HK": 68,
+      "HN": 26,
+      "HR": 51,
+      "HT": 801,
+      "HU": 151,
+      "ID": 745,
+      "IE": 32,
+      "IL": 39,
+      "IM": 1,
+      "IN": 1435,
+      "IQ": 222,
+      "IR": 453,
+      "IS": 5,
+      "IT": 5199,
+      "JE": 4,
+      "JM": 11,
+      "JO": 20,
+      "JP": 2509,
+      "KE": 94,
+      "KG": 15,
+      "KH": 66,
+      "KI": 1,
+      "KM": 2,
+      "KN": 1,
+      "KP": 1,
+      "KR": 605,
+      "KW": 11,
+      "KZ": 21,
+      "LA": 33,
+      "LB": 36,
+      "LC": 4,
+      "LK": 526,
+      "LR": 67,
+      "LS": 4,
+      "LT": 4,
+      "LU": 1,
+      "LV": 15,
+      "LY": 220,
+      "MA": 77,
+      "MD": 8,
+      "ME": 18,
+      "MG": 157,
+      "MK": 19,
+      "ML": 31,
+      "MM": 134,
+      "MN": 13,
+      "MP": 1,
+      "MQ": 1,
+      "MR": 13,
+      "MS": 1,
+      "MT": 17,
+      "MU": 3,
+      "MV": 7,
+      "MW": 21,
+      "MX": 799,
+      "MY": 576,
+      "MZ": 104,
+      "NA": 19,
+      "NC": 3,
+      "NE": 183,
+      "NF": 1,
+      "NG": 69,
+      "NI": 79,
+      "NL": 298,
+      "NO": 111,
+      "NP": 119,
+      "NZ": 37,
+      "OM": 48,
+      "PA": 36,
+      "PE": 626,
+      "PF": 4,
+      "PG": 19,
+      "PH": 535,
+      "PK": 129,
+      "PL": 268,
+      "PR": 21,
+      "PS": 26,
+      "PT": 408,
+      "PY": 50,
+      "QA": 6,
+      "RE": 1,
+      "RO": 1006,
+      "RS": 19,
+      "RU": 1404,
+      "RW": 11,
+      "SA": 203,
+      "SC": 5,
+      "SD": 102,
+      "SE": 110,
+      "SG": 27,
+      "SI": 16,
+      "SK": 65,
+      "SL": 9,
+      "SM": 1,
+      "SN": 76,
+      "SO": 1,
+      "SR": 3,
+      "SS": 1,
+      "SV": 40,
+      "SX": 1,
+      "SY": 85,
+      "SZ": 3,
+      "TC": 2,
+      "TD": 8,
+      "TG": 38,
+      "TH": 460,
+      "TL": 10,
+      "TM": 1,
+      "TN": 116,
+      "TO": 40,
+      "TR": 128,
+      "TT": 7,
+      "TV": 1,
+      "TW": 525,
+      "TZ": 926,
+      "UA": 646,
+      "UG": 147,
+      "US": 9800,
+      "UY": 34,
+      "UZ": 22,
+      "VC": 2,
+      "VE": 110,
+      "VI": 2,
+      "VN": 766,
+      "VU": 1,
+      "WS": 107,
+      "XK": 23,
+      "YE": 12,
+      "YT": 4,
+      "ZA": 145,
+      "ZM": 16,
+      "ZW": 7
+    },
+    "total": 52043
+  },
+  "country_comparison": {
+    "edition_codes": 248,
+    "gained": {
+      "AQ": 10,
+      "AS": 18,
+      "AW": 56,
+      "AX": 28,
+      "BL": 5,
+      "BQ": 42,
+      "CC": 1,
+      "CW": 96,
+      "CX": 11,
+      "GF": 131,
+      "GL": 84,
+      "GP": 178,
+      "GS": 1,
+      "GU": 85,
+      "HK": 1387,
+      "IO": 1,
+      "MF": 25,
+      "MO": 137,
+      "MP": 12,
+      "MQ": 106,
+      "NC": 157,
+      "NF": 6,
+      "PF": 371,
+      "PM": 6,
+      "PN": 1,
+      "PR": 866,
+      "PS": 2095,
+      "RE": 299,
+      "SH": 10,
+      "SJ": 4,
+      "SX": 22,
+      "TF": 3,
+      "TK": 2,
+      "VI": 55,
+      "WF": 43,
+      "XK": 910,
+      "YT": 206,
+      "ZZ": 5
+    },
+    "july_codes": 210,
+    "lost": {},
+    "retained_codes": 210,
+    "unassigned_code": "ZZ"
+  },
+  "cyclic_geometry_by_basis": {
+    "building": 1
+  },
+  "edition_candidates_by_basis": {
+    "building": 185489,
+    "lifecycle": 2605,
+    "tag": 1618272
+  },
+  "edition_candidates_by_country_and_basis": {
+    "AD": {
+      "building": 2,
+      "tag": 62
+    },
+    "AE": {
+      "building": 255,
+      "tag": 3176
+    },
+    "AF": {
+      "building": 156,
+      "lifecycle": 4,
+      "tag": 3518
+    },
+    "AG": {
+      "building": 9,
+      "tag": 101
+    },
+    "AI": {
+      "building": 2,
+      "tag": 9
+    },
+    "AL": {
+      "building": 59,
+      "tag": 1615
+    },
+    "AM": {
+      "building": 136,
+      "tag": 853
+    },
+    "AO": {
+      "building": 136,
+      "tag": 512
+    },
+    "AQ": {
+      "tag": 10
+    },
+    "AR": {
+      "building": 1307,
+      "lifecycle": 5,
+      "tag": 8155
+    },
+    "AS": {
+      "building": 7,
+      "tag": 18
+    },
+    "AT": {
+      "building": 2636,
+      "lifecycle": 6,
+      "tag": 15154
+    },
+    "AU": {
+      "building": 1917,
+      "lifecycle": 65,
+      "tag": 8256
+    },
+    "AW": {
+      "building": 10,
+      "tag": 56
+    },
+    "AX": {
+      "building": 6,
+      "tag": 28
+    },
+    "AZ": {
+      "building": 54,
+      "tag": 1237
+    },
+    "BA": {
+      "building": 224,
+      "lifecycle": 3,
+      "tag": 3724
+    },
+    "BB": {
+      "building": 40,
+      "tag": 278
+    },
+    "BD": {
+      "building": 824,
+      "tag": 14378
+    },
+    "BE": {
+      "building": 2482,
+      "lifecycle": 25,
+      "tag": 8957
+    },
+    "BF": {
+      "building": 2407,
+      "tag": 3420
+    },
+    "BG": {
+      "building": 355,
+      "lifecycle": 1,
+      "tag": 3371
+    },
+    "BH": {
+      "building": 14,
+      "tag": 875
+    },
+    "BI": {
+      "building": 21,
+      "tag": 434
+    },
+    "BJ": {
+      "building": 30,
+      "tag": 1798
+    },
+    "BL": {
+      "building": 2,
+      "tag": 5
+    },
+    "BM": {
+      "building": 2,
+      "tag": 108
+    },
+    "BN": {
+      "building": 7,
+      "tag": 128
+    },
+    "BO": {
+      "building": 530,
+      "lifecycle": 2,
+      "tag": 2700
+    },
+    "BQ": {
+      "building": 13,
+      "tag": 42
+    },
+    "BR": {
+      "building": 7109,
+      "lifecycle": 14,
+      "tag": 52721
+    },
+    "BS": {
+      "building": 108,
+      "lifecycle": 1,
+      "tag": 323
+    },
+    "BT": {
+      "building": 20,
+      "tag": 761
+    },
+    "BW": {
+      "building": 199,
+      "tag": 203
+    },
+    "BY": {
+      "building": 389,
+      "lifecycle": 23,
+      "tag": 3452
+    },
+    "BZ": {
+      "building": 38,
+      "tag": 475
+    },
+    "CA": {
+      "building": 2202,
+      "lifecycle": 30,
+      "tag": 20524
+    },
+    "CC": {
+      "tag": 1
+    },
+    "CD": {
+      "building": 150,
+      "lifecycle": 2,
+      "tag": 5181
+    },
+    "CF": {
+      "building": 10,
+      "tag": 209
+    },
+    "CG": {
+      "building": 8,
+      "tag": 233
+    },
+    "CH": {
+      "building": 947,
+      "lifecycle": 4,
+      "tag": 6977
+    },
+    "CI": {
+      "building": 210,
+      "tag": 3697
+    },
+    "CK": {
+      "building": 3,
+      "tag": 35
+    },
+    "CL": {
+      "building": 851,
+      "lifecycle": 2,
+      "tag": 4190
+    },
+    "CM": {
+      "building": 427,
+      "tag": 3203
+    },
+    "CN": {
+      "building": 2897,
+      "lifecycle": 15,
+      "tag": 22913
+    },
+    "CO": {
+      "building": 944,
+      "lifecycle": 1,
+      "tag": 5458
+    },
+    "CR": {
+      "building": 104,
+      "tag": 3794
+    },
+    "CU": {
+      "building": 49,
+      "tag": 1387
+    },
+    "CV": {
+      "building": 115,
+      "tag": 263
+    },
+    "CW": {
+      "building": 9,
+      "tag": 96
+    },
+    "CX": {
+      "building": 4,
+      "tag": 11
+    },
+    "CY": {
+      "building": 120,
+      "lifecycle": 4,
+      "tag": 1491
+    },
+    "CZ": {
+      "building": 1708,
+      "lifecycle": 25,
+      "tag": 11285
+    },
+    "DE": {
+      "building": 13560,
+      "lifecycle": 309,
+      "tag": 71872
+    },
+    "DJ": {
+      "building": 16,
+      "tag": 153
+    },
+    "DK": {
+      "building": 172,
+      "lifecycle": 6,
+      "tag": 2907
+    },
+    "DM": {
+      "building": 14,
+      "tag": 71
+    },
+    "DO": {
+      "building": 146,
+      "tag": 928
+    },
+    "DZ": {
+      "building": 504,
+      "lifecycle": 1,
+      "tag": 8313
+    },
+    "EC": {
+      "building": 554,
+      "lifecycle": 6,
+      "tag": 5241
+    },
+    "EE": {
+      "building": 85,
+      "lifecycle": 2,
+      "tag": 530
+    },
+    "EG": {
+      "building": 167,
+      "lifecycle": 3,
+      "tag": 2862
+    },
+    "EH": {
+      "building": 11,
+      "tag": 76
+    },
+    "ER": {
+      "building": 50,
+      "tag": 535
+    },
+    "ES": {
+      "building": 3244,
+      "lifecycle": 75,
+      "tag": 39555
+    },
+    "ET": {
+      "building": 117,
+      "lifecycle": 1,
+      "tag": 9949
+    },
+    "FI": {
+      "building": 319,
+      "lifecycle": 23,
+      "tag": 2234
+    },
+    "FJ": {
+      "building": 38,
+      "tag": 319
+    },
+    "FK": {
+      "tag": 6
+    },
+    "FM": {
+      "building": 20,
+      "tag": 97
+    },
+    "FO": {
+      "building": 2,
+      "tag": 106
+    },
+    "FR": {
+      "building": 5580,
+      "lifecycle": 93,
+      "tag": 59832
+    },
+    "GA": {
+      "building": 24,
+      "tag": 174
+    },
+    "GB": {
+      "building": 5940,
+      "lifecycle": 437,
+      "tag": 42055
+    },
+    "GD": {
+      "building": 5,
+      "tag": 65
+    },
+    "GE": {
+      "building": 206,
+      "lifecycle": 11,
+      "tag": 4173
+    },
+    "GF": {
+      "building": 8,
+      "tag": 131
+    },
+    "GG": {
+      "building": 3,
+      "tag": 46
+    },
+    "GH": {
+      "building": 426,
+      "tag": 4576
+    },
+    "GI": {
+      "building": 3,
+      "tag": 20
+    },
+    "GL": {
+      "building": 28,
+      "tag": 84
+    },
+    "GM": {
+      "building": 33,
+      "tag": 241
+    },
+    "GN": {
+      "building": 76,
+      "tag": 1438
+    },
+    "GP": {
+      "building": 17,
+      "tag": 178
+    },
+    "GQ": {
+      "building": 2,
+      "tag": 39
+    },
+    "GR": {
+      "building": 1469,
+      "lifecycle": 10,
+      "tag": 27962
+    },
+    "GS": {
+      "tag": 1
+    },
+    "GT": {
+      "building": 236,
+      "tag": 1653
+    },
+    "GU": {
+      "building": 19,
+      "tag": 85
+    },
+    "GW": {
+      "building": 14,
+      "tag": 34
+    },
+    "GY": {
+      "building": 18,
+      "tag": 451
+    },
+    "HK": {
+      "building": 162,
+      "lifecycle": 6,
+      "tag": 1387
+    },
+    "HN": {
+      "building": 262,
+      "tag": 1275
+    },
+    "HR": {
+      "building": 441,
+      "lifecycle": 3,
+      "tag": 5358
+    },
+    "HT": {
+      "building": 873,
+      "tag": 3154
+    },
+    "HU": {
+      "building": 526,
+      "lifecycle": 4,
+      "tag": 7704
+    },
+    "ID": {
+      "building": 3833,
+      "lifecycle": 2,
+      "tag": 89307
+    },
+    "IE": {
+      "building": 611,
+      "lifecycle": 61,
+      "tag": 3677
+    },
+    "IL": {
+      "building": 203,
+      "lifecycle": 3,
+      "tag": 3204
+    },
+    "IM": {
+      "building": 38,
+      "lifecycle": 3,
+      "tag": 97
+    },
+    "IN": {
+      "building": 4404,
+      "lifecycle": 5,
+      "tag": 69865
+    },
+    "IO": {
+      "building": 1,
+      "tag": 1
+    },
+    "IQ": {
+      "building": 551,
+      "lifecycle": 1,
+      "tag": 6794
+    },
+    "IR": {
+      "building": 870,
+      "lifecycle": 25,
+      "tag": 17967
+    },
+    "IS": {
+      "building": 11,
+      "tag": 408
+    },
+    "IT": {
+      "building": 21259,
+      "lifecycle": 82,
+      "tag": 68723
+    },
+    "JE": {
+      "building": 10,
+      "tag": 62
+    },
+    "JM": {
+      "building": 74,
+      "tag": 757
+    },
+    "JO": {
+      "building": 57,
+      "lifecycle": 4,
+      "tag": 1198
+    },
+    "JP": {
+      "building": 7047,
+      "lifecycle": 30,
+      "tag": 78349
+    },
+    "KE": {
+      "building": 359,
+      "tag": 4299
+    },
+    "KG": {
+      "building": 53,
+      "lifecycle": 1,
+      "tag": 927
+    },
+    "KH": {
+      "building": 213,
+      "lifecycle": 73,
+      "tag": 3302
+    },
+    "KI": {
+      "building": 2,
+      "tag": 57
+    },
+    "KM": {
+      "building": 4,
+      "tag": 278
+    },
+    "KN": {
+      "building": 3,
+      "lifecycle": 1,
+      "tag": 128
+    },
+    "KP": {
+      "building": 7,
+      "tag": 26
+    },
+    "KR": {
+      "building": 2292,
+      "lifecycle": 3,
+      "tag": 12566
+    },
+    "KW": {
+      "building": 20,
+      "tag": 1866
+    },
+    "KY": {
+      "building": 6,
+      "tag": 51
+    },
+    "KZ": {
+      "building": 83,
+      "lifecycle": 2,
+      "tag": 1688
+    },
+    "LA": {
+      "building": 102,
+      "lifecycle": 1,
+      "tag": 984
+    },
+    "LB": {
+      "building": 91,
+      "tag": 2087
+    },
+    "LC": {
+      "building": 15,
+      "tag": 194
+    },
+    "LI": {
+      "building": 2,
+      "tag": 31
+    },
+    "LK": {
+      "building": 1669,
+      "tag": 9347
+    },
+    "LR": {
+      "building": 123,
+      "tag": 561
+    },
+    "LS": {
+      "building": 106,
+      "tag": 201
+    },
+    "LT": {
+      "building": 180,
+      "tag": 1174
+    },
+    "LU": {
+      "building": 105,
+      "tag": 806
+    },
+    "LV": {
+      "building": 207,
+      "lifecycle": 1,
+      "tag": 803
+    },
+    "LY": {
+      "building": 263,
+      "lifecycle": 3,
+      "tag": 5496
+    },
+    "MA": {
+      "building": 202,
+      "lifecycle": 1,
+      "tag": 4291
+    },
+    "MC": {
+      "tag": 16
+    },
+    "MD": {
+      "building": 96,
+      "tag": 1807
+    },
+    "ME": {
+      "building": 75,
+      "tag": 821
+    },
+    "MF": {
+      "building": 3,
+      "tag": 25
+    },
+    "MG": {
+      "building": 411,
+      "lifecycle": 1,
+      "tag": 2180
+    },
+    "MH": {
+      "building": 1,
+      "tag": 18
+    },
+    "MK": {
+      "building": 73,
+      "tag": 1574
+    },
+    "ML": {
+      "building": 65,
+      "tag": 1622
+    },
+    "MM": {
+      "building": 799,
+      "lifecycle": 1,
+      "tag": 29017
+    },
+    "MN": {
+      "building": 45,
+      "tag": 370
+    },
+    "MO": {
+      "building": 12,
+      "tag": 137
+    },
+    "MP": {
+      "building": 1,
+      "tag": 12
+    },
+    "MQ": {
+      "building": 7,
+      "tag": 106
+    },
+    "MR": {
+      "building": 23,
+      "tag": 777
+    },
+    "MS": {
+      "building": 2,
+      "tag": 10
+    },
+    "MT": {
+      "building": 90,
+      "tag": 379
+    },
+    "MU": {
+      "building": 31,
+      "tag": 399
+    },
+    "MV": {
+      "building": 41,
+      "lifecycle": 1,
+      "tag": 325
+    },
+    "MW": {
+      "building": 128,
+      "tag": 584
+    },
+    "MX": {
+      "building": 2707,
+      "lifecycle": 1,
+      "tag": 13402
+    },
+    "MY": {
+      "building": 1274,
+      "lifecycle": 13,
+      "tag": 10462
+    },
+    "MZ": {
+      "building": 217,
+      "tag": 1429
+    },
+    "NA": {
+      "building": 56,
+      "tag": 584
+    },
+    "NC": {
+      "building": 15,
+      "tag": 157
+    },
+    "NE": {
+      "building": 209,
+      "tag": 1214
+    },
+    "NF": {
+      "building": 2,
+      "tag": 6
+    },
+    "NG": {
+      "building": 290,
+      "tag": 6784
+    },
+    "NI": {
+      "building": 172,
+      "tag": 1232
+    },
+    "NL": {
+      "building": 1198,
+      "lifecycle": 9,
+      "tag": 6497
+    },
+    "NO": {
+      "building": 878,
+      "lifecycle": 3,
+      "tag": 2914
+    },
+    "NP": {
+      "building": 252,
+      "tag": 9749
+    },
+    "NR": {
+      "building": 1,
+      "tag": 4
+    },
+    "NU": {
+      "building": 5,
+      "tag": 1
+    },
+    "NZ": {
+      "building": 205,
+      "lifecycle": 8,
+      "tag": 3422
+    },
+    "OM": {
+      "building": 102,
+      "lifecycle": 1,
+      "tag": 2327
+    },
+    "PA": {
+      "building": 159,
+      "lifecycle": 1,
+      "tag": 1007
+    },
+    "PE": {
+      "building": 1201,
+      "lifecycle": 1,
+      "tag": 5363
+    },
+    "PF": {
+      "building": 45,
+      "tag": 371
+    },
+    "PG": {
+      "building": 158,
+      "tag": 3076
+    },
+    "PH": {
+      "building": 1852,
+      "lifecycle": 13,
+      "tag": 18080
+    },
+    "PK": {
+      "building": 350,
+      "lifecycle": 1,
+      "tag": 9468
+    },
+    "PL": {
+      "building": 3917,
+      "lifecycle": 34,
+      "tag": 23483
+    },
+    "PM": {
+      "building": 1,
+      "tag": 6
+    },
+    "PN": {
+      "tag": 1
+    },
+    "PR": {
+      "building": 119,
+      "lifecycle": 2,
+      "tag": 866
+    },
+    "PS": {
+      "building": 64,
+      "lifecycle": 2,
+      "tag": 2095
+    },
+    "PT": {
+      "building": 819,
+      "lifecycle": 29,
+      "tag": 13578
+    },
+    "PW": {
+      "building": 1,
+      "tag": 7
+    },
+    "PY": {
+      "building": 307,
+      "tag": 1291
+    },
+    "QA": {
+      "building": 39,
+      "lifecycle": 2,
+      "tag": 718
+    },
+    "RE": {
+      "building": 13,
+      "tag": 299
+    },
+    "RO": {
+      "building": 1821,
+      "lifecycle": 1,
+      "tag": 15565
+    },
+    "RS": {
+      "building": 326,
+      "lifecycle": 1,
+      "tag": 2412
+    },
+    "RU": {
+      "building": 4451,
+      "lifecycle": 64,
+      "tag": 28825
+    },
+    "RW": {
+      "building": 34,
+      "tag": 414
+    },
+    "SA": {
+      "building": 385,
+      "lifecycle": 1,
+      "tag": 13017
+    },
+    "SB": {
+      "building": 19,
+      "tag": 58
+    },
+    "SC": {
+      "building": 11,
+      "tag": 60
+    },
+    "SD": {
+      "building": 283,
+      "tag": 4265
+    },
+    "SE": {
+      "building": 508,
+      "lifecycle": 63,
+      "tag": 4903
+    },
+    "SG": {
+      "building": 70,
+      "lifecycle": 1,
+      "tag": 652
+    },
+    "SH": {
+      "building": 1,
+      "tag": 10
+    },
+    "SI": {
+      "building": 594,
+      "tag": 2851
+    },
+    "SJ": {
+      "building": 1,
+      "tag": 4
+    },
+    "SK": {
+      "building": 757,
+      "lifecycle": 3,
+      "tag": 7519
+    },
+    "SL": {
+      "building": 20,
+      "tag": 656
+    },
+    "SM": {
+      "building": 3,
+      "tag": 19
+    },
+    "SN": {
+      "building": 128,
+      "tag": 3269
+    },
+    "SO": {
+      "building": 38,
+      "tag": 1678
+    },
+    "SR": {
+      "building": 9,
+      "tag": 164
+    },
+    "SS": {
+      "building": 15,
+      "lifecycle": 1,
+      "tag": 227
+    },
+    "ST": {
+      "building": 1,
+      "tag": 37
+    },
+    "SV": {
+      "building": 167,
+      "tag": 1505
+    },
+    "SX": {
+      "building": 12,
+      "tag": 22
+    },
+    "SY": {
+      "building": 167,
+      "tag": 3909
+    },
+    "SZ": {
+      "building": 10,
+      "tag": 40
+    },
+    "TC": {
+      "building": 10,
+      "tag": 25
+    },
+    "TD": {
+      "building": 19,
+      "tag": 346
+    },
+    "TF": {
+      "tag": 3
+    },
+    "TG": {
+      "building": 57,
+      "tag": 2121
+    },
+    "TH": {
+      "building": 3569,
+      "lifecycle": 9,
+      "tag": 26271
+    },
+    "TJ": {
+      "building": 2,
+      "tag": 335
+    },
+    "TK": {
+      "tag": 2
+    },
+    "TL": {
+      "building": 65,
+      "tag": 338
+    },
+    "TM": {
+      "building": 6,
+      "tag": 208
+    },
+    "TN": {
+      "building": 301,
+      "lifecycle": 2,
+      "tag": 2323
+    },
+    "TO": {
+      "building": 54,
+      "tag": 352
+    },
+    "TR": {
+      "building": 611,
+      "lifecycle": 2,
+      "tag": 47238
+    },
+    "TT": {
+      "building": 52,
+      "tag": 629
+    },
+    "TV": {
+      "building": 2,
+      "tag": 15
+    },
+    "TW": {
+      "building": 1519,
+      "lifecycle": 33,
+      "tag": 14509
+    },
+    "TZ": {
+      "building": 1541,
+      "tag": 4693
+    },
+    "UA": {
+      "building": 2387,
+      "lifecycle": 17,
+      "tag": 16191
+    },
+    "UG": {
+      "building": 292,
+      "lifecycle": 1,
+      "tag": 3682
+    },
+    "UM": {
+      "building": 1
+    },
+    "US": {
+      "building": 30777,
+      "lifecycle": 755,
+      "tag": 272003
+    },
+    "UY": {
+      "building": 62,
+      "tag": 642
+    },
+    "UZ": {
+      "building": 35,
+      "tag": 2457
+    },
+    "VA": {
+      "building": 1,
+      "tag": 12
+    },
+    "VC": {
+      "building": 6,
+      "tag": 79
+    },
+    "VE": {
+      "building": 319,
+      "lifecycle": 1,
+      "tag": 1804
+    },
+    "VG": {
+      "building": 2,
+      "lifecycle": 1,
+      "tag": 35
+    },
+    "VI": {
+      "building": 6,
+      "tag": 55
+    },
+    "VN": {
+      "building": 1508,
+      "tag": 7397
+    },
+    "VU": {
+      "building": 21,
+      "tag": 214
+    },
+    "WF": {
+      "tag": 43
+    },
+    "WS": {
+      "building": 173,
+      "tag": 758
+    },
+    "XK": {
+      "building": 50,
+      "tag": 910
+    },
+    "YE": {
+      "building": 56,
+      "tag": 3520
+    },
+    "YT": {
+      "building": 5,
+      "tag": 206
+    },
+    "ZA": {
+      "building": 575,
+      "lifecycle": 2,
+      "tag": 3893
+    },
+    "ZM": {
+      "building": 253,
+      "tag": 909
+    },
+    "ZW": {
+      "building": 60,
+      "tag": 591
+    },
+    "ZZ": {
+      "tag": 7
+    }
+  },
+  "edition_candidates_by_country_method": {
+    "fallback": 7,
+    "natural_earth": 500,
+    "nearest": 23,
+    "osm": 1805836
+  },
+  "edition_candidates_by_type": {
+    "node": 602718,
+    "relation": 11829,
+    "way": 1191819
+  },
+  "extract_hashes": {
+    "candidates_pbf": "2ad86908ed57cdcd60c3a94380d72db9c6cb90738841ca89693e064525693f32",
+    "edition.ndjson": "2f4359df4d6b5e4b5e8256db01c8c5da46e45a1bdf6682b98686dc57e12b082f",
+    "osm_iso_boundaries": "2263ea14323dc58bb186234674281e8944accd117f65a141e5b254dec2e96274",
+    "places-possible.ndjson": "c64f3f4ab544229a0a03bc01498c52a46f83163cb7f7acb2bdf9c4d27e88a342",
+    "places.ndjson": "b5937852dd822dc5a3c7e9a932d181629ade51d7094f7969185d574eafbaccde"
+  },
+  "incomplete_geometry_by_basis": {},
+  "main": {
+    "by_country": {
+      "AD": 62,
+      "AE": 3176,
+      "AF": 3518,
+      "AG": 101,
+      "AI": 9,
+      "AL": 1615,
+      "AM": 853,
+      "AO": 512,
+      "AQ": 10,
+      "AR": 8155,
+      "AS": 18,
+      "AT": 15154,
+      "AU": 8256,
+      "AW": 56,
+      "AX": 28,
+      "AZ": 1237,
+      "BA": 3724,
+      "BB": 278,
+      "BD": 14378,
+      "BE": 8957,
+      "BF": 3420,
+      "BG": 3371,
+      "BH": 875,
+      "BI": 434,
+      "BJ": 1798,
+      "BL": 5,
+      "BM": 108,
+      "BN": 128,
+      "BO": 2700,
+      "BQ": 42,
+      "BR": 52721,
+      "BS": 323,
+      "BT": 761,
+      "BW": 203,
+      "BY": 3452,
+      "BZ": 475,
+      "CA": 20524,
+      "CC": 1,
+      "CD": 5181,
+      "CF": 209,
+      "CG": 233,
+      "CH": 6977,
+      "CI": 3697,
+      "CK": 35,
+      "CL": 4190,
+      "CM": 3203,
+      "CN": 22913,
+      "CO": 5458,
+      "CR": 3794,
+      "CU": 1387,
+      "CV": 263,
+      "CW": 96,
+      "CX": 11,
+      "CY": 1491,
+      "CZ": 11285,
+      "DE": 71872,
+      "DJ": 153,
+      "DK": 2907,
+      "DM": 71,
+      "DO": 928,
+      "DZ": 8313,
+      "EC": 5241,
+      "EE": 530,
+      "EG": 2862,
+      "EH": 76,
+      "ER": 535,
+      "ES": 39555,
+      "ET": 9949,
+      "FI": 2234,
+      "FJ": 319,
+      "FK": 6,
+      "FM": 97,
+      "FO": 106,
+      "FR": 59832,
+      "GA": 174,
+      "GB": 42055,
+      "GD": 65,
+      "GE": 4173,
+      "GF": 131,
+      "GG": 46,
+      "GH": 4576,
+      "GI": 20,
+      "GL": 84,
+      "GM": 241,
+      "GN": 1438,
+      "GP": 178,
+      "GQ": 39,
+      "GR": 27962,
+      "GS": 1,
+      "GT": 1653,
+      "GU": 85,
+      "GW": 34,
+      "GY": 451,
+      "HK": 1387,
+      "HN": 1275,
+      "HR": 5358,
+      "HT": 3154,
+      "HU": 7704,
+      "ID": 89307,
+      "IE": 3677,
+      "IL": 3204,
+      "IM": 97,
+      "IN": 69865,
+      "IO": 1,
+      "IQ": 6794,
+      "IR": 17967,
+      "IS": 408,
+      "IT": 68723,
+      "JE": 62,
+      "JM": 757,
+      "JO": 1198,
+      "JP": 78349,
+      "KE": 4299,
+      "KG": 927,
+      "KH": 3302,
+      "KI": 57,
+      "KM": 278,
+      "KN": 128,
+      "KP": 26,
+      "KR": 12566,
+      "KW": 1866,
+      "KY": 51,
+      "KZ": 1688,
+      "LA": 984,
+      "LB": 2087,
+      "LC": 194,
+      "LI": 31,
+      "LK": 9347,
+      "LR": 561,
+      "LS": 201,
+      "LT": 1174,
+      "LU": 806,
+      "LV": 803,
+      "LY": 5496,
+      "MA": 4291,
+      "MC": 16,
+      "MD": 1807,
+      "ME": 821,
+      "MF": 25,
+      "MG": 2180,
+      "MH": 18,
+      "MK": 1574,
+      "ML": 1622,
+      "MM": 29017,
+      "MN": 370,
+      "MO": 137,
+      "MP": 12,
+      "MQ": 106,
+      "MR": 777,
+      "MS": 10,
+      "MT": 379,
+      "MU": 399,
+      "MV": 325,
+      "MW": 584,
+      "MX": 13402,
+      "MY": 10462,
+      "MZ": 1429,
+      "NA": 584,
+      "NC": 157,
+      "NE": 1214,
+      "NF": 6,
+      "NG": 6784,
+      "NI": 1232,
+      "NL": 6497,
+      "NO": 2914,
+      "NP": 9749,
+      "NR": 4,
+      "NU": 1,
+      "NZ": 3422,
+      "OM": 2327,
+      "PA": 1007,
+      "PE": 5363,
+      "PF": 371,
+      "PG": 3076,
+      "PH": 18080,
+      "PK": 9468,
+      "PL": 23483,
+      "PM": 6,
+      "PN": 1,
+      "PR": 866,
+      "PS": 2095,
+      "PT": 13578,
+      "PW": 7,
+      "PY": 1291,
+      "QA": 718,
+      "RE": 299,
+      "RO": 15565,
+      "RS": 2412,
+      "RU": 28825,
+      "RW": 414,
+      "SA": 13017,
+      "SB": 58,
+      "SC": 60,
+      "SD": 4265,
+      "SE": 4903,
+      "SG": 652,
+      "SH": 10,
+      "SI": 2851,
+      "SJ": 4,
+      "SK": 7519,
+      "SL": 656,
+      "SM": 19,
+      "SN": 3269,
+      "SO": 1678,
+      "SR": 164,
+      "SS": 227,
+      "ST": 37,
+      "SV": 1505,
+      "SX": 22,
+      "SY": 3909,
+      "SZ": 40,
+      "TC": 25,
+      "TD": 346,
+      "TF": 3,
+      "TG": 2121,
+      "TH": 26271,
+      "TJ": 335,
+      "TK": 2,
+      "TL": 338,
+      "TM": 208,
+      "TN": 2323,
+      "TO": 352,
+      "TR": 47238,
+      "TT": 629,
+      "TV": 15,
+      "TW": 14509,
+      "TZ": 4693,
+      "UA": 16191,
+      "UG": 3682,
+      "US": 272003,
+      "UY": 642,
+      "UZ": 2457,
+      "VA": 12,
+      "VC": 79,
+      "VE": 1804,
+      "VG": 35,
+      "VI": 55,
+      "VN": 7397,
+      "VU": 214,
+      "WF": 43,
+      "WS": 758,
+      "XK": 910,
+      "YE": 3520,
+      "YT": 206,
+      "ZA": 3893,
+      "ZM": 909,
+      "ZW": 591,
+      "ZZ": 5
+    },
+    "by_religion": {
+      "bahai": 195,
+      "buddhist": 111076,
+      "christian": 988151,
+      "confucian": 326,
+      "hindu": 56682,
+      "jain": 673,
+      "jewish": 7493,
+      "muslim": 287423,
+      "other": 7608,
+      "shinto": 40940,
+      "sikh": 1963,
+      "spiritualist": 663,
+      "taoist": 8891,
+      "unknown": 106186
+    },
+    "total": 1618270
+  },
+  "missing_member_geometry_by_basis": {},
+  "osm_boundary": {
+    "additional_boundary_codes": {
+      "AQ": 1,
+      "AS": 1,
+      "AW": 1,
+      "AX": 1,
+      "BL": 1,
+      "BQ": 1,
+      "BV": 2,
+      "CC": 1,
+      "CW": 1,
+      "CX": 1,
+      "GF": 2,
+      "GL": 1,
+      "GP": 3,
+      "GS": 1,
+      "GU": 1,
+      "HK": 1,
+      "HM": 1,
+      "IO": 1,
+      "MF": 1,
+      "MO": 1,
+      "MP": 1,
+      "MQ": 2,
+      "NC": 2,
+      "NF": 1,
+      "PF": 1,
+      "PM": 1,
+      "PN": 1,
+      "PR": 1,
+      "PS": 1,
+      "RE": 3,
+      "SH": 2,
+      "SJ": 1,
+      "SX": 1,
+      "TF": 1,
+      "TK": 1,
+      "UM": 1,
+      "VI": 1,
+      "WF": 1,
+      "XK": 1,
+      "YT": 3
+    },
+    "by_code": {
+      "AD": 1,
+      "AE": 1,
+      "AF": 1,
+      "AG": 1,
+      "AI": 1,
+      "AL": 1,
+      "AM": 1,
+      "AO": 1,
+      "AQ": 1,
+      "AR": 1,
+      "AS": 1,
+      "AT": 1,
+      "AU": 1,
+      "AW": 1,
+      "AX": 1,
+      "AZ": 1,
+      "BA": 1,
+      "BB": 1,
+      "BD": 1,
+      "BE": 1,
+      "BF": 1,
+      "BG": 1,
+      "BH": 1,
+      "BI": 1,
+      "BJ": 1,
+      "BL": 1,
+      "BM": 1,
+      "BN": 1,
+      "BO": 1,
+      "BQ": 1,
+      "BR": 1,
+      "BS": 1,
+      "BT": 1,
+      "BV": 2,
+      "BW": 1,
+      "BY": 1,
+      "BZ": 1,
+      "CA": 1,
+      "CC": 1,
+      "CD": 1,
+      "CF": 1,
+      "CG": 1,
+      "CH": 1,
+      "CI": 1,
+      "CK": 1,
+      "CL": 1,
+      "CM": 1,
+      "CN": 1,
+      "CO": 1,
+      "CR": 1,
+      "CU": 1,
+      "CV": 1,
+      "CW": 1,
+      "CX": 1,
+      "CY": 1,
+      "CZ": 1,
+      "DE": 1,
+      "DJ": 2,
+      "DK": 1,
+      "DM": 1,
+      "DO": 1,
+      "DZ": 1,
+      "EC": 1,
+      "EE": 1,
+      "EG": 1,
+      "EH": 1,
+      "ER": 1,
+      "ES": 1,
+      "ET": 1,
+      "FI": 1,
+      "FJ": 1,
+      "FK": 1,
+      "FM": 1,
+      "FO": 1,
+      "FR": 1,
+      "GA": 1,
+      "GB": 1,
+      "GD": 1,
+      "GE": 1,
+      "GF": 2,
+      "GG": 1,
+      "GH": 1,
+      "GI": 1,
+      "GL": 1,
+      "GM": 1,
+      "GN": 1,
+      "GP": 3,
+      "GQ": 1,
+      "GR": 1,
+      "GS": 1,
+      "GT": 1,
+      "GU": 1,
+      "GW": 1,
+      "GY": 1,
+      "HK": 1,
+      "HM": 1,
+      "HN": 1,
+      "HR": 1,
+      "HT": 1,
+      "HU": 1,
+      "ID": 1,
+      "IE": 1,
+      "IL": 1,
+      "IM": 2,
+      "IN": 1,
+      "IO": 1,
+      "IQ": 1,
+      "IR": 1,
+      "IS": 1,
+      "IT": 1,
+      "JE": 1,
+      "JM": 1,
+      "JO": 1,
+      "JP": 1,
+      "KE": 2,
+      "KG": 1,
+      "KH": 1,
+      "KI": 1,
+      "KM": 1,
+      "KN": 1,
+      "KP": 1,
+      "KR": 1,
+      "KW": 1,
+      "KY": 1,
+      "KZ": 1,
+      "LA": 1,
+      "LB": 1,
+      "LC": 1,
+      "LI": 1,
+      "LK": 1,
+      "LR": 1,
+      "LS": 1,
+      "LT": 1,
+      "LU": 1,
+      "LV": 1,
+      "LY": 1,
+      "MA": 1,
+      "MC": 1,
+      "MD": 1,
+      "ME": 1,
+      "MF": 1,
+      "MG": 1,
+      "MH": 1,
+      "MK": 1,
+      "ML": 1,
+      "MM": 1,
+      "MN": 1,
+      "MO": 1,
+      "MP": 1,
+      "MQ": 2,
+      "MR": 1,
+      "MS": 1,
+      "MT": 1,
+      "MU": 1,
+      "MV": 1,
+      "MW": 1,
+      "MX": 1,
+      "MY": 1,
+      "MZ": 1,
+      "NA": 1,
+      "NC": 2,
+      "NE": 1,
+      "NF": 1,
+      "NG": 1,
+      "NI": 1,
+      "NL": 1,
+      "NO": 1,
+      "NP": 1,
+      "NR": 1,
+      "NU": 1,
+      "NZ": 1,
+      "OM": 1,
+      "PA": 1,
+      "PE": 1,
+      "PF": 1,
+      "PG": 1,
+      "PH": 1,
+      "PK": 1,
+      "PL": 1,
+      "PM": 1,
+      "PN": 1,
+      "PR": 1,
+      "PS": 1,
+      "PT": 1,
+      "PW": 1,
+      "PY": 1,
+      "QA": 1,
+      "RE": 3,
+      "RO": 1,
+      "RS": 2,
+      "RU": 1,
+      "RW": 1,
+      "SA": 1,
+      "SB": 1,
+      "SC": 1,
+      "SD": 1,
+      "SE": 1,
+      "SG": 1,
+      "SH": 2,
+      "SI": 1,
+      "SJ": 1,
+      "SK": 1,
+      "SL": 1,
+      "SM": 1,
+      "SN": 1,
+      "SO": 1,
+      "SR": 1,
+      "SS": 1,
+      "ST": 1,
+      "SV": 1,
+      "SX": 1,
+      "SY": 1,
+      "SZ": 1,
+      "TC": 1,
+      "TD": 1,
+      "TF": 1,
+      "TG": 1,
+      "TH": 1,
+      "TJ": 1,
+      "TK": 1,
+      "TL": 1,
+      "TM": 1,
+      "TN": 1,
+      "TO": 1,
+      "TR": 1,
+      "TT": 1,
+      "TV": 1,
+      "TW": 1,
+      "TZ": 1,
+      "UA": 1,
+      "UG": 1,
+      "UM": 1,
+      "US": 1,
+      "UY": 1,
+      "UZ": 1,
+      "VA": 1,
+      "VC": 1,
+      "VE": 1,
+      "VG": 1,
+      "VI": 1,
+      "VN": 1,
+      "VU": 1,
+      "WF": 1,
+      "WS": 1,
+      "XK": 1,
+      "YE": 1,
+      "YT": 3,
+      "ZA": 3,
+      "ZM": 1,
+      "ZW": 1
+    },
+    "bytes": 4478066539,
+    "feature_count": 287016,
+    "invalid_polygons": 0,
+    "iso_feature_count": 267,
+    "missing_july_codes": {},
+    "sha256": "2263ea14323dc58bb186234674281e8944accd117f65a141e5b254dec2e96274",
+    "usable_feature_count": 267,
+    "vertex_count": 6105461
+  },
+  "osm_overlaps": {
+    "by_pair": {
+      "AS/US": 25,
+      "AU/CC": 1,
+      "AU/CX": 15,
+      "AU/NF": 8,
+      "AW/NL": 66,
+      "AX/FI": 34,
+      "BL/FR": 7,
+      "BQ/NL": 55,
+      "CN/HK": 1555,
+      "CN/MO": 149,
+      "CW/NL": 105,
+      "EH/MA": 86,
+      "FR/GF": 139,
+      "FR/GP": 195,
+      "FR/MF": 28,
+      "FR/MQ": 113,
+      "FR/NC": 172,
+      "FR/PF": 416,
+      "FR/PM": 7,
+      "FR/RE": 312,
+      "FR/TF": 3,
+      "FR/WF": 43,
+      "FR/YT": 211,
+      "GU/US": 104,
+      "MP/US": 13,
+      "NL/SX": 34,
+      "NO/SJ": 5,
+      "PR/US": 987,
+      "RS/XK": 960,
+      "RU/UA": 664,
+      "SD/SS": 4,
+      "UM/US": 1,
+      "US/VI": 61
+    },
+    "records": 6578
+  },
+  "possible_layer_features": 133446,
+  "without_geometry_by_basis": {
+    "tag": 2
+  }
+}
