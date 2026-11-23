@@ -62,6 +62,86 @@ Stages: `thin` (per-zoom NDJSON parts and `thin-report.json`), `build` (tippecan
 
 Measured on the 2026-07-22 extract: the largest overview tile (Europe at zoom 4) is 604 KB against 52 MB in the July archive and 550 KB in the fraction sample, and the New Zealand zoom-4 tile is 5 KB holding all its places where the sample held 31; the whole overview tier is 10.6 MB.
 
+## OpenStreetMap edition build (2026-09-01)
+
+Use the dated planet file and replication changes to reconstruct the OpenStreetMap edition at 2026-09-01T00:00:00Z. The project used the planet-file route because its chosen history service ended at 27 July 2026. The July tile build starts from an archive that mixes extraction rules and lacks some OSM identifiers. The edition build starts from typed OSM objects, applies the same rule in every country, and checks every shipped OSM key against the edition.
+
+Supply the filtered `pow-candidates-2026-09-01.osm.pbf` in type and numeric ID order, with member objects needed for geometry. The filters select `amenity=place_of_worship`, the five building types below, and the seven lifecycle forms below. Include dependencies when running `osmium tags-filter`. Keep the two Natural Earth 1:10m shapefile distributions, including their `.VERSION.txt` files, in sibling directories named `ne_10m_admin_0_countries` and `ne_10m_admin_0_map_units`.
+
+Build the OSM country polygons from the same dated planet edition as the candidates. `osmium export` assembles the relation geometries and can omit relations it cannot assemble. The extractor reports which July codes lack an exported polygon.
+
+```sh
+planet='<path to the planet PBF at the edition timestamp>'
+work='<path to ignored build directory>'
+mkdir -p "$work"
+osmium tags-filter "$planet" r/ISO3166-1 r/ISO3166-1:alpha2 -o "$work/iso-boundaries.osm.pbf"
+osmium export "$work/iso-boundaries.osm.pbf" -f geojsonseq --geometry-types=polygon -o "$work/osm-iso-boundaries-2026-09-01.geojsonseq"
+```
+
+Create a provenance JSON file using the reconstruction record for 2026-09-01T00:00:00Z. Copy the source planet MD5 and the SHA-256 digests of the filtered candidate PBF and exported OSM boundaries from that record. Extraction checks both files against the reconstruction record. The builder checks them again and verifies that the latest timestamp in the candidate PBF is at or before the cutoff. The filter and Natural Earth version must agree with extraction. The builder includes both input digests, the boundary feature counts and the build tool versions in its published records.
+
+```json
+{
+  "source_kind": "planet",
+  "planet_file": "planet-<yymmdd>.osm.pbf",
+  "planet_md5": "<32 lowercase hexadecimal characters>",
+  "change_sequences": [5101, 5102],
+  "edition_timestamp": "2026-09-01T00:00:00Z",
+  "input_sha256": {
+    "candidates_pbf": "<candidate PBF SHA-256>",
+    "osm_iso_boundaries": "<exported OSM boundaries SHA-256>"
+  },
+  "filter_rules": {
+    "tag": ["amenity=place_of_worship"],
+    "building": ["building=chapel", "building=church", "building=mosque", "building=synagogue", "building=temple"],
+    "lifecycle": [
+      "disused:amenity=place_of_worship", "abandoned:amenity=place_of_worship",
+      "was:amenity=place_of_worship", "demolished:amenity=place_of_worship",
+      "removed:amenity=place_of_worship", "razed:amenity=place_of_worship",
+      "ruins:amenity=place_of_worship"
+    ]
+  },
+  "boundary_source": "Natural Earth 1:10m",
+  "boundary_version": "5.1.1",
+  "tool_versions": {"osmium_cli": "<version used to prepare the PBF>"}
+}
+```
+
+Run from the repository root with `osmium`, `tippecanoe` and `pmtiles` on `PATH`. Keep the work directory in ignored storage. For a sample run, use a separate work directory and put the manifest directory inside it. A sample provenance file uses `"source_kind": "sample"`, `"sample_source": "<pbf basename>"` and the sample's timestamp. Omit `planet_file`, `planet_md5`, `change_sequences` and `input_sha256` for samples. Sample archive names include a sample suffix and their manifests set `pipeline.parameters.sample_only` to `true`.
+
+```sh
+pbf='<path to pow-candidates-2026-09-01.osm.pbf>'
+boundaries='<parent of the two Natural Earth directories>'
+osm_boundaries='<path to the edition OSM ISO polygon GeoJSON sequence>'
+provenance='<path to provenance.json>'
+work='<path to ignored build directory>'
+mkdir -p "$work"
+
+export UV_CACHE_DIR="$PWD/local/uv-cache" UV_OFFLINE=1
+edition_python() {
+  uv run --no-project --python 3.12 --with osmium --with shapely --with pyshp \
+    --with mapbox-vector-tile --with pmtiles --with jsonschema python "$@"
+}
+
+edition_python tools/tiles-r2/extract_osm_edition.py \
+  --pbf "$pbf" --boundaries "$boundaries" --osm-boundaries "$osm_boundaries" \
+  --provenance "$provenance" --work "$work/edition"
+
+for stage in thin build validate manifest; do
+  edition_python tools/tiles-r2/build_osm_edition.py "$stage" \
+    --edition "$work/edition" --work "$work/build" --provenance "$provenance" \
+    --pbf "$pbf" --osm-boundaries "$osm_boundaries" --snapshot 20260901 --manifest-dir tools/tiles-r2/manifests \
+    --git-commit '<build commit>' || exit
+done
+```
+
+1. **Extract.** The filter takes the first match in the order `tag`, `building`, `lifecycle`. Any listed lifecycle key sets the private `former` flag, regardless of its value. `landuse=religious` alone supplies no candidate. Nodes use their coordinates. Ways and relations use the centre of the bounding box of all available member nodes. Use the shortest longitude interval that contains the members and wrap its midpoint at the antimeridian. Follow nested relations until their members are exhausted and record cycles separately from missing references. The private `edition.ndjson` retains full tags, object versions and timestamps in node, way, relation and numeric ID order. Private `edition-stats.json` lists missing and incomplete geometries by ID and hashes the input and output files. A candidate with no usable member location remains in the private edition with null geometry and is absent from the public NDJSON. Candidates with partial geometry use the available coordinates. The private statistics list those keys and the validation report counts them by basis. Public points are rounded to six decimal places.
+2. **Assign countries.** First look for a covering OSM ISO polygon, including territorial waters, and record `osm`. Read the first valid two-uppercase-letter code from `ISO3166-1` and `ISO3166-1:alpha2` in that order. Index polygon components and rank each by the full source feature's spherical equal-area estimate. The smallest feature wins, with alphabetical ties. Count each record covered by more than one code and each unordered pair of covering codes. Second, look for a covering Natural Earth 1:10m map-unit polygon and record `natural_earth`. Read `ISO_A2_EH` first, then the two-letter `ISO_A2` field. The equivalency field resolves `-99` for entries such as France, Norway and Kosovo (`FR`, `NO`, `XK`), and resolves qualified values such as Taiwan's `CN-TW` to `TW`. Assign `ADM0_A3=UMI` to `UM`. Natural Earth's `XD` and units with neither field resolved remain unassigned. On Natural Earth overlaps and shared boundaries, use the smallest covering polygon, then the alphabetical code. Check both aliases at the antimeridian and prefer a covering polygon with an assignable code. Reject country rings that cross the antimeridian without a split. Third, if no covering Natural Earth polygon supplies a code, look for the nearest assigned Natural Earth polygon within 25 km and record `nearest`. The distance estimate scales longitude by the cosine of the point's latitude. Search across the antimeridian where needed. Finally, use `ZZ` with `fallback` where neither coverage nor the 25 km search supplies a code. The build keeps located `ZZ` points in the global layer and gives main-set points their own `ra-dots-zz` archive.
+3. **Thin and build.** `places.ndjson` holds valid points tagged `amenity=place_of_worship`. `places-possible.ndjson` holds building-only records with usable geometry and no main-set point in their bounding box plus a 10-metre margin on every side. Apply the same box rule to nodes, with a 10-metre margin east, west, north and south of the node. Split queries at the antimeridian. Check the main-set point before rounding its coordinates. The private edition marks each building candidate with `holds_tagged_place` and the statistics count withheld buildings overall and by country. The public `name` uses `name`, then `official_name`, then an empty string. The separate `name_en` field still carries `name:en`. Missing or empty religion becomes `unknown`, and denomination defaults to an empty string. `start_date` carries its original value when present. Each grid cell retains the first main-set point per religion, denomination and country and adds `n` when a dot represents more than one place. The grid starts at the July cell widths and doubles the width at a zoom if needed to meet the July grid byte cap. Every representative carries an OSM key. Zooms 0 to 6 carry the grid attributes and the combined OSM key as `id`. The client continues to zoom in when a visitor selects a representative at those zooms. Zoom 7 and above, and the RA archives, carry the public record attributes. The public record stores `osm_id` as an integer and `id` as a prefixed string. For vector tiling, the build puts world-edge coordinates just inside Web Mercator, keeps the copy in the tile that owns each point, and corrects far-edge rounding by one vector tile unit where needed. For a single-location archive, the build pads any zero-width metadata bound by up to 0.00001 degrees on each side.
+4. **Validate and record.** Decode each tile in the overview (`places_overview`, z0 to 5), places (`places`, z6 to 18), and RA archives (`places_overview`, z3 to 7). Before thinning and again in validation, derive the expected public keys from the private edition's raw tags, geometry and withholding flags. The validator checks exact membership, the expected single layer and extent, MVT and gzip header fields, distinct tile addresses, record positions and owning tiles, distinct OSM keys, and the July grid byte caps. For z0 to 7 it compares the representatives against the input grid and reconciles `n` and the religion and country sums. For z8 to 18 and every RA zoom, each applicable main-set key appears once per zoom. The validator separately matches the `places_possible` archive to the extras at z8 to 18. Extras contribute zero to every main-set count. Lifecycle-only candidates stay in the private edition. Manifest generation rechecks the input and archive hashes. The builder checks the public records for private paths and identifiers and accepts only known tools and version formats in provenance. The aggregate records identify country codes gained and lost against July, with counts from the edition for gains and from July for losses. Public reports group free-text religions outside the fixed set as `other`. Validation compares the original religion values.
+
+The production names are `places-overview-v2-20260901-grid`, `places-v2-20260901-grid`, `ra-dots-<cc>-20260901` and `places-v2-20260901-possible`. The last archive is a separate source for clients that opt into `places_possible`. Archive creation and validation run locally. The live map uses the July names until the principal investigator switches it. At the RA portal switch, derive the country list from `scope.country_codes` in the RA manifest. Derive the large-archive exceptions from each `durable_files[].uri` and `durable_files[].bytes`, using the existing 10,000,000-byte threshold. Keep the world view on the global overview by excluding `ZZ` from both country sets.
+
 ## Census boundary tiles (2026-10-13)
 
 `build_census_tiles.py` builds one PMTiles archive per census boundary file, so a country page can fetch the tiles under its window in place of the whole boundary GeoJSON (the US county layer is 737 KB gzip as GeoJSON and 126 KB of tiles at the desktop landing view). This is step 1 of the plan: the builder only. No page reads the archives, the Worker does not yet accept the `census-` names, and nothing is uploaded.

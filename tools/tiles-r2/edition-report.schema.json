@@ -1,0 +1,173 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "count": {"type": "integer", "minimum": 0},
+    "counts": {"type": "object", "additionalProperties": {"$ref": "#/$defs/count"}},
+    "countries": {
+      "type": "object",
+      "propertyNames": {"pattern": "^[A-Z]{2}$"},
+      "additionalProperties": {"$ref": "#/$defs/count"}
+    },
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "hashes": {"type": "object", "additionalProperties": {"$ref": "#/$defs/sha256"}},
+    "osm-boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sha256", "bytes", "feature_count", "iso_feature_count", "usable_feature_count",
+        "invalid_polygons", "vertex_count", "by_code", "missing_july_codes", "additional_boundary_codes"
+      ],
+      "properties": {
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "bytes": {"$ref": "#/$defs/count"},
+        "feature_count": {"$ref": "#/$defs/count"},
+        "iso_feature_count": {"$ref": "#/$defs/count"},
+        "usable_feature_count": {"$ref": "#/$defs/count"},
+        "invalid_polygons": {"$ref": "#/$defs/count"},
+        "vertex_count": {"$ref": "#/$defs/count"},
+        "by_code": {"$ref": "#/$defs/countries"},
+        "missing_july_codes": {"$ref": "#/$defs/countries"},
+        "additional_boundary_codes": {"$ref": "#/$defs/countries"}
+      }
+    },
+    "input-stats": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "edition_candidates_by_basis", "edition_candidates_by_type",
+        "edition_candidates_by_country_and_basis", "edition_candidates_by_country_method",
+        "without_geometry_by_basis", "incomplete_geometry_by_basis",
+        "missing_member_geometry_by_basis", "cyclic_geometry_by_basis", "main",
+        "possible_layer_features", "country_comparison", "boundary_comparison", "extract_hashes",
+        "osm_boundary", "osm_overlaps", "buildings_withheld"
+      ],
+      "properties": {
+        "edition_candidates_by_basis": {"$ref": "#/$defs/counts"},
+        "edition_candidates_by_type": {"$ref": "#/$defs/counts"},
+        "edition_candidates_by_country_and_basis": {
+          "type": "object",
+          "propertyNames": {"pattern": "^[A-Z]{2}$"},
+          "additionalProperties": {"$ref": "#/$defs/counts"}
+        },
+        "edition_candidates_by_country_method": {"$ref": "#/$defs/counts"},
+        "without_geometry_by_basis": {"$ref": "#/$defs/counts"},
+        "incomplete_geometry_by_basis": {"$ref": "#/$defs/counts"},
+        "missing_member_geometry_by_basis": {"$ref": "#/$defs/counts"},
+        "cyclic_geometry_by_basis": {"$ref": "#/$defs/counts"},
+        "main": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["total", "by_country", "by_religion"],
+          "properties": {
+            "total": {"$ref": "#/$defs/count"},
+            "by_country": {"$ref": "#/$defs/countries"},
+            "by_religion": {"$ref": "#/$defs/counts"}
+          }
+        },
+        "possible_layer_features": {"$ref": "#/$defs/count"},
+        "country_comparison": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["july_codes", "edition_codes", "retained_codes", "gained", "lost", "unassigned_code"],
+          "properties": {
+            "july_codes": {"$ref": "#/$defs/count"},
+            "edition_codes": {"$ref": "#/$defs/count"},
+            "retained_codes": {"$ref": "#/$defs/count"},
+            "gained": {"$ref": "#/$defs/countries"},
+            "lost": {"$ref": "#/$defs/countries"},
+            "unassigned_code": {"const": "ZZ"}
+          }
+        },
+        "boundary_comparison": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["matches", "additional_boundary_codes", "missing_july_codes", "unassigned_boundary_records"],
+            "properties": {
+              "matches": {"$ref": "#/$defs/count"},
+              "additional_boundary_codes": {"$ref": "#/$defs/countries"},
+              "missing_july_codes": {"$ref": "#/$defs/countries"},
+              "unassigned_boundary_records": {"$ref": "#/$defs/count"}
+            }
+          }
+        },
+        "osm_boundary": {"$ref": "#/$defs/osm-boundary"},
+        "osm_overlaps": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["records", "by_pair"],
+          "properties": {
+            "records": {"$ref": "#/$defs/count"},
+            "by_pair": {
+              "type": "object",
+              "propertyNames": {"pattern": "^[A-Z]{2}/[A-Z]{2}$"},
+              "additionalProperties": {"$ref": "#/$defs/count"}
+            }
+          }
+        },
+        "buildings_withheld": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["total", "by_country", "buffer_metres"],
+          "properties": {
+            "total": {"$ref": "#/$defs/count"},
+            "by_country": {"$ref": "#/$defs/countries"},
+            "buffer_metres": {"type": "number", "exclusiveMinimum": 0}
+          }
+        },
+        "extract_hashes": {"$ref": "#/$defs/hashes"}
+      }
+    },
+    "zoom": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tiles", "largest_tile_bytes", "layers"],
+      "properties": {
+        "tiles": {"type": "integer", "minimum": 1},
+        "largest_tile_bytes": {"type": "integer", "minimum": 1},
+        "layers": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["features"],
+            "properties": {
+              "features": {"$ref": "#/$defs/count"},
+              "represented": {"$ref": "#/$defs/count"},
+              "by_religion": {"$ref": "#/$defs/counts"}
+            }
+          }
+        }
+      }
+    },
+    "archive": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sha256", "bytes", "zooms", "edge_features_processed"],
+      "properties": {
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "bytes": {"type": "integer", "minimum": 1},
+        "zooms": {"type": "object", "additionalProperties": {"$ref": "#/$defs/zoom"}},
+        "edge_features_processed": {"$ref": "#/$defs/count"}
+      }
+    },
+    "validation-report": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "snapshot", "sample_only", "provenance", "boundary",
+                   "software_versions", "inputs", "archives", "grid_cell_css_pixels"],
+      "properties": {
+        "status": {"const": "passed"},
+        "snapshot": {"type": "string", "pattern": "^[0-9]{8}$"},
+        "provenance": {"type": "object"},
+        "boundary": {"type": "object"},
+        "sample_only": {"type": "boolean"},
+        "software_versions": {"type": "object", "additionalProperties": {"type": "string"}},
+        "inputs": {"$ref": "#/$defs/input-stats"},
+        "archives": {"type": "object", "minProperties": 3, "additionalProperties": {"$ref": "#/$defs/archive"}},
+        "grid_cell_css_pixels": {"$ref": "#/$defs/counts"}
+      }
+    }
+  }
+}
