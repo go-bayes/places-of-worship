@@ -34,6 +34,12 @@ const LAYERS = {
   possible: "pow-possible-rings"
 };
 const SOURCES = { possible: "pow-possible" };
+const DATED = {
+  source: "dated", layer: "dated-point", futureLayer: "dated-future", windowLayer: "dated-window",
+  areaLayer: "dated-area", transitionLayer: "dated-transition"
+};
+const PULOTU = { source: "pulotu", layer: "pulotu-point" };
+const CENSUS = { source: "census", fill: "census-fill", line: "census-line", hover: "census-hover" };
 let checks = 0;
 
 // a stand-in maplibre map: sources, ordered layers, layout and paint
@@ -42,7 +48,9 @@ let checks = 0;
 function fakeMap(rendered = {}) {
   const map = {
     sources: {}, order: [], layers: {}, filters: {}, handlers: [], zoom: 12,
+    canvas: { style: { cursor: "" } }, popupOpens: [], builds: 0,
     addSource(id, spec) { this.sources[id] = spec; },
+    removeSource(id) { delete this.sources[id]; },
     getSource(id) { return this.sources[id]; },
     addLayer(spec, beforeId) {
       const at = beforeId ? this.order.indexOf(beforeId) : -1;
@@ -50,24 +58,75 @@ function fakeMap(rendered = {}) {
       this.layers[spec.id] = { ...spec, layout: { ...(spec.layout || {}) }, paint: { ...(spec.paint || {}) } };
     },
     getLayer(id) { return this.layers[id]; },
+    removeLayer(id) { delete this.layers[id]; this.order = this.order.filter((layer) => layer !== id); },
     setLayoutProperty(id, key, value) { this.layers[id].layout[key] = value; },
     setPaintProperty(id, key, value) { this.layers[id].paint[key] = value; },
     setFilter(id, filter) { this.filters[id] = filter; },
-    on(type, layer, fn) { this.handlers.push([type, layer, fn]); },
+    on(type, layer, fn) {
+      this.handlers.push(typeof layer === "function" ? [type, null, layer] : [type, layer, fn]);
+    },
+    once(type, fn) {
+      const handler = (e) => {
+        this.handlers = this.handlers.filter(([, , candidate]) => candidate !== handler);
+        fn(e);
+      };
+      this.on(type, handler);
+    },
+    fire(type, e = {}) {
+      for (const [name, layer, fn] of this.handlers.slice()) {
+        if (name !== type) continue;
+        const features = layer ? this.queryRenderedFeatures(e.point, { layers: [layer] }) : [];
+        if (!layer || features.length) fn({ ...e, features });
+      }
+    },
+    setStyle() {
+      this.sources = {};
+      this.layers = {};
+      this.filters = {};
+      this.order = [];
+    },
+    finishStyle() {
+      this.fire("style.load");
+      this.fire("idle");
+    },
+    getCanvas() { return this.canvas; },
+    isStyleLoaded() { return true; },
+    getCenter() { return { lng: 12.5, lat: 41.9 }; },
+    jumpTo() {},
+    triggerRepaint() {},
     getZoom() { return this.zoom; },
     queryRenderedFeatures(geometryOrOptions, maybeOptions) {
       const options = maybeOptions || geometryOrOptions || {};
-      return (options.layers || []).flatMap((id) => (rendered[id] || []).map((f) => ({ ...f, layer: { id } })));
+      const point = maybeOptions ? geometryOrOptions : null;
+      const contains = (screen) => {
+        if (!point || !screen) return true;
+        if (!Array.isArray(point)) return screen[0] === point.x && screen[1] === point.y;
+        return screen.every((value, i) => value >= point[0][i] && value <= point[1][i]);
+      };
+      return (options.layers || []).flatMap((id) =>
+        this.layers[id]?.layout.visibility === "none" ? [] : (rendered[id] || [])
+          .filter((f) => contains(f.screen)).map((f) => ({ ...f, layer: { id } }))
+      );
     }
   };
   return map;
 }
 function context(map, extra = {}) {
+  class Popup {
+    setLngLat(coords) { this.point = coords; return this; }
+    getLngLat() { return { lng: this.point[0], lat: this.point[1] }; }
+    setHTML(html) { this.html = html; return this; }
+    addTo(map) { this.open = true; map.popupOpens.push(this); return this; }
+    isOpen() { return this.open; }
+    on(type, fn) { if (type === "close") this.onClose = fn; }
+    remove() { if (this.open) { this.open = false; this.onClose?.(); } }
+    getElement() { return { querySelector: () => null }; }
+  }
   const ctx = vm.createContext({
-    map, LAYERS, SOURCES, POSSIBLE_LAYER: "places_possible", IS_MOBILE: false,
+    map, LAYERS, SOURCES, DATED, PULOTU, CENSUS, POSSIBLE_LAYER: "places_possible", IS_MOBILE: false,
     CONFIG: { tiles: { possible: "https://tiles.placemap.org/places-v2-20260901-possible/{z}/{x}/{y}" } },
     currentFilterClauses: () => ["==", ["get", "religion"], "muslim"],
-    maplibregl: { Popup: function () { return { setLngLat() { return this; }, setHTML() { return this; }, addTo() { return this; }, remove() {} }; } },
+    maplibregl: { Popup },
     placesDotState: { mode: null, future: false, possible: false },
     countsList: { style: {} },
     document: { getElementById: () => null },
@@ -83,15 +142,18 @@ function context(map, extra = {}) {
     lift("function possibleRadiusExpression("),
     lift("function possibleLayerSpecs("),
     lift("function possiblePlacePopupHtml("),
-    lift("function placeDotAt("),
-    "let possibleHandlersAttached = false;",
+    lift("function featuresAt("),
+    lift("function historicalPointLayers("),
+    "let possibleHasCursor = false;",
+    "let activePossiblePopup = null;",
+    lift("function clearPossibleHover("),
     lift("function addPossibleLayers("),
     lift("function syncPossiblePlaces("),
     lift("function possibleWaitingForZoom("),
     lift("function possibleQualifier("),
     lift("function syncPossibleQualifier("),
     "let possibleHover = null;",
-    "this.api = { possibleLayerSpecs, possiblePlacePopupHtml, placeDotAt, addPossibleLayers, syncPossiblePlaces, possibleWaitingForZoom, possibleQualifier, syncPossibleQualifier, possibleRadiusExpression, placeDisplayName };",
+    "this.api = { possibleLayerSpecs, possiblePlacePopupHtml, addPossibleLayers, syncPossiblePlaces, possibleWaitingForZoom, possibleQualifier, syncPossibleQualifier, possibleRadiusExpression, placeDisplayName };",
     "this.consts = { POSSIBLE_MIN_ZOOM, POSSIBLE_RING_RADII, POSSIBLE_RING_WIDTH, POSSIBLE_HALO_WIDTH, POSSIBLE_ZOOM_QUALIFIER, POSSIBLE_COUNT_QUALIFIER, POSSIBLE_KIND_LABEL, POSSIBLE_KIND_NOTE, POSSIBLE_RING_COLOUR };"
   ].join("\n"), ctx);
   return ctx;
@@ -162,7 +224,7 @@ function interpolate(expr, z) {
   assert.deepEqual(map.filters[LAYERS.possible], ["==", ["get", "religion"], "muslim"], "the religion filters apply");
   assert.deepEqual(map.filters[LAYERS.possibleHalo], ["==", ["get", "religion"], "muslim"]);
   const handlers = map.handlers.map(([type, layer]) => `${type}:${layer}`);
-  assert.ok(handlers.includes(`click:${LAYERS.possible}`), "the ring answers a click");
+  assert.ok(handlers.includes(`mousemove:${LAYERS.possible}`), "the ring can show a hover label");
   api.syncPossiblePlaces(false);
   assert.equal(map.layers[LAYERS.possible].layout.visibility, "none");
   assert.equal(map.layers[LAYERS.possibleHalo].layout.visibility, "none");
@@ -174,35 +236,20 @@ function interpolate(expr, z) {
   checks += 13;
 }
 
-// 3. a place dot wins the press over a ring beneath it
-{
-  const withPlace = fakeMap({ [LAYERS.places]: [{ properties: { name: "St Mary" } }] });
-  withPlace.addLayer({ id: LAYERS.places });
-  const { api } = context(withPlace);
-  assert.equal(api.placeDotAt({ x: 1, y: 1 }), true);
-  const ringsOnly = context(fakeMap({ [LAYERS.possible]: [{ properties: {} }] }));
-  ringsOnly.map.addLayer({ id: LAYERS.places });
-  assert.equal(ringsOnly.api.placeDotAt({ x: 1, y: 1 }), false, "a ring alone is not a place");
-  // the click handler checks it before opening a ring's popup
-  assert.match(lift("function addPossibleLayers("), /map\.on\("click", LAYERS\.possible, \(e\) => \{\n\s*const feature = e\.features && e\.features\[0\];\n\s*if \(!feature \|\| placeDotAt\(e\.point\)\) return;/);
-  checks += 3;
-}
-
-// 4. the popup: the name or the unnamed wording, the kind and one sentence,
+// the popup: the name or the unnamed wording, the kind and one sentence,
 // the osm record, and no action that assumes a counted place
 {
   const { api, consts } = context(fakeMap());
   const html = api.possiblePlacePopupHtml(
     { id: "w42", osm_id: 42, osm_type: "way", name: "St <Jude>", religion: "unknown", denomination: "" },
-    [174.75, -41.28],
-    '<a class="popup-revise" href="x">Revise this place</a>'
+    [174.75, -41.28]
   );
   assert.match(html, /<span class="popup-title">St &lt;Jude&gt;<\/span>/, "the name, escaped");
   assert.match(html, /<div class="place-note"><strong>Possible or former place of worship<\/strong><\/div>/);
   assert.match(html, /OpenStreetMap maps a church, mosque, temple, synagogue or chapel building here without tagging it as a place of worship, so it may be a former, converted or unconfirmed place, and it is not counted in the totals\./);
   assert.equal((consts.POSSIBLE_KIND_NOTE.match(/\. |\.$/g) || []).length, 1, "one sentence");
   assert.match(html, /href="https:\/\/www\.openstreetmap\.org\/way\/42"[^>]*>Open OSM</, "the osm record itself");
-  assert.match(html, />Revise this place</, "the correction route stays");
+  assert.doesNotMatch(html, /Revise this place|popup-revise/);
   assert.match(html, />Street View</);
   assert.doesNotMatch(html, /Directions|From you|From pin/, "nothing that assumes a place in use");
   assert.doesNotMatch(html, /Religion/, "an unknown religion is not shown");
@@ -381,8 +428,205 @@ function interpolate(expr, z) {
   assert.match(lift("function openPossiblePopup("), /if \(possibleHover\) possibleHover\.remove\(\);/);
   const placesBody = lift("function addPlacesLayer(");
   assert.match(placesBody, /if \(popupOpenAt\(coords\)\) \{\n\s*hoverPopup\.remove\(\);\n\s*return;/);
-  assert.match(placesBody, /hoverPopup\.remove\(\);\n\s*if \(pinnedLabel\) pinnedLabel\.remove\(\);\n\s*void handlePlaceFeatureClick/);
+  assert.match(lift("function handleMapPlaceClick("), /placeHover\?\.remove\(\);\n\s*pinnedLabel\?\.remove\(\);/);
   checks += 8;
 }
 
-console.log(`possible places: ${checks} checks passed`);
+function interactiveMap(rendered, isMobile) {
+  const map = fakeMap(rendered);
+  const controls = {};
+  const checkbox = { checked: false, addEventListener(type, fn) { controls.toggle = fn; } };
+  const select = { appendChild() {}, addEventListener(type, fn) { controls.basemap = fn; } };
+  const queued = [];
+  const filter = ["==", ["get", "religion"], "christian"];
+  const ctx = context(map, {
+    IS_MOBILE: isMobile,
+    RC: { countryCode: "IT", datedPlaces: true, pulotuCultures: true },
+    window: {}, URLSearchParams,
+    Element: class {},
+    document: {
+      createElement: () => ({}),
+      getElementById: (id) => id === "countsPossibleToggle" ? checkbox : null
+    },
+    PORTAL_BASE: "../nz/", CONTRIBUTE_ROUTES: {},
+    CONFIG: { streetViewMinZoom: 13, tiles: { possible: "possible/tiles" } },
+    GOOGLE_MAPS_KEY: "", pinLocation: null, userLocation: null, focusPlace() {}, distanceRowsHtml: () => "",
+    makePopupDraggable() {}, clampPopupToViewport() {}, showClickHint() {},
+    openCensusPopup(feature) { controls.census = feature; },
+    requestAnimationFrame: (fn) => fn(),
+    setTimeout: (fn) => queued.push(fn),
+    basemapSelect: select, basemapOptions: [{ id: "light" }, { id: "satellite", style: {} }],
+    defaultBasemapId: "light", activeBasemapId: "light", setTerrainStateFromBasemap() {},
+    updateTerrainToggleAvailability() {}, filtersBootstrapped: false,
+    censusState: { enabled: true, year: 2000 }, activeDomainId: "religion",
+    currentFilterClauses: () => filter, updateCounts() {}, ensureNearestLine() {},
+    OVERVIEW_ENABLED: true, HOME_SHADE: { fill: "shade", outline: "shade-outline" },
+    addCensusLayers() { map.addLayer({ id: CENSUS.fill }); },
+    addOverviewLayer() { map.addLayer({ id: LAYERS.overview }); map.builds += 1; },
+    addPolygonsLayer() {}, addBuildingsLayer() {}, addHomeShadeLayers() {},
+    addPlacesLayer() { map.addLayer({ id: LAYERS.places }); },
+    syncDatedPlaces() {}, syncPulotuCultures() {}, syncPointsControl() {}, syncKeyToDots() {},
+    datedGeojson: {}, datedHandlersAttached: false, ensureDashedRingImage() {}, DATED_AMBER: "#d68910",
+    religionColors: {},
+    datedPlacePopupHtml: (props) => props.name,
+    loadPulotuData: async () => ({ data: {} }), pulotuColourExpression: () => "#fff",
+    PULOTU_GROUPS: [], safeHttpUrl: () => "", pulotuHandlersAttached: false
+  });
+  const styleStart = runtime.indexOf('map.on("style.load", () => {');
+  const styleListener = runtime.slice(styleStart, runtime.indexOf("\n});", styleStart) + 4);
+  vm.runInContext([
+    "let activePlacePopup = null, placeHover = null, pinnedLabel = null;",
+    lift("function popupOpenAt("), lift("function trackPlacePopup("), lift("function coordsFromFeature("),
+    lift("function projectCountryCode("), lift("function countryForPlace("), lift("function portalReviseHref("),
+    lift("function reviseLinkHtml("), lift("function directionsUrl("),
+    lift("function isRepresentativeDot("), lift("function handlePlaceFeatureClick("),
+    lift("function showMobileStreetViewPopup("), lift("function openPossiblePopup("),
+    lift("function handleMapPlaceClick("), 'map.on("click", handleMapPlaceClick);',
+    lift("function initBasemapSelect("), lift("function rebuildCustomLayers("), lift("function addCustomLayers("),
+    lift("function ensureCustomLayers("), lift("function refreshMapLayers("), lift("function nudgeMap("),
+    lift("function applyFilters("), styleListener,
+    constant("PLACE_SNAPSHOT_HORIZON"), lift("function placeSnapshotStale("),
+    lift("function effectivePointsMode("), lift("function effectiveDotMode("),
+    lift("function possibleRingsWanted("), lift("function syncPlaceDotEra("),
+    lift("{\n  const possibleToggle"), lift("function addDatedPlacesLayer("), lift("async function addPulotuLayer("),
+    "const SAMPLED_BELOW_ZOOM = 8;",
+    "initBasemapSelect();"
+  ].join("\n"), ctx);
+  const toggle = (on) => { checkbox.checked = on; controls.toggle(); };
+  const click = (x, y) => map.fire("click", { point: { x, y }, lngLat: { lng: 12.5, lat: 41.9 } });
+  const hover = (x, y) => map.fire("mousemove", { point: { x, y } });
+  const finish = () => {
+    map.finishStyle();
+    while (queued.length) queued.shift()();
+  };
+  finish();
+  toggle(true);
+  return { map, controls, ctx, click, hover, toggle, finish, filter };
+}
+
+(async () => {
+  // rome tile 9/273/190: the ring is 10.83 screen pixels from a counted node
+  const at = [12.5, 41.9];
+  const feature = (id, name, x, y) => ({
+    screen: [x, y], geometry: { coordinates: at },
+    properties: { id, name, osm_type: id[0] === "w" ? "way" : "node", osm_id: Number(id.slice(1)) }
+  });
+  const romeRing = feature("w814470552", "", 100, 100);
+  const romeNode = feature("n1973645380", "Counted place", 110.83, 100);
+  const unnamedWay = feature("w269736970", "", 25, 25);
+  for (const isMobile of [false, true]) {
+    const area = { properties: { name: "Area" } };
+    const rendered = {
+      [LAYERS.places]: [romeNode, unnamedWay], [LAYERS.possible]: [romeRing], [CENSUS.fill]: [area]
+    };
+    const { map, controls, ctx, toggle, click } = interactiveMap(rendered, isMobile);
+    const lastPopup = () => map.popupOpens.at(-1);
+    toggle(false);
+    click(100, 100);
+    assert.match(lastPopup().html, /openstreetmap\.org\/node\/1973645380/);
+    toggle(true);
+    click(100, 100);
+    assert.match(lastPopup().html, /openstreetmap\.org\/node\/1973645380/);
+    assert.equal(map.popupOpens.length, 2, "a direct ring hit only opens the nearby counted dot");
+    click(25, 25);
+    assert.match(lastPopup().html, /popup-title">Unnamed place</);
+    assert.match(lastPopup().html, /class="popup-revise" href="[^"]*osm_type=way&amp;osm_id=269736970"/);
+    assert.match(lastPopup().html, /<a href="https:\/\/www\.openstreetmap\.org\/way\/269736970"[^>]*>Open OSM</);
+    click(90, 100);
+    assert.match(lastPopup().html, /openstreetmap\.org\/way\/814470552/);
+    assert.doesNotMatch(lastPopup().html, /popup-revise/);
+    assert.equal(controls.census, undefined, "a padded ring hit over a census polygon opens only the ring");
+    click(50, 50);
+    assert.equal(controls.census.properties, area.properties);
+    assert.equal(map.popupOpens.length, 4);
+    checks += 10;
+
+    // replay the delegated handlers for each historical symbol over the ring
+    ctx.addDatedPlacesLayer();
+    await ctx.addPulotuLayer();
+    for (const layer of [DATED.layer, DATED.futureLayer, DATED.windowLayer, PULOTU.layer]) {
+      rendered[layer] = [feature("w814470552", "Historical symbol", 100, 100)];
+      map.setLayoutProperty(layer, "visibility", "visible");
+      const before = map.popupOpens.length;
+      click(100, 100);
+      assert.equal(map.popupOpens.length - before, 1);
+      assert.match(lastPopup().html, /Historical symbol/);
+      map.setLayoutProperty(layer, "visibility", "none");
+      checks += 2;
+    }
+    if (isMobile) {
+      click(90, 100);
+      const phoneRing = lastPopup();
+      toggle(false);
+      assert.equal(phoneRing.isOpen(), false, "unchecking rings closes the phone popup");
+      checks += 1;
+    }
+  }
+
+  // a basemap selection drops the style and restores filters and era once
+  const live = interactiveMap({ [LAYERS.possible]: [romeRing] }, false);
+  live.click(100, 100);
+  const popup = live.map.popupOpens.at(-1);
+  const rebuild = () => {
+    const before = live.map.builds;
+    live.controls.basemap({ target: { value: "satellite" } });
+    live.finish();
+    assert.equal(live.map.builds - before, 1, "one layer rebuild per basemap change");
+    checks += 1;
+  };
+  rebuild();
+  assert.equal(popup.isOpen(), true);
+  for (const layer of [LAYERS.places, LAYERS.overview, LAYERS.possible, LAYERS.possibleHalo]) {
+    assert.equal(live.map.filters[layer], live.filter);
+    checks += 1;
+  }
+  for (const layer of [LAYERS.possible, LAYERS.possibleHalo]) {
+    assert.equal(live.map.layers[layer].paint["circle-stroke-opacity"], 0.45);
+    checks += 1;
+  }
+  assert.equal(live.map.layers[LAYERS.places].paint["circle-opacity"][6], 0.45);
+  assert.equal(live.map.handlers.filter(([type, layer]) => type === "mousemove" && layer === LAYERS.possible).length, 1);
+  checks += 3;
+
+  // the checkbox, points modes and overlay domain clear the ring affordances
+  for (const hide of ["checkbox", "period", "off", "another domain"]) {
+    const { map, ctx, click, hover, toggle, finish, controls } = interactiveMap({ [LAYERS.possible]: [romeRing] }, false);
+    hover(100, 100);
+    const label = map.popupOpens.at(-1);
+    assert.equal(label.isOpen(), true);
+    assert.equal(map.canvas.style.cursor, "pointer");
+    click(100, 100);
+    const ringPopup = map.popupOpens.at(-1);
+    assert.equal(ringPopup.isOpen(), true);
+    assert.equal(label.isOpen(), false);
+    if (hide === "checkbox") {
+      toggle(false);
+    } else {
+      if (hide === "another domain") ctx.activeDomainId = "population";
+      else ctx.placesDotState.mode = hide;
+      ctx.syncPlaceDotEra();
+    }
+    assert.equal(ringPopup.isOpen(), false);
+    assert.equal(map.canvas.style.cursor, "");
+    assert.equal(map.layers[LAYERS.possible].layout.visibility, "none");
+    if (hide === "period" || hide === "off") {
+      controls.basemap({ target: { value: "satellite" } });
+      finish();
+      assert.equal(map.layers[LAYERS.places].layout.visibility, "none");
+      assert.equal(map.layers[LAYERS.overview].layout.visibility, "none");
+      assert.equal(map.getLayer(LAYERS.possible), undefined);
+      checks += 3;
+    }
+    checks += 7;
+  }
+
+  const hoverOnly = interactiveMap({ [LAYERS.possible]: [romeRing] }, false);
+  hoverOnly.hover(100, 100);
+  const label = hoverOnly.map.popupOpens.at(-1);
+  hoverOnly.toggle(false);
+  assert.equal(label.isOpen(), false, "hiding rings clears an open hover label too");
+  assert.equal(hoverOnly.map.canvas.style.cursor, "");
+  checks += 2;
+
+  console.log(`possible places: ${checks} checks passed`);
+})().catch((error) => { console.error(error); process.exitCode = 1; });

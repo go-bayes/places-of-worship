@@ -75,22 +75,31 @@ assert.match(review, /createLayers\(L, \{ countryCode: tileIso \}\)/);
 assert.match(review, /registry\?\.iso2 \|\| options\.countryCode/);
 assert.doesNotMatch(unvalidated, /overviewKeep/);
 
+const raGuide = read("guides", "ra.html");
+assert.match(raGuide, /At zooms 0–6, a dot can represent several nearby places and tapping it zooms in\./);
+assert.match(raGuide, /At zoom 7,[^.]+opens the popup for the OpenStreetMap record/);
+assert.match(raGuide, /From zoom 8, every place has its own dot and popup\./);
+assert.match(raGuide, /a popup shows the record’s name when OpenStreetMap supplies one/);
+assert.match(runtime, /place dots show OpenStreetMap places as at 1 September 2026/);
+assert.match(runtime, /the OpenStreetMap snapshot as at 1 September 2026 is hidden/);
+assert.doesNotMatch(runtime, /census-legend-note[^\n]*today's/);
+
 // every html page that loads a changed script carries the bumped query
-// one stamp per script: a script's stamp moves only when that script changes
+// the assets for the september tile switch share a release stamp
 const stamps = {
-    "region-map.js": "20261123b", // 2026-09-01 osm edition archives; the key's possible-or-former switch
+    "region-map.js": "20261123c", // september tiles and popup behaviour
     "datamaps-switcher.js": "20261013a", // switcher rows prerender; warming waits for activation
-    "unvalidated-places.js": "20261123a", // 2026-09-01 osm edition archives and country lists; feature id from properties
-    "verification-map.js": "20261111a", // photos attach to submitted portal records
+    "unvalidated-places.js": "20261123c", // september archives and country lists; feature id from properties
+    "verification-map.js": "20261123c", // match typed osm objects during hand-off
     "occupancy-contract.js": "20261019a", // relocation rules follow definition 0.1.6
     "occupancy-review.js": "20261019a", // move wording and successor in the reviewer's period summary
     "task-presentation.js": "20261015c", // decided-status and reopen-flag helpers
     "convex-task-client.js": "20261103a", // the sign-in button takes a width from its caller
-    "review-portal.js": "20261103e", // linked place: warn once on unmatched ids, record anyway
+    "review-portal.js": "20261123c", // report unresolved country codes
     "review-map.js": "20261103a", // the legend becomes the folding map data panel
 };
 // stylesheets that changed with a script, checked the same way
-stamps["maplibre-flat.css"] = "20261123b"; // the key's possible-or-former row
+stamps["maplibre-flat.css"] = "20261123c"; // the key's possible-or-former row
 const scripts = Object.keys(stamps);
 const pages = [];
 (function walk(dir) {

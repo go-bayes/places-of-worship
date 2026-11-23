@@ -141,4 +141,79 @@ const gbLoaded = load("?country=gb");
 const gb = new Proxy({}, { get: (_, name) => gbLoaded.get(String(name)) });
 check(gb.COUNTRY_CONFIG.countryCode === "UK", `The iso code gb must open the uk config: ${gb.COUNTRY_CONFIG.countryCode}`);
 
-console.log(`country config: ${checks} checks passed`);
+// hong kong has september tile records but no entry in the shared portal
+// registry. use the shipped boundary lookup and feed the map's link to
+// both entry points. also exercise a caller's explicit hk parameter.
+const shared = path.join(__dirname, "../../../shared");
+const globalPage = fs.readFileSync(path.join(__dirname, "../../../global/index.html"), "utf8");
+check(/<script src="[^"]+country-registry\.js\?v=\w+"><\/script>\s*<script src="[^"]+region-map\.js/.test(globalPage), "The global map must load the shared registry before the map runtime.");
+const publicMap = vm.createContext({
+  window: { POW_COUNTRY_REGISTRY: fiji.window.POW_COUNTRY_REGISTRY },
+  URLSearchParams, RC: {}, CONTRIBUTE_ROUTES: {}, PORTAL_BASE: "../regions/nz/", UNNAMED_PLACE: "Unnamed place",
+  handoffRegions: JSON.parse(fs.readFileSync(path.join(__dirname, "../../_shared/data/region-bboxes.json"))).regions,
+  worldRegions: JSON.parse(fs.readFileSync(path.join(shared, "data/world-outlines.json"))).regions,
+});
+vm.runInContext(fs.readFileSync(path.join(shared, "region-resolve.js"), "utf8"), publicMap);
+const runtime = fs.readFileSync(path.join(__dirname, "../../_shared/region-map.js"), "utf8");
+const lift = (name) => {
+  const start = runtime.indexOf(`function ${name}(`);
+  return runtime.slice(start, runtime.indexOf("\n}\n", start) + 2);
+};
+vm.runInContext([
+  'const normaliseLng = window.RegionResolve.normaliseLng;',
+  'const PROJECT_CODE_FOR_ISO = { gb: "uk" };',
+  ...["projectCountryCode", "countryForPlace", "countryUnderPoint", "portalReviseHref"].map(lift),
+].join("\n"), publicMap);
+const mapLink = (code, lat, lng) => new URL(publicMap.portalReviseHref("Place", lat, lng, { country_code: code }), "https://example.test/apps/global/");
+const hongKong = mapLink("HK", "22.3193", "114.1694");
+const hongKongLegacy = mapLink("", "22.3193", "114.1694");
+check(hongKong.search === hongKongLegacy.search && hongKong.searchParams.get("country") === "cn", "The Hong Kong dot must use the same boundary as a dot with no code.");
+check(load(hongKong.search).get("COUNTRY_CONFIG.countryCode") === "CN", "The generated contributor link must open the boundary country.");
+check(load("?country=hk").get("COUNTRY_CONFIG.countryCode") === "ZZ", "A direct Hong Kong contributor URL must continue to open the world view.");
+const worldFallback = mapLink("HK", "22.24", "114.2");
+check(worldFallback.searchParams.get("country") === "zz" && load(worldFallback.search).get("COUNTRY_CONFIG.countryCode") === "ZZ", "A dot with no boundary must open the world contributor view.");
+check(mapLink("GB", "0", "0").searchParams.get("country") === "uk", "The tile ISO code GB must resolve to the portal's UK entry.");
+
+async function loadReview(search) {
+  const elements = new Map();
+  const calls = { clients: 0, map: [], queues: [] };
+  const reviewDocument = {
+    getElementById(id) {
+      if (!elements.has(id)) elements.set(id, { hidden: false, textContent: "", addEventListener() {} });
+      return elements.get(id);
+    },
+  };
+  class Client {
+    constructor() { calls.clients += 1; this.configured = true; this.authToken = "test"; }
+    async restoreSession() { return { display_name: "Reviewer" }; }
+    async listReviewQueue(options) { calls.queues.push(options.countryCode); return []; }
+  }
+  vm.runInNewContext(fs.readFileSync(path.join(__dirname, "review-portal.js"), "utf8"), {
+    window: {
+      location: { search }, POW_CONVEX_CONFIG: { countryCode: "NZ" },
+      POW_COUNTRY_REGISTRY: fiji.window.POW_COUNTRY_REGISTRY,
+      PowConvexTaskClient: Client,
+      PowReviewMap: { create(options) { calls.map.push(options); return { setQueue() {} }; } },
+    },
+    document: reviewDocument, URLSearchParams,
+  }, { filename: "review-portal.js" });
+  await new Promise((resolve) => setImmediate(resolve));
+  return { ...calls, status: elements.get("queueStatusText") };
+}
+
+(async () => {
+  const cn = await loadReview(`?country=${hongKong.searchParams.get("country")}`);
+  check(cn.map[0]?.countryCode === "CN" && cn.queues.join() === "CN", "Review must open the resolved boundary country.");
+  for (const query of ["?country=hk", "?country=", "?country=constructor"]) {
+    const review = await loadReview(query);
+    check(review.clients === 0 && review.map.length === 0 && review.queues.length === 0, "An invalid review country must never load the New Zealand queue.");
+    check(review.status.className === "status error" && !review.status.hidden && /^No review country/.test(review.status.textContent), "The review page must visibly explain an invalid country.");
+  }
+  const world = await loadReview(worldFallback.search);
+  check(world.map[0]?.countryCode === "ZZ" && world.map[0]?.zoom === 2 && world.queues.join() === "ZZ", "Explicit ZZ must open the world review view and use the ZZ queue.");
+  const home = await loadReview("");
+  check(home.map[0]?.countryCode === "NZ" && home.queues.join() === "NZ", "Omitting a review country must keep the New Zealand default.");
+  const gbReview = await loadReview("?country=GB");
+  check(gbReview.queues.join() === "UK", "The review page must recognise GB as an alias for UK.");
+  console.log(`country config: ${checks} checks passed`);
+})().catch((error) => { console.error(error); process.exitCode = 1; });

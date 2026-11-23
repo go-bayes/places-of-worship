@@ -352,7 +352,7 @@ const CONFIG = {
     // osm maps as a church, mosque, temple, synagogue or chapel without the
     // place-of-worship tag, and with no tagged place inside them. never
     // counted, drawn only while the key's possible-or-former switch is on and
-    // the dots show today's snapshot, and requested only once a visitor
+    // the dots show the september snapshot, and requested only once a visitor
     // turns the switch on
     possible: "https://tiles.placemap.org/places-v2-20260901-possible/{z}/{x}/{y}",
     // optional overlay: a page names a polygon tileset in its config
@@ -577,7 +577,6 @@ map.on("error", (e) => {
   if (basemapSelect) basemapSelect.value = cartoStyle.id;
   setTerrainStateFromBasemap(cartoStyle.id);
   map.setStyle(cartoStyle.style, { diff: false });
-  map.once("style.load", () => refreshMapLayers());
 });
 
 if (!IS_MOBILE) {
@@ -933,25 +932,24 @@ function datedPlacePopupHtml(pr, coords) {
 // 2026-09-03): the portal reads ?revise=1 and opens the same card a click
 // on the place's dot would. empty on pages without a portal
 // the country a public-map place belongs to, for its revise link (pr-h2):
-// the page's own country; else the dot's tile country code; else the
-// country under the point (page manifest, then world outlines). null when
-// nothing names one (a dot at sea, or before the manifests arrive)
+// the page's own country; else a tile code supported by the portal; else
+// the country under the point (page manifest, then world outlines)
 function countryForPlace(props, lat, lng) {
   if (RC.countryCode) return { code: RC.countryCode };
-  const tileCode = props && props.country_code ? String(props.country_code) : "";
-  if (tileCode) return { code: projectCountryCode(tileCode) };
+  const tileCode = projectCountryCode(props?.country_code);
+  const registry = window.POW_COUNTRY_REGISTRY?.countries || [];
+  if (tileCode && registry.some((entry) => entry.code === tileCode)) return { code: tileCode };
   if (Number.isFinite(lat) && Number.isFinite(lng)) {
     const region = countryUnderPoint(lng, lat);
     if (region) return { code: region.code, name: region.name };
   }
-  return null;
+  return { code: "zz" };
 }
 function portalReviseHref(name, latFixed, lngFixed, props) {
   const configPortal = CONTRIBUTE_ROUTES.portal;
   let base = configPortal ? configPortal.href : "";
   if (!base) {
     const country = countryForPlace(props, Number(latFixed), Number(lngFixed));
-    if (!country) return "";
     base = `${PORTAL_BASE}verification.html?country=${encodeURIComponent(String(country.code).toLowerCase())}`;
   }
   const params = new URLSearchParams({ revise: "1", lat: latFixed, lng: lngFixed });
@@ -1157,25 +1155,6 @@ function initBasemapSelect() {
       activeBasemapId = selected.id;
       setTerrainStateFromBasemap(selected.id);
       map.setStyle(selected.style || selected.url, { diff: false });
-      map.once("style.load", () => {
-        addCustomLayers();
-        updateCounts();
-        map.triggerRepaint();
-        map.once("idle", () => {
-          ensureCustomLayers();
-          const center = map.getCenter();
-          const zoom = map.getZoom();
-          map.jumpTo({ center, zoom: zoom + 0.00001 });
-          map.jumpTo({ center, zoom });
-          refreshMapLayers();
-        });
-      });
-      setTimeout(() => {
-        ensureCustomLayers();
-        map.triggerRepaint();
-        nudgeMap();
-        refreshMapLayers();
-      }, 900);
     }
   });
   basemapSelect.disabled = basemapOptions.length <= 1;
@@ -1220,16 +1199,6 @@ const LAYERS = {
 };
 const OVERLAY_SOURCES = new Set(Object.values(SOURCES));
 
-let mobileFeatureClickHandled = false;
-
-function markMobileFeatureClickHandled() {
-  if (!IS_MOBILE) return;
-  mobileFeatureClickHandled = true;
-  requestAnimationFrame(() => {
-    mobileFeatureClickHandled = false;
-  });
-}
-
 function coordsFromFeature(feature, fallbackLngLat) {
   const props = feature?.properties || {};
   const hasProps = props.lat !== undefined && props.lng !== undefined;
@@ -1248,58 +1217,43 @@ function coordsFromFeature(feature, fallbackLngLat) {
   return null;
 }
 
-function showMobileStreetViewPopup(name, coords, featureId) {
+function showMobileStreetViewPopup(name, coords, props) {
   if (!coords) return;
   const latFixed = coords[1].toFixed(6);
   const lngFixed = coords[0].toFixed(6);
   const openStreetViewLink = `<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${latFixed},${lngFixed}" target="_blank" rel="noopener">Street View</a>`;
   const directionsLink = `<a href="${directionsUrl(latFixed, lngFixed)}" target="_blank" rel="noopener">Directions</a>`;
-  const reviseLink = reviseLinkHtml(name, latFixed, lngFixed, null);
+  const reviseLink = reviseLinkHtml(name, latFixed, lngFixed, props);
+  const openOsmLink = `<a href="${escText(osmLinkHref(props, latFixed, lngFixed))}" target="_blank" rel="noopener">Open OSM</a>`;
   const popup = new maplibregl.Popup({ maxWidth: "340px", closeOnClick: true })
     .setLngLat(coords)
     .setHTML(
       `<div class="popup-header"><span class="popup-title">${escText(name || UNNAMED_PLACE)}</span></div>` +
       distanceRowsHtml(coords) +
-      `<div class="popup-actions">${reviseLink}${openStreetViewLink}${directionsLink}</div>`
+      `<div class="popup-actions">${reviseLink}${openStreetViewLink}${directionsLink}${openOsmLink}</div>`
     )
     .addTo(map);
   trackPlacePopup(popup);
-
-  if (featureId === undefined || featureId === null) return;
-  const fillPopupName = () => {
-    const liveFeatures = map.queryRenderedFeatures({
-      layers: [LAYERS.places, LAYERS.overview],
-      filter: ["==", ["id"], featureId]
-    });
-    const f = liveFeatures && liveFeatures[0];
-    const p = f?.properties || {};
-    const betterName = p["name:en"] || p.name_en || p.name;
-    if (betterName) {
-      popup.setHTML(
-        `<div class="popup-header"><span class="popup-title">${escText(betterName)}</span></div>` +
-        `<div class="popup-actions">${reviseLinkHtml(betterName, latFixed, lngFixed, p)}${openStreetViewLink}${directionsLink}</div>`
-      );
-    }
-  };
-  setTimeout(fillPopupName, 180);
-  map.once("idle", fillPopupName);
 }
 
 // only one place popup at a time: repeated opens were stacking
 // translucent copies on the same spot, each needing its own close
 let activePlacePopup = null;
+let activePossiblePopup = null;
 // a hover label never shows over the open popup of the place it names
 function popupOpenAt(coords) {
   if (!activePlacePopup || !activePlacePopup.isOpen() || !coords) return false;
   const at = activePlacePopup.getLngLat();
   return Math.abs(at.lng - coords[0]) < 1e-9 && Math.abs(at.lat - coords[1]) < 1e-9;
 }
-function trackPlacePopup(popup) {
+function trackPlacePopup(popup, possible = false) {
   if (activePlacePopup && activePlacePopup !== popup) activePlacePopup.remove();
   activePlacePopup = popup;
+  activePossiblePopup = possible ? popup : null;
   makePopupDraggable(popup);
   popup.on("close", () => {
     if (activePlacePopup === popup) activePlacePopup = null;
+    if (activePossiblePopup === popup) activePossiblePopup = null;
   });
 }
 
@@ -1507,41 +1461,19 @@ async function handlePlaceFeatureClick(feature, fallbackLngLat) {
   const coords = coordsFromFeature(feature, fallbackLngLat);
   if (!coords) return;
   if (isRepresentativeDot(props)) {
-    // the generic mobile handler may already have flown here and set the guard
-    if (IS_MOBILE && mobileFeatureClickHandled) return;
     zoomToRepresentative(coords);
     return;
   }
   // hold or release the guide line on this place (no-op without a
   // measuring point); survives popup close by design
   focusPlace(props, coords);
+  if (IS_MOBILE) {
+    showMobileStreetViewPopup(name, coords, props);
+    return;
+  }
   const panoId = `pano-${Date.now()}`;
   const latFixed = coords[1].toFixed(6);
   const lngFixed = coords[0].toFixed(6);
-  const openStreetViewLink = `<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${latFixed},${lngFixed}" target="_blank" rel="noopener">Street View</a>`;
-
-  // Mobile: always allow Street View link at any zoom, with retry to fetch name
-  if (IS_MOBILE) {
-    if (mobileFeatureClickHandled) return;
-    markMobileFeatureClickHandled();
-    showMobileStreetViewPopup(name, coords, feature?.id);
-    return;
-  }
-  if (IS_MOBILE) {
-    new maplibregl.Popup({ maxWidth: "340px", closeOnClick: true })
-      .setLngLat(coords)
-      .setHTML(
-        `<div class="popup-header"><span class="popup-title">${escText(name)}</span></div>` +
-        `<div class="popup-actions">` +
-        reviseLinkHtml(name, latFixed, lngFixed, props) +
-        `<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${latFixed},${lngFixed}" target="_blank" rel="noopener">Street View</a>` +
-        `<a href="${escText(osmLinkHref(props, latFixed, lngFixed))}" target="_blank" rel="noopener">Open OSM</a>` +
-        `<button type="button" data-copy="${latFixed},${lngFixed}">Copy coords</button>` +
-        `</div>`
-      )
-      .addTo(map);
-    return;
-  }
   const popup = new maplibregl.Popup({ maxWidth: "720px", closeOnClick: true })
     .setLngLat(coords)
     .setHTML(
@@ -1705,7 +1637,7 @@ async function handlePlaceFeatureClick(feature, fallbackLngLat) {
   }
 }
 
-let overviewMobileHandlerAttached = false;
+let overviewHandlersAttached = false;
 function addOverviewLayer() {
   map.addSource(SOURCES.overview, {
     type: "vector",
@@ -1749,41 +1681,14 @@ function addOverviewLayer() {
     }
   });
 
-  if (!IS_MOBILE && !overviewMobileHandlerAttached) {
-    // desktop: the generic click handler stands aside for a direct hit on a
-    // dot (it expects the layer's own handler), so the overview layer needs
-    // one too, or a click on an overview dot does nothing
-    overviewMobileHandlerAttached = true;
-    map.on("click", LAYERS.overview, (e) => {
-      const feature = e.features && e.features[0];
-      if (!feature) return;
-      void handlePlaceFeatureClick(feature, e.lngLat);
-    });
+  if (!IS_MOBILE && !overviewHandlersAttached) {
+    overviewHandlersAttached = true;
     map.on("mouseenter", LAYERS.overview, () => { map.getCanvas().style.cursor = "pointer"; });
     map.on("mouseleave", LAYERS.overview, () => { map.getCanvas().style.cursor = ""; });
   }
-  if (IS_MOBILE && !overviewMobileHandlerAttached) {
-    overviewMobileHandlerAttached = true;
-    map.on("click", LAYERS.overview, (e) => {
-      const feature = e.features && e.features[0];
-      if (!feature) return;
-      if (mobileFeatureClickHandled) return;
-      const props = feature.properties || {};
-      const name = placeDisplayName(props);
-      const coords = coordsFromFeature(feature, e.lngLat);
-      if (!coords) return;
-      markMobileFeatureClickHandled();
-      if (isRepresentativeDot(props)) {
-        zoomToRepresentative(coords);
-        return;
-      }
-      focusPlace(props, coords);
-      showMobileStreetViewPopup(name, coords, feature.id);
-    });
-  }
 }
 
-let placesHandlersAttached = false;
+let placeHover = null;
 function addPlacesLayer() {
   map.addSource(SOURCES.places, {
     type: "vector",
@@ -1821,16 +1726,12 @@ function addPlacesLayer() {
     }
   });
 
-  const hoverPopup = new maplibregl.Popup({
+  if (placeHover) return;
+  const hoverPopup = placeHover = new maplibregl.Popup({
     closeButton: false,
     closeOnClick: false,
     maxWidth: "260px"
   });
-
-  if (placesHandlersAttached) {
-    return;
-  }
-  placesHandlersAttached = true;
 
   map.on("mousemove", LAYERS.places, (e) => {
     map.getCanvas().style.cursor = "pointer";
@@ -1862,15 +1763,6 @@ function addPlacesLayer() {
   map.on("mouseleave", LAYERS.places, () => {
     map.getCanvas().style.cursor = "";
     hoverPopup.remove();
-  });
-
-  map.on("click", LAYERS.places, (e) => {
-    const feature = e.features && e.features[0];
-    if (!feature) return;
-    // the popup takes over from the hover labels
-    hoverPopup.remove();
-    if (pinnedLabel) pinnedLabel.remove();
-    void handlePlaceFeatureClick(feature, e.lngLat);
   });
 }
 
@@ -1935,11 +1827,9 @@ function possibleLayerSpecs(visible) {
   ];
 }
 // the popup of a possible or former place: the place popup's structure,
-// with the kind and one sentence under the title. no directions and no
-// distance rows, which assume a place in use; the revise link stays, since
-// a contributor who knows the building is in use, or closed, is what the
-// project needs. coords is [lng, lat]; every record string is escaped
-function possiblePlacePopupHtml(props, coords, reviseHtml = "") {
+// with the kind and one sentence under the title. coords is [lng, lat];
+// every record string is escaped
+function possiblePlacePopupHtml(props, coords) {
   const p = props || {};
   const [lng, lat] = coords;
   const latFixed = lat.toFixed(6);
@@ -1952,16 +1842,9 @@ function possiblePlacePopupHtml(props, coords, reviseHtml = "") {
     `<div class="place-note">${POSSIBLE_KIND_NOTE}</div>` +
     (attrs ? `<div class="place-attrs">${attrs}</div>` : "") +
     `<div class="popup-actions">` +
-    reviseHtml +
     `<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${latFixed},${lngFixed}" target="_blank" rel="noopener">Street View</a>` +
     `<a href="${escText(osmLinkHref(p, latFixed, lngFixed))}" target="_blank" rel="noopener">Open OSM</a>` +
     `</div>`;
-}
-// the place dots win: a press on a place, or on a grid dot, is theirs,
-// whatever ring lies beneath
-function placeDotAt(point) {
-  const layers = [LAYERS.places, LAYERS.overview].filter((id) => map.getLayer(id));
-  return layers.length > 0 && map.queryRenderedFeatures(point, { layers }).length > 0;
 }
 function openPossiblePopup(feature, fallbackLngLat) {
   const coords = coordsFromFeature(feature, fallbackLngLat);
@@ -1969,16 +1852,20 @@ function openPossiblePopup(feature, fallbackLngLat) {
   const props = feature.properties || {};
   // the popup takes over from the hover label
   if (possibleHover) possibleHover.remove();
-  const revise = reviseLinkHtml(placeDisplayName(props), coords[1].toFixed(6), coords[0].toFixed(6), props);
   const popup = new maplibregl.Popup({ maxWidth: "340px", closeOnClick: true })
     .setLngLat(coords)
-    .setHTML(possiblePlacePopupHtml(props, coords, revise))
+    .setHTML(possiblePlacePopupHtml(props, coords))
     .addTo(map);
-  trackPlacePopup(popup);
+  trackPlacePopup(popup, true);
   requestAnimationFrame(() => clampPopupToViewport(popup));
 }
-let possibleHandlersAttached = false;
 let possibleHover = null;
+let possibleHasCursor = false;
+function clearPossibleHover() {
+  possibleHover?.remove();
+  if (possibleHasCursor) map.getCanvas().style.cursor = "";
+  possibleHasCursor = false;
+}
 function addPossibleLayers(visible) {
   if (!CONFIG.tiles.possible || map.getLayer(LAYERS.possible)) return;
   if (!map.getSource(SOURCES.possible)) {
@@ -1997,29 +1884,19 @@ function addPossibleLayers(visible) {
   const clauses = currentFilterClauses();
   map.setFilter(LAYERS.possibleHalo, clauses);
   map.setFilter(LAYERS.possible, clauses);
-  if (possibleHandlersAttached) return;
-  possibleHandlersAttached = true;
-  map.on("click", LAYERS.possible, (e) => {
-    const feature = e.features && e.features[0];
-    if (!feature || placeDotAt(e.point)) return;
-    if (IS_MOBILE) {
-      if (mobileFeatureClickHandled) return;
-      markMobileFeatureClickHandled();
-    }
-    openPossiblePopup(feature, e.lngLat);
-  });
-  if (IS_MOBILE) return;
+  if (IS_MOBILE || possibleHover) return;
   // the label stands clear of the ring, so the press that follows the
   // hover lands on the map and not on the label
   const hover = new maplibregl.Popup({ closeButton: false, closeOnClick: false, maxWidth: "260px", offset: 10 });
   possibleHover = hover;
   map.on("mousemove", LAYERS.possible, (e) => {
     const feature = e.features && e.features[0];
-    if (!feature || placeDotAt(e.point)) {
-      hover.remove();
+    if (!feature || featuresAt(e.point, [LAYERS.places, LAYERS.overview, ...historicalPointLayers()]).length) {
+      clearPossibleHover();
       return;
     }
     map.getCanvas().style.cursor = "pointer";
+    possibleHasCursor = true;
     const coords = coordsFromFeature(feature, e.lngLat);
     if (!coords) return;
     if (popupOpenAt(coords)) {
@@ -2031,15 +1908,16 @@ function addPossibleLayers(visible) {
       .setHTML(placeLabelHtml(placeDisplayName(feature.properties)) + `<div class="place-note">Possible or former place</div>`)
       .addTo(map);
   });
-  map.on("mouseleave", LAYERS.possible, () => {
-    map.getCanvas().style.cursor = "";
-    hover.remove();
-  });
+  map.on("mouseleave", LAYERS.possible, clearPossibleHover);
 }
 // show or hide the rings for the points mode in force. the first show adds
 // the source; until then nothing is requested. stale (a historical census
 // year) steps the rings down with the dots
 function syncPossiblePlaces(show, stale = false) {
+  if (!show) {
+    activePossiblePopup?.remove();
+    clearPossibleHover();
+  }
   if (show && !map.getLayer(LAYERS.possible)) addPossibleLayers(true);
   [LAYERS.possibleHalo, LAYERS.possible].forEach((id) => {
     if (!map.getLayer(id)) return;
@@ -2268,20 +2146,22 @@ function addCustomLayers() {
   addHomeShadeLayers();
 }
 
+function rebuildCustomLayers() {
+  addCustomLayers();
+  applyFilters();
+  syncPlaceDotEra();
+}
+
 function ensureCustomLayers() {
   if (!map.isStyleLoaded()) return;
   if (!map.getLayer(LAYERS.places) && !map.getLayer(LAYERS.overview)) {
-    addCustomLayers();
-    applyFilters();
-    updateCounts();
+    rebuildCustomLayers();
   }
 }
 
 map.on("style.load", () => {
-  addCustomLayers();
-  applyFilters();
+  rebuildCustomLayers();
   ensureNearestLine();
-  updateCounts();
   setTimeout(ensureCustomLayers, 350);
   setTimeout(nudgeMap, 400);
   setTimeout(refreshMapLayers, 650);
@@ -2337,84 +2217,56 @@ map.on("error", (e) => {
   }
 });
 
-if (IS_MOBILE) {
-  map.on("click", (e) => {
-    // gate on layer presence, not isStyleLoaded(): the latter is false during
-    // any pending repaint and silently swallows taps (see CRITIQUE/porting doc)
-    if (mobileFeatureClickHandled || !map.getLayer(LAYERS.places) || !map.getLayer(LAYERS.overview)) return;
-    const tapPadding = 12;
-    const bbox = [
-      [e.point.x - tapPadding, e.point.y - tapPadding],
-      [e.point.x + tapPadding, e.point.y + tapPadding]
-    ];
-    const features = map.queryRenderedFeatures(bbox, { layers: [LAYERS.places, LAYERS.overview] });
-    if (!features.length) {
-      // no place within reach: a possible or former ring under the finger
-      // opens its own popup (the places always win the tap)
-      const rings = map.getLayer(LAYERS.possible) ? map.queryRenderedFeatures(bbox, { layers: [LAYERS.possible] }) : [];
-      if (!rings.length) return;
-      markMobileFeatureClickHandled();
-      openPossiblePopup(rings[0], e.lngLat);
-      return;
-    }
-    const feature = features.find((item) => item.layer && item.layer.id === LAYERS.places) || features[0];
-    const props = feature.properties || {};
-    const name = placeDisplayName(props);
-    const coords = coordsFromFeature(feature, e.lngLat);
-    if (!coords) return;
-    markMobileFeatureClickHandled();
-    if (isRepresentativeDot(props)) {
-      zoomToRepresentative(coords);
-      return;
-    }
-    focusPlace(props, coords);
-    showMobileStreetViewPopup(name, coords, feature.id);
-  });
+function featuresAt(pointOrBox, layerIds) {
+  const layers = layerIds.filter((id) => map.getLayer(id));
+  return layers.length ? map.queryRenderedFeatures(pointOrBox, { layers }) : [];
 }
 
-if (!IS_MOBILE) {
-  map.on("click", (e) => {
-    // layer-presence guard; isStyleLoaded() would drop clicks during repaints
-    if (!map.getLayer(LAYERS.places) || !map.getLayer(LAYERS.overview)) return;
-    const target = e.originalEvent && e.originalEvent.target;
-    if (target instanceof Element) {
-      const isUiClick = target.closest(
-        "button, a, input, select, textarea, label, #dock, #counts-wrap, #key-wrap, #census-wrap, #wordmark, #corner-refresh, .maplibregl-ctrl"
-      );
-      if (isUiClick) return;
-    }
-    // a direct hit belongs to the layer's own handler; the possible rings
-    // answer their own direct hits (and yield there to any place dot)
-    const hitLayers = [LAYERS.places, LAYERS.overview, LAYERS.possible].filter((id) => map.getLayer(id));
-    const directHit = map.queryRenderedFeatures(e.point, { layers: hitLayers });
-    if (directHit && directHit.length) return;
-    const tapPadding = 12;
-    const bbox = [
-      [e.point.x - tapPadding, e.point.y - tapPadding],
-      [e.point.x + tapPadding, e.point.y + tapPadding]
-    ];
-    const nearby = map.queryRenderedFeatures(bbox, { layers: [LAYERS.places, LAYERS.overview] });
-    if (nearby && nearby.length) {
-      const feature = nearby.find((item) => item.layer && item.layer.id === LAYERS.places) || nearby[0];
-      void handlePlaceFeatureClick(feature, e.lngLat);
-      return;
-    }
-    // no place near the click: a ring near it opens
-    const nearbyRings = map.getLayer(LAYERS.possible) ? map.queryRenderedFeatures(bbox, { layers: [LAYERS.possible] }) : [];
-    if (nearbyRings.length) {
-      openPossiblePopup(nearbyRings[0], e.lngLat);
-      return;
-    }
-    // an area click answers with the census popup; no street-view hint
-    if (censusState.enabled && map.getLayer(CENSUS.fill) &&
-        map.queryRenderedFeatures(e.point, { layers: [CENSUS.fill] }).length) {
-      return;
-    }
-    if (map.getZoom() >= CONFIG.streetViewMinZoom) {
-      showClickHint("Move Closer and Center on a Place");
-    }
-  });
+function historicalPointLayers() {
+  return [DATED.layer, DATED.futureLayer, DATED.windowLayer, PULOTU.layer];
 }
+
+function handleMapPlaceClick(e) {
+  const target = e.originalEvent?.target;
+  if (target instanceof Element && target.closest(
+    "button, a, input, select, textarea, label, #dock, #counts-wrap, #key-wrap, #census-wrap, #wordmark, #corner-refresh, .maplibregl-ctrl"
+  )) return;
+
+  // dated places and pulotu cultures handle direct hits on their own layers
+  if (featuresAt(e.point, historicalPointLayers()).length) return;
+
+  // prefer a direct hit, then search the same 12-pixel box on both layouts
+  const padding = 12;
+  const bbox = [
+    [e.point.x - padding, e.point.y - padding],
+    [e.point.x + padding, e.point.y + padding]
+  ];
+  const placeLayers = [LAYERS.places, LAYERS.overview];
+  const direct = featuresAt(e.point, placeLayers);
+  const places = direct.length ? direct : featuresAt(bbox, placeLayers);
+  if (places.length) {
+    placeHover?.remove();
+    pinnedLabel?.remove();
+    const place = places.find((feature) => feature.layer?.id === LAYERS.places) || places[0];
+    void handlePlaceFeatureClick(place, e.lngLat);
+    return;
+  }
+
+  const ring = featuresAt(e.point, [LAYERS.possible])[0] || featuresAt(bbox, [LAYERS.possible])[0];
+  if (ring) {
+    openPossiblePopup(ring, e.lngLat);
+    return;
+  }
+
+  const area = censusState.enabled && featuresAt(e.point, [CENSUS.fill])[0];
+  if (area) {
+    openCensusPopup(area, e.lngLat);
+  } else if (!IS_MOBILE && map.getLayer(LAYERS.places) && map.getZoom() >= CONFIG.streetViewMinZoom) {
+    showClickHint("Move Closer and Center on a Place");
+  }
+}
+
+map.on("click", handleMapPlaceClick);
 
 const cityChips = document.getElementById("cityChips");
 const searchInput = document.getElementById("searchInput");
@@ -4866,14 +4718,6 @@ function removeCensusLayers() {
   if (map.getSource(CENSUS.source)) map.removeSource(CENSUS.source);
 }
 
-function placeUnderCursor(point) {
-  // pulotu culture points win the cursor over the census fill, exactly
-  // as place dots do — without this the area popup swallows the click
-  const placeLayers = [LAYERS.places, LAYERS.overview, LAYERS.possible, PULOTU.layer].filter((id) => map.getLayer(id));
-  return placeLayers.length > 0 &&
-    map.queryRenderedFeatures(point, { layers: placeLayers }).length > 0;
-}
-
 function attachCensusHandlers() {
   if (censusHandlersAttached) return;
   censusHandlersAttached = true;
@@ -4889,7 +4733,7 @@ function attachCensusHandlers() {
     if (!feature) return;
     const codeProp = censusLevelDef().codeProp;
     // places win the cursor: clear area affordances under a point
-    if (placeUnderCursor(e.point)) {
+    if (featuresAt(e.point, [LAYERS.places, LAYERS.overview, LAYERS.possible, ...historicalPointLayers()]).length) {
       map.setFilter(CENSUS.hover, ["==", ["get", codeProp], ""]);
       censusHoverPopup.remove();
       return;
@@ -4914,13 +4758,6 @@ function attachCensusHandlers() {
       map.setFilter(CENSUS.hover, ["==", ["get", censusLevelDef().codeProp], ""]);
     }
     censusHoverPopup.remove();
-  });
-  map.on("click", CENSUS.fill, (e) => {
-    if (!censusState.enabled) return;
-    const feature = e.features && e.features[0];
-    if (!feature) return;
-    if (placeUnderCursor(e.point)) return;
-    openCensusPopup(feature, e.lngLat);
   });
 }
 
@@ -5022,6 +4859,7 @@ function openCensusPopup(feature, lngLat) {
   let anyFlagged = false;
   let anySmallCell = false;
   let anySmallDenom = false;
+  const placeSnapshots = new Set();
   // the small-cell rule marks a derived share where the row's numerator falls
   // under ten people (†) or its denominator under 100 (‡); the markers are
   // byte-absent unless the row carries the token, so no existing product's
@@ -5035,6 +4873,11 @@ function openCensusPopup(feature, lngLat) {
   const rowsHtml = store.years.map((year) => {
     const row = store.byAreaYear.get(`${code}|${year}`);
     if (!row) return "";
+    if (RC.popupPlaceSnapshotNote && hasPlaces && Number.isFinite(row.place_count)) {
+      const basis = row.place_count_basis?.replace(/^current /i, "");
+      const date = row.site_snapshot_date;
+      if (basis || date) placeSnapshots.add(`${basis || "OpenStreetMap snapshot"}${date ? ` as at ${date}` : ""}`);
+    }
     const flagged = rowNoted(row, store.universalFlags);
     if (flagged) anyFlagged = true;
     const selected = year === censusState.year ? ' class="census-year-selected"' : "";
@@ -5047,6 +4890,9 @@ function openCensusPopup(feature, lngLat) {
       ${hasPlaces ? `<td>${fmtCount(row.place_count)}</td><td>${fmtRate(row.places_per_10000_residents)}</td>` : ""}
     </tr>`;
   }).join("");
+  const placeCountNote = placeSnapshots.size
+    ? ` Place counts use the ${escText([...placeSnapshots].join(" · "))}, repeated across census years.`
+    : " Place counts are the current snapshot repeated across census years.";
   const flagNote = anyFlagged && RC.censusFlagNote
     ? `<div class="place-note">${RC.censusFlagNote}</div>`
     : "";
@@ -5090,7 +4936,7 @@ function openCensusPopup(feature, lngLat) {
     smallCellNote +
     smallDenomNote +
     `<div class="place-note">${RC.popupDenominatorNote || "Percentages use the stated religion-response denominator."}` +
-    `${hasPlaces ? " Place counts are the current snapshot repeated across census years." : ""}</div>` +
+    `${hasPlaces ? placeCountNote : ""}</div>` +
     `<div class="place-note">${levelDef.credit}${hasPlaces ? " · places © OpenStreetMap (ODbL)" : ""}</div>`;
   const popup = new maplibregl.Popup({ maxWidth: "380px" })
     .setLngLat(lngLat)
@@ -5099,7 +4945,7 @@ function openCensusPopup(feature, lngLat) {
   trackPlacePopup(popup);
 }
 
-// today's OSM snapshot is honest only near the present: when the census
+// the september osm snapshot represents the recent past: when the census
 // year sits more than PLACE_SNAPSHOT_HORIZON years back, the dot layers
 // fade hard and the legend says why — historical place layers must come
 // from accepted events (docs/development/temporal-place-layer.md), not
@@ -5800,7 +5646,7 @@ function syncPlaceDotEra() {
         ? ["interpolate", ["linear"], ["zoom"], 6, 0.08, 8, 0.45, 9, 0.85, 12, 0.75, 18, 0.7]
         : ["interpolate", ["linear"], ["zoom"], 6, 0.2, 9, 0.85, 12, 0.75, 18, 0.7]);
   }
-  // the possible or former rings go with today's snapshot dots
+  // the possible or former rings go with the september snapshot dots
   syncPossiblePlaces(possibleRingsWanted(mode), stale);
   syncPointsControl(mode);
   syncKeyToDots(mode);
@@ -5819,7 +5665,7 @@ function effectiveDotMode() {
   if (censusState.enabled) return chosen;
   return chosen === "off" ? "off" : "all";
 }
-// the possible or former rings draw only beside today's snapshot dots: the
+// the possible or former rings draw only beside the september snapshot dots: the
 // key's switch is on and the points mode is all. period shows places that
 // dated evidence places in the census year, and a building osm maps today
 // says nothing about that year; off shows no places at all
@@ -6118,9 +5964,9 @@ function updateCensusLegend() {
     ? `; a dashed amber ring marks a reviewed place whose start or end is only bounded around ${censusState.year}, a dashed line a relocation in progress, a pale disc an approximate location`
     : "";
   const dotEraNote = pointsMode === "period"
-    ? `<div class="census-legend-note">showing only places whose ${datedSourceWords} say they existed in ${censusState.year} — today's undated snapshot is hidden${windowWords}${placesDotState.future ? `; hollow slate rings mark places founded after ${censusState.year}${futureCount !== null ? ` (${futureCount} in this dataset)` : ""}` : ""}</div>`
+    ? `<div class="census-legend-note">showing only places whose ${datedSourceWords} say they existed in ${censusState.year} — the OpenStreetMap snapshot as at 1 September 2026 is hidden${windowWords}${placesDotState.future ? `; hollow slate rings mark places founded after ${censusState.year}${futureCount !== null ? ` (${futureCount} in this dataset)` : ""}` : ""}</div>`
     : pointsMode === "all" && placeSnapshotStale()
-      ? `<div class="census-legend-note">place dots show today's OpenStreetMap places, not ${censusState.year} places${RC.datedPlaces ? ` — amber-ringed dots carry ${datedSourceWords} saying they existed in ${censusState.year}${windowWords}` : " — historical place layers are being assembled from evidence"}</div>`
+      ? `<div class="census-legend-note">place dots show OpenStreetMap places as at 1 September 2026, not ${censusState.year} places${RC.datedPlaces ? ` — amber-ringed dots carry ${datedSourceWords} saying they existed in ${censusState.year}${windowWords}` : " — historical place layers are being assembled from evidence"}</div>`
       : "";
   // the ramp clamps at the 2nd-98th percentile; mark the ends when
   // values continue beyond them

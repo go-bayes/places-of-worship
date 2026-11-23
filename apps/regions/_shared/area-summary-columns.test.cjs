@@ -36,6 +36,52 @@ vm.createContext(sandbox);
 vm.runInContext(`${runtime.slice(begin, end)}\nthis.expandSummaryColumns = expandSummaryColumns; this.fetchCensusSummary = fetchCensusSummary;`, sandbox);
 const { expandSummaryColumns, fetchCensusSummary } = sandbox;
 
+// the popup reads the area-summary snapshot alongside its counts. use the
+// auckland row from the governed product and an sa2 from the columnar copy.
+{
+  const data = path.join(repo, "apps/regions/nz/data");
+  const ta = JSON.parse(fs.readFileSync(path.join(data, "area_summary_ta.json")));
+  const sa2 = expandSummaryColumns(JSON.parse(fs.readFileSync(path.join(data, "area_summary_sa2.columns.json"))));
+  const lift = (name) => {
+    const start = runtime.indexOf(`function ${name}(`);
+    return runtime.slice(start, runtime.indexOf("\n}\n", start) + 2);
+  };
+  let html;
+  const popup = {
+    setLngLat() { return this; },
+    setHTML(value) { html = value; return this; },
+    addTo() { return this; },
+  };
+  const context = {
+    RC: { popupPlaceSnapshotNote: true },
+    CENSUS_METRICS: { religious_affiliation_percent: {}, places_per_10000_residents: {} },
+    censusState: { year: 2023, metric: "religious_affiliation_percent" },
+    censusLevelDef: () => ({ codeProp: "code", nameProp: "name", credit: "Stats NZ" }),
+    rowNoted: () => false, rowSmallCell: () => false, rowSmallDenominator: () => false,
+    censusAreaHeaderHtml: (name) => name, map: {}, trackPlacePopup() {},
+    maplibregl: { Popup: function () { return popup; } },
+  };
+  vm.runInNewContext(["escText", "openCensusPopup"].map(lift).join("\n"), context);
+  const render = (rows) => {
+    context.censusActive = () => ({
+      years: rows.map((row) => row.year),
+      byAreaYear: new Map(rows.map((row) => [`${row.area_code}|${row.year}`, row])),
+    });
+    context.openCensusPopup({ properties: { code: rows[0].area_code, name: rows[0].area_name } }, {});
+    return html;
+  };
+  const auckland = ta.rows.filter((row) => row.area_code === "076");
+  const aucklandPopup = render(auckland);
+  eq((aucklandPopup.match(/<td>1053<\/td>/g) || []).length, 3, "the Auckland counts still come from the area summary");
+  ok(aucklandPopup.includes("Place counts use the committed nz_places.json snapshot"), "Auckland's footnote names its own snapshot");
+  ok(!aucklandPopup.includes("1 September 2026"), "the current tiles' date does not appear as the product date");
+  const firstSa2 = sa2.rows.filter((row) => row.area_code === sa2.rows[0].area_code);
+  ok(render(firstSa2).includes("Place counts use the committed nz_places.json snapshot"), "the columnar SA2 product supplies the same basis field");
+  const datedRows = auckland.map((row) => ({ ...row, site_snapshot_date: "2026-06-01" }));
+  ok(render(datedRows).includes("snapshot as at 2026-06-01"), "a supplied snapshot date is shown");
+  ok(fs.readFileSync(path.join(data, "..", "index.html"), "utf8").includes("popupPlaceSnapshotNote: true"), "the New Zealand page enables the footnote");
+}
+
 // a response stub: the body is text, parsed or read as bytes on demand
 const respond = (status, body) => {
   const text = typeof body === "string" ? body : JSON.stringify(body);
