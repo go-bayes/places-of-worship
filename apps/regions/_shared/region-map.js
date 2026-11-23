@@ -1246,14 +1246,14 @@ function popupOpenAt(coords) {
   const at = activePlacePopup.getLngLat();
   return Math.abs(at.lng - coords[0]) < 1e-9 && Math.abs(at.lat - coords[1]) < 1e-9;
 }
-function trackPlacePopup(popup, possible = false) {
+function trackPlacePopup(popup, possibleProps = null) {
   if (activePlacePopup && activePlacePopup !== popup) activePlacePopup.remove();
   activePlacePopup = popup;
-  activePossiblePopup = possible ? popup : null;
+  activePossiblePopup = possibleProps ? { popup, props: possibleProps } : null;
   makePopupDraggable(popup);
   popup.on("close", () => {
     if (activePlacePopup === popup) activePlacePopup = null;
-    if (activePossiblePopup === popup) activePossiblePopup = null;
+    if (activePossiblePopup?.popup === popup) activePossiblePopup = null;
   });
 }
 
@@ -1856,16 +1856,24 @@ function openPossiblePopup(feature, fallbackLngLat) {
     .setLngLat(coords)
     .setHTML(possiblePlacePopupHtml(props, coords))
     .addTo(map);
-  trackPlacePopup(popup, true);
+  trackPlacePopup(popup, props);
   requestAnimationFrame(() => clampPopupToViewport(popup));
 }
 let possibleHover = null;
-let possibleHasCursor = false;
+let possibleHoverProps = null;
 function clearPossibleHover() {
   possibleHover?.remove();
-  if (possibleHasCursor) map.getCanvas().style.cursor = "";
-  possibleHasCursor = false;
+  if (possibleHoverProps) map.getCanvas().style.cursor = "";
+  possibleHoverProps = null;
 }
+function clearPossiblePopups() {
+  activePossiblePopup?.popup.remove();
+  clearPossibleHover();
+}
+map.on("zoom", () => {
+  if (map.getZoom() < POSSIBLE_MIN_ZOOM && (activePossiblePopup || possibleHoverProps)) clearPossiblePopups();
+});
+
 function addPossibleLayers(visible) {
   if (!CONFIG.tiles.possible || map.getLayer(LAYERS.possible)) return;
   if (!map.getSource(SOURCES.possible)) {
@@ -1896,7 +1904,7 @@ function addPossibleLayers(visible) {
       return;
     }
     map.getCanvas().style.cursor = "pointer";
-    possibleHasCursor = true;
+    possibleHoverProps = feature.properties || {};
     const coords = coordsFromFeature(feature, e.lngLat);
     if (!coords) return;
     if (popupOpenAt(coords)) {
@@ -1914,10 +1922,7 @@ function addPossibleLayers(visible) {
 // the source; until then nothing is requested. stale (a historical census
 // year) steps the rings down with the dots
 function syncPossiblePlaces(show, stale = false) {
-  if (!show) {
-    activePossiblePopup?.remove();
-    clearPossibleHover();
-  }
+  if (!show) clearPossiblePopups();
   if (show && !map.getLayer(LAYERS.possible)) addPossibleLayers(true);
   [LAYERS.possibleHalo, LAYERS.possible].forEach((id) => {
     if (!map.getLayer(id)) return;
@@ -2247,6 +2252,7 @@ function handleMapPlaceClick(e) {
   if (places.length) {
     placeHover?.remove();
     pinnedLabel?.remove();
+    clearPossibleHover();
     const place = places.find((feature) => feature.layer?.id === LAYERS.places) || places[0];
     void handlePlaceFeatureClick(place, e.lngLat);
     return;
@@ -3158,26 +3164,39 @@ function denominationMatch(denom, buckets, state) {
     (state[b.code] ? selected : deselected).push(...b.aliases);
   });
   const other = Boolean(state.__other);
+  if (typeof denom === "string") {
+    if (selected.includes(denom)) return true;
+    if (deselected.includes(denom)) return false;
+    return other;
+  }
   const arms = [];
   if (selected.length) arms.push(selected, true);
   if (deselected.length) arms.push(deselected, false);
   return arms.length ? ["match", denom, ...arms, other] : other;
 }
 
-function currentFilterClauses() {
-  if (allFiltersOn()) return null;
-  const rel = ["coalesce", ["get", "religion"], "unknown"];
+function placeFilterSelection() {
   const totals = christianTotals();
   const christianFull = totals ? totals.on === totals.total : Boolean(religionFilterState.christian);
   const christianNone = totals ? totals.on === 0 : !religionFilterState.christian;
   const fullReligions = KNOWN_RELIGIONS.filter((k) =>
     k === "christian" ? christianFull : religionFilterState[k]);
-  const otherChecked = Boolean(religionFilterState.unknown);
+  return {
+    fullReligions,
+    otherChecked: Boolean(religionFilterState.unknown),
+    christianPartial: Boolean(totals && !christianFull && !christianNone)
+  };
+}
+
+function currentFilterClauses(selection = placeFilterSelection()) {
+  if (allFiltersOn()) return null;
+  const { fullReligions, otherChecked, christianPartial } = selection;
+  const rel = ["coalesce", ["get", "religion"], "unknown"];
   const parts = [
     fullReligions.length ? ["match", rel, fullReligions, true, false] : false,
     otherChecked ? ["!", ["match", rel, KNOWN_RELIGIONS, true, false]] : false
   ];
-  if (totals && !christianFull && !christianNone) {
+  if (christianPartial) {
     // partially-selected christianity: only the chosen buckets pass
     const denom = ["downcase", ["to-string", ["coalesce", ["get", "denomination"], ""]]];
     parts.push(["all", ["==", rel, "christian"],
@@ -3186,12 +3205,28 @@ function currentFilterClauses() {
   return ["any", ...parts];
 }
 
+function placePassesFilters(props, selection) {
+  const religion = props.religion ?? "unknown";
+  if (selection.fullReligions.includes(religion)) return true;
+  if (!KNOWN_RELIGIONS.includes(religion)) return selection.otherChecked;
+  if (religion === "christian" && selection.christianPartial) {
+    const denom = String(props.denomination ?? "").toLowerCase();
+    return denominationMatch(denom, christianBuckets, denomFilterState);
+  }
+  return false;
+}
+
 function applyFilters() {
-  const clauses = currentFilterClauses();
+  const selection = placeFilterSelection();
+  const clauses = currentFilterClauses(selection);
   if (map.getLayer(LAYERS.places)) map.setFilter(LAYERS.places, clauses);
   if (map.getLayer(LAYERS.overview)) map.setFilter(LAYERS.overview, clauses);
   if (map.getLayer(LAYERS.possible)) map.setFilter(LAYERS.possible, clauses);
   if (map.getLayer(LAYERS.possibleHalo)) map.setFilter(LAYERS.possibleHalo, clauses);
+  if (activePossiblePopup && !placePassesFilters(activePossiblePopup.props, selection)) {
+    activePossiblePopup.popup.remove();
+  }
+  if (possibleHoverProps && !placePassesFilters(possibleHoverProps, selection)) clearPossibleHover();
   updateCounts();
   // no hash writes until the boot parse has run, or an early style.load
   // would erase a shared link's filter param before it is read

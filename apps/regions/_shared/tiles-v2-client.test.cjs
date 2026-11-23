@@ -88,7 +88,7 @@ assert.doesNotMatch(runtime, /census-legend-note[^\n]*today's/);
 // the assets for the september tile switch share a release stamp; region-map.js
 // carries a later one for the area-count snapshot footnote
 const stamps = {
-    "region-map.js": "20261124a", // september tiles, popup behaviour, snapshot footnote
+    "region-map.js": "20261124b", // clear ring popups and labels as visibility changes
     "datamaps-switcher.js": "20261013a", // switcher rows prerender; warming waits for activation
     "unvalidated-places.js": "20261123c", // september archives and country lists; feature id from properties
     "verification-map.js": "20261123c", // match typed osm objects during hand-off
@@ -97,7 +97,7 @@ const stamps = {
     "task-presentation.js": "20261015c", // decided-status and reopen-flag helpers
     "convex-task-client.js": "20261103a", // the sign-in button takes a width from its caller
     "review-portal.js": "20261123c", // report unresolved country codes
-    "review-map.js": "20261103a", // the legend becomes the folding map data panel
+    "review-map.js": "20261124b", // match the osm type and id from a clicked dot
 };
 // stylesheets that changed with a script, checked the same way
 stamps["maplibre-flat.css"] = "20261123c"; // the key's possible-or-former row

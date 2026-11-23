@@ -113,7 +113,21 @@ const stub = (table) => {
 // 1. the decoder reproduces every shipped governed product, row for row and
 //    field for field, including header, key order and value types, and the
 //    shipped file's recorded source is the governed product's actual hash
-const manifest = JSON.parse(fs.readFileSync(path.join(repo, "docs", "manifests", "area-summary-columns.manifest.json"), "utf8"));
+const manifestDir = path.join(repo, "docs", "manifests");
+const manifestPath = path.join(manifestDir, "area-summary-columns.manifest.json");
+const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+const archiveDir = path.join(manifestDir, "superseded");
+const archivePaths = fs.readdirSync(archiveDir)
+  .filter((file) => /^area-summary-columns-.*\.manifest\.json$/.test(file))
+  .map((file) => path.join(archiveDir, file));
+const expectedSchema = path.join(repo, "schemas", "data-manifest.schema.json");
+ok(fs.statSync(expectedSchema).isFile(), "the manifest schema exists");
+for (const file of [manifestPath, ...archivePaths]) {
+  const record = JSON.parse(fs.readFileSync(file, "utf8"));
+  const schemaPath = path.resolve(path.dirname(file), record.$schema);
+  eq(schemaPath, expectedSchema, `${path.relative(repo, file)}: the relative schema path resolves to the data manifest schema`);
+}
+
 for (const file of manifest.durable_files) {
   const entry = manifest.stats.files.find((f) => f.columns === file.uri);
   const governedBytes = fs.readFileSync(path.join(repo, entry.source));

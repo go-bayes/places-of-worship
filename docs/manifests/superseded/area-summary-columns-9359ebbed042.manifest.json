@@ -1,8 +1,8 @@
 {
-  "$schema": "../../schemas/data-manifest.schema.json",
+  "$schema": "../../../schemas/data-manifest.schema.json",
   "schema_version": "data-manifest.v2",
   "manifest_id": "manifest:area-summary-columns-9359ebbed042",
-  "manifest_sha256": "1a55ed0ddf98393165157ce16480839e3e744ebc73547fa61faf1475f5e026b2",
+  "manifest_sha256": "05c3d700a2e61f482039142e60ac5e20ee3f438feafeb5e34a701415f88e2b60",
   "supersedes_manifest_id": null,
   "superseded_by_manifest_id": "manifest:area-summary-columns-cd50e61877e4",
   "dataset_id": "area-summary-columns",

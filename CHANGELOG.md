@@ -4,7 +4,9 @@
 
 ### 2026-11-24
 
-- New Zealand's census popups use the 1 September 2026 OpenStreetMap snapshot for place counts and rates and display the date given in the area summary. Of the 3,422 mapped places, 3,417 fall within a territorial authority and 3,419 fall within a statistical area 2 (SA2) under the polygons used for assignment. For SA2s, the builder uses 2023 polygons archived in June 2026 before the July generalisation. The map draws the generalised polygons. Auckland's territorial authority count falls from 1,053 to 1,018. Every page that loads `region-map.js` carries `?v=20261124a` for the updated footnote.
+- New Zealand's census popups use the 1 September 2026 OpenStreetMap snapshot for place counts and rates and display the date given in the area summary. Of the 3,422 mapped places, 3,417 fall within a territorial authority and 3,419 fall within a statistical area 2 (SA2) under the polygons used for assignment. For SA2s, the builder uses 2023 polygons archived in June 2026 before the July generalisation. The map draws the generalised polygons. Auckland's territorial authority count falls from 1,053 to 1,018.
+- The review map uses the OpenStreetMap object type and ID to match a dot to a queued task. Dots missing either field can still match by coordinates. The public map clears a ring’s hover label when a counted place takes the click. Zooming out below 8 closes ring popups and clears ring labels. Changing the religion filters closes popups and clears labels for any ring that the new filters exclude. Both changed scripts, `region-map.js` and `review-map.js`, use `?v=20261124b`.
+- Corrected the schema path in the archived manifest for columnar area summaries and recomputed the manifest’s SHA-256.
 
 ### 2026-11-23 (maps switched to the 1 September 2026 OpenStreetMap edition)
 

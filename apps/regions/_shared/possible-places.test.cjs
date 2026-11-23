@@ -95,6 +95,7 @@ function fakeMap(rendered = {}) {
     jumpTo() {},
     triggerRepaint() {},
     getZoom() { return this.zoom; },
+    setZoom(zoom) { this.zoom = zoom; this.fire("zoom"); },
     queryRenderedFeatures(geometryOrOptions, maybeOptions) {
       const options = maybeOptions || geometryOrOptions || {};
       const point = maybeOptions ? geometryOrOptions : null;
@@ -144,9 +145,10 @@ function context(map, extra = {}) {
     lift("function possiblePlacePopupHtml("),
     lift("function featuresAt("),
     lift("function historicalPointLayers("),
-    "let possibleHasCursor = false;",
+    "let possibleHoverProps = null;",
     "let activePossiblePopup = null;",
     lift("function clearPossibleHover("),
+    lift("function clearPossiblePopups("),
     lift("function addPossibleLayers("),
     lift("function syncPossiblePlaces("),
     lift("function possibleWaitingForZoom("),
@@ -438,7 +440,6 @@ function interactiveMap(rendered, isMobile) {
   const checkbox = { checked: false, addEventListener(type, fn) { controls.toggle = fn; } };
   const select = { appendChild() {}, addEventListener(type, fn) { controls.basemap = fn; } };
   const queued = [];
-  const filter = ["==", ["get", "religion"], "christian"];
   const ctx = context(map, {
     IS_MOBILE: isMobile,
     RC: { countryCode: "IT", datedPlaces: true, pulotuCultures: true },
@@ -459,7 +460,12 @@ function interactiveMap(rendered, isMobile) {
     defaultBasemapId: "light", activeBasemapId: "light", setTerrainStateFromBasemap() {},
     updateTerrainToggleAvailability() {}, filtersBootstrapped: false,
     censusState: { enabled: true, year: 2000 }, activeDomainId: "religion",
-    currentFilterClauses: () => filter, updateCounts() {}, ensureNearestLine() {},
+    countLabels: ["christian", "muslim", "unknown"].map((key) => ({ key })),
+    KNOWN_RELIGIONS: ["christian", "muslim"],
+    religionFilterState: { christian: true, muslim: false, unknown: true },
+    christianBuckets: [{ code: "christian.catholic", aliases: ["catholic", "roman_catholic"] }],
+    denomFilterState: { "christian.catholic": true, __other: true },
+    updateCounts() {}, ensureNearestLine() {},
     OVERVIEW_ENABLED: true, HOME_SHADE: { fill: "shade", outline: "shade-outline" },
     addCensusLayers() { map.addLayer({ id: CENSUS.fill }); },
     addOverviewLayer() { map.addLayer({ id: LAYERS.overview }); map.builds += 1; },
@@ -472,8 +478,11 @@ function interactiveMap(rendered, isMobile) {
     loadPulotuData: async () => ({ data: {} }), pulotuColourExpression: () => "#fff",
     PULOTU_GROUPS: [], safeHttpUrl: () => "", pulotuHandlersAttached: false
   });
-  const styleStart = runtime.indexOf('map.on("style.load", () => {');
-  const styleListener = runtime.slice(styleStart, runtime.indexOf("\n});", styleStart) + 4);
+  const mapListener = (event) => {
+    const start = runtime.indexOf(`map.on("${event}", () => {`);
+    assert.ok(start >= 0, `the ${event} listener exists`);
+    return runtime.slice(start, runtime.indexOf("\n});", start) + 4);
+  };
   vm.runInContext([
     "let activePlacePopup = null, placeHover = null, pinnedLabel = null;",
     lift("function popupOpenAt("), lift("function trackPlacePopup("), lift("function coordsFromFeature("),
@@ -484,7 +493,10 @@ function interactiveMap(rendered, isMobile) {
     lift("function handleMapPlaceClick("), 'map.on("click", handleMapPlaceClick);',
     lift("function initBasemapSelect("), lift("function rebuildCustomLayers("), lift("function addCustomLayers("),
     lift("function ensureCustomLayers("), lift("function refreshMapLayers("), lift("function nudgeMap("),
-    lift("function applyFilters("), styleListener,
+    mapListener("zoom"),
+    lift("function christianTotals("), lift("function allFiltersOn("), lift("function denominationMatch("),
+    lift("function placeFilterSelection("), lift("function currentFilterClauses("),
+    lift("function placePassesFilters("), lift("function applyFilters("), mapListener("style.load"),
     constant("PLACE_SNAPSHOT_HORIZON"), lift("function placeSnapshotStale("),
     lift("function effectivePointsMode("), lift("function effectiveDotMode("),
     lift("function possibleRingsWanted("), lift("function syncPlaceDotEra("),
@@ -501,7 +513,7 @@ function interactiveMap(rendered, isMobile) {
   };
   finish();
   toggle(true);
-  return { map, controls, ctx, click, hover, toggle, finish, filter };
+  return { map, controls, ctx, click, hover, toggle, finish, filter: ctx.currentFilterClauses() };
 }
 
 (async () => {
@@ -512,22 +524,37 @@ function interactiveMap(rendered, isMobile) {
     properties: { id, name, osm_type: id[0] === "w" ? "way" : "node", osm_id: Number(id.slice(1)) }
   });
   const romeRing = feature("w814470552", "", 100, 100);
+  romeRing.properties.religion = "unknown";
   const romeNode = feature("n1973645380", "Counted place", 110.83, 100);
+  romeNode.geometry.coordinates = [12.5002, 41.9];
   const unnamedWay = feature("w269736970", "", 25, 25);
   for (const isMobile of [false, true]) {
     const area = { properties: { name: "Area" } };
     const rendered = {
       [LAYERS.places]: [romeNode, unnamedWay], [LAYERS.possible]: [romeRing], [CENSUS.fill]: [area]
     };
-    const { map, controls, ctx, toggle, click } = interactiveMap(rendered, isMobile);
+    const { map, controls, ctx, toggle, click, hover } = interactiveMap(rendered, isMobile);
     const lastPopup = () => map.popupOpens.at(-1);
     toggle(false);
     click(100, 100);
     assert.match(lastPopup().html, /openstreetmap\.org\/node\/1973645380/);
     toggle(true);
+    let ringLabel;
+    if (!isMobile) {
+      hover(100, 100);
+      ringLabel = lastPopup();
+      assert.match(ringLabel.html, /Possible or former place/);
+      assert.equal(ringLabel.isOpen(), true);
+      checks += 2;
+    }
+    const beforeClick = map.popupOpens.length;
     click(100, 100);
     assert.match(lastPopup().html, /openstreetmap\.org\/node\/1973645380/);
-    assert.equal(map.popupOpens.length, 2, "a direct ring hit only opens the nearby counted dot");
+    assert.equal(map.popupOpens.length - beforeClick, 1, "a direct ring hit only opens the nearby counted dot");
+    if (ringLabel) {
+      assert.equal(ringLabel.isOpen(), false, "the ring label clears when the counted node takes the click");
+      checks += 1;
+    }
     click(25, 25);
     assert.match(lastPopup().html, /popup-title">Unnamed place</);
     assert.match(lastPopup().html, /class="popup-revise" href="[^"]*osm_type=way&amp;osm_id=269736970"/);
@@ -538,7 +565,7 @@ function interactiveMap(rendered, isMobile) {
     assert.equal(controls.census, undefined, "a padded ring hit over a census polygon opens only the ring");
     click(50, 50);
     assert.equal(controls.census.properties, area.properties);
-    assert.equal(map.popupOpens.length, 4);
+    assert.equal(map.popupOpens.length, beforeClick + 3);
     checks += 10;
 
     // replay the delegated handlers for each historical symbol over the ring
@@ -576,8 +603,10 @@ function interactiveMap(rendered, isMobile) {
   };
   rebuild();
   assert.equal(popup.isOpen(), true);
+  assert.notEqual(live.filter, null, "the basemap test starts with a religion filter");
+  checks += 1;
   for (const layer of [LAYERS.places, LAYERS.overview, LAYERS.possible, LAYERS.possibleHalo]) {
-    assert.equal(live.map.filters[layer], live.filter);
+    assert.deepEqual(live.map.filters[layer], live.filter);
     checks += 1;
   }
   for (const layer of [LAYERS.possible, LAYERS.possibleHalo]) {
@@ -627,6 +656,54 @@ function interactiveMap(rendered, isMobile) {
   assert.equal(label.isOpen(), false, "hiding rings clears an open hover label too");
   assert.equal(hoverOnly.map.canvas.style.cursor, "");
   checks += 2;
+
+  // a popup and a hover may belong to different rings. apply the real filter
+  // or zoom event while both are open, with the reviewer’s unknown ring selected.
+  const secondRing = feature("w44", "Another ring", 140, 100);
+  secondRing.geometry.coordinates = [12.51, 41.9];
+  secondRing.properties.religion = "unknown";
+  for (const change of ["christian-only filter", "zoom below 8"]) {
+    const { map, ctx, click, hover } = interactiveMap({ [LAYERS.possible]: [romeRing, secondRing] }, false);
+    click(100, 100);
+    const popup = map.popupOpens.at(-1);
+    hover(140, 100);
+    const label = map.popupOpens.at(-1);
+    assert.notEqual(label, popup);
+    assert.equal(popup.isOpen(), true);
+    assert.equal(label.isOpen(), true);
+    if (change === "christian-only filter") {
+      ctx.religionFilterState.unknown = false;
+      ctx.applyFilters();
+    } else {
+      map.setZoom(8);
+      assert.equal(popup.isOpen(), true, "the ring still draws at zoom 8");
+      assert.equal(label.isOpen(), true);
+      map.setZoom(7);
+      checks += 2;
+    }
+    assert.equal(popup.isOpen(), false, change);
+    assert.equal(label.isOpen(), false, change);
+    assert.equal(map.canvas.style.cursor, "");
+    checks += 6;
+  }
+
+  // a surviving christian label stays open when the filter excludes only the
+  // selected catholic alias, even though other christian remains on.
+  const catholicRing = {
+    ...romeRing, properties: { ...romeRing.properties, religion: "christian", denomination: "Roman_Catholic" }
+  };
+  const otherChristianRing = { ...secondRing, properties: { ...secondRing.properties, religion: "christian" } };
+  const selected = interactiveMap({ [LAYERS.possible]: [catholicRing, otherChristianRing] }, false);
+  selected.click(100, 100);
+  const catholicPopup = selected.map.popupOpens.at(-1);
+  selected.hover(140, 100);
+  const christianLabel = selected.map.popupOpens.at(-1);
+  selected.ctx.denomFilterState["christian.catholic"] = false;
+  selected.ctx.applyFilters();
+  assert.equal(catholicPopup.isOpen(), false);
+  assert.equal(christianLabel.isOpen(), true);
+  assert.equal(selected.map.canvas.style.cursor, "pointer");
+  checks += 3;
 
   console.log(`possible places: ${checks} checks passed`);
 })().catch((error) => { console.error(error); process.exitCode = 1; });
