@@ -5,7 +5,7 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Relief: religionmap.org labs</title>
-  <meta name="description" content="An experiment: the density and diversity of mapped places of worship across one city, in three dimensions, with complete counts.">
+  <meta name="description" content="An experimental map of the density and diversity of places tagged as places of worship in OpenStreetMap across one city.">
   <meta name="robots" content="noindex">
   <link rel="preload" href="../shared/fonts/source-sans-3-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link href="../vendor/maplibre-gl@6.19.0/maplibre-gl.css" rel="stylesheet">
@@ -39,7 +39,7 @@
       <details id="how" class="how">
         <summary>How this is counted</summary>
         <ul id="how-lines" class="how-lines"></ul>
-        <p class="how-note">The count uses every zoom-12 tile that touches the study area. A neighbouring tile can supply a record on a shared edge. The total excludes extra copies and records outside the study area. Panning and zooming leave the total unchanged.</p>
+        <p class="how-note">The count uses the full set of records from zoom-12 tiles covering the study area. Each point on a shared tile edge belongs to the tile to its east or south. The total includes only records inside or on the boundary of the study area. Panning and zooming leave the total unchanged.</p>
       </details>
 
       <div class="controls">
@@ -90,7 +90,7 @@
       </div>
 
       <p class="sheet-credits"><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a>, <a href="https://www.maptiler.com/copyright/" target="_blank" rel="noopener">© MapTiler</a>, <a href="https://www.openmaptiles.org/" target="_blank" rel="noopener">© OpenMapTiles</a>. Project compilation <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a>.</p>
-      <p class="caption">Columns count places of worship mapped in OpenStreetMap (July 2026 snapshot), not worshippers. Where mapping is sparse, columns are lower.</p>
+      <p class="caption">Each column counts places tagged as places of worship in OpenStreetMap as of 1 September 2026. Where mapping is sparse, columns are lower.</p>
     </div>
   </section>
 

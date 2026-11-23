@@ -127,8 +127,20 @@ export function placesInTiles(features) {
       points.push({ tile, localX: x, localY: y, extent: raw.extent, coords: coords[i], properties, gridStep });
     });
   }
-  // during a tile transition, use finer tiles where they cover a point
-  const owned = ownedTilePoints(points).filter(({ tile, localX, localY, extent }) => {
+  const owned = ownedTilePoints(points);
+  const finestZooms = new Map();
+  if (zooms.size > 1) {
+    // the september archive has one occurrence per osm key at each zoom.
+    // quantisation can put a parent and its child on opposite sides of a tile edge.
+    for (const { tile, properties: { id } } of owned) {
+      if (typeof id === "string" && /^[nwr]\d+$/.test(id)) {
+        finestZooms.set(id, Math.max(finestZooms.get(id) ?? tile.z, tile.z));
+      }
+    }
+  }
+  const visible = owned.filter(({ tile, localX, localY, extent, properties: { id } }) => {
+    if (finestZooms.has(id)) return tile.z === finestZooms.get(id);
+    // when only geometry can identify a place, use finer tiles that cover it
     for (const z of zooms) {
       if (z <= tile.z) continue;
       const scale = 2 ** (z - tile.z);
@@ -138,7 +150,7 @@ export function placesInTiles(features) {
     }
     return true;
   });
-  const distinct = zooms.size > 1 ? replaceParentEdgeCopies(owned) : owned;
+  const distinct = zooms.size > 1 ? replaceParentEdgeCopies(visible) : visible;
   distinct.sort((a, b) => a.coords[0] - b.coords[0] || a.coords[1] - b.coords[1]);
   const occurrences = new Map();
   return distinct.map(({ coords, properties: props, gridStep }) => {

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-11-23 (labs place tiles)
+
+- Lamps and Relief now use the 1 September 2026 OpenStreetMap snapshot, restricted to places tagged as places of worship. Lamps uses the most detailed tile record loaded for each place during zoom transitions. Relief counts 95 places in central Wellington and reads points on tile edges from their owning tiles.
+
 ### 2026-11-20 (labs: Lamps and Relief, experimental)
 
 - Lamps is an unlinked experimental globe that shows mapped places of worship as lights and pillars under the sun for a selected time.

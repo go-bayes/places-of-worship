@@ -48,15 +48,16 @@ test("a square study area is centred on its city", () => {
 });
 
 test("the table's cells sum to the total at every cell size", async () => {
-  for (const size of [250, 500, 1000]) {
+  for (const [size, occupied] of [[250, 78], [500, 54], [1000, 33]]) {
     const result = await buildRelief(request(size), { fetchResponse: fixtureResponse });
     const cells = result.cells.features.filter((f) => f.properties.kind === "footprint").map((f) => f.properties);
     const rows = tableRows(cells);
-    assert.equal(result.totals.count, 117);
-    assert.equal(rows.reduce((a, r) => a + r.count, 0), 117);
-    assert.equal(countLine(result.totals), "117 mapped places in the study area. Each record is counted once.");
+    assert.equal(result.totals.count, 95);
+    assert.equal(rows.length, occupied);
+    assert.equal(rows.reduce((a, r) => a + r.count, 0), 95);
+    assert.equal(countLine(result.totals), "95 mapped places in the study area. Each record is counted once.");
     const lines = reconciliationLines(result.reconciliation, result.totals, size);
-    assert.ok(lines.includes("137 = 8 + 12 + 117."));
+    assert.ok(lines.includes("105 = 0 + 10 + 95."));
   }
 });
 

@@ -78,3 +78,26 @@ test("a child edge one tile unit away replaces its parent while the owning child
   assert.deepEqual(places.map(({ props }) => props.name), ["Chapel A", "Chapel B"]);
   assert.deepEqual(places[0].coords, childCopy.geometry.coordinates);
 });
+
+test("prefixed osm keys keep one lamp per place across a buffer-free tile boundary", () => {
+  const parent = { z: 12, x: 4036, y: 2564 };
+  const west = { z: 13, x: 8072, y: 5128 };
+  const east = { z: 13, x: 8073, y: 5128 };
+  const westernParent = tilePoint(parent, 2048, 1024, { id: "w123", osm_id: 123 });
+  const easternParent = tilePoint(parent, 2048, 1024, { id: "n123", osm_id: 123 });
+  const westernChild = tilePoint(west, 4095, 2048, westernParent.properties);
+  const easternChild = tilePoint(east, 0, 2048, easternParent.properties);
+  for (const [children, expected] of [
+    [[westernChild], [westernChild, easternParent]],
+    [[easternChild], [westernParent, easternChild]],
+    [[westernChild, easternChild], [westernChild, easternChild]]
+  ]) {
+    const places = placesInTiles([westernParent, easternParent, ...children]);
+    assert.equal(places.length, expected.length);
+    for (const feature of expected) {
+      const place = places.find(({ props }) => props.id === feature.properties.id);
+      assert.deepEqual(place?.coords, feature.geometry.coordinates);
+      assert.equal(place.gridStep, 1 / (4096 * 2 ** feature.tile.z));
+    }
+  }
+});

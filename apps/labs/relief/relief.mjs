@@ -30,7 +30,7 @@ import {
   plural
 } from "./view.mjs";
 
-const TILE_URL = "https://tiles.placemap.org/places-v2-20260722-grid/{z}/{x}/{y}";
+const TILE_URL = "https://tiles.placemap.org/places-v2-20260901-grid/{z}/{x}/{y}";
 const KEY = window.MAPTILER_API_KEY || "";
 const REDUCED_MOTION = window.matchMedia("(prefers-reduced-motion: reduce)");
 const PHONE = window.matchMedia("(max-width: 640px)");

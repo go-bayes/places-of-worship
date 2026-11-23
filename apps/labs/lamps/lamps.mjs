@@ -34,7 +34,6 @@ import {
 import { buildStyle, PLACES_TILE_PROTOCOL, PLACE_LAYERS, traditionFilter, pillarFilter, traditionColor, presence, SCALE } from "./style.mjs";
 import { metresPerPixel, pillarRadius, pillarHeight, hexagon, placesInTiles, tileMatchDistance, PILLAR } from "./geometry.mjs";
 import { CITIES } from "../shared/cities.mjs";
-import { hasPlaceId } from "../shared/tile-ownership.mjs";
 
 const MAIN_MAP = "../../global/";
 const REDUCED_MOTION = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -222,7 +221,7 @@ function startMap() {
     if (light && map.getZoom() < 13) {
       // the hit retains its source zoom, even while MapLibre draws a parent tile
       const individual = map.getZoom() >= 8 && light._z >= 8 && !(light.properties.n > 1);
-      state.pendingSelect = individual && light.properties.id != null ? String(light.properties.id) : null;
+      state.pendingSelect = individual ? light.properties.id : null;
       if (!individual) deselect();
       fly({ center: light.geometry.coordinates, zoom: 15.2 });
       return;
@@ -751,7 +750,7 @@ function buildPillars() {
     src.setData({ type: "FeatureCollection", features: [] });
   }
   if (state.pendingSelect !== null) {
-    const matches = places.filter(({ props }) => props.id != null && String(props.id) === state.pendingSelect);
+    const matches = places.filter(({ props }) => props.id === state.pendingSelect);
     if (matches.length === 1) select(matches[0].id, false);
     if (matches.length) state.pendingSelect = null;
   }
@@ -828,10 +827,7 @@ function prettify(value) {
 }
 
 function placeName(props) {
-  const name = String(props["name:en"] || props.name_en || props.name || "").trim();
-  // the tiles give unnamed places a placeholder built from the osm id
-  if (!name || /^(Place of Worship \d+|unnamed)$/i.test(name)) return "Unnamed place of worship";
-  return name;
+  return props.name_en?.trim() || props.name?.trim() || "Unnamed place of worship";
 }
 
 function drawSelection(place) {
@@ -848,12 +844,10 @@ function drawSelection(place) {
 }
 
 function followSourceId(previous, previousPlaces, places) {
-  const sourceId = previous?.props.id;
-  if (!hasPlaceId(sourceId)) return;
+  if (!previous) return;
   // decoded coordinates can move with tile precision. follow a unique source
-  // ID in both sets when the positions agree within their quantisation.
-  const id = String(sourceId);
-  const sameSource = ({ props }) => props.id != null && String(props.id) === id;
+  // id in both sets when the positions agree within their quantisation.
+  const sameSource = ({ props }) => props.id === previous.props.id;
   if (previousPlaces.filter(sameSource).length !== 1) return;
   const matches = places.filter(sameSource);
   if (matches.length === 1 && Number.isFinite(tileMatchDistance(previous, matches[0]))) return matches[0];

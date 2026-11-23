@@ -1,14 +1,16 @@
 # Vector tiles from Wellington
 
-Four XYZ tiles were retrieved from the public tile service for religionmap.org on 2026-11-20. Each file contains an uncompressed Mapbox Vector Tile protobuf with a `places` layer. At zoom 12, the `places` and `places-v2-20260722-grid` tilesets share identical payloads. [Source archive manifest](../../../../../tools/tiles-r2/manifests/places-v2-20260722-grid.manifest.json) · [Tile archive documentation](../../../../../tools/tiles-r2/README.md#grid-thinned-tiers)
+The four fixtures come from `places-v2-20260901-grid`, which includes places tagged `amenity=place_of_worship` in OpenStreetMap as of 1 September 2026. Extract each XYZ tile with `pmtiles tile` and decompress it with `gzip -dc` to obtain the Mapbox Vector Tile protobuf for the `places` layer. [Source archive manifest](../../../../../tools/tiles-r2/manifests/places-v2-20260901-grid.manifest.json) · [Tile archive documentation](../../../../../tools/tiles-r2/README.md#openstreetmap-edition-build-2026-09-01)
 
-Run `node apps/labs/relief/engine/fixtures/minimise.mjs` to rebuild the property dictionaries. The script preserves the point geometry and each occurrence. It keeps `id`, `name`, `religion`, `denomination`, `start_date` and the remaining fields used to reconcile tile ownership (`osm_id`, `osm_type`, `country_code` and `country` where present). The resulting tiles contain no phone, address, website or raw tags fields.
+Each raw record has `id`, `osm_id`, `osm_type`, `name`, `religion`, `denomination` and `country_code`. Optional fields are `name_en` and `start_date`. Contact fields and raw tags were absent from all 105 decoded records. Run `node apps/labs/relief/engine/fixtures/minimise.mjs` after extraction to remove `name_en` from the fixture property dictionaries. The script keeps the point geometry and all records, including any `start_date` values.
 
 | Fixture | Address | SHA-256 | Features |
 | --- | --- | --- | ---: |
-| `wellington-z12-4036-2564.pbf` | [12/4036/2564](https://tiles.placemap.org/places-v2-20260722-grid/12/4036/2564) | `d0aabd5230f8349b1f4e09a609d1d81041af80381a1a0c5cf329cc13dad59fd0` | 86 |
-| `wellington-z12-4036-2565.pbf` | [12/4036/2565](https://tiles.placemap.org/places-v2-20260722-grid/12/4036/2565) | `01e28159907d90ee1f6051f196db7339bb1fa2dee8958b023cd465b611c9c7f8` | 34 |
-| `wellington-z12-4037-2564.pbf` | [12/4037/2564](https://tiles.placemap.org/places-v2-20260722-grid/12/4037/2564) | `5d6714c176e28479bb8630beda307502f7cae6dabd54e2bd63a3f080aab64da6` | 5 |
-| `wellington-z12-4037-2565.pbf` | [12/4037/2565](https://tiles.placemap.org/places-v2-20260722-grid/12/4037/2565) | `3a3a7f25a7881fd49a75c5605ad886ea6101ab96c7b30eb3a35c66ea0bfed3e8` | 12 |
+| `wellington-z12-4036-2564.pbf` | [12/4036/2564](https://tiles.placemap.org/places-v2-20260901-grid/12/4036/2564) | `6f0730393ba79303f20565dd3132c314d38671b84b439788c7acbe5f1dde5489` | 66 |
+| `wellington-z12-4036-2565.pbf` | [12/4036/2565](https://tiles.placemap.org/places-v2-20260901-grid/12/4036/2565) | `2c3a208e33154f9c6279196dc8f4ba3457206cf638647bc1459114c38bbdb041` | 26 |
+| `wellington-z12-4037-2564.pbf` | [12/4037/2564](https://tiles.placemap.org/places-v2-20260901-grid/12/4037/2564) | `31fc51ffb8af62ddb3409bf23657a4bb77accba39188ae38738f1b5086fa9e60` | 4 |
+| `wellington-z12-4037-2565.pbf` | [12/4037/2565](https://tiles.placemap.org/places-v2-20260901-grid/12/4037/2565) | `89c1a2558af7a2c79c99b12060e1eeaf55b33aba877f04f8c29a050aa33797e1` | 9 |
+
+Of the 105 decoded records, zero are buffer copies and ten fall outside the central Wellington study area. The study area contains 95 distinct places.
 
 Data © OpenStreetMap contributors, licensed under the Open Data Commons Open Database Licence (ODbL) 1.0. [OpenStreetMap copyright and licence](https://www.openstreetmap.org/copyright)

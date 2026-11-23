@@ -5,7 +5,7 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lamps: religionmap.org labs</title>
-  <meta name="description" content="An experiment: every mapped place of worship as a light, under the real sun for the moment shown.">
+  <meta name="description" content="An experimental globe of places tagged as places of worship in OpenStreetMap, lit by the sun for the selected time.">
   <meta name="robots" content="noindex">
   <link rel="preload" href="../shared/fonts/source-sans-3-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="../shared/fonts/source-serif-4-latin-wght-italic.woff2" as="font" type="font/woff2" crossorigin>
@@ -59,7 +59,7 @@
     <h2 id="key-title" class="key-title">Traditions</h2>
     <ul id="key-list" class="key-list"></ul>
     <button id="about-toggle" class="about-toggle" type="button" aria-expanded="false" aria-controls="caption">About these lights</button>
-    <p id="caption" class="caption">Lights show where OpenStreetMap records places of worship (July 2026 snapshot). At wider scales, one light can represent several places. Pillar height is symbolic.</p>
+    <p id="caption" class="caption">Lights show places tagged as places of worship in OpenStreetMap as of 1 September 2026. At wider scales, one light can represent several places. Pillar height is symbolic.</p>
   </section>
 
   <aside id="card" class="card panel" aria-labelledby="card-name" hidden>

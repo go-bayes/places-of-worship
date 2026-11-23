@@ -22,7 +22,6 @@ export function tilesCoveringBbox(bbox, zoom) {
   const size = 2 ** zoom;
   const index = (coordinate) => Math.min(size - 1, Math.max(0, Math.floor(coordinate)));
   const tileX = (lon) => index((lon + 180) / 360 * size);
-  const columnLongitude = (column) => column / size * 360 - 180;
   const rowLatitude = (row) => Math.atan(Math.sinh(Math.PI * (1 - 2 * row / size))) * 180 / Math.PI;
   const tileY = (lat) => {
     const row = index((1 - Math.asinh(Math.tan(lat * Math.PI / 180)) / Math.PI) / 2 * size);
@@ -32,13 +31,11 @@ export function tilesCoveringBbox(bbox, zoom) {
     if (row > 0 && lat > rowLatitude(row)) return row - 1;
     return row;
   };
-  // include touching tiles to the west and north so their far edges can
-  // supply records missing from the owning tiles
-  const westColumn = tileX(west);
-  const northRow = tileY(north);
-  const xStart = westColumn > 0 && west <= columnLongitude(westColumn) ? westColumn - 1 : westColumn;
+  // september tiles keep edge records in the owning tile. at an exact
+  // boundary, the eastern or southern tile owns the point.
+  const xStart = tileX(west);
   const xEnd = tileX(east);
-  const yStart = northRow > 0 && north === rowLatitude(northRow) ? northRow - 1 : northRow;
+  const yStart = tileY(north);
   const yEnd = tileY(south);
   return (function* () {
     for (let x = xStart; x <= xEnd; x++) {

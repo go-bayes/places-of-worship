@@ -28,7 +28,7 @@ async function reliefPage() {
     constructor() { workers.push(this); }
     handlers = {};
     addEventListener(type, handler) { this.handlers[type] = handler; }
-    postMessage() {}
+    postMessage(request) { this.request = request; }
     terminate() { this.terminated = true; }
   }
   const map = {
@@ -52,15 +52,23 @@ async function reliefPage() {
   return { ...page, get, map, workers, legendCount, currentWorker: () => page.worker };
 }
 
+test("Relief requests the complete tier of the strict September archive", async () => {
+  const { compute, workers } = await reliefPage();
+  compute();
+  const { zoom, tileUrlTemplate } = workers[0].request;
+  assert.equal(zoom, 12);
+  assert.equal(tileUrlTemplate, "https://tiles.placemap.org/places-v2-20260901-grid/{z}/{x}/{y}");
+});
+
 test("loading and worker errors clear every Relief total and release the worker", async () => {
   const { state, compute, get, workers, legendCount, currentWorker } = await reliefPage();
-  state.result = { totals: { count: 117 } };
-  for (const id of ["how-lines", "table-body", "table-foot"]) get(id).children.push("117");
-  get("count-line").textContent = legendCount.textContent = "117";
+  state.result = { totals: { count: 95 } };
+  for (const id of ["how-lines", "table-body", "table-foot"]) get(id).children.push("95");
+  get("count-line").textContent = legendCount.textContent = "95";
   compute();
   for (const id of ["how-lines", "table-body", "table-foot"]) assert.equal(get(id).children.length, 0, id);
   assert.equal(legendCount.textContent, "");
-  assert.doesNotMatch(get("count-line").textContent, /117/);
+  assert.doesNotMatch(get("count-line").textContent, /95/);
   workers[0].handlers.error({ message: "worker stopped" });
   assert.equal(workers[0].terminated, true);
   assert.equal(currentWorker(), null);
@@ -79,9 +87,9 @@ test("a rejected Relief result never reaches the table or page state", async () 
 
 test("invalid Relief tile enumeration clears stale totals and reports a failure", async () => {
   const { state, compute, workers, get } = await reliefPage();
-  state.result = { totals: { count: 117 } };
+  state.result = { totals: { count: 95 } };
   state.city = { label: "Date line", coords: [179.99, 0] };
-  get("table-foot").children.push("117");
+  get("table-foot").children.push("95");
   compute();
   assert.equal(state.result, null);
   assert.equal(workers.length, 0);

@@ -6,7 +6,6 @@ import * as geometry from "./geometry.mjs";
 import * as palette from "../shared/palette.mjs";
 import * as style from "./style.mjs";
 import * as sun from "../shared/sun.mjs";
-import { hasPlaceId } from "../shared/tile-ownership.mjs";
 import * as maplibre from "../vendor/maplibre-gl@6.19.0/maplibre-gl.mjs";
 
 async function lampsPage({ addProtocol = () => {}, fetch } = {}) {
@@ -51,7 +50,7 @@ async function lampsPage({ addProtocol = () => {}, fetch } = {}) {
     source.slice(source.indexOf("const MAIN_MAP"), source.lastIndexOf("\nbuildChips();"))
       + "\n({ state, buildPillars, updateScale, startMap, applyFilter, refreshPlacesList, autoPitchTransform, setMap(m) { map = m; } })",
     {
-      ...geometry, ...palette, ...style, ...sun, hasPlaceId, document, URLSearchParams, setInterval() {},
+      ...geometry, ...palette, ...style, ...sun, document, URLSearchParams, setInterval() {},
       window: { matchMedia: () => ({ matches: false }) }, location: { search: "", hash: "" },
       fetch,
       maplibregl: {
@@ -119,7 +118,7 @@ test("regional lights and retained low-zoom tiles fly without opening a place ca
     state.pendingSelect = "previous";
     map.hits = [{
       layer: { id: "places-core" }, _z: tileZoom,
-      properties: { id: "representative" }, geometry: { coordinates: [1, 1] }
+      properties: { id: "w643607728", n: 3 }, geometry: { coordinates: [1, 1] }
     }];
     map.handlers.click({ point: { x: 1, y: 1 } });
     assert.equal(state.pendingSelect, null);
@@ -223,14 +222,14 @@ test("an open card closes when a distant sole match replaces the selected occurr
   assert.equal(get("card").hidden, true);
 });
 
-test("an open card follows a unique source ID across tile precision changes", async () => {
+test("an open card follows a prefixed OSM key across tile precision changes", async () => {
   const { map, state, startMap, buildPillars, get } = await lampsPage();
   startMap();
-  map.features = [point(0)];
+  map.features = [point("w643607728")];
   buildPillars();
   openFirstPillar(map);
   assert.equal(get("card").hidden, false);
-  const finer = point(0, 1.00001);
+  const finer = point("w643607728", 1.00001);
   finer.tile = { z: 14, x: 8200, y: 8144 };
   map.zoom = 14;
   map.features = [finer];
@@ -238,7 +237,49 @@ test("an open card follows a unique source ID across tile precision changes", as
   assert.equal(get("card").hidden, false);
   assert.equal(state.selected, map.data.pillars.features[0].properties.id);
   assert.deepEqual(map.data.selection.features[1].geometry.coordinates, finer.geometry.coordinates);
-  assert.match(get("card-main").href, /\/1\.00001$/);
+  assert.equal(get("card-main").href, "../../global/#map=17.00/1.00000/1.00001");
+});
+
+test("a detailed light selects the place by its prefixed OSM key after flying", async () => {
+  const { map, state, startMap, buildPillars, get } = await lampsPage();
+  map.flyTo = () => {};
+  map.once = () => {};
+  map.getPitch = () => 66;
+  map.stop = () => {};
+  startMap();
+  map.zoom = 9;
+  map.layers.add("places-core");
+  const way = point("w123");
+  way.properties.osm_id = 123;
+  map.hits = [{ ...way, layer: { id: "places-core" }, _z: 9 }];
+  map.handlers.click({ point: { x: 1, y: 1 } });
+  assert.equal(state.pendingSelect, "w123");
+  const node = point("n123", 2);
+  node.properties.osm_id = 123;
+  map.zoom = 15.2;
+  map.features = [way, node];
+  buildPillars();
+  assert.equal(state.pendingSelect, null);
+  assert.equal(get("card").hidden, false);
+  assert.deepEqual(map.data.selection.features[1].geometry.coordinates, way.geometry.coordinates);
+});
+
+test("cards display September names and missing tags without inventing tile names", async () => {
+  const { map, startMap, buildPillars, get } = await lampsPage();
+  startMap();
+  const place = point("w525849060", 1, "unknown");
+  for (const [name, name_en, displayed] of [
+    ["", undefined, "Unnamed place of worship"],
+    ["Place of Worship 123", undefined, "Place of Worship 123"],
+    ["Te ingoa", "English name", "English name"]
+  ]) {
+    map.features = [{ ...place, properties: { ...place.properties, name, name_en, osm_id: 525849060 } }];
+    buildPillars();
+    openFirstPillar(map);
+    assert.equal(get("card-name").textContent, displayed);
+    assert.equal(get("card-tradition").textContent, "Other or unknown");
+    assert.equal(get("card-start-row").hidden, true);
+  }
 });
 
 test("the Lamps places protocol reports 404 and preserves empty and populated tiles", async (t) => {
@@ -251,7 +292,7 @@ test("the Lamps places protocol reports 404 and preserves empty and populated ti
       t.after(() => maplibre.removeProtocol(scheme));
     },
     fetch: async (url, options) => {
-      assert.match(url, /^https:\/\/tiles\.placemap\.org\/places-(overview-)?v2-20260722-grid\/0\/0\/0$/);
+      assert.match(url, /^https:\/\/tiles\.placemap\.org\/places-(overview-)?v2-20260901-grid\/0\/0\/0$/);
       assert.equal(options.signal, controller.signal);
       return new Response(status === 200 ? bytes : null, { status, headers: { "Cache-Control": "max-age=60" } });
     }

@@ -4,9 +4,7 @@
 
 import { religionCategories } from "./engine/categories.js";
 
-// the extent the engine tests pin for wellington (117 places on
-// 2026-11-20), used as the city's central study area so the page and the
-// tests count the same ground
+// the page and engine tests use the same central wellington study area
 export const WELLINGTON_TEST_BBOX = [174.73, -41.34, 174.83, -41.26];
 
 export const STUDY_SIZES = [

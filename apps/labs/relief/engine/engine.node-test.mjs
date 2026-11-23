@@ -12,18 +12,18 @@ import { buildRelief } from "./relief-worker.js";
 const bbox = [174.73, -41.34, 174.83, -41.26];
 const zoom = 12;
 const fixtures = [
-  [4036, 2564, 86, ["St. Barnabas Anglican Church / Onslow Anglicans", "Futuna Chapel"]],
-  [4036, 2565, 34, ["All Saints Anglican Church", "Theravada Place of Worship"]],
-  [4037, 2564, 5, ["Miramar Christian School", "St Ronans Presbyterian Church"]],
-  [4037, 2565, 12, ["Miramar Uniting Church", "Miramar Gospel Hall"]]
+  [4036, 2564, 66, ["All Saints Anglican Church", "Futuna Chapel"]],
+  [4036, 2565, 26, ["Miramar Uniting Church", "Wat Buddhacheymahaneat Theravada Buddhist Monastery"]],
+  [4037, 2564, 4, ["Russian Orthodox Church of Christ the Saviour", "St Ronans Presbyterian Church"]],
+  [4037, 2565, 9, ["Gateway Baptist Church, Miramar", "Miramar Gospel Hall"]]
 ];
 const expectedReconciliation = {
   tilesRequested: 4,
   tilesEmpty: 0,
-  rawFeatures: 137,
-  duplicatesRemoved: 8,
-  outsideExtentRemoved: 12,
-  kept: 117,
+  rawFeatures: 105,
+  duplicatesRemoved: 0,
+  outsideExtentRemoved: 10,
+  kept: 95,
   keyless: 0
 };
 
@@ -37,6 +37,7 @@ const gunzip = (buffer) => Uint8Array.from(gunzipSync(new Uint8Array(buffer))).b
 const gzip = (buffer) => Uint8Array.from(gzipSync(new Uint8Array(buffer))).buffer;
 
 test("Wellington MVT fixtures have the pinned point counts and names", async (t) => {
+  const ids = new Set();
   for (const [x, y, count, names] of fixtures) {
     const tile = { z: zoom, x, y };
     const bytes = await fixtureTile(tile);
@@ -46,18 +47,30 @@ test("Wellington MVT fixtures have the pinned point counts and names", async (t)
     t.diagnostic(`${zoom}/${x}/${y} · ${points.length} points · ${records.slice(0, 3).map(({ name }) => name).join(", ")}`);
     assert.equal(new Uint8Array(bytes, 0, 2)[0], 0x1a);
     assert.equal(points.length, count);
-    assert.ok(records.every(({ id }) => /^[nw]\d+$/.test(id)));
+    for (const { id, osm_type, osm_id, name } of records) {
+      assert.ok(["node", "way", "relation"].includes(osm_type));
+      assert.ok(Number.isSafeInteger(osm_id) && osm_id > 0);
+      assert.equal(id, `${osm_type[0]}${osm_id}`);
+      assert.equal(typeof name, "string");
+      assert.ok(!ids.has(id), `duplicate OSM key ${id}`);
+      ids.add(id);
+    }
+    assert.ok(points.every(({ localX, localY, extent }) =>
+      localX >= 0 && localX < extent && localY >= 0 && localY < extent));
     for (const name of names) assert.ok(records.some((p) => p.name === name), name);
     assert.deepEqual(decodeMvtPoints(bytes, tile, "missing"), { foundLayer: false, points: [] });
   }
-  const tile = { z: zoom, x: 4036, y: 2564 };
-  const { points: [barnabas] } = decodeMvtPoints(await fixtureTile(tile), tile, "places");
-  assert.equal(barnabas.lon.toFixed(8), "174.79125738");
-  assert.equal(barnabas.lat.toFixed(8), "-41.24462714");
-  assert.equal(barnabas.properties.osm_id, 397049902);
-  assert.equal(barnabas.properties.religion, "christian");
-  assert.equal(barnabas.properties.denomination, "anglican");
-  assert.equal(barnabas.properties.start_date, "1920");
+  const tile = { z: zoom, x: 4036, y: 2565 };
+  const { points } = decodeMvtPoints(await fixtureTile(tile), tile, "places");
+  const monastery = points.find(({ properties }) => properties.id === "r15927101");
+  assert.equal(monastery.lon.toFixed(8), "174.76374865");
+  assert.equal(monastery.lat.toFixed(8), "-41.34269690");
+  assert.equal(monastery.properties.religion, "buddhist");
+  assert.equal(monastery.properties.denomination, "theravada");
+  assert.equal(monastery.properties.start_date, "1985");
+  const unnamed = points.find(({ properties }) => properties.id === "w525849060");
+  assert.equal(unnamed.properties.name, "");
+  assert.ok(!Object.hasOwn(unnamed.properties, "start_date"));
 });
 
 test("Wellington fixtures contain only the engine and ownership properties", async () => {
@@ -83,15 +96,15 @@ test("bounding box selects all four XYZ tiles and includes an exact east/south e
     { z: 12, x: 0, y: 1023 }, { z: 12, x: 0, y: 1024 }
   ]);
   assert.deepEqual([...tilesCoveringBbox([-180, 66.51, -179.98, row1024Latitude], 12)], [
-    { z: 12, x: 0, y: 1023 }, { z: 12, x: 0, y: 1024 }
+    { z: 12, x: 0, y: 1024 }
   ]);
   assert.throws(() => tilesCoveringBbox([175, -42, -179, -40], zoom), /non-wrapping bbox/);
 });
 
-test("Wellington extent reconciles 137 decoded records to 117 places", async () => {
+test("Wellington extent reconciles 105 decoded records to 95 places", async () => {
   const { points, reconciliation } = await collectWellington();
   assert.deepEqual(reconciliation, expectedReconciliation);
-  assert.equal(new Set(points.map((p) => p.properties.id)).size, 117);
+  assert.equal(new Set(points.map((p) => p.properties.id)).size, 95);
   assert.ok(points.every(({ lon, lat }) => lon >= bbox[0] && lon <= bbox[2] && lat >= bbox[1] && lat <= bbox[3]));
   assert.ok(points.some(({ properties }) => properties.id === "w968946836"));
 });
@@ -137,23 +150,23 @@ function syntheticTile(features, keys, values, extent = 4096) {
   return Uint8Array.from(message(26, layer)).buffer;
 }
 
-test("exact west and north boundaries retain places from touching tiles and reconcile counts", async () => {
+test("exact study-area boundaries read edge points from their owning tiles", async () => {
   const keys = ["id"];
-  const values = [string(10, "boundary"), string(10, "outside")];
-  for (const { edge, bbox, coordinates, tileX, tileY } of [
-    { edge: "west", bbox: [0, 30, 10, 70], coordinates: [[4096, 2048], [4095, 2048]], tileX: 0, tileY: 0 },
-    { edge: "north", bbox: [80, -10, 100, 0], coordinates: [[2048, 4096], [2048, 4095]], tileX: 1, tileY: 0 },
-    { edge: "north-west", bbox: [0, -10, 10, 0], coordinates: [[4096, 4096], [4095, 4095]], tileX: 0, tileY: 0 }
+  const values = [string(10, "n1")];
+  for (const { edge, bbox, coordinates, x, y, tilesRequested } of [
+    { edge: "west", bbox: [0, 30, 10, 70], coordinates: [0, 2048], x: 1, y: 0, tilesRequested: 1 },
+    { edge: "north", bbox: [80, -10, 100, 0], coordinates: [2048, 0], x: 1, y: 1, tilesRequested: 1 },
+    { edge: "north-west", bbox: [0, -10, 10, 0], coordinates: [0, 0], x: 1, y: 1, tilesRequested: 1 },
+    { edge: "south-east", bbox: [-10, 0, 0, 10], coordinates: [0, 0], x: 1, y: 1, tilesRequested: 4 }
   ]) {
-    const tile = syntheticTile(coordinates.map((point, i) => feature([0, i], [point])), keys, values);
+    const tile = syntheticTile([feature([0, 0], [coordinates])], keys, values);
     const { points, reconciliation } = await collectPlaces({
-      bbox, zoom: 1, fetchTile: ({ x, y }) => x === tileX && y === tileY ? tile : null
+      bbox, zoom: 1, fetchTile: (address) => address.x === x && address.y === y ? tile : null
     });
-    assert.deepEqual(points.map(({ properties }) => properties.id), ["boundary"], edge);
-    const tilesRequested = edge === "north-west" ? 4 : 2;
+    assert.deepEqual(points.map(({ properties }) => properties.id), ["n1"], edge);
     assert.deepEqual(reconciliation, {
-      tilesRequested, tilesEmpty: tilesRequested - 1, rawFeatures: 2, duplicatesRemoved: 0,
-      outsideExtentRemoved: 1, kept: 1, keyless: 0
+      tilesRequested, tilesEmpty: tilesRequested - 1, rawFeatures: 1, duplicatesRemoved: 0,
+      outsideExtentRemoved: 0, kept: 1, keyless: 0
     }, edge);
   }
 });
@@ -273,13 +286,16 @@ test("segments stack in palette order from zero to the complete cell count", () 
 test("Wellington hexes conserve counts and use the full projected area", async () => {
   const { points } = await collectWellington();
   const { cells, totals } = binPlaces(points, grid);
-  assert.equal(cells.length, 58);
+  assert.equal(cells.length, 54);
   assert.equal(totals.count, points.length);
-  assert.equal(totals.classified, 101);
-  assert.equal(totals.unknown, 16);
-  assert.equal(totals.counts.christian, 94);
-  assert.equal(totals.counts.other, 1);
-  assert.equal(cells.reduce((sum, cell) => sum + cell.count, 0), 117);
+  assert.equal(totals.classified, 95);
+  assert.equal(totals.unknown, 0);
+  assert.deepEqual(totals.counts, {
+    christian: 89, muslim: 2, hindu: 0, buddhist: 2, jewish: 1,
+    sikh: 0, shinto: 0, taoist: 0, unknown: 0, other: 1
+  });
+  assert.ok(Math.abs(totals.entropy_bits - 0.4610106045834804) < 1e-12);
+  assert.equal(cells.reduce((sum, cell) => sum + cell.count, 0), 95);
   for (const cell of cells) {
     assert.equal(cell.ring.length, 7);
     assert.deepEqual(cell.ring[0], cell.ring.at(-1));
@@ -329,9 +345,9 @@ test("worker builds GeoJSON using plain and gzip responses and reports HTTP fail
   assert.equal(result.cells.type, "FeatureCollection");
   const footprints = result.cells.features.filter((f) => f.properties.kind === "footprint");
   const segments = result.cells.features.filter((f) => f.properties.kind === "segment");
-  assert.equal(footprints.length, 58);
-  assert.equal(segments.length, 75);
-  assert.equal(new Set(result.cells.features.map(({ id }) => id)).size, 133);
+  assert.equal(footprints.length, 54);
+  assert.equal(segments.length, 58);
+  assert.equal(new Set(result.cells.features.map(({ id }) => id)).size, 112);
   assert.equal(segments.reduce((sum, f) => sum + f.properties.count, 0), result.totals.count);
   for (const segment of segments) {
     const footprint = footprints.find(({ id }) => id === segment.properties.cell_id);

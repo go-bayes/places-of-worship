@@ -6,8 +6,8 @@ import { TRADITIONS, KNOWN_TRADITIONS, LAMP_GOLD, mix } from "../shared/palette.
 
 export const PLACES_TILE_PROTOCOL = "places-tile";
 export const TILES = {
-  overview: `${PLACES_TILE_PROTOCOL}://tiles.placemap.org/places-overview-v2-20260722-grid/{z}/{x}/{y}`,
-  places: `${PLACES_TILE_PROTOCOL}://tiles.placemap.org/places-v2-20260722-grid/{z}/{x}/{y}`
+  overview: `${PLACES_TILE_PROTOCOL}://tiles.placemap.org/places-overview-v2-20260901-grid/{z}/{x}/{y}`,
+  places: `${PLACES_TILE_PROTOCOL}://tiles.placemap.org/places-v2-20260901-grid/{z}/{x}/{y}`
 };
 
 const OSM_CREDIT = '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors';
