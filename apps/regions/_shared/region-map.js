@@ -250,6 +250,16 @@ const CONTRIBUTE_ICON = barIcon('<path d="M12 5v14M5 12h14"/>');
       <h3>Visible Places</h3>
       <div id="countsHint">Zoom in for key</div>
       <ul id="countsList"></ul>
+      <!-- the possible or former places: the layer's legend and its switch
+           in one row (jb ruling 2026-11-23, "strict + flagged extras"), off
+           by default and never counted -->
+      <ul id="countsPossible">
+        <li class="count-possible">
+          <label class="legend" for="countsPossibleToggle"><span class="dot dot-possible" aria-hidden="true"></span>Possible or former places</label>
+          <input id="countsPossibleToggle" type="checkbox" aria-describedby="countsPossibleNote">
+          <span class="count-possible-note" id="countsPossibleNote">not counted</span>
+        </li>
+      </ul>
       <div class="count-total" id="countsTotal">Total: 0</div>
     </div>
   </div>
@@ -324,16 +334,27 @@ const CONFIG = {
   mobileMinZoom: 3.0,
   desktopMinZoom: 1.5,
   tiles: {
+    // the openstreetmap edition of 2026-09-01 (tools/tiles-r2/README.md,
+    // "OpenStreetMap edition build"): in every country the dots and counts
+    // hold only objects tagged amenity=place_of_worship, and every record
+    // carries its osm key. all three names are immutable versioned archives
+    // served by the tiles worker.
     // grid-thinned overview, z0 to 5: one dot per screen-pixel cell, religion
     // and denomination, so every place that would be visible on its own is
     // drawn and only overlapping dots are merged; a dot's `n` is the number of
-    // places it stands for (immutable versioned name, served by the tiles
-    // worker). the 2026-10-07 fraction sample drew about 2 percent of the
-    // places everywhere and made sparse countries look empty
-    overview: "https://tiles.placemap.org/places-overview-v2-20260722-grid/{z}/{x}/{y}",
-    // places tier: z8 to 18 byte-identical to the live places tier; z6 and z7
-    // grid-thinned the same way (z6 without names, z7 with them)
-    places: "https://tiles.placemap.org/places-v2-20260722-grid/{z}/{x}/{y}",
+    // places it stands for, and its `id` the osm key of the place it shows
+    overview: "https://tiles.placemap.org/places-overview-v2-20260901-grid/{z}/{x}/{y}",
+    // places tier: every place from z8 to 18; z6 and z7 grid-thinned the same
+    // way (z6 with the overview's attributes, z7 with the full record). an
+    // unnamed place has an empty `name`
+    places: "https://tiles.placemap.org/places-v2-20260901-grid/{z}/{x}/{y}",
+    // possible or former places (layer places_possible, z8 to 18): buildings
+    // osm maps as a church, mosque, temple, synagogue or chapel without the
+    // place-of-worship tag, and with no tagged place inside them. never
+    // counted, drawn only while the key's possible-or-former switch is on and
+    // the dots show today's snapshot, and requested only once a visitor
+    // turns the switch on
+    possible: "https://tiles.placemap.org/places-v2-20260901-possible/{z}/{x}/{y}",
     // optional overlay: a page names a polygon tileset in its config
     // (REGION_CONFIG.polygonsTileset) or the source is never added and no
     // tile is requested. configuration, not country identity
@@ -345,6 +366,7 @@ const CONFIG = {
   layerDefaults: {
     overview: "places_overview",
     places: "places",
+    possible: "places_possible",
     polygons: RC.polygonsTileset || null,
     buildings: "buildings"
   }
@@ -354,6 +376,7 @@ const urlParams = new URLSearchParams(window.location.search);
 const OVERVIEW_LAYER = urlParams.get("overviewLayer") || CONFIG.layerDefaults.overview;
 const OVERVIEW_ENABLED = urlParams.get("overview") !== "0";
 const PLACES_LAYER = urlParams.get("placesLayer") || CONFIG.layerDefaults.places;
+const POSSIBLE_LAYER = CONFIG.layerDefaults.possible;
 const POLYGONS_LAYER = urlParams.get("polygonsLayer") || CONFIG.layerDefaults.polygons;
 const BUILDINGS_LAYER = urlParams.get("buildingsLayer") || CONFIG.layerDefaults.buildings;
 const GOOGLE_MAPS_KEY = window.GOOGLE_MAPS_API_KEY || "";
@@ -831,6 +854,21 @@ function osmObjectUrl(type, id) {
     ? `https://www.openstreetmap.org/${t}/${n}`
     : "";
 }
+// the title of a place record: its english name where osm has one, else
+// its name, else the unnamed wording. the 2026-09-01 tiles give an unnamed
+// place an empty name, so no popup, label or link may show the raw value
+const UNNAMED_PLACE = "Unnamed place";
+function placeDisplayName(props) {
+  const p = props || {};
+  return p["name:en"] || p.name_en || p.name || UNNAMED_PLACE;
+}
+// the popup's openstreetmap link: the record itself where the tile names
+// it (every 2026-09-01 record does), else the map at the point
+function osmLinkHref(props, latFixed, lngFixed) {
+  const p = props || {};
+  return osmObjectUrl(p.osm_type, p.osm_id) ||
+    `https://www.openstreetmap.org/?mlat=${latFixed}&mlon=${lngFixed}#map=18/${latFixed}/${lngFixed}`;
+}
 // the one-line name label of the hover and pinned popups
 function placeLabelHtml(name) {
   return `<div style="font-weight:600;color:inherit;">${escText(name)}</div>`;
@@ -848,7 +886,7 @@ function censusHoverHtml(name, metricLabel, year, valueText) {
 // valid object type and id; coords is [lng, lat]
 function datedPlacePopupHtml(pr, coords) {
   const [lng, lat] = coords;
-  const name = pr.name || "Unnamed place";
+  const name = pr.name || UNNAMED_PLACE;
   const reviewed = pr.source === "reviewed_occupancy";
   // a reviewed period states its windows: "1899–1901 to 1960" reads
   // as a start somewhere in 1899–1901 and an end in 1960
@@ -917,7 +955,7 @@ function portalReviseHref(name, latFixed, lngFixed, props) {
     base = `${PORTAL_BASE}verification.html?country=${encodeURIComponent(String(country.code).toLowerCase())}`;
   }
   const params = new URLSearchParams({ revise: "1", lat: latFixed, lng: lngFixed });
-  if (name && name !== "Loading place…" && name !== "Unnamed") params.set("name", name);
+  if (name && name !== UNNAMED_PLACE) params.set("name", name);
   const osmId = props && props.osm_id !== undefined && props.osm_id !== null ? String(props.osm_id) : "";
   if (osmId) {
     params.set("osm_type", String(props.osm_type || "node"));
@@ -1164,12 +1202,17 @@ function streetViewEmbedUrl(lat, lng) {
 const SOURCES = {
   overview: "pow-overview",
   places: "pow-places",
+  possible: "pow-possible",
   polygons: "pow-polygons",
   buildings: "pow-buildings"
 };
 const LAYERS = {
   overview: "pow-overview-points",
   places: "pow-places-points",
+  // possible or former places: the white inner ring and the slate ring that
+  // carries the hit area and the handlers
+  possibleHalo: "pow-possible-halo",
+  possible: "pow-possible-rings",
   polygonsFill: "pow-polygons-fill",
   polygonsLine: "pow-polygons-line",
   buildingsFill: "pow-buildings-fill",
@@ -1215,7 +1258,7 @@ function showMobileStreetViewPopup(name, coords, featureId) {
   const popup = new maplibregl.Popup({ maxWidth: "340px", closeOnClick: true })
     .setLngLat(coords)
     .setHTML(
-      `<div class="popup-header"><span class="popup-title">${escText(name || "Unnamed")}</span></div>` +
+      `<div class="popup-header"><span class="popup-title">${escText(name || UNNAMED_PLACE)}</span></div>` +
       distanceRowsHtml(coords) +
       `<div class="popup-actions">${reviseLink}${openStreetViewLink}${directionsLink}</div>`
     )
@@ -1245,6 +1288,12 @@ function showMobileStreetViewPopup(name, coords, featureId) {
 // only one place popup at a time: repeated opens were stacking
 // translucent copies on the same spot, each needing its own close
 let activePlacePopup = null;
+// a hover label never shows over the open popup of the place it names
+function popupOpenAt(coords) {
+  if (!activePlacePopup || !activePlacePopup.isOpen() || !coords) return false;
+  const at = activePlacePopup.getLngLat();
+  return Math.abs(at.lng - coords[0]) < 1e-9 && Math.abs(at.lat - coords[1]) < 1e-9;
+}
 function trackPlacePopup(popup) {
   if (activePlacePopup && activePlacePopup !== popup) activePlacePopup.remove();
   activePlacePopup = popup;
@@ -1438,11 +1487,12 @@ function clampPopupToViewport(popup, padding = 12) {
 }
 
 // a grid-thinned dot (the overview tier, and the places tier at zoom 6)
-// stands for every place in its screen-pixel cell and carries no name or osm
-// id, so a popup could name nothing. a tap on one zooms the map in on it, to
-// where the places tier draws named places
+// stands for every place in its screen-pixel cell and carries no name and no
+// osm_id (only `id`, the osm key of the one place it shows), so a popup could
+// name nothing. a tap on one zooms the map in on it, to where the places tier
+// draws named places
 function isRepresentativeDot(props) {
-  // from zoom 8 the tiles are the live places, every one named or keyed
+  // from zoom 8 every record carries its osm_id
   if (map.getZoom() >= SAMPLED_BELOW_ZOOM) return false;
   return !(props && (props.name || props["name:en"] || props.name_en || props.osm_id));
 }
@@ -1453,7 +1503,7 @@ function zoomToRepresentative(coords) {
 async function handlePlaceFeatureClick(feature, fallbackLngLat) {
   if (!feature) return;
   const props = feature?.properties || {};
-  const name = props["name:en"] || props.name_en || props.name || "Loading place…";
+  const name = placeDisplayName(props);
   const coords = coordsFromFeature(feature, fallbackLngLat);
   if (!coords) return;
   if (isRepresentativeDot(props)) {
@@ -1485,7 +1535,7 @@ async function handlePlaceFeatureClick(feature, fallbackLngLat) {
         `<div class="popup-actions">` +
         reviseLinkHtml(name, latFixed, lngFixed, props) +
         `<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${latFixed},${lngFixed}" target="_blank" rel="noopener">Street View</a>` +
-        `<a href="https://www.openstreetmap.org/?mlat=${latFixed}&mlon=${lngFixed}#map=18/${latFixed}/${lngFixed}" target="_blank" rel="noopener">Open OSM</a>` +
+        `<a href="${escText(osmLinkHref(props, latFixed, lngFixed))}" target="_blank" rel="noopener">Open OSM</a>` +
         `<button type="button" data-copy="${latFixed},${lngFixed}">Copy coords</button>` +
         `</div>`
       )
@@ -1504,7 +1554,7 @@ async function handlePlaceFeatureClick(feature, fallbackLngLat) {
       reviseLinkHtml(name, latFixed, lngFixed, props) +
       `<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${latFixed},${lngFixed}" target="_blank" rel="noopener">Street View</a>` +
       `<a href="${directionsUrl(latFixed, lngFixed)}" target="_blank" rel="noopener">Directions</a>` +
-      `<a href="https://www.openstreetmap.org/?mlat=${latFixed}&mlon=${lngFixed}#map=18/${latFixed}/${lngFixed}" target="_blank" rel="noopener">Open OSM</a>` +
+      `<a href="${escText(osmLinkHref(props, latFixed, lngFixed))}" target="_blank" rel="noopener">Open OSM</a>` +
       `<button type="button" data-copy="${latFixed},${lngFixed}">Copy coords</button>` +
       `</div>`
     )
@@ -1719,7 +1769,7 @@ function addOverviewLayer() {
       if (!feature) return;
       if (mobileFeatureClickHandled) return;
       const props = feature.properties || {};
-      const name = props["name:en"] || props.name_en || props.name || "Unnamed";
+      const name = placeDisplayName(props);
       const coords = coordsFromFeature(feature, e.lngLat);
       if (!coords) return;
       markMobileFeatureClickHandled();
@@ -1797,7 +1847,11 @@ function addPlacesLayer() {
         .addTo(map);
       return;
     }
-    const name = props["name:en"] || props.name_en || props.name || "Unnamed";
+    if (popupOpenAt(coords)) {
+      hoverPopup.remove();
+      return;
+    }
+    const name = placeDisplayName(props);
     hoverPopup
       .setLngLat(coords)
       .setHTML(placeLabelHtml(name))
@@ -1813,8 +1867,189 @@ function addPlacesLayer() {
   map.on("click", LAYERS.places, (e) => {
     const feature = e.features && e.features[0];
     if (!feature) return;
+    // the popup takes over from the hover labels
+    hoverPopup.remove();
+    if (pinnedLabel) pinnedLabel.remove();
     void handlePlaceFeatureClick(feature, e.lngLat);
   });
+}
+
+// ---- possible or former places -------------------------------------------
+// the principal investigator's ruling of 2026-11-23 ("strict + flagged
+// extras"): the dots and counts hold only places tagged
+// amenity=place_of_worship, and the buildings osm maps as a church, mosque,
+// temple, synagogue or chapel without that tag form a separate set, off by
+// default and never counted. one checkbox row in the key, on every page,
+// switches them on; they draw from zoom 8, beside the "all" snapshot dots
+// only, as hollow rings beneath the place dots, so a counted place
+// always wins the eye and the click: no fill, and no religion colour (most
+// carry no religion tag, and colour would make them read as places). the
+// ring is two strokes, a white inner ring and a dark slate outer one, so one
+// of them holds at least 3:1 against any basemap (docs/ui-style-guide.md
+// records the figures); its outer edge stays inside a place dot's at the
+// same zoom. the source and its layers are added only when a visitor first
+// turns the switch on, so no other view requests the archive
+const POSSIBLE_MIN_ZOOM = 8;
+const POSSIBLE_RING_COLOUR = "#334155";
+const POSSIBLE_HALO_COLOUR = "#ffffff";
+const POSSIBLE_RING_WIDTH = 1.5;
+const POSSIBLE_HALO_WIDTH = 1.25;
+// the slate ring's inner radius by zoom; the white ring sits just inside it
+const POSSIBLE_RING_RADII = [8, 2, 10, 2.6, 13, 3.3, 16, 4];
+const POSSIBLE_KIND_LABEL = "Possible or former place of worship";
+const POSSIBLE_KIND_NOTE = "OpenStreetMap maps a church, mosque, temple, synagogue or chapel building here without tagging it as a place of worship, so it may be a former, converted or unconfirmed place, and it is not counted in the totals.";
+const POSSIBLE_ZOOM_QUALIFIER = "appear when you zoom in";
+const POSSIBLE_COUNT_QUALIFIER = "not counted";
+function possibleRadiusExpression(offset = 0) {
+  const stops = [];
+  for (let i = 0; i < POSSIBLE_RING_RADII.length; i += 2) {
+    stops.push(POSSIBLE_RING_RADII[i], Math.max(0, POSSIBLE_RING_RADII[i + 1] + offset));
+  }
+  return ["interpolate", ["linear"], ["zoom"], ...stops];
+}
+// the two ring layers; visible says whether the mode is on now
+function possibleLayerSpecs(visible) {
+  const layout = { visibility: visible ? "visible" : "none" };
+  const base = { type: "circle", source: SOURCES.possible, "source-layer": POSSIBLE_LAYER, minzoom: POSSIBLE_MIN_ZOOM, layout };
+  return [
+    {
+      ...base,
+      id: LAYERS.possibleHalo,
+      paint: {
+        "circle-radius": possibleRadiusExpression(-POSSIBLE_HALO_WIDTH),
+        "circle-color": "rgba(0, 0, 0, 0)",
+        "circle-stroke-width": POSSIBLE_HALO_WIDTH,
+        "circle-stroke-color": POSSIBLE_HALO_COLOUR
+      }
+    },
+    {
+      ...base,
+      id: LAYERS.possible,
+      paint: {
+        "circle-radius": possibleRadiusExpression(0),
+        "circle-color": "rgba(0, 0, 0, 0)",
+        "circle-stroke-width": POSSIBLE_RING_WIDTH,
+        "circle-stroke-color": POSSIBLE_RING_COLOUR
+      }
+    }
+  ];
+}
+// the popup of a possible or former place: the place popup's structure,
+// with the kind and one sentence under the title. no directions and no
+// distance rows, which assume a place in use; the revise link stays, since
+// a contributor who knows the building is in use, or closed, is what the
+// project needs. coords is [lng, lat]; every record string is escaped
+function possiblePlacePopupHtml(props, coords, reviseHtml = "") {
+  const p = props || {};
+  const [lng, lat] = coords;
+  const latFixed = lat.toFixed(6);
+  const lngFixed = lng.toFixed(6);
+  const religion = p.religion && p.religion !== "unknown" ? String(p.religion) : "";
+  const attrs = (religion ? `<div class="place-attr"><span class="place-attr-key">Religion</span><span class="place-attr-val">${escText(religion)}</span></div>` : "") +
+    (p.denomination ? `<div class="place-attr"><span class="place-attr-key">Denomination</span><span class="place-attr-val">${escText(p.denomination)}</span></div>` : "");
+  return `<div class="popup-header"><span class="popup-title">${escText(placeDisplayName(p))}</span></div>` +
+    `<div class="place-note"><strong>${POSSIBLE_KIND_LABEL}</strong></div>` +
+    `<div class="place-note">${POSSIBLE_KIND_NOTE}</div>` +
+    (attrs ? `<div class="place-attrs">${attrs}</div>` : "") +
+    `<div class="popup-actions">` +
+    reviseHtml +
+    `<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${latFixed},${lngFixed}" target="_blank" rel="noopener">Street View</a>` +
+    `<a href="${escText(osmLinkHref(p, latFixed, lngFixed))}" target="_blank" rel="noopener">Open OSM</a>` +
+    `</div>`;
+}
+// the place dots win: a press on a place, or on a grid dot, is theirs,
+// whatever ring lies beneath
+function placeDotAt(point) {
+  const layers = [LAYERS.places, LAYERS.overview].filter((id) => map.getLayer(id));
+  return layers.length > 0 && map.queryRenderedFeatures(point, { layers }).length > 0;
+}
+function openPossiblePopup(feature, fallbackLngLat) {
+  const coords = coordsFromFeature(feature, fallbackLngLat);
+  if (!coords) return;
+  const props = feature.properties || {};
+  // the popup takes over from the hover label
+  if (possibleHover) possibleHover.remove();
+  const revise = reviseLinkHtml(placeDisplayName(props), coords[1].toFixed(6), coords[0].toFixed(6), props);
+  const popup = new maplibregl.Popup({ maxWidth: "340px", closeOnClick: true })
+    .setLngLat(coords)
+    .setHTML(possiblePlacePopupHtml(props, coords, revise))
+    .addTo(map);
+  trackPlacePopup(popup);
+  requestAnimationFrame(() => clampPopupToViewport(popup));
+}
+let possibleHandlersAttached = false;
+let possibleHover = null;
+function addPossibleLayers(visible) {
+  if (!CONFIG.tiles.possible || map.getLayer(LAYERS.possible)) return;
+  if (!map.getSource(SOURCES.possible)) {
+    map.addSource(SOURCES.possible, {
+      type: "vector",
+      tiles: [CONFIG.tiles.possible],
+      minzoom: POSSIBLE_MIN_ZOOM,
+      maxzoom: 18,
+      attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors'
+    });
+  }
+  // beneath the place dots, whether they are drawn already or follow
+  const beforeId = map.getLayer(LAYERS.places) ? LAYERS.places : undefined;
+  possibleLayerSpecs(visible).forEach((layer) => map.addLayer(layer, beforeId));
+  // the religion filters narrow the rings as they narrow the dots
+  const clauses = currentFilterClauses();
+  map.setFilter(LAYERS.possibleHalo, clauses);
+  map.setFilter(LAYERS.possible, clauses);
+  if (possibleHandlersAttached) return;
+  possibleHandlersAttached = true;
+  map.on("click", LAYERS.possible, (e) => {
+    const feature = e.features && e.features[0];
+    if (!feature || placeDotAt(e.point)) return;
+    if (IS_MOBILE) {
+      if (mobileFeatureClickHandled) return;
+      markMobileFeatureClickHandled();
+    }
+    openPossiblePopup(feature, e.lngLat);
+  });
+  if (IS_MOBILE) return;
+  // the label stands clear of the ring, so the press that follows the
+  // hover lands on the map and not on the label
+  const hover = new maplibregl.Popup({ closeButton: false, closeOnClick: false, maxWidth: "260px", offset: 10 });
+  possibleHover = hover;
+  map.on("mousemove", LAYERS.possible, (e) => {
+    const feature = e.features && e.features[0];
+    if (!feature || placeDotAt(e.point)) {
+      hover.remove();
+      return;
+    }
+    map.getCanvas().style.cursor = "pointer";
+    const coords = coordsFromFeature(feature, e.lngLat);
+    if (!coords) return;
+    if (popupOpenAt(coords)) {
+      hover.remove();
+      return;
+    }
+    hover
+      .setLngLat(coords)
+      .setHTML(placeLabelHtml(placeDisplayName(feature.properties)) + `<div class="place-note">Possible or former place</div>`)
+      .addTo(map);
+  });
+  map.on("mouseleave", LAYERS.possible, () => {
+    map.getCanvas().style.cursor = "";
+    hover.remove();
+  });
+}
+// show or hide the rings for the points mode in force. the first show adds
+// the source; until then nothing is requested. stale (a historical census
+// year) steps the rings down with the dots
+function syncPossiblePlaces(show, stale = false) {
+  if (show && !map.getLayer(LAYERS.possible)) addPossibleLayers(true);
+  [LAYERS.possibleHalo, LAYERS.possible].forEach((id) => {
+    if (!map.getLayer(id)) return;
+    map.setLayoutProperty(id, "visibility", show ? "visible" : "none");
+    map.setPaintProperty(id, "circle-stroke-opacity", stale ? 0.45 : 1);
+  });
+}
+// the rings are switched on, but the camera is below their first zoom
+function possibleWaitingForZoom(on, zoom) {
+  return Boolean(on) && zoom < POSSIBLE_MIN_ZOOM;
 }
 
 function addPolygonsLayer() {
@@ -2025,6 +2260,9 @@ function addCustomLayers() {
   }
   addPolygonsLayer();
   addBuildingsLayer();
+  // a basemap switch drops every custom layer: the rings come back beneath
+  // the dots when their mode is in force, and stay unrequested otherwise
+  if (possibleRingsWanted()) addPossibleLayers(true);
   addPlacesLayer();
   // the home shade over the dots, once the manifest has named the country
   addHomeShadeLayers();
@@ -2110,10 +2348,18 @@ if (IS_MOBILE) {
       [e.point.x + tapPadding, e.point.y + tapPadding]
     ];
     const features = map.queryRenderedFeatures(bbox, { layers: [LAYERS.places, LAYERS.overview] });
-    if (!features.length) return;
+    if (!features.length) {
+      // no place within reach: a possible or former ring under the finger
+      // opens its own popup (the places always win the tap)
+      const rings = map.getLayer(LAYERS.possible) ? map.queryRenderedFeatures(bbox, { layers: [LAYERS.possible] }) : [];
+      if (!rings.length) return;
+      markMobileFeatureClickHandled();
+      openPossiblePopup(rings[0], e.lngLat);
+      return;
+    }
     const feature = features.find((item) => item.layer && item.layer.id === LAYERS.places) || features[0];
     const props = feature.properties || {};
-    const name = props["name:en"] || props.name_en || props.name || "Unnamed";
+    const name = placeDisplayName(props);
     const coords = coordsFromFeature(feature, e.lngLat);
     if (!coords) return;
     markMobileFeatureClickHandled();
@@ -2137,7 +2383,10 @@ if (!IS_MOBILE) {
       );
       if (isUiClick) return;
     }
-    const directHit = map.queryRenderedFeatures(e.point, { layers: [LAYERS.places, LAYERS.overview] });
+    // a direct hit belongs to the layer's own handler; the possible rings
+    // answer their own direct hits (and yield there to any place dot)
+    const hitLayers = [LAYERS.places, LAYERS.overview, LAYERS.possible].filter((id) => map.getLayer(id));
+    const directHit = map.queryRenderedFeatures(e.point, { layers: hitLayers });
     if (directHit && directHit.length) return;
     const tapPadding = 12;
     const bbox = [
@@ -2148,6 +2397,12 @@ if (!IS_MOBILE) {
     if (nearby && nearby.length) {
       const feature = nearby.find((item) => item.layer && item.layer.id === LAYERS.places) || nearby[0];
       void handlePlaceFeatureClick(feature, e.lngLat);
+      return;
+    }
+    // no place near the click: a ring near it opens
+    const nearbyRings = map.getLayer(LAYERS.possible) ? map.queryRenderedFeatures(bbox, { layers: [LAYERS.possible] }) : [];
+    if (nearbyRings.length) {
+      openPossiblePopup(nearbyRings[0], e.lngLat);
       return;
     }
     // an area click answers with the census popup; no street-view hint
@@ -3083,6 +3338,8 @@ function applyFilters() {
   const clauses = currentFilterClauses();
   if (map.getLayer(LAYERS.places)) map.setFilter(LAYERS.places, clauses);
   if (map.getLayer(LAYERS.overview)) map.setFilter(LAYERS.overview, clauses);
+  if (map.getLayer(LAYERS.possible)) map.setFilter(LAYERS.possible, clauses);
+  if (map.getLayer(LAYERS.possibleHalo)) map.setFilter(LAYERS.possibleHalo, clauses);
   updateCounts();
   // no hash writes until the boot parse has run, or an early style.load
   // would erase a shared link's filter param before it is read
@@ -3426,6 +3683,21 @@ function drawnPlacesTileZooms() {
     return null;
   }
 }
+// the quiet qualifier beside the key's possible-or-former switch: switched
+// on below the rings' first zoom it says where they appear, otherwise that
+// they are not counted
+function possibleQualifier(on, zoom) {
+  return possibleWaitingForZoom(on, zoom) ? POSSIBLE_ZOOM_QUALIFIER : POSSIBLE_COUNT_QUALIFIER;
+}
+function syncPossibleQualifier() {
+  const note = document.getElementById("countsPossibleNote");
+  if (!note) return;
+  // the row shows and hides with the list it sits under
+  const row = document.getElementById("countsPossible");
+  if (row && countsList) row.style.display = countsList.style.display === "none" ? "none" : "";
+  const text = possibleQualifier(placesDotState.possible, map.getZoom());
+  if (note.textContent !== text) note.textContent = text;
+}
 function renderCounts(counts, sampled = false) {
   countsList.innerHTML = "";
   let total = 0;
@@ -3438,6 +3710,9 @@ function renderCounts(counts, sampled = false) {
       `<span>${value.toLocaleString()}</span>`;
     countsList.appendChild(item);
   });
+  // the possible or former rings are never counted; their row sits below
+  // the list and says so, or, switched on further out, where they appear
+  syncPossibleQualifier();
   countsTotal.textContent = `${sampled ? "Places shown" : "Total"}: ${total.toLocaleString()}`;
   // feed the toggle's hint dots with the categories that lead this view
   const ranked = countLabels
@@ -3509,6 +3784,7 @@ function updateCounts() {
         countsList.style.display = "none";
         countsTotal.style.display = "none";
       }
+      syncPossibleQualifier();
       return;
     }
     if (!countsUserEnabled) {
@@ -4480,6 +4756,8 @@ const CENSUS_POINT_ANCHORS = [
   LAYERS.overview,
   LAYERS.polygonsFill,
   LAYERS.buildingsFill,
+  LAYERS.possibleHalo,
+  LAYERS.possible,
   LAYERS.places
 ];
 // matches the first basemap layer that carries infrastructure or labels:
@@ -4591,7 +4869,7 @@ function removeCensusLayers() {
 function placeUnderCursor(point) {
   // pulotu culture points win the cursor over the census fill, exactly
   // as place dots do — without this the area popup swallows the click
-  const placeLayers = [LAYERS.places, LAYERS.overview, PULOTU.layer].filter((id) => map.getLayer(id));
+  const placeLayers = [LAYERS.places, LAYERS.overview, LAYERS.possible, PULOTU.layer].filter((id) => map.getLayer(id));
   return placeLayers.length > 0 &&
     map.queryRenderedFeatures(point, { layers: placeLayers }).length > 0;
 }
@@ -4840,7 +5118,9 @@ function placeSnapshotStale() {
 // places and nothing else once that wave crossed the horizon). period is
 // the user's choice, offered where dated data exists; a choice persists
 // across year and level changes until they change it again.
-const placesDotState = { mode: null, future: false };
+// possible: the key's possible-or-former switch, off by default and kept
+// for the session only (it is carried in no link or stored state)
+const placesDotState = { mode: null, future: false, possible: false };
 function effectivePointsMode() {
   return placesDotState.mode || "all";
 }
@@ -5484,18 +5764,7 @@ function syncPulotuCultures() {
 
 function syncPlaceDotEra() {
   const stale = placeSnapshotStale();
-  // dots are religion-domain furniture (design §4): under any other
-  // overlay domain the place layers hide and the points row drops; the
-  // user's chosen mode survives in placesDotState for religion's return
-  const dotsBelong = activeDomainId === "religion";
-  // with the census off the period mode has no census year to bound it,
-  // so the dots show in full; "off" still applies, which keeps the pill's
-  // points select working while the layer is off (jb 2026-10-14). the
-  // chosen mode survives in placesDotState for the layer's return
-  const chosen = effectivePointsMode();
-  const mode = !dotsBelong ? "off"
-    : censusState.enabled ? chosen
-    : chosen === "off" ? "off" : "all";
+  const mode = effectiveDotMode();
   // period mode shows only the dated tier; all mode keeps the pre-modes
   // behaviour where the dated tier joins the faded snapshot on
   // historical years; off shows no dots at all
@@ -5508,7 +5777,7 @@ function syncPlaceDotEra() {
   // off modes; hidden layers also drop out of click hit-testing
   // with the census off only the religion domain's own "off" hides them;
   // other domains keep their census-off behaviour
-  const hideSnapshot = censusState.enabled ? mode !== "all" : dotsBelong && mode === "off";
+  const hideSnapshot = censusState.enabled ? mode !== "all" : activeDomainId === "religion" && mode === "off";
   if (map.getLayer(LAYERS.overview)) {
     map.setLayoutProperty(LAYERS.overview, "visibility", hideSnapshot ? "none" : "visible");
   }
@@ -5531,8 +5800,31 @@ function syncPlaceDotEra() {
         ? ["interpolate", ["linear"], ["zoom"], 6, 0.08, 8, 0.45, 9, 0.85, 12, 0.75, 18, 0.7]
         : ["interpolate", ["linear"], ["zoom"], 6, 0.2, 9, 0.85, 12, 0.75, 18, 0.7]);
   }
+  // the possible or former rings go with today's snapshot dots
+  syncPossiblePlaces(possibleRingsWanted(mode), stale);
   syncPointsControl(mode);
   syncKeyToDots(mode);
+}
+
+// the points mode the map draws now. dots are religion-domain furniture
+// (design §4): under any other overlay domain the place layers hide and
+// the points row drops; the user's chosen mode survives in placesDotState
+// for religion's return. with the census off the period mode has no census
+// year to bound it, so the dots show in full; "off" still applies, which
+// keeps the pill's points select working while the layer is off (jb
+// 2026-10-14)
+function effectiveDotMode() {
+  if (activeDomainId !== "religion") return "off";
+  const chosen = effectivePointsMode();
+  if (censusState.enabled) return chosen;
+  return chosen === "off" ? "off" : "all";
+}
+// the possible or former rings draw only beside today's snapshot dots: the
+// key's switch is on and the points mode is all. period shows places that
+// dated evidence places in the census year, and a building osm maps today
+// says nothing about that year; off shows no places at all
+function possibleRingsWanted(mode = effectiveDotMode()) {
+  return Boolean(placesDotState.possible) && mode === "all";
 }
 
 // the key describes the place dots; "Points: off" leaves it describing
@@ -6235,6 +6527,21 @@ if (censusSourceSelect && RC.pulotuCultures) {
   }
 }
 
+// the key's possible-or-former switch (every page, the global map too): the
+// rings follow it beside the snapshot dots, and its qualifier says where
+// they appear or that they are not counted
+{
+  const possibleToggle = document.getElementById("countsPossibleToggle");
+  if (possibleToggle) {
+    possibleToggle.checked = false;
+    possibleToggle.addEventListener("change", () => {
+      placesDotState.possible = possibleToggle.checked;
+      syncPossiblePlaces(possibleRingsWanted(), placeSnapshotStale());
+      syncPossibleQualifier();
+    });
+  }
+}
+
 // a places tile arriving after the last move can turn the counts from a
 // sample into a total, or follow a first render, and idle may not fire while
 // another source is still loading. so the counts refresh shortly after a
@@ -6625,7 +6932,7 @@ if (offerGo && !RC.disableBorderHandoff) {
             if (target instanceof Element && target.closest(
               "button, a, input, select, textarea, label, #dock, #counts-wrap, #key-wrap, #census-wrap, #wordmark, #corner-refresh, .maplibregl-ctrl"
             )) return;
-            const interactive = [LAYERS.places, LAYERS.overview, CENSUS.fill, PULOTU.layer]
+            const interactive = [LAYERS.places, LAYERS.overview, LAYERS.possible, CENSUS.fill, PULOTU.layer]
               .filter((id) => id && map.getLayer(id));
             if (interactive.length && map.queryRenderedFeatures(e.point, { layers: interactive }).length) return;
             const pick = handoffNeighbourAt(normaliseLng(e.lngLat.lng), e.lngLat.lat);
