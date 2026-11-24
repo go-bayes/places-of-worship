@@ -12,7 +12,7 @@ The brief makes three proposals.
 2. **A confirmed date below the floor.** The backend accepts a date earlier than the country's floor when the submission records who confirmed the date.
 3. **Years before the common era.** BCE years are accepted.
 
-Proposals 1 and 2 form *stage 1* and must ship together; proposal 3 is *stage 2*. Either of the first two proposals alone leaves St George's Basilica refused. The format refuses a year written `0920` in every field, and Czechia's floor of 1000 also refuses the year in a dated claim, a period or a function chain.
+Proposals 1 and 2 form *stage 1* and must ship together; proposal 3 is *stage 2*. Either of the first two proposals alone leaves St George's Basilica refused. The evidence form's validators refuse a year written `0920` in every field, and Czechia's floor of 1000 also refuses the year in a dated claim, a period or a function chain.
 
 Ruling R6 of 2 September 2026 accepted the floor table "as an interim typo guard" and said that "a deep-time date format (signed years, BCE, one sanity bound near 12000 BCE) is a separate follow-on ruling, scheduled after PR-D". The brief is the proposal for that ruling. PR-D, the import of the Woodberry records with their periods, merged as #69 on 2 September 2026. The changelog entry for PR-D records that the live import then awaited Joseph; the brief does not establish whether the import has since run.
 
@@ -20,17 +20,17 @@ Ruling R6 of 2 September 2026 accepted the floor table "as an interim typo guard
 
 - A *partial date* is a date written as a year (`1880`), a year and month (`1880-03`), or a full date (`1880-03-01`).
 - A *historical date* says when something happened at a place: the bounds of a dated claim, the start and end of a period of use, a date in a function chain (the dated sequence of changes in how a place was used), and the lifecycle date on an evidence form.
-- An *observation date* says when evidence was made or consulted: the date of an observation, a photograph or a visit to a source.
+- An *observation date* says when evidence was made: the date of an observation or a photograph, and the date that a documentary source carries. The source register's publication and consulted dates are free text and stay outside the brief.
 - The *floor* is the earliest year that a country accepts in a dated claim, a period or a function chain (`convex/lib/countryYears.ts`).
-- A *validator* is the code that accepts or refuses a date. The backend holds the validators that bind. The contributor portal, the review page, the agent intake and the command-line tools hold copies.
+- A *validator* is the code that accepts or refuses a date. The backend holds the validators that bind. The contributor portal, the review page and the command-line tools hold copies. The batch import and the agent intake apply rules of their own.
 
 ## 3. What is refused today
 
 Two rules refuse correct dates.
 
-**The format** applies to every partial date. In the backend, a year or a year and month must lie between 1000 and 2100. A full date may carry any four-digit year, so `0920-05-01` passes the format where `0920` fails.
+**The format** applies to every partial date on an evidence form, a dated claim, a period and a function chain. In those validators a year or a year and month must lie between 1000 and 2100. A full date may carry any four-digit year, so `0920-05-01` passes the format where `0920` fails. The batch import's pattern and the agent intake already accept a year below 1000.
 
-**The floor** applies in addition to dated claims, periods and function chains. The lifecycle date and the evidence form's source date meet the format only.
+**The floor** adds to the format for dated claims, periods and function chains. The lifecycle date and the evidence form's source date meet the format only.
 
 The portal's contract scripts differ from the backend: they accept any four-digit year and then apply the floor.
 
@@ -65,7 +65,7 @@ Section 7 of the slider brief of 2 September 2026 lists more cases.
 
 ## 5. Proposal 1: historical dates from year 1
 
-**Two validators.** The backend today uses one format rule for historical dates and observation dates. Proposal 1 separates them. The historical validator accepts years from 1. The observation validator keeps the range 1000 to 2100, so that `0201` typed for 2021 is still refused as the date of a photograph.
+**Two validators.** The backend today uses one format rule for historical dates and observation dates. Proposal 1 separates them. The historical validator accepts years from 1. The observation validator keeps the range 1000 to 2100, so that `0201` typed for 2021 is still refused as the date of a photograph. A field observation and a rapid current observation refuse a date outside the range outright.
 
 **The source date.** The evidence form stores a source's own date and a capture date in one field. A source can be older than 1000: the evidence for St Martin's Church is Bede, who wrote about 731. The brief proposes that the field keep the observation range and accept an earlier date with the stored confirmation of section 6.
 
@@ -100,7 +100,7 @@ The brief sets out three options.
 
 Under option C a record may carry a list of confirmed dates. Each entry holds the date as written and who confirmed it: a contributor, a curator or an agent.
 
-- **The rule.** The backend refuses a date below the floor unless the list holds that date. A date edited later needs a new entry.
+- **The rule.** The backend refuses a date below the floor, or a documentary source's date below the observation range, unless the list holds that date. A date edited later needs a new entry.
 - **Hashes.** A record without a confirmed date does not carry the list at all, in any form, so every existing record keeps its hash.
 - **The time of the check.** The backend checks the floor when a record is written. A later change to a floor leaves stored records valid.
 - **The portal** asks beside the date field, "1344 is earlier than most dated places in New Zealand. Is the year right?", and adds the entry when the contributor confirms.
@@ -155,7 +155,7 @@ Section 8 states four rules.
 - **The slider.** The slider stays on census years (ruling R7).
 - **The definition.** The date format only ensures that a ruling of the operational definition can be recorded.
 
-Four checks become stricter for new records: the year `0000` is refused in a full date; a full observation date before 1000 needs a confirmation; the lifecycle date meets the floor; and the agent intake meets the floor.
+Four checks become stricter for new records: the year `0000` is refused in a full date; a full observation date outside 1000 to 2100 is refused, or needs a confirmation where the date is a documentary source's; the lifecycle date meets the floor; and the agent intake meets the floor.
 
 ## 10. Decisions for Joseph
 
@@ -164,26 +164,27 @@ Each decision takes a yes or a no. Each carries the brief's recommendation.
 1. **Start now.** Build stage 1 whether or not the live import of PR-D has run. *Recommended.*
 2. **Stage 1 scope.** Build proposals 1 and 2 together. *Recommended.*
 3. **Two validators.** Historical dates accept years from 1; observation dates keep 1000 to 2100. *Recommended.*
-4. **The source date and the lifecycle date.** Both take the confirmation of section 6 below their range or floor. *Recommended.*
-5. **Stage 1 form.** Four digits with leading zeros; `0000` refused until stage 2. *Recommended.*
-6. **The floor.** Option C, a stored list of confirmed dates. *Recommended.* Options A and B are in section 6.
-7. **The nine floors of 24 November.** Confirm the nine values as listed in section 3. *Recommended.*
-8. **Stage 2 stored form.** A minus sign and four digits, astronomical numbering, one spelling. *Recommended.*
-9. **The bound.** 10000 BCE, in place of R6's "near 12000 BCE". *Recommended.*
-10. **Older dates.** A date older than the bound is recorded as the bound, with a note. *Recommended.*
-11. **Stage 2 precision.** Year only for BCE dates. *Recommended.*
-12. **Entry.** A CE or BCE choice beside the year. *Recommended.*
-13. **Calendars.** Adopt the four rules of section 8. *Recommended.*
-14. **Exports.** A data dictionary and an unhashed numeric year column. *Recommended.*
+4. **The source date.** A documentary source's date below 1000 takes the confirmation of section 6. *Recommended.*
+5. **The lifecycle date.** The lifecycle date meets the country's floor, with the confirmation below the floor. *Recommended.* The floor is a new restriction on the field.
+6. **Stage 1 form.** Four digits with leading zeros; `0000` refused until stage 2. *Recommended.*
+7. **The floor.** Option C, a stored list of confirmed dates. *Recommended.* Options A and B are in section 6.
+8. **The nine floors of 24 November.** Confirm the nine values as listed in section 3. *Recommended.*
+9. **Stage 2 stored form.** A minus sign and four digits, astronomical numbering, one spelling. *Recommended.*
+10. **The bound.** 10000 BCE, in place of R6's "near 12000 BCE". *Recommended.*
+11. **Older dates.** A date older than the bound is recorded as the bound, with a note. *Recommended.*
+12. **Stage 2 precision.** Year only for BCE dates. *Recommended.*
+13. **Entry.** A CE or BCE choice beside the year. *Recommended.*
+14. **Calendars.** Adopt the four rules of section 8. *Recommended.* Joseph may rule on each of the four rules separately.
+15. **Exports.** A data dictionary and an unhashed numeric year column. *Recommended.*
 
 ## 11. Build order
 
-1. Stage 1 in the backend: the two validators, the padded form, the list of confirmed dates and the shared test. The backend goes first because historical dates widen.
-2. Stage 1 in the portal: the confirmation beside the date field, the three-digit question, and the RA guide.
-3. Stage 2, after rulings 8 to 14: the comparison routine and its mirror first, then the callers, then entry, display and exports.
+1. Stage 1 in the backend, after rulings 1 to 8: the two validators, the padded form, the list of confirmed dates and the shared test. The backend goes first because historical dates widen.
+2. Stage 1 in the portal, after ruling 14 as well: the confirmation beside the date field, the three-digit question, and the RA guide.
+3. Stage 2, after rulings 9 to 15: the comparison routine and its mirror first, then the callers, then entry, display and exports.
 
 Each pull request states which copies of the validators it changes and shows the shared test passing against every copy.
 
 ## 12. How the brief was made
 
-Claude Fable 5.2 drafted the brief from a read-only inventory of the repository at `51f9782b`. Claude Sonnet 5.5 reviewed two drafts for accuracy and Claude Opus 5.5 reviewed two drafts for design.
+Claude Fable 5.2 drafted the brief from a read-only inventory of the repository at `51f9782b`. Claude Sonnet 5.5 reviewed three drafts for accuracy and Claude Opus 5.5 reviewed three drafts for design.
