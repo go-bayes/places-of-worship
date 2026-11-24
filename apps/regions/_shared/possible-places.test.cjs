@@ -116,12 +116,17 @@ function context(map, extra = {}) {
   class Popup {
     setLngLat(coords) { this.point = coords; return this; }
     getLngLat() { return { lng: this.point[0], lat: this.point[1] }; }
-    setHTML(html) { this.html = html; return this; }
+    setHTML(html) {
+      this.html = html;
+      const href = html.match(/class="popup-revise" href="([^"]+)"/)?.[1];
+      this.reviseLink = href ? { href: href.replaceAll("&amp;", "&") } : null;
+      return this;
+    }
     addTo(map) { this.open = true; map.popupOpens.push(this); return this; }
     isOpen() { return this.open; }
     on(type, fn) { if (type === "close") this.onClose = fn; }
     remove() { if (this.open) { this.open = false; this.onClose?.(); } }
-    getElement() { return { querySelector: () => null }; }
+    getElement() { return { querySelector: (selector) => selector === ".popup-revise" ? this.reviseLink : null }; }
   }
   const ctx = vm.createContext({
     map, LAYERS, SOURCES, DATED, PULOTU, CENSUS, POSSIBLE_LAYER: "places_possible", IS_MOBILE: false,
@@ -449,7 +454,7 @@ function interactiveMap(rendered, isMobile) {
       createElement: () => ({}),
       getElementById: (id) => id === "countsPossibleToggle" ? checkbox : null
     },
-    PORTAL_BASE: "../nz/", CONTRIBUTE_ROUTES: {},
+    PORTAL_BASE: "../nz/", CONTRIBUTE_ROUTES: {}, SHARED_BASE: "../../shared/",
     CONFIG: { streetViewMinZoom: 13, tiles: { possible: "possible/tiles" } },
     GOOGLE_MAPS_KEY: "", pinLocation: null, userLocation: null, focusPlace() {}, distanceRowsHtml: () => "",
     makePopupDraggable() {}, clampPopupToViewport() {}, showClickHint() {},
@@ -484,8 +489,11 @@ function interactiveMap(rendered, isMobile) {
     return runtime.slice(start, runtime.indexOf("\n});", start) + 4);
   };
   vm.runInContext([
-    "let activePlacePopup = null, placeHover = null, pinnedLabel = null;",
+    "let activePlacePopup = null, activePlaceReviseArgs = null, placeHover = null, pinnedLabel = null;",
+    runtime.match(/^let placeCountryOverrides = .*;$/m)[0],
+    lift("async function loadPlaceCountryOverrides("),
     lift("function popupOpenAt("), lift("function trackPlacePopup("), lift("function coordsFromFeature("),
+    constant("PROJECT_CODE_FOR_ISO"),
     lift("function projectCountryCode("), lift("function countryForPlace("), lift("function portalReviseHref("),
     lift("function reviseLinkHtml("), lift("function directionsUrl("),
     lift("function isRepresentativeDot("), lift("function handlePlaceFeatureClick("),
@@ -528,6 +536,34 @@ function interactiveMap(rendered, isMobile) {
   const romeNode = feature("n1973645380", "Counted place", 110.83, 100);
   romeNode.geometry.coordinates = [12.5002, 41.9];
   const unnamedWay = feature("w269736970", "", 25, 25);
+  const overrides = JSON.parse(fs.readFileSync(path.join(__dirname, "../../shared/data/place-country-overrides.json"), "utf8"));
+  const jerusalemNode = feature("n291872774", "Counted place", 50, 50);
+  jerusalemNode.properties.country_code = "IL";
+  jerusalemNode.geometry.coordinates = [35.229411, 31.776174];
+  for (const isMobile of [false, true]) {
+    for (const ok of [true, false]) {
+      const { map, ctx, click } = interactiveMap({ [LAYERS.places]: [jerusalemNode] }, isMobile);
+      delete ctx.RC.countryCode;
+      ctx.CONFIG.tiles.places = "https://example.test/places-v2-20260901-grid/{z}/{x}/{y}";
+      ctx.window.POW_COUNTRY_REGISTRY = { countries: [{ code: "il" }, { code: "ps" }] };
+      let respond;
+      ctx.fetch = () => new Promise((resolve) => { respond = resolve; });
+      const pending = ctx.loadPlaceCountryOverrides();
+      click(50, 50);
+      const popup = map.popupOpens.at(-1);
+      const link = popup.getElement().querySelector(".popup-revise");
+      assert.match(link.href, /\bcountry=il&/);
+      respond({ ok, json: async () => overrides });
+      await pending;
+      assert.equal(popup.getElement().querySelector(".popup-revise"), link);
+      assert.equal(map.popupOpens.length, 1);
+      assert.equal(popup.isOpen(), true);
+      const props = jerusalemNode.properties;
+      assert.equal(link.href, ctx.portalReviseHref(props.name, "31.776174", "35.229411", props));
+      assert.match(link.href, ok ? /\bcountry=ps&/ : /\bcountry=il&/);
+      checks += 6;
+    }
+  }
   for (const isMobile of [false, true]) {
     const area = { properties: { name: "Area" } };
     const rendered = {

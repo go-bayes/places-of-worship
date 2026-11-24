@@ -937,13 +937,23 @@ async function loadPlaceCountryOverrides() {
   try {
     const res = await fetch(`${SHARED_BASE}data/place-country-overrides.json`);
     const doc = res.ok ? await res.json() : null;
-    if (!edition || doc?.tiles_edition !== edition || !Array.isArray(doc.rules)) return;
+    if (!edition || doc?.schema_version !== 1 || doc.tiles_edition !== edition ||
+        !Array.isArray(doc.rules) || !doc.rules.length) return;
     const overrides = new Map();
     for (const rule of doc.rules) {
-      const override = { portalCountry: rule.portal_country.toLowerCase(), tileCountry: rule.tile_country };
+      if (typeof rule?.portal_country !== "string" || !/^[a-z]{2}$/.test(rule.portal_country) ||
+          typeof rule.tile_country !== "string" || !/^[A-Z]{2}$/.test(rule.tile_country) ||
+          !Array.isArray(rule.ids) || rule.count !== rule.ids.length ||
+          new Set(rule.ids).size !== rule.ids.length ||
+          !rule.ids.every((id) => typeof id === "string" && /^[nwr][1-9][0-9]*$/.test(id))) return;
+      const override = { portalCountry: rule.portal_country, tileCountry: rule.tile_country };
       for (const id of rule.ids) overrides.set(id, override);
     }
     placeCountryOverrides = overrides;
+    if (activePlaceReviseArgs && activePlacePopup?.isOpen()) {
+      const link = activePlacePopup.getElement()?.querySelector(".popup-revise");
+      if (link) link.href = portalReviseHref(...activePlaceReviseArgs);
+    }
   } catch {
     // the revise link can still use the tile code or the country under the point
   }
@@ -955,7 +965,8 @@ function countryForPlace(props, lat, lng) {
   if (RC.countryCode) return { code: RC.countryCode };
   const registry = window.POW_COUNTRY_REGISTRY?.countries || [];
   const override = placeCountryOverrides.get(props?.id);
-  if (override && props.country_code === override.tileCountry && registry.some((entry) => entry.code === override.portalCountry)) {
+  if (override && typeof props?.country_code === "string" && props.country_code === override.tileCountry &&
+      registry.some((entry) => entry.code === override.portalCountry)) {
     return { code: override.portalCountry };
   }
   const tileCode = projectCountryCode(props?.country_code);
@@ -1254,12 +1265,13 @@ function showMobileStreetViewPopup(name, coords, props) {
       `<div class="popup-actions">${reviseLink}${openStreetViewLink}${directionsLink}${openOsmLink}</div>`
     )
     .addTo(map);
-  trackPlacePopup(popup);
+  trackPlacePopup(popup, { reviseArgs: [name, latFixed, lngFixed, props] });
 }
 
 // only one place popup at a time: repeated opens were stacking
 // translucent copies on the same spot, each needing its own close
 let activePlacePopup = null;
+let activePlaceReviseArgs = null;
 let activePossiblePopup = null;
 // a hover label never shows over the open popup of the place it names
 function popupOpenAt(coords) {
@@ -1267,13 +1279,17 @@ function popupOpenAt(coords) {
   const at = activePlacePopup.getLngLat();
   return Math.abs(at.lng - coords[0]) < 1e-9 && Math.abs(at.lat - coords[1]) < 1e-9;
 }
-function trackPlacePopup(popup, possibleProps = null) {
+function trackPlacePopup(popup, { possibleProps, reviseArgs = null } = {}) {
   if (activePlacePopup && activePlacePopup !== popup) activePlacePopup.remove();
   activePlacePopup = popup;
+  activePlaceReviseArgs = reviseArgs;
   activePossiblePopup = possibleProps ? { popup, props: possibleProps } : null;
   makePopupDraggable(popup);
   popup.on("close", () => {
-    if (activePlacePopup === popup) activePlacePopup = null;
+    if (activePlacePopup === popup) {
+      activePlacePopup = null;
+      activePlaceReviseArgs = null;
+    }
     if (activePossiblePopup?.popup === popup) activePossiblePopup = null;
   });
 }
@@ -1512,7 +1528,7 @@ async function handlePlaceFeatureClick(feature, fallbackLngLat) {
       `</div>`
     )
     .addTo(map);
-  trackPlacePopup(popup);
+  trackPlacePopup(popup, { reviseArgs: [name, latFixed, lngFixed, props] });
   requestAnimationFrame(() => clampPopupToViewport(popup));
 
   const panoContainer = () => document.getElementById(panoId);
@@ -1877,7 +1893,7 @@ function openPossiblePopup(feature, fallbackLngLat) {
     .setLngLat(coords)
     .setHTML(possiblePlacePopupHtml(props, coords))
     .addTo(map);
-  trackPlacePopup(popup, props);
+  trackPlacePopup(popup, { possibleProps: props });
   requestAnimationFrame(() => clampPopupToViewport(popup));
 }
 let possibleHover = null;
@@ -2207,6 +2223,8 @@ map.on("sourcedata", (event) => {
   }
   map.triggerRepaint();
 });
+
+if (!RC.countryCode) void loadPlaceCountryOverrides();
 
 map.on("load", () => {
   initBasemapSelect();
@@ -6812,7 +6830,6 @@ if (offerGo && !RC.disableBorderHandoff) {
         // the global map also learns the countries without a page, for
         // the contribute entry alone; deferred behind the page manifest
         if (!HANDOFF_HOME) {
-          loadPlaceCountryOverrides();
           fetch(`${SHARED_BASE}data/world-outlines.json`)
             .then((res) => (res.ok ? res.json() : null))
             .then((world) => {

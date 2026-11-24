@@ -166,6 +166,7 @@ vm.runInContext([
   'const normaliseLng = window.RegionResolve.normaliseLng;',
   'const PROJECT_CODE_FOR_ISO = { gb: "uk" };',
   runtime.match(/^let placeCountryOverrides = .*;$/m)[0],
+  "let activePlacePopup = null, activePlaceReviseArgs = null;",
   ...["function projectCountryCode", "function countryForPlace", "function countryUnderPoint", "function portalReviseHref", "async function loadPlaceCountryOverrides"].map(lift),
 ].join("\n"), publicMap);
 const mapLink = (code, lat, lng, id) => new URL(publicMap.portalReviseHref("Place", lat, lng, { country_code: code, id }), "https://example.test/apps/global/");
@@ -199,6 +200,23 @@ async function checkPlaceCountryOverrides() {
   await publicMap.loadPlaceCountryOverrides();
   check(reviseCountry("IL") === "il", "An override file from a different edition must keep the tile country.");
 
+  const { tile_country, ...ruleWithoutTileCountry } = palestineRule;
+  const malformedFiles = {
+    "unknown schema version": { ...overridesFile, schema_version: 2 },
+    "empty rules": { ...overridesFile, rules: [] },
+    "incorrect count": { ...overridesFile, rules: [{ ...palestineRule, ids: [overriddenId] }] },
+    "missing tile country after a valid rule": { ...overridesFile, rules: [palestineRule, ruleWithoutTileCountry] },
+    "upper-case portal country": { ...overridesFile, rules: [{ ...palestineRule, portal_country: "PS" }] },
+    "lower-case tile country": { ...overridesFile, rules: [{ ...palestineRule, tile_country: "il" }] },
+    "duplicate key": { ...overridesFile, rules: [{ ...palestineRule, count: 2, ids: [overriddenId, overriddenId] }] },
+    "malformed key": { ...overridesFile, rules: [{ ...palestineRule, count: 2, ids: [overriddenId, "n01"] }] },
+  };
+  for (const [problem, doc] of Object.entries(malformedFiles)) {
+    publicMap.fetch = async () => ({ ok: true, json: async () => doc });
+    await publicMap.loadPlaceCountryOverrides();
+    check(vm.runInContext("placeCountryOverrides.size", publicMap) === 0, `The loader must ignore the whole file with ${problem}.`);
+  }
+
   publicMap.fetch = async (url) => ({ ok: url === "../shared/data/place-country-overrides.json", json: async () => overridesFile });
   await publicMap.loadPlaceCountryOverrides();
   const palestine = mapLink("IL", "31.78", "35.23", overriddenId);
@@ -207,6 +225,7 @@ async function checkPlaceCountryOverrides() {
   check(reviseCountry("IL") === "il", "The country page must keep its own country for the same key.");
   delete publicMap.RC.countryCode;
   check(reviseCountry("FR") === "fr", "A listed key with a different tile country must keep its tile country.");
+  check(publicMap.countryForPlace({ id: overriddenId }, NaN, NaN).code === "zz", "A listed feature without a country code must use the normal fallback.");
   check(reviseCountry("IL", "w751805614") === "il", "An unlisted key must keep its tile country.");
   const registry = publicMap.window.POW_COUNTRY_REGISTRY;
   publicMap.window.POW_COUNTRY_REGISTRY = { countries: registry.countries.filter((country) => country.code !== "ps") };

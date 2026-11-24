@@ -87,7 +87,7 @@ assert.doesNotMatch(runtime, /census-legend-note[^\n]*today's/);
 // every html page that loads a changed script carries the bumped query
 // scripts with later changes carry their own stamps
 const stamps = {
-    "region-map.js": "20261124c", // use country overrides for global revise links
+    "region-map.js": "20261124d", // refresh global revise links when the overrides load
     "datamaps-switcher.js": "20261013a", // switcher rows prerender; warming waits for activation
     "unvalidated-places.js": "20261123c", // september archives and country lists; feature id from properties
     "verification-map.js": "20261123c", // match typed osm objects during hand-off
