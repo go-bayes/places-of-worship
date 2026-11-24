@@ -56,7 +56,7 @@ const context = vm.createContext({
   window, document, localStorage, sessionStorage: localStorage, navigator,
   URLSearchParams, Map, Set, Date, Number, String, Boolean, Object, Array, Math, JSON, RegExp, Intl, console, setTimeout, clearTimeout, Promise, Error,
 });
-for (const file of ["../../../shared/data/country-registry.js", "../../../shared/region-resolve.js", "occupancy-contract.js", "function-chain-contract.js", "task-presentation.js", "verification-map.js"]) {
+for (const file of ["../../../shared/data/country-registry.js", "../../../shared/region-resolve.js", "date-floor.js", "occupancy-contract.js", "function-chain-contract.js", "task-presentation.js", "verification-map.js"]) {
   vm.runInContext(fs.readFileSync(path.join(__dirname, file), "utf8"), context, { filename: file });
 }
 
@@ -165,6 +165,117 @@ const fresh = () => {
   assert.equal(app.ownWorkBatch("ra-issues-vu"), true);
   assert.equal(app.ownWorkBatch("nz-temporal-ra-workpack-001"), false);
   assert.equal(app.ownWorkBatch(""), false);
+}
+
+// 6. the date floor follows the country the server validates against (jb
+//    2026-11-24: "we must make dates robust"): the entry's country for a
+//    new entry, an existing task's own country otherwise. the contracts read
+//    the floor on every validation, so it cannot go stale
+{
+  const app = fresh();
+  app.selectedTask = null;
+  app.occupancyPinContext = null;
+  app.tasks = [{ properties: { task_id: "t-ie", country_code: "IE" } }];
+  app.backendTasksById = new Map();
+  app.bindDateFloor();
+  const valid = value => window.PowOccupancy.isValidPartialDate(value);
+  // the sweden page has no ruled floor: the default
+  assert.equal(window.POW_DATE_FLOOR_YEAR, 1600);
+  assert.equal(valid("1344"), false);
+  // a pin in czechia: the entry is recorded there, and so is its floor
+  app.pinCountry = { code: "CZ" };
+  assert.equal(window.POW_DATE_FLOOR_YEAR, 1000);
+  assert.equal(valid("1344"), true);
+  // a quick photo's fix counts when no pin is down
+  app.pinCountry = null;
+  app.quickPhoto = { country: { code: "MX" } };
+  assert.equal(window.POW_DATE_FLOOR_YEAR, 1500);
+  assert.equal(valid("1344"), false);
+  assert.equal(valid("1520"), true);
+  app.quickPhoto = null;
+  // an open task is validated against its own country, whatever the page
+  // or a leftover pin says
+  app.selectedTask = { properties: { task_id: "t-nz", country_code: "NZ" } };
+  app.pinCountry = { code: "CZ" };
+  assert.equal(window.POW_DATE_FLOOR_YEAR, 1600);
+  assert.equal(valid("1344"), false);
+  // and a task in a country with a lower floor than the page's opens it
+  app.selectedTask = { properties: { task_id: "t-uk", country_code: "UK" } };
+  app.pinCountry = null;
+  assert.equal(window.POW_DATE_FLOOR_YEAR, 1000);
+  assert.equal(valid("1344"), true);
+  app.selectedTask = { properties: { task_id: "t-nz", country_code: "NZ" } };
+  app.pinCountry = { code: "CZ" };
+  // a pane opened for another task outranks the selection: the pane names
+  // its task, here one from the task list
+  app.dateFloorTaskKey = "t-ie";
+  assert.equal(app.dateFloorCountryCode(), "IE");
+  assert.equal(valid("1344"), true);
+  // the new entry's own periods take the entry's country even with a task
+  // still selected
+  app.dateFloorTaskKey = "rapid-pin-periods";
+  assert.equal(app.dateFloorCountryCode(), "CZ");
+  app.dateFloorTaskKey = null;
+  // a period's pin placed for a task keeps that task's floor: pin mode
+  // releases the selection, and the pin may sit across a border
+  app.selectedTask = null;
+  app.occupancyPinContext = { context: { taskId: "t-ie" }, index: 0 };
+  app.pinCountry = { code: "NZ" };
+  assert.equal(app.dateFloorCountryCode(), "IE");
+  assert.equal(window.POW_DATE_FLOOR_YEAR, 1000);
+  assert.equal(valid("1344"), true);
+  app.occupancyPinContext = null;
+  app.pinCountry = null;
+  // the history or periods pane opened after a submission: nothing is
+  // selected, the pin is gone, and the task list does not hold the new
+  // task yet. the pane still takes the country the entry was recorded in
+  app.noteTaskCountry("t-new", "cz");
+  app.dateFloorTaskKey = "t-new";
+  assert.equal(app.dateFloorCountryCode(), "CZ");
+  assert.equal(window.POW_DATE_FLOOR_YEAR, 1000);
+  assert.equal(valid("1344"), true);
+  // once the task list holds the task, its recorded country governs
+  app.tasks.push({ properties: { task_id: "t-new", country_code: "MX" } });
+  assert.equal(app.dateFloorCountryCode(), "MX");
+  // an unknown task falls back to the entry's country, and the page once
+  // everything closes
+  app.dateFloorTaskKey = "t-unknown";
+  assert.equal(app.dateFloorCountryCode(), "SE");
+  app.dateFloorTaskKey = null;
+  assert.equal(window.POW_DATE_FLOOR_YEAR, 1600);
+}
+
+// 7. the wiring block 6 relies on, read from the source: the constructor
+//    binds the live floor, every form names its task when it opens and
+//    before it validates, the neutral screens clear the name, and the three
+//    places that create a task with the entry's country record it
+{
+  const source = fs.readFileSync(path.join(__dirname, "verification-map.js"), "utf8");
+  const method = name => {
+    const start = source.search(new RegExp(`^    (?:async )?${name}\\([^)]*\\) \\{$`, "m"));
+    assert.ok(start >= 0, `${name} not found`);
+    const rest = source.slice(start + 1);
+    const end = rest.search(/^    (?:async )?[A-Za-z_]+\([^)]*\) \{$/m);
+    return rest.slice(0, end < 0 ? undefined : end);
+  };
+  assert.match(method("constructor"), /this\.dateFloorTaskKey = null;[\s\S]*this\.taskCountryById = new Map\(\);[\s\S]*this\.bindDateFloor\(\);/);
+  for (const name of ["renderHistoricalClaimEntry", "renderOccupancyEntry", "submitHistoricalClaim", "submitOccupancies"]) {
+    assert.match(method(name), /this\.dateFloorTaskKey = context\.taskId \|\| null;/, name);
+  }
+  assert.match(method("bindGuidedPeriods"), /this\.dateFloorTaskKey = taskId;/);
+  assert.match(method("guidedPeriodsError"), /this\.dateFloorTaskKey = taskId \|\| null;/);
+  assert.match(method("rapidPeriodsPlan"), /this\.dateFloorTaskKey = periodsKey;/);
+  for (const name of ["renderDetail", "renderInitialDetail", "enterPinMode", "exitPinMode"]) {
+    assert.match(method(name), /this\.dateFloorTaskKey = null;/, name);
+  }
+  assert.equal((source.match(/this\.noteTaskCountry\(result\.task_id, entryCountry\.code\)/g) || []).length, 3);
+  // and the screens that clear it do clear it
+  const app = fresh();
+  app.dateFloorTaskKey = "t-ie";
+  element("detailPanel");
+  app.setEntryOpen = () => {};
+  try { app.renderInitialDetail(); } catch (error) { /* the stub dom renders no further */ }
+  assert.equal(app.dateFloorTaskKey, null);
 }
 
 console.log("entry-country: ok");

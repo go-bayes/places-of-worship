@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-11-24 (the portal's date floor follows the entry)
+
+- The contributor portal now checks dates against the earliest year of the country the entry is recorded in. It used the page's country, while the backend used the entry's, so a pin dropped across a border could pass the portal and be refused by the backend, or be refused by the portal when the backend would have accepted it. For a new entry the country is the pin's; for a task's own forms (its periods, its history pane, a period's pin) it is the country the task is recorded in, including a task created a moment earlier from another country's page. Each form names its task when it opens and before it validates, and the floor is computed each time a date is checked. Files: `apps/regions/nz/js/verification-map.js` (stamp `20261124g`), `apps/regions/nz/js/date-floor.js` (comments only, stamp `20261124b`), `apps/regions/nz/verification.html`, `apps/regions/_shared/tiles-v2-client.test.cjs`, `apps/regions/nz/js/entry-country.test.cjs`.
+
 ### 2026-11-24 (date floors for the nine census countries)
 
 - The nine countries that gained backend census years in #229 now have their own earliest accepted year for dated claims and periods of use. They had fallen back to the default of 1600, so the portal and the backend would have refused a 1344 foundation date in Czechia. Albania, Czechia, Ghana and Kenya accept dates from 1000; the Bahamas and South Africa from 1500; Malawi, Rwanda and Zambia stay at 1600. The values reuse the three floors ruled on 2026-09-02 and await Joseph's confirmation (`docs/development/public-map-occupancy-slider-brief-2026-09-02.md`, section 4).
