@@ -72,4 +72,53 @@ assert(issue.mode === "report_issue" && issue.siteId === "site-1" && issue.osmId
 const both = parse(new URLSearchParams("report_issue=1&revise=1&lat=-36.8&lng=174.7"));
 assert(both.mode === "revise", "When both flags are set the revise flow wins.");
 
-console.log("deep-link context: 9 checks passed");
+// w358707342 is a possible building; n358707342 is Unity Baptist Church.
+// replay the public-map URL through the signed-in contributor hand-off.
+const runtime = fs.readFileSync(path.join(__dirname, "../../_shared/region-map.js"), "utf8");
+const linkStart = runtime.indexOf("function portalReviseHref(");
+const linkContext = {
+    URLSearchParams,
+    CONTRIBUTE_ROUTES: { portal: { href: "../nz/verification.html?country=us" } },
+    UNNAMED_PLACE: "Unnamed place",
+};
+vm.runInNewContext(runtime.slice(linkStart, runtime.indexOf("\n}\n", linkStart) + 2), linkContext);
+const app = Object.create(window.NzVerificationMap.prototype);
+const coords = [-80, 35];
+const unity = { task_id: "unity-baptist", name: "Unity Baptist Church", matched_osm_id: "358707342", osm_object_type: "node" };
+app.backendUser = { _id: "reviewer" };
+app.tasks = [];
+app.backendTasksById = new Map([[unity.task_id, unity]]);
+let selection;
+let opened;
+app.selectTaskById = (taskId) => { selection = taskId; };
+app.openContextIssueForm = (feature) => { opened = feature; };
+function handOff(type) {
+    const href = linkContext.portalReviseHref(type === "way" ? "Unnamed place" : unity.name, "35", "-80", {
+        osm_type: type, osm_id: 358707342,
+    });
+    app.pendingDeepLink = parse(new URL(href, "https://example.test/apps/global/").searchParams);
+    selection = null;
+    opened = null;
+    app.applyPendingDeepLink();
+}
+handOff("way");
+assert(selection === null && opened.properties.osm_type === "way", "The possible way must never select the counted node's backend task.");
+assert(opened.properties.osm_id === "358707342", "The unmatched hand-off keeps its typed object.");
+handOff("node");
+assert(selection === unity.task_id && !opened, "The corresponding node link still selects the backend task.");
+handOff("unknown");
+assert(selection === null && opened, "An unrecognised type in a typed link must not be interpreted as a node.");
+app.tasks = [
+    { properties: { task_id: "node-dot", osm_id: 358707342, osm_type: "node" }, geometry: { coordinates: coords } },
+    { properties: { task_id: "legacy-dot", osm_id: 358707342 }, geometry: { coordinates: coords } },
+];
+handOff("way");
+assert(selection === null && opened, "A typed way cannot match by numeric ID or identical coordinates, even when a task has no type.");
+app.tasks.push({ properties: { task_id: "way-dot", osm_id: 358707342, osm_type: "way" } });
+handOff("way");
+assert(selection === "way-dot" && !opened, "The correct pair selects a task from the loaded map features.");
+app.pendingDeepLink = parse(new URLSearchParams("revise=1&osm_id=358707342"));
+app.applyPendingDeepLink();
+assert(selection === "node-dot", "An older untyped link still matches by numeric ID.");
+
+console.log("deep-link context: 16 checks passed");

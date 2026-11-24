@@ -302,7 +302,9 @@ def plan_manifest(entries: list[dict], existing: dict | None, git_commit: str | 
         manifest["supersedes_manifest_id"] = existing.get("supersedes_manifest_id")
     elif existing:
         manifest["supersedes_manifest_id"] = existing["manifest_id"]
-        archived = {**existing, "downstream_status": "superseded", "superseded_by_manifest_id": manifest["manifest_id"]}
+        # the archive sits one folder deeper, so its relative schema reference gains a level
+        archived = {**existing, "$schema": "../../../schemas/data-manifest.schema.json",
+                    "downstream_status": "superseded", "superseded_by_manifest_id": manifest["manifest_id"]}
         archived["manifest_sha256"] = manifest_hash(archived)
     manifest["manifest_sha256"] = manifest_hash(manifest)
     return manifest, archived

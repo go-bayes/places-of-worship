@@ -711,6 +711,33 @@
       border-radius: var(--r-pill);
       border: 1px solid var(--chrome-line);
     }
+    /* the possible-or-former row under the religion list: the layer's
+       legend and its switch in one row. the ring sits in the dots' column,
+       drawn as on the map (a white inner ring in a slate one); the checkbox
+       sits in the counts' column, and the quiet qualifier under the label */
+    #counts #countsPossible { margin-top: 10px; }
+    #counts li.count-possible { flex-wrap: wrap; row-gap: 2px; }
+    #counts li.count-possible label { cursor: pointer; }
+    #counts li.count-possible input {
+      width: 18px;
+      height: 18px;
+      margin: 0;
+      accent-color: var(--action);
+      cursor: pointer;
+    }
+    #counts .dot.dot-possible {
+      flex: none;
+      box-sizing: border-box;
+      background: transparent;
+      border: 2px solid #334155;
+      box-shadow: inset 0 0 0 1.5px #ffffff;
+    }
+    #counts .count-possible-note {
+      flex-basis: 100%;
+      padding-left: 28px;
+      color: var(--muted);
+      font-size: var(--fs-chrome-xs);
+    }
     #counts .count-total {
       margin-top: 12px;
       font-weight: 600;
@@ -789,6 +816,7 @@
       #counts ul { gap: 6px; }
       #counts li { font-size: var(--fs-chrome-lg); }
       #counts .dot { width: 12px; height: 12px; }
+      #counts .count-possible-note { padding-left: 24px; }
       #cityChips { display: none; }
       .dock-row { gap: 4px; }
       .dock-row input { padding: 12px 12px; font-size: var(--fs-chrome-xl); }

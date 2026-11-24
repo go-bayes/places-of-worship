@@ -68,7 +68,7 @@ function make({ mobile = false, loads = true } = {}) {
   const periodOption = element();
   select.value = "all";
   select.children['option[value="period"]'] = periodOption;
-  const layers = { overview: "visible", places: "visible" };
+  const layers = { overview: "visible", places: "visible", possible: "none" };
   const sandbox = {
     IS_MOBILE: mobile,
     HAS_CENSUS: true,
@@ -89,10 +89,12 @@ function make({ mobile = false, loads = true } = {}) {
     renderOfferToggle: () => offerGo.setAttribute("aria-pressed", sandbox.censusState.enabled ? "true" : "false"),
     // place-dot stubs
     activeDomainId: "religion",
-    placesDotState: { mode: null, future: false },
+    placesDotState: { mode: null, future: false, possible: false },
     effectivePointsMode: () => sandbox.placesDotState.mode || "all",
     placeSnapshotStale: () => false,
     syncDatedPlaces: () => {}, syncPulotuCultures: () => {},
+    // the possible or former rings follow the mode they are given
+    syncPossiblePlaces: (show) => { layers.possible = show ? "visible" : "none"; },
     // the key sync is in the slice; with no key element it returns at once
     keyWrap: null, countsToggle: null,
     LAYERS: { overview: "overview", places: "places" },
@@ -290,6 +292,37 @@ const off = (t) => {
   t.realSyncPlaceDotEra();
   assert.equal(t.layers.places, "visible", "another domain keeps its census-off dots");
   checks += 9;
+
+  // the key's possible-or-former switch (jb ruling 2026-11-23): the rings
+  // draw only beside today's snapshot dots. off by default; on, they follow
+  // points all (and period with the census off, which shows all); points
+  // off, period with the census on and any other domain drop them
+  t = make();
+  t.realSyncPlaceDotEra();
+  assert.equal(t.layers.possible, "none", "the rings are off by default");
+  t.placesDotState.possible = true;
+  const cases = [
+    [true, "all", "visible"], [true, "period", "none"], [true, "off", "none"],
+    [false, "all", "visible"], [false, "period", "visible"], [false, "off", "none"]
+  ];
+  for (const [enabled, mode, rings] of cases) {
+    t.censusState.enabled = enabled;
+    t.placesDotState.mode = mode;
+    t.realSyncPlaceDotEra();
+    assert.equal(t.layers.possible, rings, `census ${enabled}, points ${mode}: rings ${rings}`);
+    checks += 1;
+  }
+  t.placesDotState.mode = "all";
+  t.placesDotState.possible = false;
+  t.realSyncPlaceDotEra();
+  assert.equal(t.layers.possible, "none", "the switch off drops the rings");
+  t.placesDotState.possible = true;
+  t.activeDomainId = "health";
+  t.realSyncPlaceDotEra();
+  assert.equal(t.layers.possible, "none", "another domain drops the rings with the dots");
+  // the select keeps its own modes; the switch is no points mode
+  assert.equal(t.select.value, "off");
+  checks += 3;
 
   console.log(`census chrome: ${checks} checks passed`);
 })().catch((err) => {
