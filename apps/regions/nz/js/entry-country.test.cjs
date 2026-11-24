@@ -199,6 +199,16 @@ const fresh = () => {
   app.pinCountry = { code: "CZ" };
   assert.equal(window.POW_DATE_FLOOR_YEAR, 1600);
   assert.equal(valid("1344"), false);
+  // a pane opened for another task outranks the selection: the pane names
+  // its task, here one from the task list
+  app.dateFloorTaskKey = "t-ie";
+  assert.equal(app.dateFloorCountryCode(), "IE");
+  assert.equal(valid("1344"), true);
+  // the new entry's own periods take the entry's country even with a task
+  // still selected
+  app.dateFloorTaskKey = "rapid-pin-periods";
+  assert.equal(app.dateFloorCountryCode(), "CZ");
+  app.dateFloorTaskKey = null;
   // a period's pin placed for a task keeps that task's floor: pin mode
   // releases the selection, and the pin may sit across a border
   app.selectedTask = null;
@@ -207,9 +217,24 @@ const fresh = () => {
   assert.equal(app.dateFloorCountryCode(), "IE");
   assert.equal(window.POW_DATE_FLOOR_YEAR, 1000);
   assert.equal(valid("1344"), true);
-  // back to the page once everything closes
   app.occupancyPinContext = null;
   app.pinCountry = null;
+  // the history or periods pane opened after a submission: nothing is
+  // selected, the pin is gone, and the task list does not hold the new
+  // task yet. the pane still takes the country the entry was recorded in
+  app.noteTaskCountry("t-new", "cz");
+  app.dateFloorTaskKey = "t-new";
+  assert.equal(app.dateFloorCountryCode(), "CZ");
+  assert.equal(window.POW_DATE_FLOOR_YEAR, 1000);
+  assert.equal(valid("1344"), true);
+  // once the task list holds the task, its recorded country governs
+  app.tasks.push({ properties: { task_id: "t-new", country_code: "MX" } });
+  assert.equal(app.dateFloorCountryCode(), "MX");
+  // an unknown task falls back to the entry's country, and the page once
+  // everything closes
+  app.dateFloorTaskKey = "t-unknown";
+  assert.equal(app.dateFloorCountryCode(), "SE");
+  app.dateFloorTaskKey = null;
   assert.equal(window.POW_DATE_FLOOR_YEAR, 1600);
 }
 

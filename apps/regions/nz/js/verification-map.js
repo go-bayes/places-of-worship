@@ -1970,6 +1970,9 @@ function assignmentQuickstartHtml() {
 
 class NzVerificationMap {
     constructor() {
+        // the task whose form is open, for the date floor (dateFloorCountryCode)
+        this.dateFloorTaskKey = null;
+        this.taskCountryById = new Map();
         this.bindDateFloor();
         this.map = null;
         this.markerLayer = null;
@@ -4286,15 +4289,35 @@ class NzVerificationMap {
         return this.pinCountry || this.quickPhoto?.country || this.pageCountry();
     }
 
+    // a task this session created or submitted against, with the country it
+    // was recorded in: the task list may not hold the task yet when its
+    // history or periods pane opens
+    noteTaskCountry(taskId, countryCode) {
+        if (!taskId || !countryCode) return;
+        if (!this.taskCountryById) this.taskCountryById = new Map();
+        this.taskCountryById.set(taskId, String(countryCode).toUpperCase());
+    }
+
+    taskCountryCode(taskId) {
+        if (!taskId) return "";
+        const selected = this.selectedTask?.properties;
+        if (selected?.task_id === taskId && selected.country_code) return selected.country_code;
+        return this.featureForTaskId(taskId)?.properties?.country_code || this.taskCountryById?.get(taskId) || "";
+    }
+
     // the country whose date floor governs the open form, which is the
-    // country the server validates against: an existing task's own (a
-    // contributor's own task can sit in another country than the page's,
-    // and a period's pin placed for that task does not change it), else
-    // the country the new entry records
+    // country the server validates against. for a task's form (guided
+    // periods, the history pane, the periods pane, a period's pin) that is
+    // the task's own country, which can differ from the page's; for a new
+    // entry it is the country the entry records. each form names its task
+    // in dateFloorTaskKey when it opens and again before it validates
     dateFloorCountryCode() {
-        const periodTaskId = this.occupancyPinContext?.context?.taskId;
-        const task = this.selectedTask || (periodTaskId ? this.featureForTaskId(periodTaskId) : null);
-        return task?.properties?.country_code || this.entryCountry().code;
+        const key = this.occupancyPinContext?.context?.taskId || this.dateFloorTaskKey;
+        if (key === RAPID_PIN_PERIODS_KEY) return this.entryCountry().code;
+        const taskCountry = key
+            ? this.taskCountryCode(key)
+            : this.selectedTask?.properties?.country_code;
+        return taskCountry || this.entryCountry().code;
     }
 
     // F1: the contracts read window.POW_DATE_FLOOR_YEAR each time they
@@ -4640,6 +4663,7 @@ class NzVerificationMap {
                     portal_version: "rapid-current-v1-multicountry",
                 },
             });
+            this.noteTaskCountry(result.task_id, entryCountry.code);
             // synthesise the backend-task shape locally so the entry is on
             // the map and in the list before the batch queries catch up
             const manualTask = {
@@ -6505,6 +6529,7 @@ class NzVerificationMap {
     }
 
     renderInitialDetail() {
+        this.dateFloorTaskKey = null;
         this.setEntryOpen(false);
         const panel = document.getElementById("detailPanel");
         if (!panel) return;
@@ -7391,6 +7416,7 @@ class NzVerificationMap {
     }
 
     renderDetail(feature) {
+        this.dateFloorTaskKey = null;
         const props = { ...(feature.properties || {}) };
         const coordinates = feature.geometry?.coordinates || [];
         const locationAssertion = props.initial_location_assertion
@@ -8742,6 +8768,8 @@ class NzVerificationMap {
                     portal_version: "rapid-current-v1-multicountry",
                 },
             });
+            // a later history or periods pane for this task takes its floor
+            if (!options.props?.task_id) this.noteTaskCountry(result.task_id, entryCountry.code);
             this.clearFormDirty();
             if (options.draftKey) this.clearRapidDraft(options.draftKey);
             const periodsOutcome = await this.recordRapidPeriods(periodsPlan, result, options.periodsKey);
@@ -9010,6 +9038,7 @@ class NzVerificationMap {
         this.setEntryOpen(true);
         const panel = document.getElementById("detailPanel");
         if (!panel || !context || !window.PowHistoricalClaim) return;
+        this.dateFloorTaskKey = context.taskId || null;
         panel.innerHTML = this.historicalClaimFormHtml(context, options);
         const form = document.getElementById("historicalClaimForm");
         const markDirty = () => this.markFormDirty(`history-${context.taskId}`);
@@ -9051,6 +9080,7 @@ class NzVerificationMap {
             return;
         }
         const values = this.historicalClaimValues();
+        this.dateFloorTaskKey = context.taskId || null;
         const inputError = window.PowHistoricalClaim.validateHistoricalClaim(values, context.referenceDate);
         if (inputError) {
             if (status) status.textContent = inputError;
@@ -9878,6 +9908,7 @@ class NzVerificationMap {
         const taskId = props?.task_id;
         const block = document.getElementById("guidedPeriods");
         if (!taskId || !block || !window.PowOccupancy) return;
+        this.dateFloorTaskKey = taskId;
         const state = this.guidedPeriodsState(taskId);
         const rapidKey = taskId === RAPID_PIN_PERIODS_KEY;
         const sync = event => {
@@ -10064,6 +10095,7 @@ class NzVerificationMap {
     // a duplicate claim stands in)
     guidedPeriodsError(taskId, values) {
         if (!window.PowOccupancy) return "";
+        this.dateFloorTaskKey = taskId || null;
         this.readGuidedPeriods(taskId);
         const state = this.guidedPeriodsState(taskId);
         const gridAssessed = Object.values(values.targetYearStatuses || {}).some(status => status && status !== "not_assessed");
@@ -10123,6 +10155,7 @@ class NzVerificationMap {
     renderOccupancyEntry(context, options = {}) {
         const panel = document.getElementById("detailPanel");
         if (!panel || !context || !window.PowOccupancy) return;
+        this.dateFloorTaskKey = context.taskId || null;
         this.setEntryOpen(true);
         const restoring = Boolean(options.restore) && this.occupancyDraft?.taskId === context.taskId;
         if (!restoring) {
@@ -10412,6 +10445,7 @@ class NzVerificationMap {
             ? { ...draft.provenance, uncertaintyNote: `${draft.provenance.uncertaintyNote || ""} ${draft.gapNote}`.trim() }
             : draft.provenance;
         const segments = draft.segments.map((segment, index) => ({ ...segment, ...provenance, segmentIndex: index }));
+        this.dateFloorTaskKey = context.taskId || null;
         const inputError = window.PowOccupancy.validateSet(segments, context.referenceDate, this.occupancyTaskPoint(context.taskId));
         if (inputError) {
             if (status) status.textContent = inputError;
@@ -11971,6 +12005,7 @@ class NzVerificationMap {
     // { problem } when they cannot go, else the payload to record
     rapidPeriodsPlan(periodsKey, values) {
         if (!periodsKey || !window.PowOccupancy || !this.guidedPeriodsTouched(periodsKey)) return null;
+        this.dateFloorTaskKey = periodsKey;
         this.readGuidedPeriods(periodsKey);
         const state = this.guidedPeriodsState(periodsKey);
         const referenceDate = values.observedOn || state.referenceDate || "";
@@ -12478,6 +12513,7 @@ class NzVerificationMap {
                 location_mode: confirmed.locationMode,
             },
         });
+        this.noteTaskCountry(result.task_id, entryCountry.code);
         return { task_id: result.task_id, name, deduped: Boolean(result.deduped) };
     }
 
@@ -12488,6 +12524,7 @@ class NzVerificationMap {
         // a new entry starts from a clean slate: the previously selected task
         // is released and the sidebar narrows to the entry (jb 2026-09-03)
         this.selectedTask = null;
+        this.dateFloorTaskKey = null;
         this.issueFormOpenTaskId = null;
         this.pinSearchRows = [];
         this.setEntryOpen(true);
@@ -13347,6 +13384,7 @@ class NzVerificationMap {
 
     exitPinMode() {
         this.disarmHoldRelease?.();
+        this.dateFloorTaskKey = null;
         if (this.formDirtyTaskId === "rapid-pin" || this.formDirtyTaskId === "location-pin") {
             this.clearFormDirty();
         }

@@ -2,8 +2,9 @@
 // the earliest year a dated claim or period may name. a typo guard, not a
 // historical statement. Client mirror of convex/lib/countryYears.ts
 // DATE_FLOOR_YEARS; both files move together (countryYears.node-test.mjs ties
-// them). the contracts read window.POW_DATE_FLOOR_YEAR, which the portal sets
-// from this table for its country, so an unset value falls back to the default.
+// them). the contracts read window.POW_DATE_FLOOR_YEAR, which the portal
+// computes from this table for the country of the open form
+// (verification-map.js, bindDateFloor); an unset value falls back to the default.
 (function () {
     const DEFAULT_DATE_FLOOR_YEAR = 1600;
     const DATE_FLOOR_YEARS = Object.freeze({
