@@ -8,16 +8,18 @@
 // country, native zooms 3 to 7; a country with no archive, and the world
 // view, falls back to the public map's grid-thinned overview, native zoom 5,
 // stretched to 7) and the places tier from zoom 8 in, read from the versioned
-// grid archive (byte-identical to the live tier from zoom 8, immutable for a
-// year). the three countries whose ra-dots archive exceeds 10 MB (us, de, it;
-// the maintainer's decision of 2026-10-13, revising the 2026-09-04 rule that
-// every place shows, for them only) use the overview below zoom 6 and the grid places tier at
-// zooms 6 and 7, so their tiles stay small. the ra-dots and
-// places tiers carry osm_id, osm_type, name and country_code where the place
-// has them, so a click on any opens the same popup and revise card. the
-// grid-thinned overview draws one dot per screen-pixel cell and carries no
-// name or osm id, so a click on one of its dots zooms in instead (the
-// portals test isRepresentativeDot before opening a popup).
+// grid archive (every place from zoom 8, immutable for a year). a country
+// whose ra-dots archive exceeds 10 MB (the maintainer's decision of
+// 2026-10-13, revising the 2026-09-04 rule that every place shows, for those
+// countries only; in the 2026-09-01 edition only the united states) uses the
+// overview below zoom 6 and the grid places tier at zooms 6 and 7, so its
+// tiles stay small. the ra-dots and places tiers carry id, osm_id, osm_type,
+// name (empty when the place is unnamed) and country_code, so a click on any
+// opens the same popup and revise card. the grid-thinned overview draws one
+// dot per screen-pixel cell and carries no name or osm id, so a click on one
+// of its dots zooms in instead (the portals test isRepresentativeDot before
+// opening a popup). the portals never request the public map's separate
+// possible-or-former archive (places-v2-<edition>-possible).
 //
 // leaflet.vectorgrid 1.3.0's own hit-testing predates leaflet 1.8 and never
 // fires, so callers hit-test the map's click against the rendered symbols
@@ -32,13 +34,14 @@
     const EDGE = "#17202a";
     const PLACES_TILE_LAYER = "places";
     const PLACES_TILE_MAX_NATIVE_ZOOM = 18;
-    // tiles v2 (build 20260722). the overview is the grid-thinned tier of
-    // 2026-10-13 (one dot per screen-pixel cell, religion and denomination,
-    // every place represented, z0 to 5; it replaced the fraction sample that
-    // drew about two percent of the places); the ra-dots archives hold every
-    // place of one country, z3 to 7, in the same layer name. both are
-    // immutable versioned names served by the tiles worker
-    const TILES_VERSION = "20260722";
+    // the openstreetmap edition of 2026-09-01 (tools/tiles-r2/README.md,
+    // "OpenStreetMap edition build"): every archive holds only objects tagged
+    // amenity=place_of_worship, in every country. the overview is grid-thinned
+    // (one dot per screen-pixel cell, religion and denomination, every place
+    // represented, z0 to 5); the ra-dots archives hold every place of one
+    // country, z3 to 7, in the same layer name. all are immutable versioned
+    // names served by the tiles worker
+    const TILES_VERSION = "20260901";
     const PLACES_TILE_URL = `https://tiles.placemap.org/places-v2-${TILES_VERSION}-grid/{z}/{x}/{y}`;
     const OVERVIEW_TILE_URL = `https://tiles.placemap.org/places-overview-v2-${TILES_VERSION}-grid/{z}/{x}/{y}`;
     const OVERVIEW_TILE_LAYER = "places_overview";
@@ -46,29 +49,32 @@
     const RA_DOTS_TILE_LAYER = "places_overview";
     const RA_DOTS_MIN_NATIVE_ZOOM = 3;
     const RA_DOTS_MAX_NATIVE_ZOOM = 7;
-    // the two-letter codes that have an ra-dots archive: the 210 archives in
-    // manifest tiles-v2-20260722:0ce3c532af1e986d (tools/tiles-r2/manifests/
-    // tiles-v2-20260722-0ce3c532af1e.manifest.json, on main at commit 8dae8c76). update this list with
-    // TILES_VERSION whenever the archives are rebuilt. a country not listed
-    // (and the world view, ZZ) falls back to the overview sample
+    // the two-letter codes that have an ra-dots archive: scope.country_codes
+    // of tools/tiles-r2/manifests/ra-dots-20260901.manifest.json, lower case,
+    // without zz (247 codes). the world view keeps the global overview, so zz
+    // stays out. regenerate this list, and the large-archive list below, with
+    // TILES_VERSION whenever the archives are rebuilt; unvalidated-places.test.cjs
+    // fails when either drifts from the manifest. a country not listed falls
+    // back to the overview
     const RA_DOTS_COUNTRY_CODES = new Set((
-        "ad ae af ag ai al am ao ar at au az ba bb bd be bf bg bh bi bj bm bn bo br bs bt bw by " +
-        "bz ca cd cf cg ch ci ck cl cm cn co cr cu cv cy cz de dj dk dm do dz ec ee eg eh er es " +
-        "et fi fj fk fm fo fr ga gb gd ge gg gh gi gm gn gq gr gt gw gy hn hr ht hu id ie il im " +
-        "in iq ir is it je jm jo jp ke kg kh ki km kn kp kr kw ky kz la lb lc li lk lr ls lt lu " +
-        "lv ly ma mc md me mg mh mk ml mm mn mr ms mt mu mv mw mx my mz na ne ng ni nl no np nr " +
-        "nu nz om pa pe pg ph pk pl pt pw py qa ro rs ru rw sa sb sc sd se sg si sk sl sm sn so " +
-        "sr ss st sv sy sz tc td tg th tj tl tm tn to tr tt tv tw tz ua ug us uy uz va vc ve vg " +
-        "vn vu ws ye za zm zw"
+        "ad ae af ag ai al am ao aq ar as at au aw ax az ba bb bd be bf bg bh bi bj bl bm bn bo " +
+        "bq br bs bt bw by bz ca cc cd cf cg ch ci ck cl cm cn co cr cu cv cw cx cy cz de dj dk " +
+        "dm do dz ec ee eg eh er es et fi fj fk fm fo fr ga gb gd ge gf gg gh gi gl gm gn gp gq " +
+        "gr gs gt gu gw gy hk hn hr ht hu id ie il im in io iq ir is it je jm jo jp ke kg kh ki " +
+        "km kn kp kr kw ky kz la lb lc li lk lr ls lt lu lv ly ma mc md me mf mg mh mk ml mm mn " +
+        "mo mp mq mr ms mt mu mv mw mx my mz na nc ne nf ng ni nl no np nr nu nz om pa pe pf pg " +
+        "ph pk pl pm pn pr ps pt pw py qa re ro rs ru rw sa sb sc sd se sg sh si sj sk sl sm sn " +
+        "so sr ss st sv sx sy sz tc td tf tg th tj tk tl tm tn to tr tt tv tw tz ua ug us uy uz " +
+        "va vc ve vg vi vn vu wf ws xk ye yt za zm zw"
     ).split(" "));
     // the full tier takes over from here; below it the country's ra-dots
     // archive (or the overview sample) draws
     const PLACES_MIN_ZOOM = 8;
-    // countries whose ra-dots archive exceeds 10 MB in the tiles manifest
-    // (us 34.6 MB, de 11.8 MB, it 10.7 MB; the next is jp at 9.3 MB). they
-    // have no ra-dots url and take the grid places tier from a lower zoom.
-    // update with TILES_VERSION
-    const GRID_PLACES_COUNTRY_CODES = new Set(["us", "de", "it"]);
+    // countries whose ra-dots archive exceeds 10,000,000 bytes in the
+    // manifest's durable_files (us 34.4 MB; the next is id at 9.9 MB, then
+    // jp at 9.7 MB). they have no ra-dots url and take the grid places tier
+    // from a lower zoom. update with TILES_VERSION
+    const GRID_PLACES_COUNTRY_CODES = new Set(["us"]);
     const GRID_PLACES_MIN_ZOOM = 6;
     const ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 
@@ -85,6 +91,19 @@
     function placesMinZoom(countryCode) {
         const code = String(countryCode || "").trim().toLowerCase();
         return GRID_PLACES_COUNTRY_CODES.has(code) ? GRID_PLACES_MIN_ZOOM : PLACES_MIN_ZOOM;
+    }
+
+    // vectorgrid hands getFeatureId the decoded tile feature, whose record
+    // attributes sit under `properties`. the 2026-09-01 tiles carry the
+    // prefixed osm key as `id` (w123); a record without one falls back to
+    // type/id, and a dot that names no osm object gets no id
+    function featureId(feature) {
+        const props = (feature && feature.properties) || {};
+        if (props.id !== undefined && props.id !== null && props.id !== "") return String(props.id);
+        if (props.osm_id !== undefined && props.osm_id !== null && props.osm_id !== "") {
+            return `${props.osm_type || "node"}/${props.osm_id}`;
+        }
+        return undefined;
     }
 
     function dotStyle(zoomed) {
@@ -160,7 +179,7 @@
             // dom task markers and popups, where the canvas dots live
             pane: "overlayPane",
             attribution: ATTRIBUTION,
-            getFeatureId: props => `${props.osm_type || "node"}/${props.osm_id}`,
+            getFeatureId: featureId,
             // the bundled build ships the canvas tile renderer; the module's
             // own default (svg) stands only where it is missing
             ...(L.canvas && typeof L.canvas.tile === "function" ? { rendererFactory: L.canvas.tile } : {}),
@@ -344,6 +363,7 @@
         styleFor,
         edgeWanted,
         redraw,
+        featureId,
         createLayers,
         addTo,
         removeFrom,

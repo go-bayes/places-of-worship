@@ -36,6 +36,57 @@ vm.createContext(sandbox);
 vm.runInContext(`${runtime.slice(begin, end)}\nthis.expandSummaryColumns = expandSummaryColumns; this.fetchCensusSummary = fetchCensusSummary;`, sandbox);
 const { expandSummaryColumns, fetchCensusSummary } = sandbox;
 
+// the popup reads the area-summary snapshot alongside its counts. use the
+// auckland row from the governed product and an sa2 from the columnar copy.
+{
+  const data = path.join(repo, "apps/regions/nz/data");
+  const ta = JSON.parse(fs.readFileSync(path.join(data, "area_summary_ta.json")));
+  const sa2 = expandSummaryColumns(JSON.parse(fs.readFileSync(path.join(data, "area_summary_sa2.columns.json"))));
+  const lift = (name) => {
+    const start = runtime.indexOf(`function ${name}(`);
+    return runtime.slice(start, runtime.indexOf("\n}\n", start) + 2);
+  };
+  let html;
+  const popup = {
+    setLngLat() { return this; },
+    setHTML(value) { html = value; return this; },
+    addTo() { return this; },
+  };
+  const context = {
+    RC: { popupPlaceSnapshotNote: true },
+    CENSUS_METRICS: { religious_affiliation_percent: {}, places_per_10000_residents: {} },
+    censusState: { year: 2023, metric: "religious_affiliation_percent" },
+    censusLevelDef: () => ({ codeProp: "code", nameProp: "name", credit: "Stats NZ" }),
+    rowNoted: () => false, rowSmallCell: () => false, rowSmallDenominator: () => false,
+    censusAreaHeaderHtml: (name) => name, map: {}, trackPlacePopup() {},
+    maplibregl: { Popup: function () { return popup; } },
+  };
+  vm.runInNewContext(["escText", "openCensusPopup"].map(lift).join("\n"), context);
+  const render = (rows) => {
+    context.censusActive = () => ({
+      years: rows.map((row) => row.year),
+      byAreaYear: new Map(rows.map((row) => [`${row.area_code}|${row.year}`, row])),
+    });
+    context.openCensusPopup({ properties: { code: rows[0].area_code, name: rows[0].area_name } }, {});
+    return html;
+  };
+  const auckland = ta.rows.filter((row) => row.area_code === "076");
+  const aucklandPopup = render(auckland);
+  const snapshotNote = "OpenStreetMap objects tagged amenity=place_of_worship as at 1 September 2026";
+  eq((aucklandPopup.match(/<td>1018<\/td>/g) || []).length, 3, "the Auckland counts come from the September area summary");
+  ok(aucklandPopup.includes(snapshotNote), "Auckland's footnote names its own snapshot");
+  ok(!aucklandPopup.includes("2026-09-01"), "the popup shows the snapshot date once in display format");
+  const firstSa2 = sa2.rows.filter((row) => row.area_code === sa2.rows[0].area_code);
+  ok(render(firstSa2).includes(snapshotNote), "the columnar SA2 product supplies the same snapshot");
+  const suppressedSa2 = sa2.rows.filter((row) => row.area_name === "Botany Central");
+  ok(render(suppressedSa2).includes(snapshotNote), "the SA2 count has a snapshot footnote even when census denominators are suppressed");
+  const datedRows = auckland.map((row) => ({
+    ...row, place_count_basis: "OpenStreetMap snapshot", site_snapshot_date: "2026-06-01",
+  }));
+  ok(render(datedRows).includes("snapshot as at 1 June 2026"), "the displayed date follows the supplied date field");
+  ok(fs.readFileSync(path.join(data, "..", "index.html"), "utf8").includes("popupPlaceSnapshotNote: true"), "the New Zealand page enables the footnote");
+}
+
 // a response stub: the body is text, parsed or read as bytes on demand
 const respond = (status, body) => {
   const text = typeof body === "string" ? body : JSON.stringify(body);
@@ -62,7 +113,21 @@ const stub = (table) => {
 // 1. the decoder reproduces every shipped governed product, row for row and
 //    field for field, including header, key order and value types, and the
 //    shipped file's recorded source is the governed product's actual hash
-const manifest = JSON.parse(fs.readFileSync(path.join(repo, "docs", "manifests", "area-summary-columns.manifest.json"), "utf8"));
+const manifestDir = path.join(repo, "docs", "manifests");
+const manifestPath = path.join(manifestDir, "area-summary-columns.manifest.json");
+const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+const archiveDir = path.join(manifestDir, "superseded");
+const archivePaths = fs.readdirSync(archiveDir)
+  .filter((file) => /^area-summary-columns-.*\.manifest\.json$/.test(file))
+  .map((file) => path.join(archiveDir, file));
+const expectedSchema = path.join(repo, "schemas", "data-manifest.schema.json");
+ok(fs.statSync(expectedSchema).isFile(), "the manifest schema exists");
+for (const file of [manifestPath, ...archivePaths]) {
+  const record = JSON.parse(fs.readFileSync(file, "utf8"));
+  const schemaPath = path.resolve(path.dirname(file), record.$schema);
+  eq(schemaPath, expectedSchema, `${path.relative(repo, file)}: the relative schema path resolves to the data manifest schema`);
+}
+
 for (const file of manifest.durable_files) {
   const entry = manifest.stats.files.find((f) => f.columns === file.uri);
   const governedBytes = fs.readFileSync(path.join(repo, entry.source));

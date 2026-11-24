@@ -21,7 +21,7 @@ assert.equal(mod.dotStyle(false).color, "#ffffff");
 // overview) below, the full places tier from 8 in
 assert.equal(mod.PLACES_MIN_ZOOM, 8);
 assert.equal(mod.OVERVIEW_TILE_MAX_NATIVE_ZOOM, 5);
-assert.equal(mod.OVERVIEW_TILE_URL, "https://tiles.placemap.org/places-overview-v2-20260722-grid/{z}/{x}/{y}");
+assert.equal(mod.OVERVIEW_TILE_URL, "https://tiles.placemap.org/places-overview-v2-20260901-grid/{z}/{x}/{y}");
 // a grid-thinned dot names nothing; a place from the other tiers carries a name or an osm id
 assert.equal(mod.isRepresentativeDot({ religion: "christian", n: 4 }), true);
 assert.equal(mod.isRepresentativeDot({}), true);
@@ -30,20 +30,21 @@ assert.equal(mod.isRepresentativeDot({ "name:en": "St Mary" }), false);
 assert.equal(mod.isRepresentativeDot({ name_en: "St Mary" }), false);
 assert.equal(mod.isRepresentativeDot({ osm_id: 12, osm_type: "node" }), false);
 // the places tier reads the versioned, immutable grid archive (layer name unchanged)
-assert.equal(mod.PLACES_TILE_URL, "https://tiles.placemap.org/places-v2-20260722-grid/{z}/{x}/{y}");
+assert.equal(mod.PLACES_TILE_URL, "https://tiles.placemap.org/places-v2-20260901-grid/{z}/{x}/{y}");
 assert.equal(mod.PLACES_TILE_LAYER, "places");
 // a grid-thinned zoom 6 or 7 dot of the places tier carries n, no name, no osm id
 assert.equal(mod.isRepresentativeDot({ religion: "christian", denomination: "catholic", n: 3 }), true);
 assert.equal(mod.RA_DOTS_MIN_NATIVE_ZOOM, 3);
 assert.equal(mod.RA_DOTS_MAX_NATIVE_ZOOM, 7);
 
-// the archive list: 210 two-letter codes from the tiles-v2-20260722 manifest
-assert.equal(mod.RA_DOTS_COUNTRY_CODES.size, 210);
+// the archive list: the 247 two-letter codes of the 2026-09-01 ra-dots
+// manifest (zz excluded); the manifest drift check is further down
+assert.equal(mod.RA_DOTS_COUNTRY_CODES.size, 247);
 [...mod.RA_DOTS_COUNTRY_CODES].forEach(code => assert.match(code, /^[a-z]{2}$/));
-["nz", "us", "de", "se", "fj", "gb", "id", "br"].forEach(code => assert.ok(mod.RA_DOTS_COUNTRY_CODES.has(code), code));
-["zz", "uk", "aq", "xk"].forEach(code => assert.equal(mod.RA_DOTS_COUNTRY_CODES.has(code), false, code));
-assert.equal(mod.raDotsTileUrl("NZ"), "https://tiles.placemap.org/ra-dots-nz-20260722/{z}/{x}/{y}");
-assert.equal(mod.raDotsTileUrl(" se "), "https://tiles.placemap.org/ra-dots-se-20260722/{z}/{x}/{y}");
+["nz", "us", "de", "se", "fj", "gb", "id", "br", "aq", "xk", "hk", "pr", "ps"].forEach(code => assert.ok(mod.RA_DOTS_COUNTRY_CODES.has(code), code));
+["zz", "uk", "um", "hm"].forEach(code => assert.equal(mod.RA_DOTS_COUNTRY_CODES.has(code), false, code));
+assert.equal(mod.raDotsTileUrl("NZ"), "https://tiles.placemap.org/ra-dots-nz-20260901/{z}/{x}/{y}");
+assert.equal(mod.raDotsTileUrl(" se "), "https://tiles.placemap.org/ra-dots-se-20260901/{z}/{x}/{y}");
 assert.equal(mod.raDotsTileUrl("ZZ"), null);
 assert.equal(mod.raDotsTileUrl(""), null);
 assert.equal(mod.raDotsTileUrl(undefined), null);
@@ -81,7 +82,7 @@ assert.equal("rendererFactory" in layers.overview.opts, false);
 // the overview sample not requested at all
 made.length = 0;
 const nz = mod.createLayers(fakeL, { countryCode: "NZ" });
-assert.equal(nz.overview.url, "https://tiles.placemap.org/ra-dots-nz-20260722/{z}/{x}/{y}");
+assert.equal(nz.overview.url, "https://tiles.placemap.org/ra-dots-nz-20260901/{z}/{x}/{y}");
 assert.equal(nz.overview.opts.minNativeZoom, 3);
 // the zoom floor: no request below the archive's first zoom (minNativeZoom
 // alone clamps to z3 but still loads the layer at z1 and z2)
@@ -100,11 +101,12 @@ assert.equal(mod.placesMinZoom("nz"), 8);
 assert.equal(nz.places.opts.minZoom, 8);
 assert.equal(nz.overview.opts.maxZoom, 7);
 
-// the three largest sets (us, de, it) have no ra-dots url: the overview draws
-// to zoom 5 and the grid places tier takes over at zoom 6
-assert.deepEqual([...mod.GRID_PLACES_COUNTRY_CODES].sort(), ["de", "it", "us"]);
+// the largest set (us, the one archive over 10 MB in the 2026-09-01
+// edition) has no ra-dots url: the overview draws to zoom 5 and the grid
+// places tier takes over at zoom 6
+assert.deepEqual([...mod.GRID_PLACES_COUNTRY_CODES].sort(), ["us"]);
 assert.equal(mod.GRID_PLACES_MIN_ZOOM, 6);
-["us", "DE", " it "].forEach(code => {
+["us", "US", " us "].forEach(code => {
     assert.equal(mod.raDotsTileUrl(code), null, code);
     made.length = 0;
     const large = mod.createLayers(fakeL, { countryCode: code });
@@ -118,12 +120,15 @@ assert.equal(mod.GRID_PLACES_MIN_ZOOM, 6);
     assert.equal(large.places.opts.maxNativeZoom, 18, code);
     assert.ok(made.every(entry => !/ra-dots/.test(entry.url)), code);
 });
-// japan, the next largest set, stays on its own archive
-assert.equal(mod.raDotsTileUrl("jp"), "https://tiles.placemap.org/ra-dots-jp-20260722/{z}/{x}/{y}");
-assert.equal(mod.placesMinZoom("jp"), 8);
+// germany and italy (over 10 MB in july, under it now) and indonesia, the
+// next largest set, use their own archives
+["de", "it", "id", "jp"].forEach(code => {
+    assert.equal(mod.raDotsTileUrl(code), `https://tiles.placemap.org/ra-dots-${code}-20260901/{z}/{x}/{y}`, code);
+    assert.equal(mod.placesMinZoom(code), 8, code);
+});
 
 // a country with no archive (and ZZ) falls back to the overview sample
-["ZZ", "aq", "xx"].forEach(code => {
+["ZZ", "um", "xx"].forEach(code => {
     const fallback = mod.createLayers(fakeL, { countryCode: code });
     assert.equal(fallback.overview.url, mod.OVERVIEW_TILE_URL, code);
     assert.equal(fallback.overview.opts.maxNativeZoom, 5, code);
@@ -251,7 +256,7 @@ assert.equal(feature.properties.country_code, "NZ");
     assert.equal(high.options.minZoom, 5);
 
     // a fallback country (no archive) keeps its usual zoom-out
-    const fallbackLayers = mod.createLayers(fakeLeaflet, { countryCode: "AQ" });
+    const fallbackLayers = mod.createLayers(fakeLeaflet, { countryCode: "UM" });
     assert.equal(fallbackLayers.zoomFloor, null);
     const fallbackMap = makeMap({ zoom: 2, layersMin: 1 });
     mod.addTo(fallbackMap, fallbackLayers);
@@ -345,5 +350,60 @@ assert.equal(feature.properties.country_code, "NZ");
         assert.deepEqual(requests, []);
     }
 }
+
+// the country lists follow the ra-dots manifest of the edition the module
+// names: every code of scope.country_codes but zz has an archive, and the
+// large-archive list is exactly the codes whose archive in durable_files
+// exceeds 10,000,000 bytes. a rebuild that changes either fails here until
+// the lists are regenerated
+{
+    const version = mod.PLACES_TILE_URL.match(/places-v2-(\d{8})-grid/)[1];
+    const manifestPath = path.join(__dirname, "..", "..", "..", "..", "tools", "tiles-r2", "manifests", `ra-dots-${version}.manifest.json`);
+    const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+    const expected = manifest.scope.country_codes.filter(code => code !== "ZZ").map(code => code.toLowerCase()).sort();
+    assert.deepEqual([...mod.RA_DOTS_COUNTRY_CODES].sort(), expected, "RA_DOTS_COUNTRY_CODES matches the manifest");
+    const archives = manifest.durable_files.map(file => ({
+        code: (file.uri.match(new RegExp(`ra-dots-([a-z]{2})-${version}\\.pmtiles$`)) || [])[1],
+        bytes: file.bytes,
+    }));
+    assert.equal(archives.length, manifest.scope.country_codes.length, "one archive per code");
+    assert.ok(archives.every(file => file.code && Number.isInteger(file.bytes)), "every archive names its code and size");
+    const large = archives.filter(file => file.code !== "zz" && file.bytes > 10000000).map(file => file.code).sort();
+    assert.deepEqual([...mod.GRID_PLACES_COUNTRY_CODES].sort(), large, "GRID_PLACES_COUNTRY_CODES matches the manifest");
+    assert.deepEqual(large, ["us"]);
+    // every archive url the module can build names an archive the manifest records
+    const recorded = new Set(archives.map(file => `ra-dots-${file.code}-${version}`));
+    expected.forEach(code => {
+        const url = mod.raDotsTileUrl(code);
+        if (url) assert.ok(recorded.has(url.split("/")[3]), code);
+    });
+}
+
+// the feature id vectorgrid stores per tile feature: vectorgrid passes the
+// decoded feature, whose attributes sit under properties (the earlier
+// callback read the feature itself, so every dot got node/undefined)
+{
+    const decoded = [
+        { type: 1, properties: { id: "w123", osm_id: 123, osm_type: "way", name: "St Mary" } },
+        { type: 1, properties: { id: "n456", osm_id: 456, osm_type: "node", name: "" } },
+    ];
+    const ids = decoded.map(mod.featureId);
+    assert.deepEqual(ids, ["w123", "n456"]);
+    assert.notEqual(ids[0], ids[1], "two features keep two ids");
+    // a record without the prefixed key falls back to type/id; a dot that
+    // names no osm object gets no id
+    assert.equal(mod.featureId({ properties: { osm_id: 9, osm_type: "relation" } }), "relation/9");
+    assert.equal(mod.featureId({ properties: { osm_id: 9 } }), "node/9");
+    assert.equal(mod.featureId({ properties: { religion: "christian", n: 4 } }), undefined);
+    assert.equal(mod.featureId({}), undefined);
+    assert.equal(mod.featureId(null), undefined);
+    // the layers hand vectorgrid this callback
+    const built = mod.createLayers({ vectorGrid: { protobuf(url, opts) { return { url, opts }; } } }, { countryCode: "nz" });
+    assert.equal(built.places.opts.getFeatureId, mod.featureId);
+    assert.equal(built.overview.opts.getFeatureId(decoded[1]), "n456");
+}
+
+// the portals never request the possible-or-former archive
+assert.doesNotMatch(fs.readFileSync(path.join(__dirname, "unvalidated-places.js"), "utf8"), /-possible\/\{z\}|places_possible"/);
 
 console.log("unvalidated-places: ok");

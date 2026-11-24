@@ -196,7 +196,7 @@ const settle = () => new Promise(resolve => setImmediate(resolve));
   leafletWindow.window = leafletWindow;
   const leafletContext = vm.createContext({
     window: leafletWindow, document: leafletDocument, navigator: leafletWindow.navigator, setTimeout, clearTimeout, console,
-    Image: function () {}, HTMLElement: function () {}, XMLHttpRequest: function () {}, fetch: fetchStub,
+    Image: function () {}, Element: function () {}, HTMLElement: function () {}, XMLHttpRequest: function () {}, fetch: fetchStub,
   });
   vm.runInContext(fs.readFileSync(path.join(__dirname, "../../../vendor/leaflet@1.9.4/dist/leaflet.js"), "utf8"), leafletContext);
   const L = leafletWindow.L;
@@ -263,4 +263,71 @@ const settle = () => new Promise(resolve => setImmediate(resolve));
     assert.ok(zooms.length > 0 && zooms.every(z => z === 5), `dark tiles at z6 are tile zoom 5 (${zooms})`);
   }
   console.log("map loading: theme change keeps the imagery zoom floor in both portals ok");
+
+  // tigard first church of christ, scientist is w354113286. jefferson
+  // prairie church is n354113286, a different object with the same number.
+  {
+    const tigard = { name: "Tigard First Church of Christ, Scientist", osm_type: "way", osm_id: 354113286 };
+    const jefferson = { name: "Jefferson Prairie Church", osm_type: "node", osm_id: 354113286 };
+    const latlng = L.latLng(45.43, -122.77);
+    let props = tigard;
+    leafletWindow.PowUnvalidatedPlaces = {
+      createLayers: () => ({}),
+      removeFrom() {},
+      // the theme choice asks the module whether dots take the dark edge
+      edgeWanted: () => false,
+      nearestDot: () => ({ latlng, feature: { properties: props } }),
+    };
+    let html;
+    let openCards;
+    L.popup = () => ({
+      setLatLng() { return this; },
+      setContent(value) { html = value; return this; },
+      openOn() { return this; },
+      getElement() {
+        if (!html.includes("data-open-task-id")) return null;
+        return { querySelector: () => ({ addEventListener(_type, fn) { openCards = fn; } }) };
+      },
+    });
+    const selected = [];
+    const portal = leafletWindow.PowReviewMap.create({
+      countryCode: "us", centre: [latlng.lat, latlng.lng], zoom: 10,
+      onSelectTask: (id) => selected.push(id),
+    });
+    const row = (dot, id) => ({
+      task: {
+        task_id: id, name: dot.name, matched_osm_id: String(dot.osm_id), osm_object_type: dot.osm_type,
+        // give every task the click coordinates to test the coordinate fallback
+        geometry: { coordinates: [latlng.lng, latlng.lat] },
+      },
+    });
+    const click = () => {
+      openCards = null;
+      portal.map.fire("click", { containerPoint: L.point(50, 50) });
+    };
+    const node = row(jefferson, "jefferson");
+    const way = row(tigard, "tigard");
+    const untyped = row({ ...tigard, osm_type: undefined }, "legacy");
+    portal.setQueue([node, untyped], "");
+    click();
+    assert.match(html, /Tigard First Church of Christ, Scientist/);
+    assert.match(html, /osm_id=354113286&amp;osm_type=way/);
+    assert.equal(openCards, null, "a typed way cannot select the node or an untyped task even at the same point");
+    portal.setQueue([row({ ...tigard, osm_id: 44 }, "different-way")], "");
+    click();
+    assert.equal(openCards, null, "a typed way cannot select a different way at the same point");
+    portal.setQueue([node, untyped, way], "");
+    click();
+    assert.match(html, /data-open-task-id="tigard"/);
+    openCards();
+    props = jefferson;
+    click();
+    assert.match(html, /data-open-task-id="jefferson"/);
+    openCards();
+    props = { name: "Legacy dot" };
+    click();
+    assert.match(html, /data-open-task-id="jefferson"/, "a dot without an OSM key can still match by coordinates");
+    assert.deepEqual(selected, ["tigard", "jefferson"]);
+    console.log("review map typed task matching: 8 checks passed");
+  }
 })().catch(error => { console.error(error); process.exit(1); });
