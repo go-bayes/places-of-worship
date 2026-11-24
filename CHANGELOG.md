@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-11-24 (deep-time date format, design brief)
+
+- Added `docs/development/deep-time-date-format-brief-2026-11-24.md`, a draft for Joseph's rulings. The brief proposes that historical dates accept years 1 to 999 written with four digits, that the backend accept a date below a country's floor when the submission records the contributor's confirmation, and that a second stage accept BCE years. Documentation only; no behaviour changes.
+
 ### 2026-11-24 (the portal's date floor follows the entry)
 
 - The contributor portal now checks dates against the earliest year of the country the entry is recorded in. It used the page's country, while the backend used the entry's, so a pin dropped across a border could pass the portal and be refused by the backend, or be refused by the portal when the backend would have accepted it. For a new entry the country is the pin's; for a task's own forms (its periods, its history pane, a period's pin) it is the country the task is recorded in, including a task created a moment earlier from another country's page. Each form names its task when it opens and before it validates, and the floor is computed each time a date is checked. Files: `apps/regions/nz/js/verification-map.js` (stamp `20261124g`), `apps/regions/nz/js/date-floor.js` (comments only, stamp `20261124b`), `apps/regions/nz/verification.html`, `apps/regions/_shared/tiles-v2-client.test.cjs`, `apps/regions/nz/js/entry-country.test.cjs`.
