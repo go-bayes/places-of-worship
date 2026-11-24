@@ -1,6 +1,6 @@
 # Deep-time dates: design brief, 24 November 2026
 
-**Status.** Ruled. Joseph ruled on all fifteen decisions on 24 November 2026, and section 10 records his words. He accepted each recommendation except the bound, which he set at 12000 BCE; sections 7, 10 and 11 are revised to match, and the other sections stand as proposed. Nothing is built yet. Joseph asked for the brief on 24 November 2026, after saying of the date floors "we must make dates robust".
+**Status.** Ruled. Joseph ruled on all fifteen decisions on 24 November 2026, and section 10 records his words. He accepted each recommendation except the bound, which he set at 12000 BCE, and the stored form, which he extended to reach the bound. Sections 7, 10 and 11 are revised to match, sections 3 and 6 each note a ruling, and the other sections stand as proposed. Nothing is built yet. Joseph asked for the brief on 24 November 2026, after saying of the date floors "we must make dates robust".
 
 ## 1. What the brief asks
 
@@ -113,11 +113,11 @@ The floor table stays, as the list of years below which a confirmation is requir
 
 ## 7. Stage 2: years before the common era
 
-**The stored form.** A BCE year is stored in the numbering that astronomers use and that the Extended Date/Time Format (ISO 8601-2, level 1) adopts. The numbering has a year zero: `0000` is 1 BCE, `-0018` is 19 BCE, `-9499` is 9500 BCE. A year from 2 BCE to 10000 BCE is a minus sign and four digits, and `-9999` is 10000 BCE. A year from 10001 BCE to 12000 BCE takes the format's long form, which is the letter `Y`, a minus sign and five digits: `Y-10000` is 10001 BCE and `Y-11999` is 12000 BCE. The format allows the long form only for a year that four digits cannot write, so each year has a single spelling. The validator refuses any other spelling, including `-0000`, `Y-9499` and `-11999`. A single spelling is required because dates are hashed as text: two spellings of the same year would give two hashes.
+**The stored form.** A BCE year is stored in the numbering that astronomers use, which is also the numbering of ISO 8601 and of its Extended Date/Time Format (ISO 8601-2, level 1). The numbering has a year zero: `0000` is 1 BCE, `-0018` is 19 BCE, `-9499` is 9500 BCE. A year from 2 BCE to 10000 BCE is a minus sign and four digits, and `-9999` is 10000 BCE. A year from 10001 BCE to 12000 BCE takes the format's long form, which is the letter `Y`, a minus sign and five digits: `Y-10000` is 10001 BCE and `Y-11999` is 12000 BCE. The format allows the long form only for a year that four digits cannot write, so each year has a single spelling. The validator refuses any other spelling, including `-0000`, `Y-9499` and `-11999`. A single spelling is required because dates are hashed as text: two spellings of the same year would give two hashes.
 
-**The bound.** The earliest year accepted is 12000 BCE, stored as `Y-11999`. R6 names "one sanity bound near 12000 BCE". The draft recommended 10000 BCE, where four digits end, to avoid a second form. Joseph chose 12000 BCE and the long form for the years beyond four digits (rulings 9 and 10). Göbekli Tepe, at about 9500 BCE, fits within four digits. The validator sets the bound and the form does not: the long form can write any earlier year, so a later ruling can move the bound without rewriting a stored date.
+**The bound.** The earliest year accepted is 12000 BCE, stored as `Y-11999`. R6 names "one sanity bound near 12000 BCE". The draft recommended 10000 BCE, where four digits end, to avoid a second form. Joseph chose 12000 BCE and the long form for the years beyond four digits (rulings 9 and 10). Göbekli Tepe, at about 9500 BCE, fits within four digits. The validator sets the bound and the form does not: the long form can write any earlier year, so a later ruling can move the bound without a change of form.
 
-**Older dates.** Some sacred sites are tens of thousands of years old; the paintings of the Chauvet cave, which Joseph named, are about 36,000 years old. A contributor records such a date as the bound, 12000 BCE, with a note that gives the date in the source (ruling 11). Whether such a site is a place of worship is a question for the operational definition.
+**Older dates.** Some sacred sites are tens of thousands of years old. Joseph asked what a contributor does with Chauvet, whose cave paintings are about 36,000 years old. The brief's answer is ruling 11: the contributor records the date as the bound, 12000 BCE, with a note that gives the date in the source. Such a date is stored as `Y-11999`, like a date of 12000 BCE itself, and only the note tells the two apart. The stage 2 design should settle whether the record marks such a date; a marker would let a later ruling move the bound and find the dates to revise. Whether such a site is a place of worship is a question for the operational definition.
 
 **Conversion.** JavaScript's date parser does not read the stored form, and Python's date type has no year below 1. The project converts with a routine of its own: a backend routine, a portal mirror and a test that ties the mirror to the backend, as `functionChainMirror.node-test.mjs` already does for function chains.
 
@@ -128,11 +128,11 @@ The floor table stays, as the list of years below which a confirmation is requir
 **What changes.**
 
 - A comparison routine parses a partial date into numbers and compares two dates. The routine reads both BCE forms, and it replaces text comparison and four-character year extraction in the backend and in the portal mirrors.
-- Every pattern that expects a four-digit year, in each copy listed in section 4. Each pattern gains the signed form and the long form.
+- Every pattern that expects a four-digit year, in each copy listed in section 4. Each pattern for a historical date gains the signed form and the long form; the patterns for observation dates keep 1000 to 2100.
 - The builder of dated places (`scripts/build_occupancy_dated_places.py`), which today writes an empty start year for `-0500`, so that the map never draws the place. The builder should stop with an error.
 - The map popups, which show a year of 0 as missing and would show −18 for 19 BCE.
-- The Rust verifier, which must handle signed years before the first signed date is stored.
-- The exports. A spreadsheet reads `-0018` as −18 and strips the zeros from `0920`. The export gains a data dictionary and a numeric year column that is not hashed.
+- The Rust verifier, which must handle signed years and the long form before the first such date is stored.
+- The exports. A spreadsheet reads `-0018` as −18 and strips the zeros from `0920`. The export gains a data dictionary, which explains both BCE forms, and a numeric year column that is not hashed.
 
 **A safety test.** Stage 2 re-derives every derived row from a current export with the new routine and requires that no hash changes.
 
@@ -196,4 +196,4 @@ Each pull request states which copies of the validators it changes and shows the
 
 ## 12. How the brief was made
 
-Claude Fable 5.2 drafted the brief from a read-only inventory of the repository at `51f9782b`. Claude Sonnet 5.5 reviewed three drafts for accuracy and Claude Opus 5.5 reviewed three drafts for design. Joseph ruled on 24 November 2026, and Claude Fable 5.2 recorded the rulings and revised sections 7, 10 and 11.
+Claude Fable 5.2 drafted the brief from a read-only inventory of the repository at `51f9782b`. Claude Sonnet 5.5 reviewed three drafts for accuracy and Claude Opus 5.5 reviewed three drafts for design. Joseph ruled on 24 November 2026. Claude Fable 5.2 recorded the rulings and revised sections 3, 6, 7, 10 and 11, and Claude Opus 5.5 reviewed the record.
