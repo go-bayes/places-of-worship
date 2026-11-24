@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-11-24 (deep-time date format, design brief)
+
+- Added `docs/development/deep-time-date-format-brief-2026-11-24.md`, a draft for Joseph's rulings. The brief proposes accepting years 1 to 999 written with four digits, accepting BCE years in a second stage, and replacing the refusal of a date below a country's floor with a confirmation in the portal. Documentation only; no behaviour changes.
+
 ### 2026-11-24 (date floors for the nine census countries)
 
 - The nine countries that gained backend census years in #229 now have their own earliest accepted year for dated claims and periods of use. They had fallen back to the default of 1600, so the portal and the backend would have refused a 1344 foundation date in Czechia. Albania, Czechia, Ghana and Kenya accept dates from 1000; the Bahamas and South Africa from 1500; Malawi, Rwanda and Zambia stay at 1600. The values reuse the three floors ruled on 2026-09-02 and await Joseph's confirmation (`docs/development/public-map-occupancy-slider-brief-2026-09-02.md`, section 4).
