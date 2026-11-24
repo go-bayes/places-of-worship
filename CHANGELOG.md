@@ -33,6 +33,10 @@
 - `docs/ui-style-guide.md`: a dated proposal note under *Theme*, the light values for the tokens added since 2026-09-21, and the measured contrast and colour-difference numbers.
 - Stamps: `theme.js?v=20261120b`, `theme.css?v=20261120c`, `verification-map.js?v=20261124f`, `review-map.js?v=20261124f`, `unvalidated-places.js?v=20261124f` (pinned in `tiles-v2-client.test.cjs`). Tests: `theme.test.cjs`, `unvalidated-places.test.cjs`.
 
+### 2026-11-20 (backend census years for nine countries)
+
+- The backend now uses the portal’s census years for Albania, the Bahamas, the Czech Republic, Ghana, Kenya, Malawi, Rwanda, South Africa and Zambia. Rapid entry and occupancy derivation use those years by default, and wide CSV exports include columns for them. CI checks that both lists agree.
+
 ### 2026-11-20 (labs: Lamps and Relief, experimental)
 
 - Lamps is an unlinked experimental globe that shows mapped places of worship as lights and pillars under the sun for a selected time.
