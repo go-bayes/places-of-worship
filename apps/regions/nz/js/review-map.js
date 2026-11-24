@@ -477,10 +477,15 @@
                 }
                 const lat = hit.latlng.lat;
                 const lng = hit.latlng.lng;
+                const osmId = String(props.osm_id ?? "");
+                const osmType = props.osm_type;
                 const matched = rows.find(row => {
                     const task = row?.task;
                     if (!task) return false;
-                    if (props.osm_id !== undefined && String(task.matched_osm_id || "") === String(props.osm_id)) return true;
+                    const sameId = osmId && String(task.matched_osm_id ?? "") === osmId;
+                    // a typed key takes precedence over proximity or a bare id
+                    if (osmId && osmType) return sameId && task.osm_object_type === osmType;
+                    if (sameId) return true;
                     const coords = task.geometry?.coordinates || [];
                     return coords.length >= 2 && Math.abs(Number(coords[1]) - lat) < 5e-5 && Math.abs(Number(coords[0]) - lng) < 5e-5;
                 });

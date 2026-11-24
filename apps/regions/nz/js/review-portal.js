@@ -32,10 +32,25 @@
     const registry = new Map(((window.POW_COUNTRY_REGISTRY || {}).countries || [])
         .map(entry => [String(entry.code || "").toLowerCase(), { code: String(entry.code || "").toUpperCase(), label: entry.name || String(entry.code || "").toUpperCase() }]));
     const countryFor = value => {
-        const key = String(value || "").toLowerCase();
-        return countryLabels[key] || registry.get(key) || null;
+        const key = String(value || "").trim().toLowerCase();
+        if (key === "zz") return { code: "ZZ", label: "the world", centre: [10, 20], zoom: 2 };
+        if (key === "gb") return countryLabels.uk;
+        return (Object.hasOwn(countryLabels, key) ? countryLabels[key] : registry.get(key)) || null;
     };
-    const countryFromQuery = countryFor(searchParams.get("country"));
+    const requestedCountry = searchParams.get("country");
+    const countryFromQuery = countryFor(requestedCountry);
+    if (requestedCountry !== null && !countryFromQuery) {
+        document.title = "religionmap.org · Review evidence";
+        document.getElementById("pageHeading").textContent = "Review";
+        document.getElementById("authPanel").hidden = true;
+        document.getElementById("queueControls").hidden = true;
+        document.getElementById("detailPanel").hidden = true;
+        const message = requestedCountry.trim()
+            ? `No review country found for "${requestedCountry.trim()}".`
+            : "No review country was specified.";
+        setStatus(document.getElementById("queueStatusText"), message, "error");
+        return;
+    }
     const countryFromConfig = countryFor(config.countryCode);
     const country = countryFromQuery || countryFromConfig || countryLabels.nz;
     const countryCode = country.code;
@@ -91,6 +106,8 @@
             containerId: "reviewMap",
             countryCode: country.code,
             countryName: country.label,
+            centre: country.centre,
+            zoom: country.zoom,
             onSelectTask: (taskId) => {
                 selectTask(taskId, { fromMap: true });
             },

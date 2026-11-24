@@ -701,9 +701,8 @@ function deepLinkContextFromParams(params) {
     const longitude = Number.parseFloat(params.get("lng") || "");
     const osmId = (params.get("osm_id") || "").trim();
     const osmTypeRaw = (params.get("osm_type") || "").trim().toLowerCase();
-    const osmType = osmId
-        ? (["node", "way", "relation"].includes(osmTypeRaw) ? osmTypeRaw : "node")
-        : undefined;
+    const type = osmTypeRaw || "node";
+    const osmType = osmId && ["node", "way", "relation"].includes(type) ? type : undefined;
     return {
         mode,
         name: (params.get("name") || "").trim(),
@@ -714,6 +713,7 @@ function deepLinkContextFromParams(params) {
         siteId: (params.get("site_id") || "").trim() || undefined,
         osmId: osmId || undefined,
         osmType,
+        hasTypedOsmKey: Boolean(osmId && osmTypeRaw),
     };
 }
 const ASSIGNMENT_SESSION_SEGMENT = ASSIGNMENT_BATCH_ID
@@ -4729,6 +4729,7 @@ class NzVerificationMap {
             siteId: undefined,
             osmId: osmId || undefined,
             osmType: osmId ? (osmTypeRaw || "node") : undefined,
+            hasTypedOsmKey: Boolean(osmId && osmTypeRaw),
         };
         if (this.map && typeof this.map.closePopup === "function") this.map.closePopup();
         this.renderBackendPanel();
@@ -4818,29 +4819,26 @@ class NzVerificationMap {
         });
     }
 
-    // matches a dated context feature to a loaded portal task: first by OSM
-    // id (against loaded task features, then backend tasks), then by exact
-    // 5 dp coordinate. Returns the task props (carrying task_id) or null.
-    matchContextTask(feature) {
+    // match typed osm keys by type and id in both task stores. untyped
+    // records can fall back to an id or exact 5 dp coordinates.
+    matchContextTask(feature, { hasTypedOsmKey = Boolean(feature.properties?.osm_type) } = {}) {
         const props = feature.properties || {};
         const osmId = props.osm_id !== undefined && props.osm_id !== null ? String(props.osm_id) : "";
-        const osmType = props.osm_type ? String(props.osm_type) : "";
         const coords = feature.geometry?.coordinates || [];
         if (osmId) {
-            // ids alone collide across osm object types (node/123 vs way/123),
-            // so require the type to agree whenever both sides carry one
+            const sameObject = (id, type) => String(id ?? "") === osmId
+                && (!hasTypedOsmKey || (props.osm_type && type === props.osm_type));
             const byFeature = this.tasks.find(f => {
                 const p = f.properties || {};
-                if (String(p.osm_id || "") !== osmId) return false;
-                const t = p.osm_type ? String(p.osm_type) : "";
-                return !osmType || !t || t === osmType;
+                return sameObject(p.osm_id, p.osm_type);
             });
             if (byFeature) return byFeature.properties;
             for (const task of this.backendTasksById.values()) {
-                if (String(task.matched_osm_id || "") === osmId) {
+                if (sameObject(task.matched_osm_id, task.osm_object_type)) {
                     return featureFromBackendTask(task).properties;
                 }
             }
+            if (hasTypedOsmKey) return null;
         }
         if (coords.length >= 2) {
             const key = `${Number(coords[1]).toFixed(5)},${Number(coords[0]).toFixed(5)}`;
@@ -6875,7 +6873,7 @@ class NzVerificationMap {
             properties: { name: link.name, osm_type: link.osmType, osm_id: link.osmId },
             geometry: link.hasCoords ? { type: "Point", coordinates: [link.longitude, link.latitude] } : null,
         };
-        const matched = this.matchContextTask(feature);
+        const matched = this.matchContextTask(feature, { hasTypedOsmKey: link.hasTypedOsmKey });
         if (matched?.task_id) {
             this.issueFormOpenTaskId = matched.task_id;
             this.selectTaskById(matched.task_id, { focusDetail: true });
