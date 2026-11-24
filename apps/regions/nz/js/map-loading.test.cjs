@@ -274,6 +274,8 @@ const settle = () => new Promise(resolve => setImmediate(resolve));
     leafletWindow.PowUnvalidatedPlaces = {
       createLayers: () => ({}),
       removeFrom() {},
+      // the theme choice asks the module whether dots take the dark edge
+      edgeWanted: () => false,
       nearestDot: () => ({ latlng, feature: { properties: props } }),
     };
     let html;

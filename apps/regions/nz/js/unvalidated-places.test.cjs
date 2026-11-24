@@ -275,6 +275,82 @@ assert.equal(feature.properties.country_code, "NZ");
     mod.removeFrom(idle, null);
 }
 
+// the light streets map (proposed 2026-11-20): each dot takes a solid dark
+// edge, a stroke 1.5 px wider each side than its halo, drawn first; the
+// edge comes and goes with the test the portal hands in, and without one
+// the style is the plain dot it always was
+{
+    assert.equal(mod.EDGE, "#17202a");
+    for (const zoomed of [true, false]) {
+        const base = mod.dotStyle(zoomed);
+        const edge = mod.edgeStyle(zoomed);
+        assert.equal(edge.radius, base.radius);
+        assert.equal(edge.weight, base.weight + 3);
+        assert.equal(edge.color, "#17202a");
+        assert.equal(edge.fill, false);
+        let on = false;
+        const style = mod.styleFor(zoomed, () => on);
+        assert.equal(typeof style, "function");
+        assert.equal(style().fillColor, "#f59e0b", "off: the dot alone");
+        on = true;
+        const both = style();
+        assert.equal(both.length, 2);
+        assert.equal(both[0].color, "#17202a", "the edge draws first");
+        assert.equal(both[1].fillColor, "#f59e0b");
+        assert.equal(typeof mod.styleFor(zoomed), "object", "no test, no edge");
+    }
+    // both tiers stay attached while the points show. model leaflet's
+    // redraw() using the map zoom and _setView() rounding and checking the range.
+    for (const countryCode of ["nz", ""]) {
+        const requests = [];
+        let zoom = 5;
+        const map = { hasLayer: layer => layer._map === map, getZoom: () => zoom, getCenter: () => [0, 0] };
+        const tileL = {
+            vectorGrid: {
+                protobuf(url, options) {
+                    const request = tileZoom => {
+                        const nativeZoom = Math.min(tileZoom, options.maxNativeZoom);
+                        requests.push(url.replace("{z}/{x}/{y}", `${nativeZoom}/0/0`));
+                    };
+                    return {
+                        url, options, _map: map,
+                        redraw() { request(zoom); },
+                        _removeAllTiles() {},
+                        _setView(_centre, mapZoom) {
+                            const tileZoom = Math.round(mapZoom);
+                            const { minZoom = -Infinity, maxZoom = Infinity } = options;
+                            if (tileZoom >= minZoom && tileZoom <= maxZoom) request(tileZoom);
+                        },
+                    };
+                },
+            },
+        };
+        const both = mod.createLayers(tileL, { countryCode, edged: () => true });
+        const tileAt = (layer, z) => layer.url.replace("{z}/{x}/{y}", `${z}/0/0`);
+        mod.redraw(map, both);
+        assert.deepEqual(requests, [tileAt(both.overview, 5)], `${countryCode || "world"}: at zoom 5 only the overview fetches`);
+        requests.length = 0;
+        zoom = 16;
+        mod.redraw(map, both);
+        assert.deepEqual(requests, [tileAt(both.places, 16)], `${countryCode || "world"}: at zoom 16 only the places tier fetches`);
+        requests.length = 0;
+        // the hand-off zooms: the last overview zoom and the first places zoom
+        zoom = 7;
+        mod.redraw(map, both);
+        assert.deepEqual(requests, [tileAt(both.overview, countryCode ? 7 : 5)]);
+        requests.length = 0;
+        zoom = 7.6;
+        mod.redraw(map, both);
+        assert.deepEqual(requests, [tileAt(both.places, 8)], "at zoom 7.6 only the /8/ places tile is requested");
+        requests.length = 0;
+        // a tier off the map is not redrawn
+        zoom = 16;
+        both.places._map = null;
+        mod.redraw(map, both);
+        assert.deepEqual(requests, []);
+    }
+}
+
 // the country lists follow the ra-dots manifest of the edition the module
 // names: every code of scope.country_codes but zz has an archive, and the
 // large-archive list is exactly the codes whose archive in durable_files

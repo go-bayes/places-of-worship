@@ -26,6 +26,13 @@
 
 - Edition records can be regenerated from the validated archives. Each manifest lists the countries its archive covers and can record the installed PMTiles converter release. The versioned uploader uses conditional writes and checks the remote digest before resuming an upload.
 
+### 2026-11-20 (portal theme choice, proposal)
+
+- Contributor and review portals (`apps/regions/nz/verification.html`, `apps/regions/nz/review.html`, `apps/regions/_shared/theme.js`, `apps/regions/_shared/theme.css`). Proposed, pending Joseph's ruling: the three-state theme control returns as `Dark`, `Light` and `Auto`, with Dark the default, so nobody's screen changes unless they choose; Light is for research assistants recording outdoors on phones, where a dark screen is hard to read in sunlight. The control sits in each header and, at 700 px and under, in the Map data panel. The choice is applied before first paint, kept on the device under `pow-theme-choice` and held in memory when storage is blocked. In Light, Streets is the ordinary street map; Hybrid and Satellite never change. Map marks keep their colours in both themes and take a solid dark outer edge on the light Streets map and in the light legend (`js/unvalidated-places.js` draws it on the canvas dots).
+- RA guide (`apps/guides/ra.html`): the orientation section names the control, why to choose Light outdoors, where it sits on a phone, and how Streets and the markers look in each theme.
+- `docs/ui-style-guide.md`: a dated proposal note under *Theme*, the light values for the tokens added since 2026-09-21, and the measured contrast and colour-difference numbers.
+- Stamps: `theme.js?v=20261120b`, `theme.css?v=20261120c`, `verification-map.js?v=20261124f`, `review-map.js?v=20261124f`, `unvalidated-places.js?v=20261124f` (pinned in `tiles-v2-client.test.cjs`). Tests: `theme.test.cjs`, `unvalidated-places.test.cjs`.
+
 ### 2026-11-20 (backend census years for nine countries)
 
 - The backend now uses the portal’s census years for Albania, the Bahamas, the Czech Republic, Ghana, Kenya, Malawi, Rwanda, South Africa and Zambia. Rapid entry and occupancy derivation use those years by default, and wide CSV exports include columns for them. CI checks that both lists agree.

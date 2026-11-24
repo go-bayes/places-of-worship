@@ -1406,6 +1406,21 @@ function statusLabel(status) {
     return "Not assessed";
 }
 
+// the theme control's phone copy, first in the map data panel so it shows
+// when the panel opens on a short map (proposed 2026-11-20): the header
+// carries it on a wider screen. theme.js marks the pressed choice when it
+// binds the panel
+function themeChoiceHtml(id) {
+    return `<div class="map-data-theme">
+                    <span class="map-data-theme-label" id="${id}Label">Theme</span>
+                    <div class="theme-control" role="group" aria-labelledby="${id}Label">
+                        <button type="button" data-theme-choice="dark" aria-pressed="false">Dark</button>
+                        <button type="button" data-theme-choice="light" aria-pressed="false">Light</button>
+                        <button type="button" data-theme-choice="auto" aria-pressed="false">Auto</button>
+                    </div>
+                </div>`;
+}
+
 // marker fill = target-year status, in the page's own tokens; not assessed
 // is hollow (createIcon), so it has no fill here. uncertain has its own
 // indigo mark (jb 2026-11-03, ui item 8), not the caution amber of the
@@ -2927,7 +2942,10 @@ class NzVerificationMap {
         // the layer's container is made anew each time a basemap swap puts
         // it back, so the filter class is set again on each add
         this.streetsLayer.on("add", () => this.syncStreetsTheme());
-        window.addEventListener?.("pow-theme-change", () => this.syncStreetsTheme());
+        window.addEventListener?.("pow-theme-change", () => {
+            this.syncStreetsTheme();
+            this.syncMarkEdges();
+        });
         if (SATELLITE_TILE_URL) {
             // imagery so the pin can be steered onto the real building;
             // maptiler serves z20 (upsampled where no aerial exists)
@@ -3680,6 +3698,7 @@ class NzVerificationMap {
                     <button type="button" class="legend-fold" aria-expanded="true" aria-controls="portalMapData">Map data <span class="legend-caret" aria-hidden="true">▾</span></button>
                 </div>
                 <div id="portalMapData" class="legend-body">
+                ${themeChoiceHtml("portalMapTheme")}
                 ${this.mapDataLegendHtml(source)}
                 ${source !== "none" ? `
                 <button type="button" id="portalPointsToggle" class="points-toggle" aria-pressed="${this.pointsMode === "off" ? "false" : "true"}">${this.pointsMode === "off" ? "Show points" : "Hide points"}</button>` : ""}
@@ -3693,6 +3712,10 @@ class NzVerificationMap {
             div.querySelector("#portalPointsToggle")?.addEventListener("click", () => {
                 this.setPointsMode(this.pointsMode === "off" ? "all" : "off");
             });
+            // the phone's theme control (the header has no room for it
+            // under 700 px): bound here, since the panel is built after
+            // theme.js wires the page
+            window.PowTheme?.bind?.(div);
             this.mapDataMovable = this.makeControlMovable(div, div.querySelector(".legend-grip"));
             this.mapDataPanel = div;
             div.querySelector(".legend-fold")?.addEventListener("click", () => {
@@ -3943,7 +3966,12 @@ class NzVerificationMap {
             // full tier draws every place, a neighbour's dot with its own
             // portal named in the popup
             const ownIso = this.ownIsoCode();
-            this.tileDotLayers = UNVALIDATED_PLACES.createLayers(L, { countryCode: ownIso === "ZZ" ? "" : ownIso });
+            // on the light streets map each dot takes a dark outer edge
+            // (proposed 2026-11-20); syncMarkEdges redraws when that changes
+            this.tileDotLayers = UNVALIDATED_PLACES.createLayers(L, {
+                countryCode: ownIso === "ZZ" ? "" : ownIso,
+                edged: () => this.markEdgesWanted(),
+            });
             if (!this.tileDotLayers) return;
             // vectorgrid's own hit-testing never fires here (see the module),
             // so the map's click is hit-tested against the rendered dots
@@ -4758,6 +4786,27 @@ class NzVerificationMap {
         return this.datedLoadPromise;
     }
 
+    // the light streets map: the page is light and the basemap is not
+    // imagery. there every map mark takes a dark outer edge (proposed
+    // 2026-11-20): the dom markers through theme.css, the canvas dots here
+    markEdgesWanted() {
+        if (UNVALIDATED_PLACES?.edgeWanted) return UNVALIDATED_PLACES.edgeWanted(this.map);
+        return document.documentElement?.getAttribute?.("data-theme-effective") === "light"
+            && !this.map?.getContainer?.()?.classList?.contains("basemap-imagery");
+    }
+
+    // redraws the dots when the edge test changes its answer; returns
+    // whether it rebuilt the fallback dots, so a caller about to rebuild
+    // them does not do it twice
+    syncMarkEdges() {
+        const on = Boolean(this.markEdgesWanted());
+        if (on === this.markEdgesOn) return false;
+        this.markEdgesOn = on;
+        if (this.tileDotLayers) UNVALIDATED_PLACES?.redraw?.(this.map, this.tileDotLayers);
+        this.syncContextDots();
+        return true;
+    }
+
     // context dots for the current mode; period mirrors the data maps'
     // DATED filter: start_year present and <= year, end_year absent, null,
     // or >= year (open-ended places carry an explicit null end_year)
@@ -4776,9 +4825,14 @@ class NzVerificationMap {
             const coords = feature.geometry?.coordinates || [];
             if (coords.length < 2) return;
             const latlng = [coords[1], coords[0]];
+            const edged = this.markEdgesWanted();
             this.contextDotLayer.addLayer(L.circleMarker(latlng, {
                 radius: 7.5,
-                stroke: false,
+                // the halo's dark outer edge on the light streets map
+                stroke: edged,
+                color: UNVALIDATED_PLACES?.EDGE || "#17202a",
+                weight: 1,
+                opacity: 1,
                 fillColor: CONTEXT_DOT_HALO,
                 fillOpacity: 0.9,
                 interactive: false,
@@ -5527,7 +5581,9 @@ class NzVerificationMap {
             // imagery needs haloed markers: the css rings and the canvas
             // context dots switch treatment on this class (jb 2026-09-02)
             this.map.getContainer().classList.toggle("basemap-imagery", next !== "streets");
-            this.syncContextDots();
+            // one rebuild of the fallback dots: syncMarkEdges makes it when
+            // the edge changes, and this line otherwise
+            if (!this.syncMarkEdges()) this.syncContextDots();
         }
         document.querySelectorAll(".basemap-toggle button").forEach(button => {
             button.setAttribute("aria-pressed", button.dataset.basemap === this.basemap ? "true" : "false");

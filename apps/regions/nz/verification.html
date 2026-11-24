@@ -21,14 +21,14 @@
          stays a light workspace and keeps its own colours below -->
     <link rel="stylesheet" href="../../shared/map-shell.css">
     <!-- theme: the choice is applied to <html> before paint (r-u2) -->
-    <script src="../_shared/theme.js?v=20260921a"></script>
-    <link rel="stylesheet" href="../_shared/theme.css?v=20261103a">
+    <script src="../_shared/theme.js?v=20261120b"></script>
+    <link rel="stylesheet" href="../_shared/theme.css?v=20261120c">
     <link rel="stylesheet" href="../_shared/state.css?v=20260921a">
 
     <style>
         :root {
             /* colour, type, spacing and radius tokens live in
-               ../_shared/theme.css (dark); this page keeps only
+               ../_shared/theme.css (dark and light); this page keeps only
                its layout tokens below */
         }
 
@@ -132,6 +132,11 @@
 
         .nav-links a:hover {
             background: var(--action-soft);
+        }
+
+        /* the theme control sits at the row's end, where r-u2 put it */
+        .nav-links .theme-control {
+            margin-left: auto;
         }
 
         /* the one dominant action in the sidebar: adding a missing place.
@@ -3491,6 +3496,12 @@
                 padding: 0 12px;
             }
 
+            /* the bar keeps exit and guide; the theme control moves to the
+               map data panel on a phone */
+            .sidebar-header .nav-links .theme-control {
+                display: none;
+            }
+
             body.assignment-mode .sidebar .sidebar-header .pilot-note {
                 grid-column: 1 / -1;
                 margin-top: 6px;
@@ -3583,6 +3594,13 @@
                 <div class="nav-links">
                     <a href="../../global/">Exit</a>
                     <a href="https://religionmap.org/apps/guides/ra.html" target="_blank" rel="noopener">Guide</a>
+                    <!-- theme choice (proposed 2026-11-20): dark by default,
+                         light for sunlight, auto follows the device -->
+                    <div class="theme-control" role="group" aria-label="Theme">
+                        <button type="button" data-theme-choice="dark" aria-pressed="true">Dark</button>
+                        <button type="button" data-theme-choice="light" aria-pressed="false">Light</button>
+                        <button type="button" data-theme-choice="auto" aria-pressed="false">Auto</button>
+                    </div>
                 </div>
                 <div id="modeNotice" class="pilot-note"></div>
             </header>
@@ -3719,9 +3737,9 @@
     <script src="js/location-assertion-contract.js?v=20260902a"></script>
     <script src="js/osm-history.js?v=20260902c"></script>
     <script src="js/source-links.js?v=20260904a"></script>
-    <script src="js/unvalidated-places.js?v=20261123c"></script>
+    <script src="js/unvalidated-places.js?v=20261124f"></script>
     <script src="js/task-presentation.js?v=20261015c"></script>
     <script src="js/recentre-control.js?v=20261001a"></script>
-    <script src="js/verification-map.js?v=20261123c"></script>
+    <script src="js/verification-map.js?v=20261124f"></script>
 </body>
 </html>

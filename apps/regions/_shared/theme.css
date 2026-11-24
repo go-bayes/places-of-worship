@@ -1,10 +1,14 @@
 /* one token system for the ra portal and the review portal. dark is the
-   one theme (jb 2026-09-21: "the dark theme is beautiful. can we simply
-   make that default with no options?"); the three-state control of r-u2
-   (2026-09-19) is retired and the light set is recorded in
-   docs/ui-style-guide.md only. the meanings are ruled there and the values
-   approved (jb, 2026-09-21). never reuse one token for an unrelated
-   meaning. theme.js marks <html> dark before paint. */
+   default (jb 2026-09-21: "the dark theme is beautiful. can we simply make
+   that default with no options?"), and the values below are approved
+   (jb, 2026-09-21). proposed 2026-11-20, pending jb's ruling: r-u2's
+   three-state control returns (dark, light, auto) so a contributor
+   recording outdoors can choose light, which reads in sunlight; nothing
+   changes for anyone who does not choose. theme.js marks <html> with the
+   choice before paint and the light set applies under
+   data-theme-effective="light". the meanings are ruled in
+   docs/ui-style-guide.md, where both columns are recorded. never reuse one
+   token for an unrelated meaning. */
 :root {
   color-scheme: dark;
   --bg: #0f1620;
@@ -41,6 +45,8 @@
   --stale: #c69ae0;
   --marker-unvalidated: #f59e0b;
   --marker-halo: #ffffff;
+  /* the edge of a map mark: the dark panel colour, in both themes */
+  --marker-edge: #17202a;
   --shade-soft: rgba(0, 0, 0, 0.35);
   --shade: rgba(0, 0, 0, 0.5);
   --shade-deep: rgba(0, 0, 0, 0.6);
@@ -66,6 +72,235 @@
   --r-md: 12px;
   --r-lg: 16px;
   --r-pill: 999px;
+}
+
+/* the light set (retired 2026-09-21, restored 2026-11-20 pending jb's
+   ruling): the retired values, and for the tokens added since, light
+   values that keep the ruled meaning and hue (docs/ui-style-guide.md) */
+:root[data-theme-effective="light"] {
+  color-scheme: light;
+  --bg: #f4f6f8;
+  --panel: #ffffff;
+  --panel-2: #f3f6f9;
+  --ink: #17202a;
+  --muted: #5b6776;
+  --line: #cfd6df;
+  --control-line: #8a94a3;
+  --action: #1f618d;
+  --action-hover: #17527a;
+  --action-soft: #e8f1fb;
+  --danger: #b42318;
+  --danger-soft: #fee4e2;
+  --caution: #6b4e00;
+  --caution-soft: #fff4dc;
+  --caution-strong: #9a6700;
+  --marker-uncertain: #6366f1;
+  --marker-disputed: #c8218e;
+  --uncertain: #4338ca;
+  --uncertain-soft: #eef0ff;
+  --present: #145a32;
+  --present-soft: #dff3e6;
+  --absent: #374151;
+  --absent-soft: #e5e7eb;
+  --not-assessed: #1f4e79;
+  --not-assessed-soft: #e8f1fb;
+  --entry: #0f766e;
+  --entry-soft: #e6f4f1;
+  --stale: #7d3c98;
+  --marker-unvalidated: #f59e0b;
+  --marker-halo: #ffffff;
+  --marker-edge: #17202a;
+  --shade-soft: rgba(15, 23, 42, 0.12);
+  --shade: rgba(15, 23, 42, 0.25);
+  --shade-deep: rgba(15, 23, 42, 0.35);
+  --shade-ink: rgba(0, 0, 0, 0.45);
+  --shade-ink-deep: rgba(0, 0, 0, 0.7);
+  --veil: rgba(255, 255, 255, 0.94);
+  --action-glow: rgba(31, 97, 141, 0.18);
+  --present-glow: rgba(22, 101, 52, 0.16);
+}
+
+/* map marks look the same in both themes: they sit on the basemap, not
+   the panel, and hybrid and satellite never change. under the light set a
+   mark keeps the dark values of the tokens it draws in (fill, edge, rings,
+   shadow); inside a mark --panel is its edge and hollow centre. the
+   legend's ring swatches keep the surface colour for the gap between fill
+   and ring, so they leave --panel to the theme */
+:root[data-theme-effective="light"] .verification-marker {
+  --panel: var(--marker-edge);
+}
+
+/* the pin a contributor drops and the selected case's outline are map
+   marks too: they keep their dark red and shadow */
+:root[data-theme-effective="light"] .verification-marker,
+:root[data-theme-effective="light"] .legend-dot,
+:root[data-theme-effective="light"] .pin-drop-marker {
+  --present: #6fcf97;
+  --absent: #b8c2d0;
+  --muted: #a7b3c2;
+  --ink: #e8edf3;
+  --action: #7fb3e6;
+  --entry: #5fd3c4;
+  --stale: #c69ae0;
+  --danger: #f28b82;
+  --shade-deep: rgba(0, 0, 0, 0.6);
+  --shade-ink: rgba(0, 0, 0, 0.6);
+  --shade-ink-deep: rgba(0, 0, 0, 0.8);
+}
+
+/* the one change the light surfaces force (2026-11-20): the pale rings, the
+   pin's white halo and the open-case amber fall under 3:1 on the light
+   streets map and on the light legend, so there each mark takes a solid
+   1 px outer edge in --marker-edge just outside its outermost ring, as on
+   imagery it takes a white halo. the colours are unchanged, and the other
+   overlays (the accuracy circle, approximate areas, relocation lines) are
+   left alone. --mark-reach is how far a mark's ring reaches past its
+   border; the canvas dots take the same edge in js/unvalidated-places.js */
+.verification-marker.vm-validated-present,
+.verification-marker.vm-validated-absent {
+  --mark-reach: 5px;
+}
+
+.verification-marker.vm-disputed,
+.verification-marker.vm-stale {
+  --mark-reach: 4px;
+}
+
+.verification-marker.vm-unvalidated,
+.legend-dot.vm-validated-present-swatch,
+.legend-dot.vm-validated-absent-swatch {
+  --mark-reach: 3.5px;
+}
+
+.legend-dot.vm-disputed-swatch,
+.legend-dot.vm-stale-swatch,
+.legend-dot.vm-unvalidated-swatch {
+  --mark-reach: 3px;
+}
+
+/* the contributor's legend draws the map's own marker classes, so over
+   imagery its swatches take the imagery halos too; the edge sits outside
+   those halos */
+.basemap-imagery .verification-marker.legend-mark {
+  --mark-reach: 1px;
+}
+
+.basemap-imagery .verification-marker.legend-mark:is(.vm-in-review, .vm-nomination) {
+  --mark-reach: 2px;
+}
+
+.basemap-imagery .verification-marker.legend-mark.vm-unvalidated {
+  --mark-reach: 5px;
+}
+
+.basemap-imagery .verification-marker.legend-mark:is(.vm-disputed, .vm-stale) {
+  --mark-reach: 6px;
+}
+
+.basemap-imagery .verification-marker.legend-mark:is(.vm-validated-present, .vm-validated-absent) {
+  --mark-reach: 7px;
+}
+
+:root[data-theme-effective="light"] .leaflet-container:not(.basemap-imagery) .leaflet-marker-pane .verification-marker:not(.vm-selected),
+:root[data-theme-effective="light"] .leaflet-container:not(.basemap-imagery) .leaflet-marker-pane .pin-drop-marker,
+:root[data-theme-effective="light"] .legend-mark,
+:root[data-theme-effective="light"] .legend-dot {
+  outline: 1px solid var(--marker-edge);
+  outline-offset: var(--mark-reach, 0px);
+}
+
+/* the selected case already draws its outline (3 px at 2 px off the
+   border), so its edge is a ring just outside that outline */
+:root[data-theme-effective="light"] .leaflet-container:not(.basemap-imagery) .leaflet-marker-pane .verification-marker.vm-selected {
+  position: relative;
+}
+
+:root[data-theme-effective="light"] .leaflet-container:not(.basemap-imagery) .leaflet-marker-pane .verification-marker.vm-selected::after {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  border: 1px solid var(--marker-edge);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+:root[data-theme-effective="light"] .leaflet-container:not(.basemap-imagery) .leaflet-marker-pane .verification-marker.vm-selected:is(.vm-in-review, .vm-nomination)::after {
+  inset: -9px;
+}
+
+/* the theme control: dark, light, auto (auto follows the device). small
+   and quiet, the basemap switch's segmented idiom; the device remembers
+   the choice */
+.theme-control {
+  display: inline-flex;
+  align-items: stretch;
+  flex: none;
+  border: 1px solid var(--control-line);
+  border-radius: var(--r-sm);
+  overflow: hidden;
+}
+
+.theme-control button {
+  width: auto;
+  min-height: 44px;
+  margin: 0;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 0;
+  background: var(--panel);
+  color: var(--muted);
+  font-family: var(--font);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.theme-control button + button {
+  border-left: 1px solid var(--control-line);
+}
+
+.theme-control button:hover {
+  background: var(--panel-2);
+  color: var(--ink);
+}
+
+.theme-control button[aria-pressed="true"],
+.theme-control button[aria-pressed="true"]:hover {
+  background: var(--action);
+  color: var(--panel);
+}
+
+.theme-control button:focus-visible {
+  outline: 3px solid var(--action);
+  outline-offset: -3px;
+}
+
+/* the pressed button is filled in --action, so its ring is --panel */
+.theme-control button[aria-pressed="true"]:focus-visible {
+  outline-color: var(--panel);
+}
+
+/* on a phone the header has no room, so the control's second copy sits in
+   the map data panel, labelled; the header copy hides there (each page's
+   own rule). one copy shows at any width */
+.map-data-theme {
+  display: none;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.map-data-theme-label {
+  color: var(--muted);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+}
+
+@media (max-width: 700px) {
+  .map-data-theme {
+    display: flex;
+  }
 }
 
 /* leaflet's own chrome follows the tokens, so popups, zoom buttons and the
@@ -135,7 +370,8 @@
 }
 
 /* r-u3: without a maptiler key the openstreetmap streets tiles take a
-   filter in dark mode; imagery is never darkened (buildings would misread) */
+   filter in dark mode; in light they are the ordinary streets map. imagery
+   is never darkened (buildings would misread) */
 :root[data-theme-effective="dark"] .streets-tiles-filtered {
   filter: invert(1) hue-rotate(180deg) brightness(0.85) contrast(0.95);
 }
