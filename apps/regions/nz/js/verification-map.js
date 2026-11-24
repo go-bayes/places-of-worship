@@ -1953,7 +1953,7 @@ function assignmentQuickstartHtml() {
             <ol>
                 <li>Sign in with Google at the top of this panel.</li>
                 <li>Work down the assigned ${COUNTRY_CONFIG.countryName} task list in order. Stop at a natural stopping point and tell JB where you stopped.</li>
-                <li>Open Street View or Google Maps to look around the site, and use the OSM object only as context. Record the imagery capture date if Street View is your evidence.</li>
+                <li>Use Street View or Google Maps as a reality check on a place that an independent source, such as OpenStreetMap, already records. Treat the OSM record as context for identity, not proof of current use. Do not add a place from Street View alone. Record the imagery capture date if you cite Street View.</li>
                 <li>Record ${TARGET_YEARS.length ? `${targetYearAndListText()} status` : "the current status"}, confidence, source title, source URL or file reference, and any useful lifecycle date.</li>
             </ol>
         `;
@@ -1962,7 +1962,7 @@ function assignmentQuickstartHtml() {
         <ol>
             <li>Sign in with Google at the top of this panel.</li>
             <li>Work down the assigned task list in order. Stop at a natural stopping point and tell JB where you stopped.</li>
-            <li>Open Street View or Google Maps to look around the site, and use the OSM object only as context. Record the imagery capture date if Street View is your evidence.</li>
+            <li>Use Street View or Google Maps as a reality check on a place that an independent source, such as OpenStreetMap, already records. Treat the OSM record as context for identity, not proof of current use. Do not add a place from Street View alone. Record the imagery capture date if you cite Street View.</li>
             <li>Record 2013, 2018, and 2023 status, confidence, source title, source URL or file reference, and any useful lifecycle date.</li>
         </ol>
     `;
@@ -7467,7 +7467,7 @@ class NzVerificationMap {
             <div class="detail-section">
                 <h3>1. Open source links</h3>
                 <div class="copy-help">
-                    Use OSM to identify why this case was flagged. Use Street View or other non-OSM sources to check what is visible, and record the imagery capture date when Google shows one.
+                    Use OSM to identify why this case was flagged. Use Street View, or another non-OSM source, as a reality check on what the record says, and record the imagery capture date when Google shows one.
                 </div>
                 <div class="link-grid">
                     ${this.linkHtml("Street View", props.street_view_url, "source-link-primary")}
@@ -8017,7 +8017,7 @@ class NzVerificationMap {
                     <div class="link-grid" id="${prefix}SourceLinksGrid"></div>
                 </div>
                 <div class="source-quick-fill" id="${prefix}SourceQuickFill">
-                    <span class="label-help">Checked a usual source? Fill it in one click:</span>
+                    <span class="label-help">Checked a usual source? Fill it in one click. Street View is a reality check on a place that another source records; do not add a place from Street View alone.</span>
                     <button type="button" class="tertiary" id="${prefix}QuickFillOsm" title="Cite the OpenStreetMap record (or the map at this point) as your named source">OpenStreetMap record</button>
                     <button type="button" class="tertiary" id="${prefix}QuickFillStreetView" title="Cite Google Street View imagery at this point as your named source">Google Street View</button>
                 </div>
@@ -10715,7 +10715,7 @@ class NzVerificationMap {
                         <input id="sourceUrlInput" type="text" placeholder="https:// link, Street View link, archive, or agreed storage path">
                     </label>
                     <div class="source-url-actions">
-                        <button id="useStreetViewUrlButton" type="button" class="tertiary" title="Fill the URL field with the Google Street View link if street-level imagery is your evidence">Use Street View URL</button>
+                        <button id="useStreetViewUrlButton" type="button" class="tertiary" title="Fill the URL field with the Google Street View link if you are citing Street View as your check">Use Street View URL</button>
                         <button id="useOsmUrlButton" type="button" class="tertiary" title="Fill the URL field with the OSM record link if your evidence is the OSM record itself">Use OSM URL</button>
                     </div>
                 </div>
