@@ -1,6 +1,6 @@
 # Deep-time dates: design brief, 24 November 2026
 
-**Status.** Ruled. Joseph ruled on all fifteen decisions on 24 November 2026, and section 10 records his words. He accepted each recommendation except the bound, which he set at 12000 BCE, and the stored form, which he extended to reach the bound. Sections 7, 10 and 11 are revised to match, sections 3 and 6 each note a ruling, and the other sections stand as proposed. Nothing is built yet. Joseph asked for the brief on 24 November 2026, after saying of the date floors "we must make dates robust".
+**Status.** Ruled. Joseph ruled on all fifteen decisions on 24 November 2026, and section 10 records the rulings. He accepted each recommendation except the bound, which he set at 12000 BCE, and the stored form, which he extended to reach the bound. Sections 7, 10 and 11 are revised to match, sections 3 and 6 each note a ruling, and the other sections stand as proposed. Nothing is built yet. Joseph asked for the brief on 24 November 2026, after saying of the date floors "we must make dates robust".
 
 ## 1. What the brief asks
 
@@ -159,12 +159,11 @@ Four checks become stricter for new records: the year `0000` is refused in a ful
 
 ## 10. Joseph's rulings
 
-Joseph ruled on 24 November 2026. The quotations give his words as he typed them.
+Joseph ruled on 24 November 2026.
 
-- Beside decision 1: "Agree".
-- Below the list: "re: 10 what if people want to record chauvet?  or deep archeology? i think 12000 would cover the turkish sites?" and "accept others."
-- In the working session: "accepted recommendatations 12k bce for #10 I think."
-- Asked whether the years from 10001 BCE to 12000 BCE should take (a) the Extended Date/Time Format's long form for those years only, or (b) five digits for every BCE year: "(a), confirm 12k bce".
+- He agreed to decision 1 and accepted the other recommendations, except the bound.
+- On the bound, he asked what a contributor does with Chauvet or other deep archaeology, judged that 12000 BCE covers the early sites in Turkey, and set the bound at 12000 BCE.
+- For the years from 10001 BCE to 12000 BCE he was offered (a) the Extended Date/Time Format's long form for those years only, or (b) five digits for every BCE year. He chose (a).
 
 The fifteen decisions as ruled:
 
