@@ -33,6 +33,13 @@ class VersionedUploadTest(unittest.TestCase):
                     uploader.main()
                 client.assert_not_called()
 
+    def test_credential_check_refuses_dry_run_before_creating_client(self):
+        args = ["uploader", "--check-credentials", "--dry-run"]
+        with patch("sys.argv", args), contextlib.redirect_stderr(io.StringIO()), patch.object(uploader, "client") as client:
+            with self.assertRaises(SystemExit):
+                uploader.main()
+            client.assert_not_called()
+
     def test_dry_run_lists_selected_file_without_r2_or_ledger(self):
         with tempfile.TemporaryDirectory() as folder:
             (Path(folder) / f"{ARCHIVE}.pmtiles").write_bytes(b"test")
