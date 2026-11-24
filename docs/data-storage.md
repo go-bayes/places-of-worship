@@ -20,7 +20,7 @@ generation.
   was deleted at the same time). The hostname is a Worker custom domain on
   the separate `placemap.org` zone, matching `tools/tiles-r2/worker/wrangler.jsonc`
   and the tile URLs in `apps/regions/_shared/region-map.js`.
-  - Tilesets: `places`, `places-overview`, `buildings`, `nz-polygons` (the public maps no longer read `places` or `places-overview`; the RA layers still read `places` from zoom 8).
+  - Tilesets: `places`, `places-overview`, `buildings`, `nz-polygons` (neither the public maps nor the RA and review portals read `places` or `places-overview` any longer).
   - Versioned tilesets (tiles v2, build 20260722; manifest
     `tools/tiles-r2/manifests/tiles-v2-20260722-0ce3c532af1e.manifest.json`,
     with its validation report beside it, on `main` at commit
@@ -47,8 +47,30 @@ generation.
     thinning happens only where dots overlap and a sparse country keeps
     every place; the fraction samples of 2026-10-07 drew about 2 percent of
     the places everywhere. The public maps read these two archives
-    (`apps/regions/_shared/region-map.js`); the superseded fraction-sampled
-    archives stay in R2 under their immutable names.
+    (`apps/regions/_shared/region-map.js`) until the 2026-09-01 edition
+    below replaced them; the superseded fraction-sampled archives stay in R2
+    under their immutable names.
+  - OpenStreetMap edition of 2026-09-01 (build tools and procedure in
+    `tools/tiles-r2/README.md`, section "OpenStreetMap edition build";
+    manifests `places-overview-v2-20260901-grid.manifest.json`,
+    `places-v2-20260901-grid.manifest.json`,
+    `places-v2-20260901-possible.manifest.json` and
+    `ra-dots-20260901.manifest.json` in `tools/tiles-r2/manifests/`, with
+    `validation-report-osm-edition-20260901.json` beside them). Every
+    archive holds only objects tagged `amenity=place_of_worship`, in every
+    country (1,618,270 places), and every record carries its OSM key:
+    `places-overview-v2-20260901-grid` (z0 to 5), `places-v2-20260901-grid`
+    (z6 and 7 thinned, every place from z8) and 248 `ra-dots-<cc>-20260901`
+    archives (z3 to 7, one per country code, `zz` included). Worship-type
+    buildings without the tag form the separate
+    `places-v2-20260901-possible` archive (layer `places_possible`, z8 to
+    18, 133,446 records), which no count includes. The client switch points
+    the public maps (`apps/regions/_shared/region-map.js`, which requests the
+    possible archive only once a visitor turns on the key's "Possible or
+    former places" switch) and the RA
+    and review portals (`apps/regions/nz/js/unvalidated-places.js`, which
+    never request it) at these names. The July archives stay in R2 under
+    their immutable names.
   - Local copies of the archives are kept outside the repo; the worker
     README records the upload and rebuild procedure.
 - Site domain: `religionmap.org` is served by GitHub Pages (`CNAME` at the repo root) with DNS on Cloudflare. Keep the apex A/AAAA records and the `www` CNAME **DNS only** (grey cloud) for this configuration. Proxying these records interrupted GitHub Pages certificate renewal (`https_certificate.state = bad_authz`). An expired origin certificate can produce Cloudflare error 526 when strict origin-certificate validation is enabled. To recover, set the records to DNS only, remove and re-add the custom domain under Settings → Pages to restart issuance, wait for the state to read `approved`, then enable Enforce HTTPS. Inspect the certificate with `gh api repos/go-bayes/places-of-worship/pages --jq .https_certificate`. The repair completed on 2026-09-18: the replacement certificate is approved until 2026-12-17, HTTPS enforcement is enabled, and the HTTPS apex returns 200. The redirect domains (`placesmap.org`, `powmap.org`) and the tiles host are Worker custom domains on separate zones and remain unchanged.
