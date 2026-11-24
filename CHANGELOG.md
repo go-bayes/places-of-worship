@@ -4,7 +4,7 @@
 
 ### 2026-11-24 (date floors for the nine census countries)
 
-- The nine countries that gained census years on 2026-11-20 now have their own earliest accepted year for dated claims and periods of use. They had fallen back to the default of 1600, so the portal and the backend would have refused a 1344 foundation date in Czechia. Albania, Czechia, Ghana and Kenya accept dates from 1000; the Bahamas and South Africa from 1500; Malawi, Rwanda and Zambia stay at 1600. The values follow the tiers ruled on 2026-09-02 and await Joseph's confirmation (`docs/development/public-map-occupancy-slider-brief-2026-09-02.md`, section 4).
+- The nine countries that gained backend census years in #229 now have their own earliest accepted year for dated claims and periods of use. They had fallen back to the default of 1600, so the portal and the backend would have refused a 1344 foundation date in Czechia. Albania, Czechia, Ghana and Kenya accept dates from 1000; the Bahamas and South Africa from 1500; Malawi, Rwanda and Zambia stay at 1600. The values reuse the three floors ruled on 2026-09-02 and await Joseph's confirmation (`docs/development/public-map-occupancy-slider-brief-2026-09-02.md`, section 4).
 - The test that ties the backend table to the portal's copy now fails when a country with census years has no floor of its own, so a country added later cannot inherit the default unnoticed. Files: `convex/lib/countryYears.ts`, `apps/regions/nz/js/date-floor.js` (stamp `20261124a` in `verification.html`), `convex/lib/countryYears.node-test.mjs`.
 - Dates before 1000 and BCE dates are still refused in every country, because the date format takes four-digit years. The deep-time format scheduled in the same brief removes that limit and is separate work.
 

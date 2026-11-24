@@ -41,13 +41,15 @@ Both feature kinds share the source; every point layer filters on `geometry-type
 | US, CA, MX, BR | 1500 |
 | IE, UK, PT, RO, SK, IN, KR | 1000 |
 
-Added 2026-11-24, for the nine countries that gained census waves on 2026-11-20 and had fallen back to the default (Joseph, 2026-11-24: "we must make dates robust"; the values follow the tiers above and await his confirmation):
+Added 2026-11-24, for the nine countries that gained census waves on 2026-11-20 and had fallen back to the default (Joseph, 2026-11-24: "we must make dates robust"; the values reuse the three floors above and await his confirmation). The rule applied: 1000 where a documented place of worship predates 1500; 1500 where one predates 1600 or the country belongs with the Americas; 1600 otherwise.
 
-| countries | floor | earliest place of worship considered (approximate) |
+| countries | floor | an early place of worship the floor admits (approximate) |
 |---|---|---|
 | AL, CZ, GH, KE | 1000 | Albania: Byzantine churches of the 13th and 14th centuries. Czechia: Romanesque rotundas and the Old New Synagogue (c. 1270). Ghana: Larabanga Mosque (1421 by tradition). Kenya: the Swahili-coast mosques of Gedi and Lamu (14th and 15th centuries). |
 | BS, ZA | 1500 | The Bahamas takes the Americas tier. South Africa: the chapel recorded at Mossel Bay in 1501. |
-| MW, RW, ZM | 1600 | No documented place of worship before 1600; the floor is explicit so that the test can require one. |
+| MW, RW, ZM | 1600 | None identified before 1600; the floor is explicit so that the test can require one. |
+
+Places founded before 1000, such as St George's Basilica in Prague (c. 920) and the sixth-century basilicas at Butrint in Albania, stay out of reach until the date format changes (section 7).
 
 The floor is a typo guard, not a claim about when worship began. Countries without census waves keep 1600. The partial-date format is four-digit years, so no floor may drop below 1000 without a format change; the countryYears test enforces the range 1000–1600 and requires a floor for every country with waves.
 

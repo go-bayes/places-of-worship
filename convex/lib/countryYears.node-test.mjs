@@ -39,7 +39,7 @@ function portalMirror(pageFloor) {
   return context.window.PowDateFloor;
 }
 
-// floors for the nine countries, set on 2026-11-24 on the R6 tiers: 1000 where
+// floors for the nine countries, set on 2026-11-24 from the three R6 values: 1000 where
 // a documented place of worship predates 1500, 1500 where one predates 1600 or
 // the country sits in the Americas tier, 1600 otherwise.
 const ADDED_FLOORS = { AL: 1000, BS: 1500, CZ: 1000, GH: 1000, KE: 1000, MW: 1600, RW: 1600, ZA: 1500, ZM: 1600 };
