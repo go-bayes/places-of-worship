@@ -26,6 +26,10 @@
 
 - Edition records can be regenerated from the validated archives. Each manifest lists the countries its archive covers and can record the installed PMTiles converter release. The versioned uploader uses conditional writes and checks the remote digest before resuming an upload.
 
+### 2026-11-20 (backend census years for nine countries)
+
+- The backend now uses the portal’s census years for Albania, the Bahamas, the Czech Republic, Ghana, Kenya, Malawi, Rwanda, South Africa and Zambia. Rapid entry and occupancy derivation use those years by default, and wide CSV exports include columns for them. CI checks that both lists agree.
+
 ### 2026-11-20 (labs: Lamps and Relief, experimental)
 
 - Lamps is an unlinked experimental globe that shows mapped places of worship as lights and pillars under the sun for a selected time.
