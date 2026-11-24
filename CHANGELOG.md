@@ -6,6 +6,12 @@
 
 - Lamps and Relief now use the 1 September 2026 OpenStreetMap snapshot, restricted to places tagged as places of worship. Lamps uses the most detailed tile record loaded for each place during zoom transitions. Relief counts 95 places in central Wellington and reads points on tile edges from their owning tiles.
 
+### 2026-11-23 (dated OpenStreetMap tile build)
+
+- Added the build and validation tools for the 1 September 2026 OpenStreetMap edition. Every shipped record carries an OSM key. The overview, places counts and RA dots use `amenity=place_of_worship` in every country. Country assignment uses OSM ISO polygons first and Natural Earth as a fallback. The separate `places-v2-20260901-possible` archive holds building candidates at zooms 8 to 18. The build omits buildings whose bounding box and 10-metre margin contain a tagged place. Validation reconciles both public sets against the private edition and checks the two source digests against the 1 September reconstruction record. Unnamed places have an empty `name` field. The 251 archives were uploaded to the tile bucket on 24 November 2026 with create-only writes; each was read back by SHA-256, and three tiles from every archive, fetched through the public tile host, matched the local archive. The live map still uses the July tiles until the principal investigator switches it.
+
+- Edition records can be regenerated from the validated archives. Each manifest lists the countries its archive covers and can record the installed PMTiles converter release. The versioned uploader uses conditional writes and checks the remote digest before resuming an upload.
+
 ### 2026-11-20 (labs: Lamps and Relief, experimental)
 
 - Lamps is an unlinked experimental globe that shows mapped places of worship as lights and pillars under the sun for a selected time.
