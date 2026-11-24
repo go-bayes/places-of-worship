@@ -12,6 +12,7 @@ SHA-256 digest.
 
 import argparse
 import hashlib
+import io
 import json
 import re
 from pathlib import Path
@@ -74,14 +75,11 @@ def main():
     args = parser.parse_args()
 
     expected_digest = json.loads(INPUT_MANIFEST.read_bytes())["extract_hashes"]["places.ndjson"]
-    with args.places.open("rb") as places:
-        digest = hashlib.sha256()
-        for chunk in iter(lambda: places.read(1024 * 1024), b""):
-            digest.update(chunk)
-        if digest.hexdigest() != expected_digest:
-            parser.exit(1, f"The places file's SHA-256 does not match the {TILES_EDITION} input manifest.\n")
-        places.seek(0)
-        points, place_count = exact_points(places)
+    # read once, so the bytes that are parsed are the bytes that were hashed
+    data = args.places.read_bytes()
+    if hashlib.sha256(data).hexdigest() != expected_digest:
+        parser.exit(1, f"The places file's SHA-256 does not match the {TILES_EDITION} input manifest.\n")
+    points, place_count = exact_points(io.BytesIO(data))
     if place_count != EXPECTED_IL_PLACES_20260901:
         parser.exit(1, f"Expected {EXPECTED_IL_PLACES_20260901} {TILE_COUNTRY} places, found {place_count}.\n")
 

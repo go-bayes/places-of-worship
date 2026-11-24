@@ -491,6 +491,7 @@ function interactiveMap(rendered, isMobile) {
   vm.runInContext([
     "let activePlacePopup = null, activePlaceReviseArgs = null, placeHover = null, pinnedLabel = null;",
     runtime.match(/^let placeCountryOverrides = .*;$/m)[0],
+    runtime.match(/^const PLACE_COUNTRY_OVERRIDE_RULES = .*;$/m)[0],
     lift("async function loadPlaceCountryOverrides("),
     lift("function popupOpenAt("), lift("function trackPlacePopup("), lift("function coordsFromFeature("),
     constant("PROJECT_CODE_FOR_ISO"),

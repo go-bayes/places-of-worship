@@ -932,20 +932,27 @@ function datedPlacePopupHtml(pr, coords) {
 // 2026-09-03): the portal reads ?revise=1 and opens the same card a click
 // on the place's dot would. empty on pages without a portal
 let placeCountryOverrides = new Map();
+// the rules this script accepts for each tile edition, as "tile code>portal country" and its number of places; a list that differs in any respect is ignored whole
+const PLACE_COUNTRY_OVERRIDE_RULES = { "20260901": { "IL>ps": 302 } };
 async function loadPlaceCountryOverrides() {
   const edition = CONFIG.tiles.places.match(/\/places-v2-(\d{8})-[^/]+\//)?.[1];
+  const expected = PLACE_COUNTRY_OVERRIDE_RULES[edition];
   try {
     const res = await fetch(`${SHARED_BASE}data/place-country-overrides.json`);
     const doc = res.ok ? await res.json() : null;
-    if (!edition || doc?.schema_version !== 1 || doc.tiles_edition !== edition ||
-        !Array.isArray(doc.rules) || !doc.rules.length) return;
+    if (!expected || doc?.schema_version !== 1 || doc.tiles_edition !== edition ||
+        !Array.isArray(doc.rules) || doc.rules.length !== Object.keys(expected).length) return;
     const overrides = new Map();
+    const seenRules = new Set();
     for (const rule of doc.rules) {
       if (typeof rule?.portal_country !== "string" || !/^[a-z]{2}$/.test(rule.portal_country) ||
           typeof rule.tile_country !== "string" || !/^[A-Z]{2}$/.test(rule.tile_country) ||
           !Array.isArray(rule.ids) || rule.count !== rule.ids.length ||
           new Set(rule.ids).size !== rule.ids.length ||
           !rule.ids.every((id) => typeof id === "string" && /^[nwr][1-9][0-9]*$/.test(id))) return;
+      const ruleKey = `${rule.tile_country}>${rule.portal_country}`;
+      if (expected[ruleKey] !== rule.ids.length || seenRules.has(ruleKey) || rule.ids.some((id) => overrides.has(id))) return;
+      seenRules.add(ruleKey);
       const override = { portalCountry: rule.portal_country, tileCountry: rule.tile_country };
       for (const id of rule.ids) overrides.set(id, override);
     }

@@ -166,6 +166,7 @@ vm.runInContext([
   'const normaliseLng = window.RegionResolve.normaliseLng;',
   'const PROJECT_CODE_FOR_ISO = { gb: "uk" };',
   runtime.match(/^let placeCountryOverrides = .*;$/m)[0],
+  runtime.match(/^const PLACE_COUNTRY_OVERRIDE_RULES = .*;$/m)[0],
   "let activePlacePopup = null, activePlaceReviseArgs = null;",
   ...["function projectCountryCode", "function countryForPlace", "function countryUnderPoint", "function portalReviseHref", "async function loadPlaceCountryOverrides"].map(lift),
 ].join("\n"), publicMap);
@@ -210,6 +211,10 @@ async function checkPlaceCountryOverrides() {
     "lower-case tile country": { ...overridesFile, rules: [{ ...palestineRule, tile_country: "il" }] },
     "duplicate key": { ...overridesFile, rules: [{ ...palestineRule, count: 2, ids: [overriddenId, overriddenId] }] },
     "malformed key": { ...overridesFile, rules: [{ ...palestineRule, count: 2, ids: [overriddenId, "n01"] }] },
+    "a shortened but self-consistent rule": { ...overridesFile, rules: [{ ...palestineRule, count: 300, ids: palestineRule.ids.slice(0, 300) }] },
+    "a second rule repeating a key": { ...overridesFile, rules: [palestineRule, { ...palestineRule, portal_country: "fr", count: 1, ids: [overriddenId] }] },
+    "an unexpected rule": { ...overridesFile, rules: [{ ...palestineRule, portal_country: "fr" }] },
+    "the expected rule twice": { ...overridesFile, rules: [palestineRule, palestineRule] },
   };
   for (const [problem, doc] of Object.entries(malformedFiles)) {
     publicMap.fetch = async () => ({ ok: true, json: async () => doc });
