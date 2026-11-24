@@ -137,6 +137,9 @@ def main():
     parser.add_argument("--dry-run", action="store_true", help="list what would be uploaded and stop")
     args = parser.parse_args()
     if args.check_credentials:
+        # a dry run promises no contact with r2, and the check makes two requests
+        if args.dry_run:
+            parser.error("--check-credentials cannot be combined with --dry-run")
         check_credentials(client())
         return
     if args.dir is None:
