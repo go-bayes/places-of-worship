@@ -188,6 +188,12 @@ check(palestineRule.count === palestineRule.ids.length && overrideIds.size === 3
 check(palestineRule.ids.every((id) => /^[nrw][1-9]\d*$/.test(id)), "Each override must have a typed OpenStreetMap key.");
 check(createHash("sha256").update(fs.readFileSync(boundary)).digest("hex") === palestineRule.boundary_sha256, "The override boundary hash must match the file on disk.");
 check(!overrideIds.has("w751805614") && !overrideIds.has("n1977711181"), "The two places inside only the simplified outline must stay outside the override list.");
+// a tile switch that leaves the list behind must fail here: the map ignores a list from another edition without a warning
+const tileEdition = placesUrl.match(/\/places-v2-(\d{8})-/)[1];
+const acceptedRules = vm.runInContext("PLACE_COUNTRY_OVERRIDE_RULES", publicMap);
+check(overridesFile.tiles_edition === tileEdition, `The override list is for tiles ${overridesFile.tiles_edition}, and the map reads ${tileEdition}: rebuild it with scripts/build_place_country_overrides.py.`);
+check(Object.keys(acceptedRules).join() === tileEdition, `The map must accept override rules for tiles ${tileEdition} only.`);
+check(JSON.stringify(acceptedRules[tileEdition]) === JSON.stringify(Object.fromEntries(overridesFile.rules.map((rule) => [`${rule.tile_country}>${rule.portal_country}`, rule.ids.length]))), "The rules the map accepts must be the rules and counts in the list.");
 const overriddenId = "n291872774";
 check(overrideIds.has(overriddenId), "The list must include the place inside the governorate boundary.");
 

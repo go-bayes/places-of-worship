@@ -932,7 +932,7 @@ function datedPlacePopupHtml(pr, coords) {
 // 2026-09-03): the portal reads ?revise=1 and opens the same card a click
 // on the place's dot would. empty on pages without a portal
 let placeCountryOverrides = new Map();
-// the rules this script accepts for each tile edition, as "tile code>portal country" and its number of places; a list that differs in any respect is ignored whole
+// the rules this script accepts for each tile edition, as "tile code>portal country" and its number of places; a list with another rule, another count, a malformed key or a repeated key is ignored whole
 const PLACE_COUNTRY_OVERRIDE_RULES = { "20260901": { "IL>ps": 302 } };
 async function loadPlaceCountryOverrides() {
   const edition = CONFIG.tiles.places.match(/\/places-v2-(\d{8})-[^/]+\//)?.[1];

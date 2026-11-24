@@ -154,6 +154,17 @@ edition_python tools/tiles-r2/build_osm_edition.py manifest \
   --pmtiles-package-release '<converter package release>'
 ```
 
+### Rebuild the revise-link country list
+
+Every new edition needs its own `apps/shared/data/place-country-overrides.json`. On the global map the list sends "Revise this place" to Palestine's contributor portal for places that the tiles code `IL` and that lie inside the governorate boundaries drawn on the Palestine page. The map accepts the list only for the tile edition it names and only with the rule and count recorded in `PLACE_COUNTRY_OVERRIDE_RULES` in `apps/regions/_shared/region-map.js`. A list left over from an earlier edition is ignored without a warning, and those links then open Israel's portal. `apps/regions/nz/js/country-config.test.cjs` fails when the map's tile edition and the list disagree.
+
+Build the list from the edition's exact place coordinates, the `places.ndjson` whose digest the input manifest records. The public tiles round coordinates and move places across the boundary: for this edition they give 300 places where the exact coordinates give 302. When the edition changes, update the edition, the two expected counts and the manifest name in the script, and the rule table in `region-map.js`.
+
+```sh
+uv run scripts/build_place_country_overrides.py --places "$work/edition/places.ndjson"
+uv run scripts/build_place_country_overrides.py --places "$work/edition/places.ndjson" --check
+```
+
 ## Census boundary tiles (2026-10-13)
 
 `build_census_tiles.py` builds one PMTiles archive per census boundary file, so a country page can fetch the tiles under its window in place of the whole boundary GeoJSON (the US county layer is 737 KB gzip as GeoJSON and 126 KB of tiles at the desktop landing view). This is step 1 of the plan: the builder only. No page reads the archives, the Worker does not yet accept the `census-` names, and nothing is uploaded.

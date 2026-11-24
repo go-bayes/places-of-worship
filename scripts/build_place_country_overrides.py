@@ -12,7 +12,6 @@ SHA-256 digest.
 
 import argparse
 import hashlib
-import io
 import json
 import re
 from pathlib import Path
@@ -30,10 +29,12 @@ EXPECTED_IL_PLACES_20260901 = 3204
 EXPECTED_OVERRIDE_KEYS_20260901 = 302
 
 
-def exact_points(places):
+def exact_points(places, digest):
     points = {}
     count = 0
     for line in places:
+        # hash each line as it is parsed, so the digest covers the bytes used
+        digest.update(line)
         feature = json.loads(line)
         props = feature["properties"]
         if props.get("country_code") == TILE_COUNTRY:
@@ -75,11 +76,14 @@ def main():
     args = parser.parse_args()
 
     expected_digest = json.loads(INPUT_MANIFEST.read_bytes())["extract_hashes"]["places.ndjson"]
-    # read once, so the bytes that are parsed are the bytes that were hashed
-    data = args.places.read_bytes()
-    if hashlib.sha256(data).hexdigest() != expected_digest:
+    digest = hashlib.sha256()
+    try:
+        with args.places.open("rb") as places:
+            points, place_count = exact_points(places, digest)
+    except (ValueError, KeyError):
+        parser.exit(1, f"The places file is not readable as the {TILES_EDITION} edition's places file.\n")
+    if digest.hexdigest() != expected_digest:
         parser.exit(1, f"The places file's SHA-256 does not match the {TILES_EDITION} input manifest.\n")
-    points, place_count = exact_points(io.BytesIO(data))
     if place_count != EXPECTED_IL_PLACES_20260901:
         parser.exit(1, f"Expected {EXPECTED_IL_PLACES_20260901} {TILE_COUNTRY} places, found {place_count}.\n")
 
