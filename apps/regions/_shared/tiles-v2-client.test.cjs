@@ -91,7 +91,7 @@ const stamps = {
     "region-map.js": "20261124e", // accept only the expected override rule and count
     "datamaps-switcher.js": "20261013a", // switcher rows prerender; warming waits for activation
     "unvalidated-places.js": "20261124f", // september archives; theme edge redraw at the rounded zoom
-    "verification-map.js": "20261124f", // typed osm hand-off; one rebuild of the fallback dots on a basemap switch
+    "verification-map.js": "20261124g", // the date floor follows the entry's or the task's country
     "occupancy-contract.js": "20261019a", // relocation rules follow definition 0.1.6
     "occupancy-review.js": "20261019a", // move wording and successor in the reviewer's period summary
     "task-presentation.js": "20261015c", // decided-status and reopen-flag helpers
