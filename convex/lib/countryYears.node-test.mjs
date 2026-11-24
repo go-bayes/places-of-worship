@@ -39,6 +39,11 @@ function portalMirror(pageFloor) {
   return context.window.PowDateFloor;
 }
 
+// floors for the nine countries, set on 2026-11-24 from the three R6 values: 1000 where
+// a documented place of worship predates 1500, 1500 where one predates 1600 or
+// the country sits in the Americas tier, 1600 otherwise.
+const ADDED_FLOORS = { AL: 1000, BS: 1500, CZ: 1000, GH: 1000, KE: 1000, MW: 1600, RW: 1600, ZA: 1500, ZM: 1600 };
+
 test("portal and Convex date floors match for explicit floors and census countries", () => {
   const ruledFloors = {
     NZ: 1600,
@@ -65,9 +70,17 @@ test("portal and Convex date floors match for explicit floors and census countri
     assert.equal(mirror.DATE_FLOOR_YEARS[code], floor, `${code} has a different explicit portal floor`);
     assert.equal(dateFloorYear(code), floor, `${code} has a different Convex floor`);
   }
-  for (const code of ADDED_CENSUS_COUNTRIES) {
-    assert.equal(dateFloorYear(code), 1600, `${code} did not resolve to the default Convex floor`);
-    assert.equal(mirror.yearFor(code.toLowerCase()), 1600, `${code} did not resolve to the default portal floor`);
+  assert.deepEqual(Object.keys(ADDED_FLOORS).sort(), [...ADDED_CENSUS_COUNTRIES].sort());
+  for (const [code, floor] of Object.entries(ADDED_FLOORS)) {
+    assert.equal(DATE_FLOOR_YEARS[code], floor, `${code} has a different explicit Convex floor`);
+    assert.equal(mirror.DATE_FLOOR_YEARS[code], floor, `${code} has a different explicit portal floor`);
+    assert.equal(dateFloorYear(code), floor, `${code} has a different Convex floor`);
+  }
+  // a country with census waves never falls back to the default: adding one
+  // to DEFAULT_TARGET_YEARS fails here until its floor is set in both files
+  for (const code of Object.keys(DEFAULT_TARGET_YEARS)) {
+    assert.ok(Object.hasOwn(DATE_FLOOR_YEARS, code), `${code} has census waves but no explicit Convex floor`);
+    assert.ok(Object.hasOwn(mirror.DATE_FLOOR_YEARS, code), `${code} has census waves but no explicit portal floor`);
   }
   for (const [code, floor] of Object.entries(DATE_FLOOR_YEARS)) {
     assert.ok(floor >= 1000 && floor <= DEFAULT_DATE_FLOOR_YEAR, `${code} floor ${floor} outside 1000..${DEFAULT_DATE_FLOOR_YEAR}`);
@@ -104,6 +117,11 @@ test("a historical claim before the floor is refused with the floor named", () =
   assert.throws(() => assertHistoricalClaim(claim, "2026-09-02"), /from 1600 onward/);
   assert.throws(() => assertHistoricalClaim(claim, "2026-09-02", dateFloorYear("NZ")), /from 1600 onward/);
   assert.doesNotThrow(() => assertHistoricalClaim(claim, "2026-09-02", dateFloorYear("IE")));
+  // the 1450 claim is accepted in the 1000-tier countries added on 2026-11-24
+  for (const code of ["AL", "CZ", "GH", "KE"]) {
+    assert.doesNotThrow(() => assertHistoricalClaim(claim, "2026-09-02", dateFloorYear(code)), code);
+  }
+  assert.throws(() => assertHistoricalClaim(claim, "2026-09-02", dateFloorYear("ZA")), /from 1500 onward/);
 });
 
 test("an occupancy segment honours the country floor", () => {

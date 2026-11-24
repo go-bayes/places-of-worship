@@ -9,18 +9,27 @@
     const DATE_FLOOR_YEARS = Object.freeze({
         NZ: 1600,
         VU: 1600,
+        AL: 1000,
         AU: 1600,
         BR: 1500,
+        BS: 1500,
         CA: 1500,
+        CZ: 1000,
+        GH: 1000,
         IE: 1000,
         IN: 1000,
+        KE: 1000,
         KR: 1000,
+        MW: 1600,
         MX: 1500,
         PT: 1000,
         RO: 1000,
+        RW: 1600,
         SK: 1000,
         UK: 1000,
         US: 1500,
+        ZA: 1500,
+        ZM: 1600,
     });
 
     function yearFor(countryCode) {

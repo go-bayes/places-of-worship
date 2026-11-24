@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### 2026-11-24 (date floors for the nine census countries)
+
+- The nine countries that gained backend census years in #229 now have their own earliest accepted year for dated claims and periods of use. They had fallen back to the default of 1600, so the portal and the backend would have refused a 1344 foundation date in Czechia. Albania, Czechia, Ghana and Kenya accept dates from 1000; the Bahamas and South Africa from 1500; Malawi, Rwanda and Zambia stay at 1600. The values reuse the three floors ruled on 2026-09-02 and await Joseph's confirmation (`docs/development/public-map-occupancy-slider-brief-2026-09-02.md`, section 4).
+- The test that ties the backend table to the portal's copy now fails when a country with census years has no floor of its own, so a country added later cannot inherit the default unnoticed. Files: `convex/lib/countryYears.ts`, `apps/regions/nz/js/date-floor.js` (stamp `20261124a` in `verification.html`), `convex/lib/countryYears.node-test.mjs`.
+- Dates before 1000 and BCE dates are still refused in every country, because the date format takes four-digit years. The deep-time format scheduled in the same brief removes that limit and is separate work.
+
 ### 2026-11-24
 
 - New Zealand's census popups use the 1 September 2026 OpenStreetMap snapshot for place counts and rates and display the date given in the area summary. Of the 3,422 mapped places, 3,417 fall within a territorial authority and 3,419 fall within a statistical area 2 (SA2) under the polygons used for assignment. For SA2s, the builder uses 2023 polygons archived in June 2026 before the July generalisation. The map draws the generalised polygons. Auckland's territorial authority count falls from 1,053 to 1,018.

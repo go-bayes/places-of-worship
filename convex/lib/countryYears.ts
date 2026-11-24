@@ -33,24 +33,36 @@ export const DEFAULT_TARGET_YEARS: Record<string, number[]> = {
 // the earliest year a dated claim or period may name, per country. it is a
 // typo guard, not a historical statement: countries whose documented places
 // of worship predate 1600 get a lower floor so deep history stays reachable.
+// every country with census waves carries an explicit floor (the test in
+// countryYears.node-test.mjs requires one), so a country added to
+// DEFAULT_TARGET_YEARS cannot fall back to the default unnoticed.
 // Mirrors apps/regions/nz/js/date-floor.js; both files move together
-// (the test in countryYears.node-test.mjs ties them).
+// (the same test ties them).
 export const DEFAULT_DATE_FLOOR_YEAR = 1600;
 export const DATE_FLOOR_YEARS: Record<string, number> = {
   NZ: 1600,
   VU: 1600,
+  AL: 1000,
   AU: 1600,
   BR: 1500,
+  BS: 1500,
   CA: 1500,
+  CZ: 1000,
+  GH: 1000,
   IE: 1000,
   IN: 1000,
+  KE: 1000,
   KR: 1000,
+  MW: 1600,
   MX: 1500,
   PT: 1000,
   RO: 1000,
+  RW: 1600,
   SK: 1000,
   UK: 1000,
   US: 1500,
+  ZA: 1500,
+  ZM: 1600,
 };
 
 // the floor for a country; unknown or absent countries keep the default so
