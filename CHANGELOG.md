@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-11-24 (Street View is a reality check)
+
+- The contributor portal's instructions now describe Street View and Google Maps as a reality check on a place that an independent source, such as OpenStreetMap, already records, and tell a contributor not to add a place from Street View alone (JB, 2026-11-24). The instructions had told contributors to look around the site in Street View and to treat it as evidence. Wording only: the *Google Street View* button and every form are unchanged, and no stored record changes. The RA guide says the same in its pin-drop and nomination paragraphs. Files: `apps/regions/nz/js/verification-map.js` (stamp `20261124h`), `apps/regions/nz/verification.html`, `apps/regions/_shared/tiles-v2-client.test.cjs`, `apps/guides/ra.html`.
+
 ### 2026-11-24 (deep-time date format, rulings)
 
 - Joseph ruled on the fifteen decisions of `docs/development/deep-time-date-format-brief-2026-11-24.md`, and section 10 of the brief records his words. He accepted each recommendation except the bound, which he set at 12000 BCE, and the stored form, which he extended to reach the bound. A BCE year is stored as a minus sign and four digits to 10000 BCE, and in the Extended Date/Time Format's long form, as `Y-11999`, from 10001 BCE to 12000 BCE. He also confirmed the nine date floors of #234. Documentation only; no behaviour changes.

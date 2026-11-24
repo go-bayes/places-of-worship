@@ -1953,7 +1953,7 @@ function assignmentQuickstartHtml() {
             <ol>
                 <li>Sign in with Google at the top of this panel.</li>
                 <li>Work down the assigned ${COUNTRY_CONFIG.countryName} task list in order. Stop at a natural stopping point and tell JB where you stopped.</li>
-                <li>Open Street View or Google Maps to look around the site, and use the OSM object only as context. Record the imagery capture date if Street View is your evidence.</li>
+                <li>Use Street View or Google Maps as a reality check on a place that an independent source, such as OpenStreetMap, already records. Do not add a place from Street View alone. Record the imagery capture date if you cite the check.</li>
                 <li>Record ${TARGET_YEARS.length ? `${targetYearAndListText()} status` : "the current status"}, confidence, source title, source URL or file reference, and any useful lifecycle date.</li>
             </ol>
         `;
@@ -1962,7 +1962,7 @@ function assignmentQuickstartHtml() {
         <ol>
             <li>Sign in with Google at the top of this panel.</li>
             <li>Work down the assigned task list in order. Stop at a natural stopping point and tell JB where you stopped.</li>
-            <li>Open Street View or Google Maps to look around the site, and use the OSM object only as context. Record the imagery capture date if Street View is your evidence.</li>
+            <li>Use Street View or Google Maps as a reality check on a place that an independent source, such as OpenStreetMap, already records. Do not add a place from Street View alone. Record the imagery capture date if you cite the check.</li>
             <li>Record 2013, 2018, and 2023 status, confidence, source title, source URL or file reference, and any useful lifecycle date.</li>
         </ol>
     `;
@@ -7467,7 +7467,7 @@ class NzVerificationMap {
             <div class="detail-section">
                 <h3>1. Open source links</h3>
                 <div class="copy-help">
-                    Use OSM to identify why this case was flagged. Use Street View or other non-OSM sources to check what is visible, and record the imagery capture date when Google shows one.
+                    Use OSM to identify why this case was flagged. Use Street View as a reality check on what OSM or another independent source records, and record the imagery capture date when Google shows one.
                 </div>
                 <div class="link-grid">
                     ${this.linkHtml("Street View", props.street_view_url, "source-link-primary")}
