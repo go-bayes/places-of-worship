@@ -1,6 +1,6 @@
 # Deep-time dates: design brief, 24 November 2026
 
-**Status.** Draft for Joseph's rulings. The brief proposes; section 10 lists the decisions. Nothing here is ruled except the quoted rulings of 2 September 2026. Joseph asked for the brief on 24 November 2026, after saying of the date floors "we must make dates robust".
+**Status.** Ruled. Joseph ruled on all fifteen decisions on 24 November 2026, and section 10 records his words. He accepted each recommendation except the bound, which he set at 12000 BCE; sections 7, 10 and 11 are revised to match, and the other sections stand as proposed. Nothing is built yet. Joseph asked for the brief on 24 November 2026, after saying of the date floors "we must make dates robust".
 
 ## 1. What the brief asks
 
@@ -40,7 +40,7 @@ The portal's contract scripts differ from the backend: they accept any four-digi
 | 1500 | Brazil, Canada, Mexico and the United States (ruled, R6); the Bahamas and South Africa |
 | 1600 | New Zealand, Vanuatu and Australia (ruled, R6); Malawi, Rwanda and Zambia; every country without an entry |
 
-The nine countries outside R6 were added on 24 November 2026 (#234) and await Joseph's confirmation.
+The nine countries outside R6 were added on 24 November 2026 (#234), and Joseph confirmed the nine values the same day (ruling 8).
 
 | Place | Date | Record | Refused by |
 |---|---|---|---|
@@ -96,7 +96,7 @@ The brief sets out three options.
 
 - **Option A: keep the refusal and lower the floors.** The countries at 1000 drop to year 1, and Joseph rules the others one by one. A correct date is still refused wherever a floor is set too high.
 - **Option B: ask in the portal and drop the floor in the backend.** The batch import and every other caller of the backend then have no guard, and a reviewer cannot tell a confirmed date from a slip.
-- **Option C: keep the floor in the backend and accept a confirmed date.** *Recommended.*
+- **Option C: keep the floor in the backend and accept a confirmed date.** *Recommended, and ruled (ruling 7).*
 
 Under option C a record may carry a list of confirmed dates. Each entry holds the date as written and who confirmed it: a contributor, a curator or an agent.
 
@@ -113,22 +113,22 @@ The floor table stays, as the list of years below which a confirmation is requir
 
 ## 7. Stage 2: years before the common era
 
-**The stored form.** A BCE year is stored as a minus sign and four digits, in the numbering that astronomers use and that the Extended Date/Time Format (ISO 8601-2, level 1) adopts. The numbering has a year zero: `0000` is 1 BCE, `-0018` is 19 BCE, `-9499` is 9500 BCE. Each year has a single spelling, and the validator refuses any other, including `-0000`. A single spelling is required because dates are hashed as text: two spellings of the same year would give two hashes.
+**The stored form.** A BCE year is stored in the numbering that astronomers use and that the Extended Date/Time Format (ISO 8601-2, level 1) adopts. The numbering has a year zero: `0000` is 1 BCE, `-0018` is 19 BCE, `-9499` is 9500 BCE. A year from 2 BCE to 10000 BCE is a minus sign and four digits, and `-9999` is 10000 BCE. A year from 10001 BCE to 12000 BCE takes the format's long form, which is the letter `Y`, a minus sign and five digits: `Y-10000` is 10001 BCE and `Y-11999` is 12000 BCE. The format allows the long form only for a year that four digits cannot write, so each year has a single spelling. The validator refuses any other spelling, including `-0000`, `Y-9499` and `-11999`. A single spelling is required because dates are hashed as text: two spellings of the same year would give two hashes.
 
-**The bound.** Four digits reach `-9999`, which is 10000 BCE. R6 names "one sanity bound near 12000 BCE". The Extended Date/Time Format writes a longer year with a prefix, as `Y-11999`, which would be a second form. The brief recommends a bound of 10000 BCE; Göbekli Tepe, at about 9500 BCE, fits.
+**The bound.** The earliest year accepted is 12000 BCE, stored as `Y-11999`. R6 names "one sanity bound near 12000 BCE". The draft recommended 10000 BCE, where four digits end, to avoid a second form. Joseph chose 12000 BCE and the long form for the years beyond four digits (rulings 9 and 10). Göbekli Tepe, at about 9500 BCE, fits within four digits. The validator sets the bound and the form does not: the long form can write any earlier year, so a later ruling can move the bound without rewriting a stored date.
 
-**Older dates.** Some sacred sites are tens of thousands of years old. The brief proposes that a contributor record such a date as the bound, with a note. Whether such a site is a place of worship is a question for the operational definition.
+**Older dates.** Some sacred sites are tens of thousands of years old; the paintings of the Chauvet cave, which Joseph named, are about 36,000 years old. A contributor records such a date as the bound, 12000 BCE, with a note that gives the date in the source (ruling 11). Whether such a site is a place of worship is a question for the operational definition.
 
 **Conversion.** JavaScript's date parser does not read the stored form, and Python's date type has no year below 1. The project converts with a routine of its own: a backend routine, a portal mirror and a test that ties the mirror to the backend, as `functionChainMirror.node-test.mjs` already does for function chains.
 
 **Precision.** A BCE date takes a year only, and the rule includes `0000`. Sources for BCE foundations rarely give a month.
 
-**Entry and display.** A contributor chooses CE or BCE beside the year and never sees the signed form. Every display shows "19 BCE", including the sentences that the backend stores for a function chain. The stored sentence for a CE date stays byte-identical.
+**Entry and display.** A contributor chooses CE or BCE beside the year and never sees the signed form or the long form. Every display shows "19 BCE", including the sentences that the backend stores for a function chain. The stored sentence for a CE date stays byte-identical.
 
 **What changes.**
 
-- A comparison routine parses a partial date into numbers and compares two dates. The routine replaces text comparison and four-character year extraction in the backend and in the portal mirrors.
-- Every pattern that expects a four-digit year, in each copy listed in section 4.
+- A comparison routine parses a partial date into numbers and compares two dates. The routine reads both BCE forms, and it replaces text comparison and four-character year extraction in the backend and in the portal mirrors.
+- Every pattern that expects a four-digit year, in each copy listed in section 4. Each pattern gains the signed form and the long form.
 - The builder of dated places (`scripts/build_occupancy_dated_places.py`), which today writes an empty start year for `-0500`, so that the map never draws the place. The builder should stop with an error.
 - The map popups, which show a year of 0 as missing and would show −18 for 19 BCE.
 - The Rust verifier, which must handle signed years before the first signed date is stored.
@@ -157,34 +157,43 @@ Section 8 states four rules.
 
 Four checks become stricter for new records: the year `0000` is refused in a full date; a full observation date outside 1000 to 2100 is refused, or needs a confirmation where the date is a documentary source's; the lifecycle date meets the floor; and the agent intake meets the floor.
 
-## 10. Decisions for Joseph
+## 10. Joseph's rulings
 
-Each decision takes a yes or a no. Each carries the brief's recommendation.
+Joseph ruled on 24 November 2026. The quotations give his words as he typed them.
 
-1. **Start now.** Build stage 1 whether or not the live import of PR-D has run. *Recommended.*
-2. **Stage 1 scope.** Build proposals 1 and 2 together. *Recommended.*
-3. **Two validators.** Historical dates accept years from 1; observation dates keep 1000 to 2100. *Recommended.*
-4. **The source date.** A documentary source's date below 1000 takes the confirmation of section 6. *Recommended.*
-5. **The lifecycle date.** The lifecycle date meets the country's floor, with the confirmation below the floor. *Recommended.* The floor is a new restriction on the field.
-6. **Stage 1 form.** Four digits with leading zeros; `0000` refused until stage 2. *Recommended.*
-7. **The floor.** Option C, a stored list of confirmed dates. *Recommended.* Options A and B are in section 6.
-8. **The nine floors of 24 November.** Confirm the nine values as listed in section 3. *Recommended.*
-9. **Stage 2 stored form.** A minus sign and four digits, astronomical numbering, one spelling. *Recommended.*
-10. **The bound.** 10000 BCE, in place of R6's "near 12000 BCE". *Recommended.*
-11. **Older dates.** A date older than the bound is recorded as the bound, with a note. *Recommended.*
-12. **Stage 2 precision.** Year only for BCE dates. *Recommended.*
-13. **Entry.** A CE or BCE choice beside the year. *Recommended.*
-14. **Calendars.** Adopt the four rules of section 8. *Recommended.* Joseph may rule on each of the four rules separately.
-15. **Exports.** A data dictionary and an unhashed numeric year column. *Recommended.*
+- Beside decision 1: "Agree".
+- Below the list: "re: 10 what if people want to record chauvet?  or deep archeology? i think 12000 would cover the turkish sites?" and "accept others."
+- In the working session: "accepted recommendatations 12k bce for #10 I think."
+- Asked whether the years from 10001 BCE to 12000 BCE should take (a) the Extended Date/Time Format's long form for those years only, or (b) five digits for every BCE year: "(a), confirm 12k bce".
+
+The fifteen decisions as ruled:
+
+1. **Start now.** Build stage 1 whether or not the live import of PR-D has run. *Accepted.*
+2. **Stage 1 scope.** Build proposals 1 and 2 together. *Accepted.*
+3. **Two validators.** Historical dates accept years from 1; observation dates keep 1000 to 2100. *Accepted.*
+4. **The source date.** A documentary source's date below 1000 takes the confirmation of section 6. *Accepted.*
+5. **The lifecycle date.** The lifecycle date meets the country's floor, with the confirmation below the floor. *Accepted.* The floor is a new restriction on the field.
+6. **Stage 1 form.** Four digits with leading zeros; `0000` refused until stage 2. *Accepted.*
+7. **The floor.** Option C, a stored list of confirmed dates. *Accepted.*
+8. **The nine floors of 24 November.** The nine values listed in section 3. *Confirmed.*
+9. **Stage 2 stored form.** Astronomical numbering, one spelling: a minus sign and four digits to 10000 BCE, and the long form, as `Y-11999`, from 10001 BCE to 12000 BCE. *Accepted as amended by option (a).* The draft recommended four digits only.
+10. **The bound.** 12000 BCE, R6's figure. *Ruled against the draft's recommendation of 10000 BCE.*
+11. **Older dates.** A date older than the bound is recorded as the bound, with a note. *Accepted.*
+12. **Stage 2 precision.** Year only for BCE dates. *Accepted.*
+13. **Entry.** A CE or BCE choice beside the year. *Accepted.*
+14. **Calendars.** The four rules of section 8. *Accepted.*
+15. **Exports.** A data dictionary and an unhashed numeric year column. *Accepted.*
 
 ## 11. Build order
 
-1. Stage 1 in the backend, after rulings 1 to 8: the two validators, the padded form, the list of confirmed dates and the shared test. The backend goes first because historical dates widen.
-2. Stage 1 in the portal, after ruling 14 as well: the confirmation beside the date field, the three-digit question, and the RA guide.
-3. Stage 2, after rulings 9 to 15: the comparison routine and its mirror first, then the callers, then entry, display and exports.
+The rulings of section 10 open every step.
+
+1. Stage 1 in the backend (rulings 1 to 8): the two validators, the padded form, the list of confirmed dates and the shared test. The backend goes first because historical dates widen.
+2. Stage 1 in the portal (ruling 14 as well): the confirmation beside the date field, the three-digit question, and the RA guide.
+3. Stage 2 (rulings 9 to 15): the comparison routine and its mirror first, then the callers, then entry, display and exports.
 
 Each pull request states which copies of the validators it changes and shows the shared test passing against every copy.
 
 ## 12. How the brief was made
 
-Claude Fable 5.2 drafted the brief from a read-only inventory of the repository at `51f9782b`. Claude Sonnet 5.5 reviewed three drafts for accuracy and Claude Opus 5.5 reviewed three drafts for design.
+Claude Fable 5.2 drafted the brief from a read-only inventory of the repository at `51f9782b`. Claude Sonnet 5.5 reviewed three drafts for accuracy and Claude Opus 5.5 reviewed three drafts for design. Joseph ruled on 24 November 2026, and Claude Fable 5.2 recorded the rulings and revised sections 7, 10 and 11.
