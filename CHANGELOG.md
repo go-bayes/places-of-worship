@@ -16,11 +16,20 @@
 - Phone popups for counted places link to the OpenStreetMap record and carry its type and ID into the contributor portal. Typed revision links match tasks by both fields. On the global map, “Revise this place” uses a list of 302 places to open Palestine’s contributor portal for places coded `IL` that lie inside the 2017 governorate boundaries used on the Palestine map. Any open revision link for a listed place updates when the list loads. The map ignores the list unless it holds exactly the one rule and 302 places expected for the tile edition. A place’s country code in the tiles follows OpenStreetMap’s ISO 3166-1 boundaries. The code files the place in a country archive and makes no statement about sovereignty. Global-map revision links otherwise use the tile country code where the portal registry supports it, then the mapped boundary, with the world view as the fallback. The review page explains when an explicit country code is unresolved. Basemap changes preserve the religion filters, historical fade and points mode. The New Zealand census popup identifies the area summary’s own snapshot as the source of its place counts. The census legend dates the map dots to 1 September 2026.
 - The map and portal assets for this change use the `20261123c` cache stamp. Local tests cover the Key, the separate ring layers and counts, desktop and phone clicks, portal hand-offs, basemap changes and ring visibility. The RA guide describes the United States dot behaviour and the ring popup actions. The archives must be uploaded before this change goes live, and the principal investigator decides when.
 
+### 2026-11-23 (labs place tiles)
+
+- Lamps and Relief now use the 1 September 2026 OpenStreetMap snapshot, restricted to places tagged as places of worship. Lamps uses the most detailed tile record loaded for each place during zoom transitions. Relief counts 95 places in central Wellington and reads points on tile edges from their owning tiles.
+
 ### 2026-11-23 (dated OpenStreetMap tile build)
 
 - Added the build and validation tools for the 1 September 2026 OpenStreetMap edition. Every shipped record carries an OSM key. The overview, places counts and RA dots use `amenity=place_of_worship` in every country. Country assignment uses OSM ISO polygons first and Natural Earth as a fallback. The separate `places-v2-20260901-possible` archive holds building candidates at zooms 8 to 18. The build omits buildings whose bounding box and 10-metre margin contain a tagged place. Validation reconciles both public sets against the private edition and checks the two source digests against the 1 September reconstruction record. Unnamed places have an empty `name` field. The 251 archives were uploaded to the tile bucket on 24 November 2026 with create-only writes; each was read back by SHA-256, and three tiles from every archive, fetched through the public tile host, matched the local archive. The live map still uses the July tiles until the principal investigator switches it.
 
 - Edition records can be regenerated from the validated archives. Each manifest lists the countries its archive covers and can record the installed PMTiles converter release. The versioned uploader uses conditional writes and checks the remote digest before resuming an upload.
+
+### 2026-11-20 (labs: Lamps and Relief, experimental)
+
+- Lamps is an unlinked experimental globe that shows mapped places of worship as lights and pillars under the sun for a selected time.
+- Relief is an unlinked experimental map and table that show the density and diversity of mapped places of worship across a city in hexagonal cells.
 
 ### 2026-11-16 (review rulings carried into the standing documents)
 
