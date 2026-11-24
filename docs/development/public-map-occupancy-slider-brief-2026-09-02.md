@@ -41,7 +41,7 @@ Both feature kinds share the source; every point layer filters on `geometry-type
 | US, CA, MX, BR | 1500 |
 | IE, UK, PT, RO, SK, IN, KR | 1000 |
 
-Added 2026-11-24, for the nine countries that gained census waves on 2026-11-20 and had fallen back to the default (Joseph, 2026-11-24: "we must make dates robust"; the values reuse the three floors above and await his confirmation). The rule applied: 1000 where a documented place of worship predates 1500; 1500 where one predates 1600 or the country belongs with the Americas; 1600 otherwise.
+Added 2026-11-24, for the nine countries that gained census waves on 2026-11-20 and had fallen back to the default (Joseph, 2026-11-24: "we must make dates robust"; the values reuse the three floors above, and he confirmed them on 2026-11-24 as ruling 8 of `docs/development/deep-time-date-format-brief-2026-11-24.md`). The rule applied: 1000 where a documented place of worship predates 1500; 1500 where one predates 1600 or the country belongs with the Americas; 1600 otherwise.
 
 | countries | floor | an early place of worship the floor admits (approximate) |
 |---|---|---|

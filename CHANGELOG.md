@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-11-24 (deep-time date format, rulings)
+
+- Joseph ruled on the fifteen decisions of `docs/development/deep-time-date-format-brief-2026-11-24.md`, and section 10 of the brief records his words. He accepted each recommendation except the bound, which he set at 12000 BCE, and the stored form, which he extended to reach the bound. A BCE year is stored as a minus sign and four digits to 10000 BCE, and in the Extended Date/Time Format's long form, as `Y-11999`, from 10001 BCE to 12000 BCE. He also confirmed the nine date floors of #234. Documentation only; no behaviour changes.
+
 ### 2026-11-24 (deep-time date format, design brief)
 
 - Added `docs/development/deep-time-date-format-brief-2026-11-24.md`, a draft for Joseph's rulings. The brief proposes that historical dates accept years 1 to 999 written with four digits, that the backend accept a date below a country's floor when the submission records the contributor's confirmation, and that a second stage accept BCE years. Documentation only; no behaviour changes.
