@@ -4,7 +4,7 @@
 
 ### 2026-11-24 (deep-time date format, design brief)
 
-- Added `docs/development/deep-time-date-format-brief-2026-11-24.md`, a draft for Joseph's rulings. The brief proposes accepting years 1 to 999 written with four digits, accepting BCE years in a second stage, and replacing the refusal of a date below a country's floor with a confirmation in the portal. Documentation only; no behaviour changes.
+- Added `docs/development/deep-time-date-format-brief-2026-11-24.md`, a draft for Joseph's rulings. The brief proposes that historical dates accept years 1 to 999 written with four digits, that the backend accept a date below a country's floor when the submission records the contributor's confirmation, and that a second stage accept BCE years. Documentation only; no behaviour changes.
 
 ### 2026-11-24 (date floors for the nine census countries)
 

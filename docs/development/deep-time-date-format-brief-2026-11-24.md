@@ -1,119 +1,172 @@
 # Deep-time dates: design brief, 24 November 2026
 
-**Status.** Draft for Joseph's rulings. The brief proposes; section 8 lists the decisions. Nothing here is ruled except the quoted rulings of 2 September 2026.
+**Status.** Draft for Joseph's rulings. The brief proposes; section 10 lists the decisions. Nothing here is ruled except the quoted rulings of 2 September 2026. Joseph asked for the brief on 24 November 2026, after saying of the date floors "we must make dates robust".
 
 ## 1. What the brief asks
 
-The portal and the backend refuse true dates. For example, a contributor cannot record that St George's Basilica in Prague was founded about 920, or that the Western Wall dates from 19 BCE. Joseph, 24 November 2026: "we must make dates robust".
+The portal and the backend refuse correct dates. For example, a contributor cannot record that St George's Basilica in Prague was founded about 920, or that the structure of the Western Wall dates from 19 BCE.
 
-The brief proposes two changes to the date format and one change to the date floor.
+The brief makes three proposals.
 
-1. **Stage 1: years 1 to 999.** Accept a year below 1000 when the contributor writes it with four digits, as `0920`.
-2. **Stage 2: years before the common era.** Accept BCE years, stored in the signed form of the international date standard (ISO 8601), with one new comparison routine replacing text comparison.
-3. **The floor becomes a question.** Today a date earlier than the country's floor is refused. The brief proposes that the portal ask the contributor to confirm such a date, and that the backend accept it.
+1. **Historical dates from year 1.** A historical date accepts a year below 1000 when the contributor writes the year with four digits, as `0920`.
+2. **A confirmed date below the floor.** The backend accepts a date earlier than the country's floor when the submission records that the contributor confirmed the date.
+3. **Years before the common era.** A second stage accepts BCE years.
 
-Ruling R6 of 2 September 2026 accepted the floor table "as an interim typo guard" and scheduled "a deep-time date format (signed years, BCE, one sanity bound near 12000 BCE)" as "a separate follow-on ruling". This brief is the proposal for that ruling.
+Proposals 1 and 2 must ship together. Either proposal alone leaves St George's Basilica refused: the format refuses `0920` in one field, and Czechia's floor of 1000 refuses it in the others.
 
-## 2. What is refused today
+Ruling R6 of 2 September 2026 accepted the floor table "as an interim typo guard" and said that "a deep-time date format (signed years, BCE, one sanity bound near 12000 BCE) is a separate follow-on ruling, scheduled after PR-D". The brief is the proposal for that ruling. The brief does not establish whether PR-D, the import of the Woodberry records with their periods, is complete.
 
-A *partial date* is a date written as a year (`1880`), a year and month (`1880-03`), or a full date (`1880-03-01`). Dated claims, periods of use and function chains all take partial dates.
+## 2. Terms
 
-Two rules refuse true dates.
+- A *partial date* is a date written as a year (`1880`), a year and month (`1880-03`), or a full date (`1880-03-01`).
+- A *historical date* says when something happened at a place: the bounds of a dated claim, the start and end of a period of use, a date in a function chain (the dated sequence of changes in how a place was used), and the lifecycle date on an evidence form.
+- An *observation date* says when evidence was made or consulted: the date of an observation, a photograph, a publication or a visit to a source.
+- The *floor* is the earliest year a country accepts in a historical date (`convex/lib/countryYears.ts`).
+- A *validator* is the code that accepts or refuses a date. The backend holds the validators that bind. The contributor portal, the review page, the curators' workbench, the agent intake and the command-line tools hold copies.
 
-- **The format.** The year takes four digits and, for a year or a year and month, must lie between 1000 and 2100. No date before 1000 CE can be written.
-- **The floor.** Each country has an earliest accepted year: 1600 in New Zealand, Vanuatu and Australia and in every country without a ruled floor, 1500 in the Americas and South Africa, and 1000 elsewhere (`convex/lib/countryYears.ts`).
+## 3. What is refused today
 
-| Place | Date | Refused by |
-|---|---|---|
-| St Martin's Church, Canterbury | before 597 | the format |
-| St George's Basilica, Prague | c. 920 | the format |
-| Mahabodhi Temple, Bodh Gaya | founded in the 3rd century BCE | the format |
-| Western Wall, Jerusalem | 19 BCE | the format |
-| Pantheon, Rome | c. 126 | the format and Italy's default floor of 1600 |
-| A pre-Columbian temple in Mexico | before 1500 | Mexico's floor of 1500 |
+Two rules refuse correct dates, and the two rules apply to different fields.
+
+**The format.** In the backend, a year or a year and month must lie between 1000 and 2100. A full date may carry any four-digit year, so `0920-05-01` passes where `0920` fails. The lifecycle date and every observation date meet the format and no floor.
+
+**The floor.** Dated claims, periods and function chains meet the floor.
+
+| Floor | Countries |
+|---|---|
+| 1000 | Ireland, India, South Korea, Portugal, Romania, Slovakia and the United Kingdom (ruled, R6); Albania, Czechia, Ghana and Kenya |
+| 1500 | Brazil, Canada, Mexico and the United States (ruled, R6); the Bahamas and South Africa |
+| 1600 | New Zealand, Vanuatu and Australia (ruled, R6); Malawi, Rwanda and Zambia; every country without an entry |
+
+The nine countries outside R6 were added on 24 November 2026 (#234) and await Joseph's confirmation.
+
+| Place | Date | Record | Refused by |
+|---|---|---|---|
+| St Martin's Church, Canterbury | before 597 | period of worship | the United Kingdom's floor of 1000 |
+| St George's Basilica, Prague | c. 920 | structure | Czechia's floor of 1000; the format, as a lifecycle date |
+| Mahabodhi Temple, Bodh Gaya | founded in the 3rd century BCE | structure | the format; India's floor |
+| Western Wall, Jerusalem | 19 BCE | structure (prayer at the wall began much later) | the format; the default floor of 1600 |
+| Pantheon, Rome | c. 126 | structure | the default floor of 1600 |
+| A pre-Columbian temple in Mexico | before 1500 | structure | Mexico's floor of 1500 |
 
 Section 7 of the slider brief of 2 September 2026 lists more cases.
 
-## 3. How dates work today
+## 4. How dates work today
 
-These facts come from a read-only inventory of the repository at `51f9782b`.
-
-- **Storage.** Every partial date is stored as text. Every census year is stored as a number. No index uses a date.
+- **Storage.** Every partial date is stored as text. Every census year is stored as a number. No index uses a partial date.
 - **Comparison.** The code compares dates as text. Text comparison orders four-digit years correctly, including `0920`. Text comparison orders signed years wrongly. For example, `-0500` sorts after `-0100`, although the year written `-0500` came four centuries earlier.
-- **Year extraction.** The code reads the year as the first four characters. For `-0500` the first four characters give −50.
-- **Copies.** The backend holds the validator (`convex/lib/limits.ts`). The contributor portal holds four copies, the review page one, and the workbench, the agent intake, the Python tools and the Rust command-line tool one each. No test compares the validator with its copies, and the copies already disagree: the backend caps the year at 2100 and three portal copies do not.
+- **Year extraction.** The code takes the year from the first four characters. For `-0500` the first four characters give −50.
+- **Copies.** A search of the code finds validators in the backend (`convex/lib/limits.ts`, `convex/batchImport.ts`), the portal (three contract scripts and `verification-map.js`), the workbench (two), the agent intake, three Python scripts with their schemas, and three parsers in the Rust tool. The copies disagree. The backend caps a year at 2100 and the portal contracts do not; the workbench accepts the year `0000` and the Rust tool refuses it.
+- **Tests.** Two tests compare the portal with the backend on derived presence and on function chains. No test compares the validators on the edges of the date format.
 - **Hashes.** Evidence versions, review snapshots, derived rows and submission receipts hash records that contain date text. A frozen export is served from stored bytes.
-- **The public map.** The map reads a numeric start year and end year for each dated place. The United Kingdom file already carries the years 772 and 925 from OpenStreetMap, and the map draws them. The slider covers census years only (ruling R7).
+- **The public map.** The map takes a numeric start year and end year for each dated place. The United Kingdom file already carries the years 772 and 925 from OpenStreetMap. The slider covers census years only (ruling R7).
 
-## 4. Stage 1: years 1 to 999
+## 5. Proposal 1: historical dates from year 1
 
-**Proposal.** A year below 1000 is written with leading zeros: `0920`, `0920-05`, `0920-05-01`. The year `0000` is refused, because the common era has no year zero.
+**Two validators.** The backend today uses one validator for historical dates and observation dates. Proposal 1 separates the validators. The historical validator accepts years from 1. The observation validator keeps today's range of 1000 to 2100, so that `0201` typed for 2021 is still refused as the date of a photograph.
 
-**Why four digits.** Text comparison, year extraction, the map builder and the map already handle `0920` correctly. A leading zero is also deliberate: nobody types `0920` when they mean 1920. When a contributor types `920`, the portal answers "For a year before 1000, write four digits: 0920."
+**The written form.** A year below 1000 takes leading zeros: `0920`, `0920-05`, `0920-05-01`. Text comparison, year extraction, the map builder and the map already handle the form.
+
+**The year 0000.** Stage 1 refuses `0000` in every form. Stage 2 gives `0000` a meaning (1 BCE), and stage 1 keeps the value free until then. The refusal narrows one case that passes today: a full date such as `0000-01-01` in a field without a floor.
+
+**When a contributor types three digits.** The commonest slip is a dropped digit. The portal therefore asks, "Did you mean 1920, or the year 920? For the year 920, write 0920."
 
 **What changes.**
 
-- The two patterns in `convex/lib/limits.ts` that cap a year and a year and month at 1000 to 2100, and the matching check in `verification-map.js`.
-- The "around this year" helper in the portal, which builds the neighbouring years without padding. The helper already fails for "around 1000", which yields `999`.
-- The helper that finds the last day of a month, which uses a JavaScript routine that maps years 0 to 99 onto 1900 to 1999.
-- The test that requires every floor to lie between 1000 and 1600.
-- `docs/convex-task-layer-spec.md`, which still says "from 1600 onward".
+- The backend patterns for a year and for a year and month, applied to historical dates only.
+- The portal contract validators, which today join the format check and the floor check.
+- The "around this year" helpers, in three places, which build neighbouring years without padding. "Around 1000" already yields the invalid year `999`.
+- The test that requires every floor to lie between 1000 and 1600, and the tests that assert the message "from 1600 onward".
+- The documents that still say "from 1600 onward", among them `docs/convex-task-layer-spec.md` and `FAQ.md`.
 
-**One shared test.** Stage 1 adds a file of test dates, each marked valid or invalid, and runs every copy of the validator against the file. A copy that drifts then fails in continuous integration.
+**A shared test.** Stage 1 adds a file of test dates, each marked valid or invalid for each kind of date, and runs every copy of the validators against the file. The list of copies comes from a search of the code. Three copies need a small extraction before a test can reach them: the workbench pattern, the portal's check of observation dates, and the Rust parsers.
 
-## 5. The floor becomes a question
+## 6. Proposal 2: a confirmed date below the floor
 
-**Proposal.** A date earlier than the country's floor is accepted after the contributor confirms it. The portal asks, for example, "1344 is earlier than most dated places in New Zealand. Is the year right?" The backend applies the format, the sanity bound and the rule that a date cannot follow the evidence's reference date. The backend does not apply the floor.
+The floor exists to catch a slip of the keyboard. A refusal catches the slip and also blocks a correct date, and the contributor who holds the source cannot override the refusal.
 
-**Why.** The floor exists to catch a slip of the keyboard. A confirmation catches the slip equally well, and a true date still gets through. A refusal cannot be overridden by the contributor who is holding the source. The floor table stays, as the list of years below which the portal asks.
+The brief sets out three options.
 
-**What the proposal gives up.** A batch import has no contributor to ask. The proposal is that an import reports each date below the floor in its preview, and a curator confirms the preview as today.
+- **Option A: keep the refusal and lower the floors.** The countries at 1000 drop to year 1, and Joseph rules the others one by one. A correct date is still refused wherever a floor is set too high.
+- **Option B: ask in the portal and drop the floor in the backend.** The workbench, the batch import and any other caller then have no guard, and a reviewer cannot tell a confirmed date from a slip.
+- **Option C: keep the floor in the backend and accept a confirmed date.** *Recommended.* A submission may carry a field stating that the contributor confirmed each date below the floor. The backend refuses a date below the floor without the field and stores the field with the record. The review queue marks the record.
 
-**The alternative.** Keep the refusal and lower the floors: the countries at 1000 drop to year 1, and Joseph rules the others one by one. The alternative keeps a guard in the backend. The alternative also keeps refusing true dates wherever a floor is set too high.
+Under option C:
 
-## 6. Stage 2: years before the common era
+- **The portal** asks beside the date field, "1344 is earlier than most dated places in New Zealand. Is the year right?", and sets the field when the contributor confirms.
+- **A batch import** today rejects a row whose date is below the floor. Under option C the import file carries the confirmation for each such row, and the curator who prepares the file sets it.
+- **The agent intake** applies no floor today. Under option C an agent's record meets the same floor and must carry the same field.
+- **Existing records** keep their hashes, because a record without a confirmed date does not carry the field.
+- **In New Zealand, Australia and Vanuatu** a date below the floor will often concern an Indigenous sacred site. The confirmation can remind the contributor of the sensitivity flag.
 
-**Proposal for the stored form.** A BCE year is stored as a minus sign and four or five digits, counted as the standard counts: `0000` is 1 BCE, `-0018` is 19 BCE, `-9499` is 9500 BCE. The standard's count runs one behind the BCE label because the standard has a year zero.
+The floor table stays, as the list of years below which a confirmation is required.
 
-**Proposal for entry and display.** Contributors never see the signed form. The portal takes "19 BCE" and shows "19 BCE"; the conversion happens once, in one shared routine with its own tests.
+## 7. Stage 2: years before the common era
 
-**Proposal for precision.** A BCE date takes a year only. Sources for BCE foundations rarely give a month. A year-only rule also removes the calendar arithmetic for negative years.
+**The stored form.** A BCE year is stored as a minus sign and four digits, in the numbering that astronomers use and that the Extended Date/Time Format (ISO 8601-2, level 1) adopts. The numbering has a year zero: `0000` is 1 BCE, `-0018` is 19 BCE, `-9499` is 9500 BCE. Each year has a single spelling, and the validator refuses any other. A single spelling is required because dates are hashed as text: two spellings of the same year would give two hashes.
 
-**Sanity bound.** Ruling R6 names "one sanity bound near 12000 BCE". The brief proposes 12000 BCE.
+**The bound.** Four digits reach `-9999`, which is 10000 BCE. R6 names "one sanity bound near 12000 BCE". A bound of 12000 BCE needs five digits and a second width. The brief recommends 10000 BCE; Göbekli Tepe, at about 9500 BCE, fits.
 
-**What changes.** Text comparison and four-character year extraction both fail for signed years. Stage 2 replaces both.
+**Conversion.** JavaScript's and Python's date types cannot hold the stored form. The project converts with a routine of its own: a backend routine, a portal mirror and a test that ties the mirror to the backend, as `functionChainMirror.node-test.mjs` already does for function chains.
 
-- One routine parses a partial date into numbers and compares two dates. Every comparison in `convex/lib/historicalClaims.ts`, `occupancies.ts` and `functionChain.ts`, and in the portal copies, calls the routine.
-- Every pattern that expects a four-digit year, in the backend, the portal, the workbench, the agent intake and its schema, the Python intake (whose date type stops at year 1) and the Rust tool.
-- The date inputs in the portal, which allow ten characters and a numeric keyboard.
-- The builder of dated places, which today cannot read a year from `-0500`, and three places in the map popup that treat a year of 0 as missing.
+**Precision.** A BCE date takes a year only. Sources for BCE foundations rarely give a month.
 
-**Calendar.** Dates are ordered on the Gregorian calendar extended backwards. A source that gives a day before 15 October 1582 usually gives it on the Julian calendar, up to ten days apart. The brief proposes recording the date as the source gives it and accepting that difference. At year precision the difference rarely changes the recorded year.
+**Entry and display.** A contributor chooses CE or BCE beside the year and never sees the signed form. Every display shows "19 BCE", including the sentences that the backend stores for a function chain. The stored sentence for a CE date stays byte-identical.
 
-## 7. What does not change
+**What changes.**
 
-- **Stored records.** No stored date is rewritten. Both stages only widen what the validator accepts, so every existing record keeps its text and its hashes.
-- **Frozen exports.** A frozen export is served from stored bytes and cannot change.
-- **The slider.** The slider stays on census years (ruling R7). Whether the public map should offer a deep-time view is a separate question.
-- **Definition.** Whether an ancient ruin or a sacred site of great antiquity counts as a place of worship is a question for the operational definition. The date format only ensures that the answer can be recorded.
+- A comparison routine parses a partial date into numbers and compares two dates. The routine replaces text comparison and four-character year extraction in the backend and in the portal mirrors.
+- Every pattern that expects a four-digit year, in each copy listed in section 4.
+- The builder of dated places (`scripts/build_occupancy_dated_places.py`), which today returns no year for `-0500` and so silently drops the place. The builder should stop with an error.
+- The map popups, which show a year of 0 as missing and would show −18 for 19 BCE.
+- The Rust verifier, which must accept signed years before the first signed date is stored.
+- The exports. A spreadsheet reads `-0018` as −18 and strips the zeros from `0920`. The export gains a data dictionary and a numeric year column that is not hashed.
 
-## 8. Decisions for Joseph
+**A safety test.** Stage 2 re-derives every derived row from a current export with the new routine and requires that no hash changes.
+
+## 8. Calendars and approximate dates
+
+**The year.** A stored year is a year of the common era, or before it, that begins on 1 January.
+
+**Julian dates.** A source written before a country adopted the Gregorian calendar gives Julian dates. The two calendars differed by 10 days in 1582, 11 days from 1700, 12 from 1800 and 13 from 1900. Britain and its colonies changed in 1752; Romania changed in 1919. The contributor records a day as the source gives it and names the calendar in the source account.
+
+**The start of the year.** Before 1752, English and Irish sources began the year on 25 March. A date from January to late March in such a source belongs to the following modern year. The guide should say so with an example.
+
+**Other calendars.** Sources for several project countries use the Hijri calendar, the Vikram Samvat, the Buddhist Era or a regnal count. A year in one of these calendars spans two years of the common era. The contributor records such a year as a date between the two.
+
+**Approximate dates.** "Around" today means one year either side, which is too narrow for "c. 920". For a date before 1000 the contributor uses "between". The guide gives worked examples for a century ("3rd century BCE" is 300 to 201 BCE) and for a date in years before present.
+
+## 9. What stays the same
+
+- **Stored records.** No stored date is rewritten, and every existing record keeps its text and its hashes. The one narrowing is the year `0000` (section 5).
+- **Frozen exports.** A frozen export is served from stored bytes.
+- **The slider.** The slider stays on census years (ruling R7).
+- **The definition.** Whether an ancient ruin or a sacred site of great antiquity counts as a place of worship is a question for the operational definition. The date format only ensures that the answer can be recorded.
+
+## 10. Decisions for Joseph
 
 Each decision carries the brief's recommendation.
 
-1. **Staging.** Build stage 1 and the floor change first, and stage 2 after. *Recommended.* Stage 1 is small and removes most refusals; stage 2 touches every comparison.
-2. **The floor.** Replace the refusal with a confirmation in the portal (section 5). *Recommended.* The alternative keeps the refusal and lowers the floors.
-3. **Stage 1 form.** Four digits with leading zeros, and `0000` refused. *Recommended.*
-4. **Stage 2 stored form.** The signed form of ISO 8601. *Recommended*, because the form is standard and other date tools read it.
-5. **Stage 2 entry.** Contributors write and read "19 BCE". *Recommended.*
-6. **Stage 2 precision.** Year only for BCE dates. *Recommended.*
-7. **Sanity bound.** 12000 BCE. *Recommended*, following R6.
-8. **Calendar.** Record a date as the source gives it, ordered on the extended Gregorian calendar. *Recommended.*
+1. **Stage 1 scope.** Build proposals 1 and 2 together. *Recommended.*
+2. **Two validators.** Historical dates accept years from 1; observation dates keep 1000 to 2100. *Recommended.*
+3. **Stage 1 form.** Four digits with leading zeros; `0000` refused until stage 2. *Recommended.*
+4. **The floor.** Option C, a stored confirmation. *Recommended.* Options A and B are in section 6.
+5. **The nine floors of 24 November.** Confirm or change the values in section 3. Under option C each value is the year below which a confirmation is required.
+6. **Stage 2 stored form.** A minus sign and four digits, astronomical numbering, one spelling. *Recommended.*
+7. **The bound.** 10000 BCE, in place of R6's "near 12000 BCE". *Recommended.* The alternative is 12000 BCE with five digits for every BCE year.
+8. **Stage 2 precision.** Year only for BCE dates. *Recommended.*
+9. **Entry.** A CE or BCE choice beside the year. *Recommended.*
+10. **Calendars.** The rules of section 8. *Recommended.*
+11. **Exports.** A data dictionary and an unhashed numeric year column. *Recommended.*
 
-## 9. Build order
+## 11. Build order
 
-1. Stage 1 and the shared test file, in one pull request. Backend first, because the change widens validation.
-2. The floor change, in a second pull request, with the RA guide updated to describe the confirmation.
-3. Stage 2, after rulings 4 to 8: the comparison routine and its tests first, then the callers, then entry and display.
+1. Stage 1 in the backend: the two validators, the padded form, the confirmation field and the shared test. The backend goes first because the change widens validation.
+2. Stage 1 in the portal and the workbench: the confirmation beside the date field, the three-digit question, and the RA guide.
+3. Stage 2, after rulings 6 to 9: the comparison routine and its mirror first, then the callers, then entry, display and exports.
 
-Each pull request states which copies of the validator it changes and shows the shared test passing against all of them.
+Each pull request states which copies of the validators it changes and shows the shared test passing against every copy.
+
+## 12. How the brief was made
+
+Claude Fable 5.2 drafted the brief from a read-only inventory of the repository at `51f9782b`. Claude Sonnet 5.5 reviewed the first draft for accuracy and Claude Opus 5.5 reviewed its design; both asked for changes, and this version answers them.
