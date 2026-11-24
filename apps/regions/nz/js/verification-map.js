@@ -655,7 +655,9 @@ const ENTRY_COUNTRY_WORLD_MANIFEST = "../../shared/data/world-outlines.json";
 const REGISTRY_REGIONS = [...COUNTRY_REGISTRY.values()]
     .filter(entry => Array.isArray(entry.bbox) && entry.bbox.length === 4)
     .map(entry => ({ code: String(entry.code || "").toLowerCase(), name: entry.name || "", boxes: [entry.bbox] }));
-// F1: the contracts validate dates against this country's floor (date-floor.js)
+// F1: the contracts validate dates against a country's floor (date-floor.js).
+// this is the page's floor, in force until the portal binds the live one
+// (bindDateFloor), which follows the country the open form records
 window.POW_DATE_FLOOR_YEAR = window.PowDateFloor ? window.PowDateFloor.yearFor(COUNTRY_CONFIG.countryCode) : 1600;
 const TARGET_YEARS = COUNTRY_CONFIG.targetYears;
 const DEFAULT_TARGET_YEAR = COUNTRY_CONFIG.defaultTargetYear || TARGET_YEARS[TARGET_YEARS.length - 1] || "";
@@ -1968,6 +1970,7 @@ function assignmentQuickstartHtml() {
 
 class NzVerificationMap {
     constructor() {
+        this.bindDateFloor();
         this.map = null;
         this.markerLayer = null;
         this.tasks = [];
@@ -4281,6 +4284,27 @@ class NzVerificationMap {
     // photo fix's, else the page's
     entryCountry() {
         return this.pinCountry || this.quickPhoto?.country || this.pageCountry();
+    }
+
+    // the country whose date floor governs the open form, which is the
+    // country the server validates against: an existing task's own (a
+    // contributor's own task can sit in another country than the page's,
+    // and a period's pin placed for that task does not change it), else
+    // the country the new entry records
+    dateFloorCountryCode() {
+        const periodTaskId = this.occupancyPinContext?.context?.taskId;
+        const task = this.selectedTask || (periodTaskId ? this.featureForTaskId(periodTaskId) : null);
+        return task?.properties?.country_code || this.entryCountry().code;
+    }
+
+    // F1: the contracts read window.POW_DATE_FLOOR_YEAR each time they
+    // validate, so the floor is computed on read and cannot go stale when
+    // a pin crosses a border or another task opens
+    bindDateFloor() {
+        Object.defineProperty(window, "POW_DATE_FLOOR_YEAR", {
+            configurable: true,
+            get: () => (window.PowDateFloor ? window.PowDateFloor.yearFor(this.dateFloorCountryCode()) : 1600),
+        });
     }
 
     notePinCountry(latlng) {

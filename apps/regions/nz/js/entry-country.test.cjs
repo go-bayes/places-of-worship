@@ -56,7 +56,7 @@ const context = vm.createContext({
   window, document, localStorage, sessionStorage: localStorage, navigator,
   URLSearchParams, Map, Set, Date, Number, String, Boolean, Object, Array, Math, JSON, RegExp, Intl, console, setTimeout, clearTimeout, Promise, Error,
 });
-for (const file of ["../../../shared/data/country-registry.js", "../../../shared/region-resolve.js", "occupancy-contract.js", "function-chain-contract.js", "task-presentation.js", "verification-map.js"]) {
+for (const file of ["../../../shared/data/country-registry.js", "../../../shared/region-resolve.js", "date-floor.js", "occupancy-contract.js", "function-chain-contract.js", "task-presentation.js", "verification-map.js"]) {
   vm.runInContext(fs.readFileSync(path.join(__dirname, file), "utf8"), context, { filename: file });
 }
 
@@ -165,6 +165,52 @@ const fresh = () => {
   assert.equal(app.ownWorkBatch("ra-issues-vu"), true);
   assert.equal(app.ownWorkBatch("nz-temporal-ra-workpack-001"), false);
   assert.equal(app.ownWorkBatch(""), false);
+}
+
+// 6. the date floor follows the country the server validates against (jb
+//    2026-11-24: "we must make dates robust"): the entry's country for a
+//    new entry, an existing task's own country otherwise. the contracts read
+//    the floor on every validation, so it cannot go stale
+{
+  const app = fresh();
+  app.selectedTask = null;
+  app.occupancyPinContext = null;
+  app.tasks = [{ properties: { task_id: "t-ie", country_code: "IE" } }];
+  app.backendTasksById = new Map();
+  app.bindDateFloor();
+  const valid = value => window.PowOccupancy.isValidPartialDate(value);
+  // the sweden page has no ruled floor: the default
+  assert.equal(window.POW_DATE_FLOOR_YEAR, 1600);
+  assert.equal(valid("1344"), false);
+  // a pin in czechia: the entry is recorded there, and so is its floor
+  app.pinCountry = { code: "CZ" };
+  assert.equal(window.POW_DATE_FLOOR_YEAR, 1000);
+  assert.equal(valid("1344"), true);
+  // a quick photo's fix counts when no pin is down
+  app.pinCountry = null;
+  app.quickPhoto = { country: { code: "MX" } };
+  assert.equal(window.POW_DATE_FLOOR_YEAR, 1500);
+  assert.equal(valid("1344"), false);
+  assert.equal(valid("1520"), true);
+  app.quickPhoto = null;
+  // an open task is validated against its own country, whatever the page
+  // or a leftover pin says
+  app.selectedTask = { properties: { task_id: "t-nz", country_code: "NZ" } };
+  app.pinCountry = { code: "CZ" };
+  assert.equal(window.POW_DATE_FLOOR_YEAR, 1600);
+  assert.equal(valid("1344"), false);
+  // a period's pin placed for a task keeps that task's floor: pin mode
+  // releases the selection, and the pin may sit across a border
+  app.selectedTask = null;
+  app.occupancyPinContext = { context: { taskId: "t-ie" }, index: 0 };
+  app.pinCountry = { code: "NZ" };
+  assert.equal(app.dateFloorCountryCode(), "IE");
+  assert.equal(window.POW_DATE_FLOOR_YEAR, 1000);
+  assert.equal(valid("1344"), true);
+  // back to the page once everything closes
+  app.occupancyPinContext = null;
+  app.pinCountry = null;
+  assert.equal(window.POW_DATE_FLOOR_YEAR, 1600);
 }
 
 console.log("entry-country: ok");
