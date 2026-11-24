@@ -199,6 +199,13 @@ const fresh = () => {
   app.pinCountry = { code: "CZ" };
   assert.equal(window.POW_DATE_FLOOR_YEAR, 1600);
   assert.equal(valid("1344"), false);
+  // and a task in a country with a lower floor than the page's opens it
+  app.selectedTask = { properties: { task_id: "t-uk", country_code: "UK" } };
+  app.pinCountry = null;
+  assert.equal(window.POW_DATE_FLOOR_YEAR, 1000);
+  assert.equal(valid("1344"), true);
+  app.selectedTask = { properties: { task_id: "t-nz", country_code: "NZ" } };
+  app.pinCountry = { code: "CZ" };
   // a pane opened for another task outranks the selection: the pane names
   // its task, here one from the task list
   app.dateFloorTaskKey = "t-ie";
@@ -236,6 +243,39 @@ const fresh = () => {
   assert.equal(app.dateFloorCountryCode(), "SE");
   app.dateFloorTaskKey = null;
   assert.equal(window.POW_DATE_FLOOR_YEAR, 1600);
+}
+
+// 7. the wiring block 6 relies on, read from the source: the constructor
+//    binds the live floor, every form names its task when it opens and
+//    before it validates, the neutral screens clear the name, and the three
+//    places that create a task with the entry's country record it
+{
+  const source = fs.readFileSync(path.join(__dirname, "verification-map.js"), "utf8");
+  const method = name => {
+    const start = source.search(new RegExp(`^    (?:async )?${name}\\([^)]*\\) \\{$`, "m"));
+    assert.ok(start >= 0, `${name} not found`);
+    const rest = source.slice(start + 1);
+    const end = rest.search(/^    (?:async )?[A-Za-z_]+\([^)]*\) \{$/m);
+    return rest.slice(0, end < 0 ? undefined : end);
+  };
+  assert.match(method("constructor"), /this\.dateFloorTaskKey = null;[\s\S]*this\.taskCountryById = new Map\(\);[\s\S]*this\.bindDateFloor\(\);/);
+  for (const name of ["renderHistoricalClaimEntry", "renderOccupancyEntry", "submitHistoricalClaim", "submitOccupancies"]) {
+    assert.match(method(name), /this\.dateFloorTaskKey = context\.taskId \|\| null;/, name);
+  }
+  assert.match(method("bindGuidedPeriods"), /this\.dateFloorTaskKey = taskId;/);
+  assert.match(method("guidedPeriodsError"), /this\.dateFloorTaskKey = taskId \|\| null;/);
+  assert.match(method("rapidPeriodsPlan"), /this\.dateFloorTaskKey = periodsKey;/);
+  for (const name of ["renderDetail", "renderInitialDetail", "enterPinMode", "exitPinMode"]) {
+    assert.match(method(name), /this\.dateFloorTaskKey = null;/, name);
+  }
+  assert.equal((source.match(/this\.noteTaskCountry\(result\.task_id, entryCountry\.code\)/g) || []).length, 3);
+  // and the screens that clear it do clear it
+  const app = fresh();
+  app.dateFloorTaskKey = "t-ie";
+  element("detailPanel");
+  app.setEntryOpen = () => {};
+  try { app.renderInitialDetail(); } catch (error) { /* the stub dom renders no further */ }
+  assert.equal(app.dateFloorTaskKey, null);
 }
 
 console.log("entry-country: ok");

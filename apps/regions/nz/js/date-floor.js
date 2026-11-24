@@ -38,7 +38,7 @@
         return Number.isInteger(floor) ? floor : DEFAULT_DATE_FLOOR_YEAR;
     }
 
-    // the floor in force on this page: set by the portal for its country
+    // the floor in force on this page: computed by the portal for the open form's country
     function current() {
         const value = Number(window.POW_DATE_FLOOR_YEAR);
         return Number.isInteger(value) && value > 0 ? value : DEFAULT_DATE_FLOOR_YEAR;
