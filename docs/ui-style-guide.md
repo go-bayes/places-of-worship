@@ -142,12 +142,13 @@ tap to revise`. The dots paint on canvas tiles, never as DOM paths (the
 overview tiles of a phone's viewport at country scale carried 317,000
 places across Europe, 7,500 of them in Sweden, and iOS Safari killed the
 page on the first pinch, 2026-09-22); below zoom 8 only the portal's own
-country's `ra-dots-<cc>-20260722` archive loads (a country with no archive
-gets the grid-thinned `places-overview-v2-20260722-grid` overview, whose
-dots name nothing and zoom the map in when tapped; the United States,
-Germany and Italy, whose archives exceed 10 MB, use that overview below zoom
-6 and the thinned places tier at zooms 6 and 7), and from zoom 8 every
-place draws, a neighbour's dot with its own portal named in the popup.
+country's `ra-dots-<cc>-20260901` archive loads (a country with no archive
+gets the grid-thinned `places-overview-v2-20260901-grid` overview, whose
+dots name nothing and zoom the map in when tapped; the United States, whose
+archive exceeds 10 MB, uses that overview below zoom 6 and the thinned
+places tier at zooms 6 and 7), and from zoom 8 every place draws, a
+neighbour's dot with its own portal named in the popup. The portals never
+draw the public map's possible or former places.
 
 Under the zoom buttons at the top left of the map are two icon buttons of
 one shape (`.map-icon-control` in `apps/regions/_shared/theme.css`: 44 px,
@@ -306,6 +307,22 @@ Contrast (WCAG relative luminance) on the pairs the pages actually draw; the Dar
 | `--not-assessed` on `--panel` | 8.7:1 | 7.9:1 |
 | `--absent` on `--panel` | 10.3:1 | 9.1:1 |
 | `--ink` on `--bg` | 15.2:1 | 15.4:1 |
+
+### Possible or former places on the public map
+
+One checkbox row in the public map's key, "Possible or former places", on the global map and every country page (JB ruling, 2026-11-23: "Strict + flagged extras"), draws buildings OpenStreetMap maps as a church, mosque, temple, synagogue or chapel without the place-of-worship tag as hollow rings from zoom 8 (`apps/regions/_shared/region-map.js`, `POSSIBLE_*`). The row sits under the religion list and above the total: a native checkbox, the ring swatch, the label, and a muted qualifier under it, "not counted", which reads "appear when you zoom in" while the switch is on below zoom 8. It is unchecked on every page load and carried in no link or stored state. The rings draw only beside the 1 September 2026 snapshot dots, in the "Points: all" mode: not with the points off, and not in "Points: period", which shows only places dated evidence puts in the census year. The legend and the switch are one row, so the key needs no separate legend entry. The ring is two strokes and no fill: a white inner ring (`#ffffff`, 1.25 px) inside a slate outer ring (`#334155`, 1.5 px, the dated layer's later-foundation slate). It carries no religion colour, because most of these buildings have no religion tag and colour would make them read as counted places; the shape carries the meaning, so nothing depends on colour. Its outer edge stays inside a place dot's at every zoom, and it draws beneath the dots. A counted dot within 12 px of a click or tap takes priority over a ring. Dated places and Pulotu culture symbols take priority when hit directly. A ring's hover label stands 10 px clear of the ring and hides while the ring's popup is open. The popup offers Street View and Open OSM. A counted-place click clears the ring’s hover label. Hiding rings closes their popups and clears their hover labels and cursor. The same cleanup applies below zoom 8 and to rings excluded by a religion filter. The portals never draw these rings.
+
+The two strokes divide the work: the slate ring holds 3:1 against any background of relative luminance 0.254 or more, and the white ring against any of 0.30 or less, so one of them holds 3:1 against every basemap colour. Measured on 2026-11-23 against the basemap pixels 2.5 to 5 px outside 13 rings at desktop width (Rome at zoom 14.5, Wellington at 13.5 and the outskirts of Munich at 12.5, census layer off), with the design colours:
+
+| Basemap | Background luminance | Slate ring | White ring | Better of the two, lowest | Place-dot edge `#0b0c10`, lowest |
+| --- | --- | --- | --- | --- | --- |
+| Backdrop (the default) | 0.16 to 0.98 | 2.1 to 10.2:1 | 1.0 to 5.0:1 | 3.6:1 (median 8.3:1) | 4.0:1 |
+| Streets | 0.66 to 0.90 | 7.0 to 9.3:1 | 1.1 to 1.5:1 | 7.0:1 | 13.2:1 |
+| Satellite | 0.05 to 0.20 | 1.0 to 2.5:1 | 4.2 to 10.7:1 | 4.2:1 (median 6.2:1) | 1.8:1 (median 3.2:1) |
+| OpenStreetMap | 0.53 to 0.95 | 5.8 to 9.9:1 | 1.0 to 1.8:1 | 5.8:1 | 10.9:1 |
+| Dataviz | 0.77 to 0.96 | 8.1 to 9.9:1 | 1.0 to 1.3:1 | 8.1:1 | 15.2:1 |
+
+The public map has no Hybrid basemap; Satellite is its imagery case. Read from the rendered pixels instead, where the strokes are antialiased, the better stroke reached a median of 5.2:1 on Satellite at a device pixel ratio of 1 but fell to 1.4:1 at one ring, where the antialiased white stroke blended into the imagery; at a ratio of 2 (phones, two rings a basemap) the lowest rendered figure was 4.6:1.
 
 ## Status Components
 

@@ -1,9 +1,11 @@
-// source-level checks for the tiles v2 client switch (build 20260722): the
-// shared runtime reads the slim overview sample and the places-v2 tier (z6-7
-// sampled), the counts panel says "places shown" below zoom 8, the RA and review portals read per-country
-// ra-dots archives, and every page loading a changed script carries the
-// bumped cache-busting query. browser behaviour is checked separately in
-// the pull request; these checks stop the wiring regressing.
+// source-level checks for the tiles client (the openstreetmap edition of
+// 2026-09-01): the shared runtime reads the grid-thinned overview and the
+// places tier (z6-7 thinned), the counts panel says "places shown" below
+// zoom 8, the possible or former archive is a separate source drawn only in
+// its points mode, the RA and review portals read per-country ra-dots
+// archives, and every page loading a changed script carries the bumped
+// cache-busting query. browser behaviour is checked separately in the pull
+// request; these checks stop the wiring regressing.
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
@@ -18,9 +20,9 @@ const unvalidated = read("regions", "nz", "js", "unvalidated-places.js");
 
 // shared runtime: versioned places tier (z6-7 grid-thinned, z8-18 identical to
 // the live tier), source minzoom still 6 so nothing below z6 is requested
-assert.match(runtime, /places: "https:\/\/tiles\.placemap\.org\/places-v2-20260722-grid\/\{z\}\/\{x\}\/\{y\}"/);
+assert.match(runtime, /places: "https:\/\/tiles\.placemap\.org\/places-v2-20260901-grid\/\{z\}\/\{x\}\/\{y\}"/);
 assert.doesNotMatch(runtime, /tiles\.placemap\.org\/places\/\{z\}/);
-assert.doesNotMatch(runtime, /tiles\.placemap\.org\/places-v2-20260722\/\{z\}/, "the fraction-sampled places tier is retired");
+assert.doesNotMatch(runtime, /20260722/, "no july archive is read");
 const placesSource = runtime.slice(runtime.indexOf("map.addSource(SOURCES.places"), runtime.indexOf("map.addLayer({\n    id: LAYERS.places"));
 assert.match(placesSource, /tiles: \[CONFIG\.tiles\.places\],\s+minzoom: 6,\s+maxzoom: 18,/);
 
@@ -29,9 +31,21 @@ assert.match(unvalidated, /const PLACES_TILE_URL = `https:\/\/tiles\.placemap\.o
 assert.match(unvalidated, /const PLACES_MIN_ZOOM = 8;/);
 
 // shared runtime: versioned grid-thinned overview, source maxzoom 5, layer still to 6
-assert.match(runtime, /overview: "https:\/\/tiles\.placemap\.org\/places-overview-v2-20260722-grid\/\{z\}\/\{x\}\/\{y\}"/);
+assert.match(runtime, /overview: "https:\/\/tiles\.placemap\.org\/places-overview-v2-20260901-grid\/\{z\}\/\{x\}\/\{y\}"/);
 assert.doesNotMatch(runtime, /tiles\.placemap\.org\/places-overview\//);
-assert.doesNotMatch(runtime, /tiles\.placemap\.org\/places-overview-v2-20260722\/\{z\}/, "the fraction-sampled overview is retired");
+assert.doesNotMatch(unvalidated, /20260722/, "the portals read no july archive");
+
+// the possible or former archive: its own source and layer name, from zoom
+// 8, added only by the mode, and kept out of every count and the portals
+assert.match(runtime, /possible: "https:\/\/tiles\.placemap\.org\/places-v2-20260901-possible\/\{z\}\/\{x\}\/\{y\}"/);
+assert.match(runtime, /possible: "places_possible",/);
+const possibleSource = runtime.slice(runtime.indexOf("map.addSource(SOURCES.possible"), runtime.indexOf("// beneath the place dots, whether"));
+assert.match(possibleSource, /tiles: \[CONFIG\.tiles\.possible\],\s+minzoom: POSSIBLE_MIN_ZOOM,\s+maxzoom: 18,/);
+assert.match(runtime, /const POSSIBLE_MIN_ZOOM = 8;/);
+// the counts query one layer, the overview or the places, never the rings
+assert.match(runtime, /const preferredLayer = zoom < 6 \? LAYERS\.overview : LAYERS\.places;\n\s*if \(!map\.getLayer\(preferredLayer\)\) return;\n\s*const features = map\.queryRenderedFeatures\(\{ layers: \[preferredLayer\] \}\);/);
+assert.doesNotMatch(verification, /places_possible|-possible\//, "the ra portal never requests the rings");
+assert.doesNotMatch(review, /places_possible|-possible\//, "the review portal never requests the rings");
 // a grid-thinned dot counts the places it stands for, and a tap on one zooms in
 assert.match(runtime, /const places = Number\.isFinite\(n\) && n > 1 \? n : 1;/);
 assert.match(runtime, /function isRepresentativeDot\(props\)/);
@@ -61,20 +75,31 @@ assert.match(review, /createLayers\(L, \{ countryCode: tileIso \}\)/);
 assert.match(review, /registry\?\.iso2 \|\| options\.countryCode/);
 assert.doesNotMatch(unvalidated, /overviewKeep/);
 
+const raGuide = read("guides", "ra.html");
+assert.match(raGuide, /At zooms 0–6, a dot can represent several nearby places and tapping it zooms in\./);
+assert.match(raGuide, /At zoom 7,[^.]+opens the popup for the OpenStreetMap record/);
+assert.match(raGuide, /From zoom 8, every place has its own dot and popup\./);
+assert.match(raGuide, /a popup shows the record’s name when OpenStreetMap supplies one/);
+assert.match(runtime, /place dots show OpenStreetMap places as at 1 September 2026/);
+assert.match(runtime, /the OpenStreetMap snapshot as at 1 September 2026 is hidden/);
+assert.doesNotMatch(runtime, /census-legend-note[^\n]*today's/);
+
 // every html page that loads a changed script carries the bumped query
-// one stamp per script: a script's stamp moves only when that script changes
+// scripts with later changes carry their own stamps
 const stamps = {
-    "region-map.js": "20261103e", // census panel opens folded on every screen
+    "region-map.js": "20261124e", // accept only the expected override rule and count
     "datamaps-switcher.js": "20261013a", // switcher rows prerender; warming waits for activation
-    "unvalidated-places.js": "20261013b", // versioned grid places url; us, de and it use the grid tier from zoom 6
-    "verification-map.js": "20261111a", // photos attach to submitted portal records
+    "unvalidated-places.js": "20261123c", // september archives and country lists; feature id from properties
+    "verification-map.js": "20261123c", // match typed osm objects during hand-off
     "occupancy-contract.js": "20261019a", // relocation rules follow definition 0.1.6
     "occupancy-review.js": "20261019a", // move wording and successor in the reviewer's period summary
     "task-presentation.js": "20261015c", // decided-status and reopen-flag helpers
     "convex-task-client.js": "20261103a", // the sign-in button takes a width from its caller
-    "review-portal.js": "20261103e", // linked place: warn once on unmatched ids, record anyway
-    "review-map.js": "20261103a", // the legend becomes the folding map data panel
+    "review-portal.js": "20261123c", // report unresolved country codes
+    "review-map.js": "20261124b", // match the osm type and id from a clicked dot
 };
+// stylesheets that changed with a script, checked the same way
+stamps["maplibre-flat.css"] = "20261123c"; // the key's possible-or-former row
 const scripts = Object.keys(stamps);
 const pages = [];
 (function walk(dir) {
@@ -90,7 +115,7 @@ pages.forEach(page => {
     scripts.forEach(name => {
         const pattern = new RegExp(`${name.replace(".", "\\.")}\\?v=(\\w+)`, "g");
         for (const match of html.matchAll(pattern)) {
-            assert.equal(match[1], stamps[name],`${path.relative(apps, page)}: ${name} is ?v=${match[1]}`);
+            assert.equal(match[1], stamps[name], `${path.relative(apps, page)}: ${name} is ?v=${match[1]}`);
             checked += 1;
         }
     });

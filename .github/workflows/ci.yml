@@ -55,6 +55,7 @@ jobs:
           node apps/regions/_shared/region-map-startup.test.cjs
           node apps/regions/_shared/census-chrome.test.cjs
           node apps/regions/_shared/tiles-v2-client.test.cjs
+          node apps/regions/_shared/possible-places.test.cjs
           node apps/regions/_shared/denomination-filter.test.cjs
           node apps/regions/_shared/counts-label.test.cjs
           node apps/regions/_shared/escape-map-text.test.cjs
