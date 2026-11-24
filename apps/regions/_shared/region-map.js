@@ -931,13 +931,34 @@ function datedPlacePopupHtml(pr, coords) {
 // deep link into the portal's revise flow for a public-map place (jb
 // 2026-09-03): the portal reads ?revise=1 and opens the same card a click
 // on the place's dot would. empty on pages without a portal
-// the country a public-map place belongs to, for its revise link (pr-h2):
-// the page's own country; else a tile code supported by the portal; else
-// the country under the point (page manifest, then world outlines)
+let placeCountryOverrides = new Map();
+async function loadPlaceCountryOverrides() {
+  const edition = CONFIG.tiles.places.match(/\/places-v2-(\d{8})-[^/]+\//)?.[1];
+  try {
+    const res = await fetch(`${SHARED_BASE}data/place-country-overrides.json`);
+    const doc = res.ok ? await res.json() : null;
+    if (!edition || doc?.tiles_edition !== edition || !Array.isArray(doc.rules)) return;
+    const overrides = new Map();
+    for (const rule of doc.rules) {
+      const override = { portalCountry: rule.portal_country.toLowerCase(), tileCountry: rule.tile_country };
+      for (const id of rule.ids) overrides.set(id, override);
+    }
+    placeCountryOverrides = overrides;
+  } catch {
+    // the revise link can still use the tile code or the country under the point
+  }
+}
+
+// revise-link country: the page's country, then an edition-specific override
+// or tile code supported by the portal, then the country under the point
 function countryForPlace(props, lat, lng) {
   if (RC.countryCode) return { code: RC.countryCode };
-  const tileCode = projectCountryCode(props?.country_code);
   const registry = window.POW_COUNTRY_REGISTRY?.countries || [];
+  const override = placeCountryOverrides.get(props?.id);
+  if (override && props.country_code === override.tileCountry && registry.some((entry) => entry.code === override.portalCountry)) {
+    return { code: override.portalCountry };
+  }
+  const tileCode = projectCountryCode(props?.country_code);
   if (tileCode && registry.some((entry) => entry.code === tileCode)) return { code: tileCode };
   if (Number.isFinite(lat) && Number.isFinite(lng)) {
     const region = countryUnderPoint(lng, lat);
@@ -6791,6 +6812,7 @@ if (offerGo && !RC.disableBorderHandoff) {
         // the global map also learns the countries without a page, for
         // the contribute entry alone; deferred behind the page manifest
         if (!HANDOFF_HOME) {
+          loadPlaceCountryOverrides();
           fetch(`${SHARED_BASE}data/world-outlines.json`)
             .then((res) => (res.ok ? res.json() : null))
             .then((world) => {

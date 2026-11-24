@@ -5,6 +5,7 @@
 // knows opens the neutral world view. r-h4: signed out, the unvalidated
 // dot's popup offers sign-in and the click parks the place as the pending
 // deep link; a dot across the border names its own portal
+const { createHash } = require("node:crypto");
 const fs = require("node:fs");
 const path = require("node:path");
 const vm = require("node:vm");
@@ -147,24 +148,27 @@ check(gb.COUNTRY_CONFIG.countryCode === "UK", `The iso code gb must open the uk 
 const shared = path.join(__dirname, "../../../shared");
 const globalPage = fs.readFileSync(path.join(__dirname, "../../../global/index.html"), "utf8");
 check(/<script src="[^"]+country-registry\.js\?v=\w+"><\/script>\s*<script src="[^"]+region-map\.js/.test(globalPage), "The global map must load the shared registry before the map runtime.");
+const runtime = fs.readFileSync(path.join(__dirname, "../../_shared/region-map.js"), "utf8");
+const placesUrl = runtime.match(/places: "(https:\/\/[^"]+)"/)[1];
 const publicMap = vm.createContext({
   window: { POW_COUNTRY_REGISTRY: fiji.window.POW_COUNTRY_REGISTRY },
   URLSearchParams, RC: {}, CONTRIBUTE_ROUTES: {}, PORTAL_BASE: "../regions/nz/", UNNAMED_PLACE: "Unnamed place",
+  CONFIG: { tiles: { places: placesUrl } }, SHARED_BASE: "../shared/",
   handoffRegions: JSON.parse(fs.readFileSync(path.join(__dirname, "../../_shared/data/region-bboxes.json"))).regions,
   worldRegions: JSON.parse(fs.readFileSync(path.join(shared, "data/world-outlines.json"))).regions,
 });
 vm.runInContext(fs.readFileSync(path.join(shared, "region-resolve.js"), "utf8"), publicMap);
-const runtime = fs.readFileSync(path.join(__dirname, "../../_shared/region-map.js"), "utf8");
-const lift = (name) => {
-  const start = runtime.indexOf(`function ${name}(`);
+const lift = (signature) => {
+  const start = runtime.indexOf(`${signature}(`);
   return runtime.slice(start, runtime.indexOf("\n}\n", start) + 2);
 };
 vm.runInContext([
   'const normaliseLng = window.RegionResolve.normaliseLng;',
   'const PROJECT_CODE_FOR_ISO = { gb: "uk" };',
-  ...["projectCountryCode", "countryForPlace", "countryUnderPoint", "portalReviseHref"].map(lift),
+  runtime.match(/^let placeCountryOverrides = .*;$/m)[0],
+  ...["function projectCountryCode", "function countryForPlace", "function countryUnderPoint", "function portalReviseHref", "async function loadPlaceCountryOverrides"].map(lift),
 ].join("\n"), publicMap);
-const mapLink = (code, lat, lng) => new URL(publicMap.portalReviseHref("Place", lat, lng, { country_code: code }), "https://example.test/apps/global/");
+const mapLink = (code, lat, lng, id) => new URL(publicMap.portalReviseHref("Place", lat, lng, { country_code: code, id }), "https://example.test/apps/global/");
 const hongKong = mapLink("HK", "22.3193", "114.1694");
 const hongKongLegacy = mapLink("", "22.3193", "114.1694");
 check(hongKong.search === hongKongLegacy.search && hongKong.searchParams.get("country") === "cn", "The Hong Kong dot must use the same boundary as a dot with no code.");
@@ -173,6 +177,42 @@ check(load("?country=hk").get("COUNTRY_CONFIG.countryCode") === "ZZ", "A direct 
 const worldFallback = mapLink("HK", "22.24", "114.2");
 check(worldFallback.searchParams.get("country") === "zz" && load(worldFallback.search).get("COUNTRY_CONFIG.countryCode") === "ZZ", "A dot with no boundary must open the world contributor view.");
 check(mapLink("GB", "0", "0").searchParams.get("country") === "uk", "The tile ISO code GB must resolve to the portal's UK entry.");
+
+const overridesFile = JSON.parse(fs.readFileSync(path.join(shared, "data/place-country-overrides.json"), "utf8"));
+const [palestineRule] = overridesFile.rules;
+const overrideIds = new Set(palestineRule.ids);
+const boundary = path.join(shared, "../..", palestineRule.boundary);
+check(palestineRule.count === palestineRule.ids.length && overrideIds.size === 302 && overrideIds.size === palestineRule.count, "The Palestine rule must list and count 302 distinct keys.");
+check(palestineRule.ids.every((id) => /^[nrw][1-9]\d*$/.test(id)), "Each override must have a typed OpenStreetMap key.");
+check(createHash("sha256").update(fs.readFileSync(boundary)).digest("hex") === palestineRule.boundary_sha256, "The override boundary hash must match the file on disk.");
+check(!overrideIds.has("w751805614") && !overrideIds.has("n1977711181"), "The two places inside only the simplified outline must stay outside the override list.");
+const overriddenId = "n291872774";
+check(overrideIds.has(overriddenId), "The list must include the place inside the governorate boundary.");
+
+async function checkPlaceCountryOverrides() {
+  const reviseCountry = (code, id = overriddenId) => mapLink(code, "31.78", "35.23", id).searchParams.get("country");
+  publicMap.fetch = async () => { throw new Error("offline"); };
+  await publicMap.loadPlaceCountryOverrides();
+  check(reviseCountry("IL") === "il", "A failed override fetch must keep the tile country.");
+
+  publicMap.fetch = async () => ({ ok: true, json: async () => ({ ...overridesFile, tiles_edition: "20260722" }) });
+  await publicMap.loadPlaceCountryOverrides();
+  check(reviseCountry("IL") === "il", "An override file from a different edition must keep the tile country.");
+
+  publicMap.fetch = async (url) => ({ ok: url === "../shared/data/place-country-overrides.json", json: async () => overridesFile });
+  await publicMap.loadPlaceCountryOverrides();
+  const palestine = mapLink("IL", "31.78", "35.23", overriddenId);
+  check(palestine.searchParams.get("country") === "ps" && load(palestine.search).get("COUNTRY_CONFIG.countryCode") === "PS", "The matching global-map key must open the Palestine portal.");
+  publicMap.RC.countryCode = "il";
+  check(reviseCountry("IL") === "il", "The country page must keep its own country for the same key.");
+  delete publicMap.RC.countryCode;
+  check(reviseCountry("FR") === "fr", "A listed key with a different tile country must keep its tile country.");
+  check(reviseCountry("IL", "w751805614") === "il", "An unlisted key must keep its tile country.");
+  const registry = publicMap.window.POW_COUNTRY_REGISTRY;
+  publicMap.window.POW_COUNTRY_REGISTRY = { countries: registry.countries.filter((country) => country.code !== "ps") };
+  check(reviseCountry("IL") === "il", "An override without a supported portal country must keep the tile country.");
+  publicMap.window.POW_COUNTRY_REGISTRY = registry;
+}
 
 async function loadReview(search) {
   const elements = new Map();
@@ -202,6 +242,7 @@ async function loadReview(search) {
 }
 
 (async () => {
+  await checkPlaceCountryOverrides();
   const cn = await loadReview(`?country=${hongKong.searchParams.get("country")}`);
   check(cn.map[0]?.countryCode === "CN" && cn.queues.join() === "CN", "Review must open the resolved boundary country.");
   for (const query of ["?country=hk", "?country=", "?country=constructor"]) {
