@@ -112,17 +112,25 @@ export function confirmationsFor(
   return kept.length > 0 ? kept : undefined;
 }
 
-// the confirmations an edit that sends no list leaves on a record: an entry
-// survives only while its date is in the record both before and after the
-// edit, so a changed date loses its confirmation and a restored date needs a
-// new one; an edit never carries another writer's confirmation to a new date
+// the confirmations an edit that sends no list leaves on a record. each date
+// field is keyed by the field and the purpose of its date; an entry survives
+// only while every field that holds its date after the edit held the same
+// date for the same purpose before it. a changed date loses its confirmation,
+// a restored date needs a new one, and the same text set in another field,
+// or kept under another purpose, needs a fresh confirmation from its writer
+export type KeyedDate = { key: string; value: string };
+
 export function carriedConfirmations(
   stored: readonly ConfirmedDate[] | undefined,
-  previousDates: readonly (string | undefined)[],
-  nextDates: readonly (string | undefined)[],
+  previous: readonly KeyedDate[],
+  next: readonly KeyedDate[],
 ): ConfirmedDate[] | undefined {
-  const before = confirmationsFor(stored, previousDates);
-  return confirmationsFor(before, nextDates);
+  const before = new Set(previous.map((field) => `${field.key}=${field.value}`));
+  const kept = (stored ?? []).filter((entry) => {
+    const holders = next.filter((field) => field.value === entry.date);
+    return holders.length > 0 && holders.every((field) => before.has(`${field.key}=${field.value}`));
+  });
+  return kept.length > 0 ? kept : undefined;
 }
 
 export function isConfirmedDate(list: readonly ConfirmedDate[] | undefined, value: string): boolean {

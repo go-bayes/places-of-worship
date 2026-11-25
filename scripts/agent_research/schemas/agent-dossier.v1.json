@@ -193,7 +193,7 @@
               "confirmed_by": { "const": "agent" }
             }
           },
-          "description": "Dates written in date_start or date_end that fall before the date floor of the place's country and that the agent confirmed as written (deep-time dates, stage 1, ruling 7). Omit the list when no date needs it. The review queue treats a date only an agent confirmed as unconfirmed until a person confirms it."
+          "description": "Dates of this claim that the agent confirmed as written (deep-time dates, stage 1, ruling 7): a date_start or date_end before the date floor of the place's country, or the source's own source_date before 1000. A source_date after 2100 is refused even when listed. Omit the list when no date needs it. The production reader's output (reader-output.v1) cannot yet carry this field, so a claim it dates before the floor is refused at intake. The review queue treats a date only an agent confirmed as unconfirmed until a person confirms it."
         },
         "source": { "$ref": "#/$defs/source" },
         "quoted_support": {

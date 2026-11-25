@@ -3,7 +3,8 @@
 The pre-submit checks agree with ingestion (convex/lib/agentIntake.ts): an agent's dated
 claim meets the country's floor unless the agent confirmed the date; a documentary source's
 own date keeps 1000 to 2100, or falls before 1000 with the agent's confirmation; and the
-dossier builder carries the agent's confirmations.
+dossier builder carries a confirmation supplied to it. The production reader cannot yet emit
+one (its output schema has no such field), so its claims below the floor are refused.
 """
 import json
 import re
@@ -64,7 +65,27 @@ class AgentDatesTest(unittest.TestCase):
             self.assertEqual(int(re.search(rf'\b{code}: (\d+),', table).group(1)), floor, code)
         self.assertEqual(int(re.search(r'DEFAULT_DATE_FLOOR_YEAR = (\d+);', source).group(1)), intake.DEFAULT_DATE_FLOOR_YEAR)
 
-    def test_the_dossier_builder_carries_the_agents_confirmations(self):
+    def test_the_production_reader_cannot_yet_emit_a_confirmation(self):
+        # the reader's structured output (reader-output.v1) has no confirmed_dates, so a claim
+        # the production reader dates before the floor reaches intake unconfirmed and is
+        # refused; extending the reader's prompt and schema is a later step for the owner
+        import lib
+        reader_schema = json.loads(research_place.READER_SCHEMA_PATH.read_text())
+        claim = {'claim_type': 'start_date', 'value': '1590', 'date_start': '1590', 'date_end': None, 'date_precision': 'year',
+                 'source': {'locator': 'https://example.org/history', 'source_name': 'Parish history', 'source_type': 'other',
+                            'source_date': None, 'source_date_basis': 'not_stated'},
+                 'quoted_support': '', 'evidential_weight': 'secondary', 'confidence': 'low', 'note': ''}
+        item = {'$ref': '#/properties/claims/items'}
+        self.assertEqual(lib.validate(claim, item, reader_schema), [])
+        self.assertTrue(lib.validate({**claim, 'confirmed_dates': agent('1590')}, item, reader_schema))
+        place = {'place_ref': 'osm:node/1', 'name': 'Test chapel', 'country_code': 'NZ', 'seed_latitude': -41.3, 'seed_longitude': 174.8}
+        dossier = research_place.assemble_dossier(place, {'claims': [claim]}, 'claude', 'sonnet', {}, '2026-11-25T00:00:00Z', '2026-11-25T00:01:00Z', 60.0, 'run-1', 'nz-v1')
+        self.assertNotIn('confirmed_dates', dossier['claims'][0])
+        errors = intake.claim_date_rule_errors(dossier['claims'][0], 'claims[0]', intake.DATE_FLOOR_YEARS['NZ'])
+        self.assertTrue(any('earlier than 1600' in e for e in errors))
+
+    def test_the_dossier_builder_carries_a_confirmation_supplied_to_it(self):
+        # a confirmation handed to the builder directly (not yet by the production reader)
         place = {'place_ref': 'osm:node/1', 'name': 'Test chapel', 'country_code': 'NZ', 'seed_latitude': -41.3, 'seed_longitude': 174.8}
         output = {'claims': [
             {'claim_type': 'start_date', 'value': '1590', 'date_start': '1590', 'date_precision': 'year',

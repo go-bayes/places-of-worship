@@ -40,3 +40,9 @@ test("finding 5: a chain may confirm every date it can hold", () => {
   const confirmed = { ...chain, confirmed_dates: Array.from({ length: 42 }, (_, i) => ({ date: year(i), confirmed_by: "contributor" })) };
   assert.doesNotThrow(() => assertFunctionChain(confirmed, "2026-09-02", 1000));
 });
+
+test("round 2, finding 5: a capture timestamp is checked in full, and only a documentary source takes the early exception", () => {
+  assert.throws(() => assertEvidenceDraftSubmission({ source_type: "field_observation", source_date_or_capture_date: "2020-01-01Tgarbage" }, false, VU_FLOOR), /from 1000 to 2100|timestamp/);
+  assert.doesNotThrow(() => assertEvidenceDraftSubmission({ source_type: "field_observation", source_date_or_capture_date: "2020-01-01T03:38:13.597Z" }, false, VU_FLOOR));
+  assert.throws(() => assertEvidenceDraftSubmission({ source_date_or_capture_date: "0920", confirmed_dates: [{ date: "0920", confirmed_by: "contributor" }] }, false, VU_FLOOR), /from 1000 to 2100/);
+});

@@ -73,20 +73,26 @@ class PartialDatesTest(unittest.TestCase):
                     with self.subTest(schema=name, pointer=pointer, value=row["value"]):
                         self.assertEqual(lib.validate(row["value"], {"$ref": pointer}, root) == [], row["form"])
 
-    def test_dated_places_builder_reads_padded_years_and_nothing_else(self):
-        # scripts/build_occupancy_dated_places.py reads the year of a real historical date,
-        # padded years included, and no year from anything else (0000, other digits, an
-        # impossible day)
+    def test_dated_places_builder_reads_padded_years(self):
+        # scripts/build_occupancy_dated_places.py takes the year from the first four characters,
+        # which reads a padded year as written; stage 1 leaves the reader as it was
         builder = load_builder()
-        historical = {row["value"] for row in ROWS if row["historical"]}
         for row in ROWS:
-            # the builder trims a value before reading it, as the backend did before storing it
-            text = row["value"].strip()
-            with self.subTest(value=row["value"]):
-                if text != row["value"]:
-                    self.assertEqual(builder.year_of(row["value"]), builder.year_of(text))
-                else:
-                    self.assertEqual(builder.year_of(row["value"]), int(text[:4]) if text in historical else None)
+            if row["historical"]:
+                with self.subTest(value=row["value"]):
+                    self.assertEqual(builder.year_of(row["value"]), int(row["value"][:4]))
+
+    def test_dated_places_feature_draws_padded_years_and_keeps_stored_projections(self):
+        # the generated map feature: a period from 0920 draws from the year 920, and a period
+        # stored before stage 1 with an end the stage 1 rules would refuse draws as it did
+        builder = load_builder()
+        task = {"task_id": "t1", "name": "Mission church", "country_code": "CZ", "geometry": {"type": "Point", "coordinates": [14.4, 50.09]}}
+        base = {"task_id": "t1", "occupancy_id": "o1", "segment_index": 0, "location_relation": "same_as_task_point",
+                "latitude": 50.09, "longitude": 14.4, "location_mode": "building_identified", "start_basis": "founding_stated"}
+        padded = builder.occupancy_feature({**base, "start_mode": "known", "start_date": "0920", "end_mode": "known", "end_date": "1421", "end_basis": "closure_stated"}, task, "b1", {})
+        self.assertEqual((padded["properties"]["start_year"], padded["properties"]["end_year"]), (920, 1421))
+        stored = builder.occupancy_feature({**base, "start_mode": "known", "start_date": "1910", "end_mode": "known", "end_date": "2020-02-30", "end_basis": "closure_stated"}, task, "b1", {})
+        self.assertEqual((stored["properties"]["start_year"], stored["properties"]["end_year"]), (1910, 2020))
 
     def test_fixture_bounds_agree_with_the_python_calendar(self):
         for row in ROWS:

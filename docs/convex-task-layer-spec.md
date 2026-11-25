@@ -422,8 +422,9 @@ Fields:
 - `source_date_or_capture_date`: optional partial date string, an observation
   date from 1000 to 2100. A documentary source's own date before 1000 is
   accepted when `confirmed_dates` holds it; the date of a field observation,
-  street or aerial imagery or a rapid current observation keeps the range
-  outright (deep-time dates, stage 1, rulings 3 and 4).
+  street or aerial imagery, a rapid current observation or a record with no
+  source type keeps the range outright (deep-time dates, stage 1, rulings 3
+  and 4).
 - `source_notes`.
 - `action`: map action value.
 - `target_year_statuses`: object keyed by the task batch's target years.
@@ -446,16 +447,17 @@ Fields:
 - `lifecycle_event`: optional.
 - `lifecycle_date`: optional partial date string, a historical date: `YYYY`,
   `YYYY-MM`, or `YYYY-MM-DD` from the year 0001, with a year before 1000
-  written with four digits (`0920`). On guided evidence it meets the task
-  country's date floor (`convex/lib/countryYears.ts`; 1600 for Vanuatu and
+  written with four digits (`0920`). On a fresh submission, whatever its
+  contract version, it meets the task country's date floor (`convex/lib/countryYears.ts`; 1600 for Vanuatu and
   New Zealand) unless `confirmed_dates` holds it (deep-time dates, stage 1,
   rulings 5 and 7).
 - `confirmed_dates`: optional list of `{ date, confirmed_by }` entries, one per
   date of the record confirmed below the floor or the observation range, the
   date exactly as written and `confirmed_by` one of `contributor`, `curator`,
   or `agent`. A record without a confirmed date carries no list, so its hashes
-  are unchanged. Every entry must match a date the record holds; a date edited
-  after it was confirmed needs a new entry.
+  are unchanged. Every entry must match a date the record holds. An edit keeps
+  an entry only while every field holding its date kept that date for the same
+  purpose, so a changed, restored or moved date needs a new entry.
 - `lifecycle_date_precision`: optional.
 - `lifecycle_note`: optional.
 - `related_ids_or_note`.

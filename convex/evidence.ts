@@ -14,6 +14,8 @@ import {
   assertEvidenceDraftLimits,
   assertEvidenceDraftSubmission,
   assertMaxString,
+  assertNoYearZero,
+  evidenceDateFields,
   assertTaskReasonLimit,
 } from "./lib/limits";
 import { assertNotRapidContract, isRapidCurrentDraft } from "./lib/rapidEntry";
@@ -30,7 +32,7 @@ import { assertWideEvidenceRowFields } from "./lib/wideEvidenceFields";
 import { resolveCitedSource } from "./lib/sources";
 import { appendTaskEvent } from "./lib/taskEvents";
 import { evidenceDraftDoc } from "./lib/validators";
-import { recordEvidenceVersion, recordHeadChange, submissionReceipt } from "./evidenceVersions";
+import { matchesCurrentVersion, recordEvidenceVersion, recordHeadChange, submissionReceipt } from "./evidenceVersions";
 import { revisionIntent } from "./model";
 
 
@@ -528,23 +530,42 @@ function definedMembers<T extends object>(value: T): Partial<T> {
   return Object.fromEntries(Object.entries(value).filter(([, member]) => member !== undefined)) as Partial<T>;
 }
 
-// the two dates an evidence record holds
-function draftDates(draft: { source_date_or_capture_date?: string; lifecycle_date?: string }): (string | undefined)[] {
-  return [draft.source_date_or_capture_date, draft.lifecycle_date];
+// the record a patch leaves: the stored row with the write's members over it,
+// and the write's confirmed-dates list, which may remove the stored one
+function mergedRecord<T extends object>(existing: T | null, members: object, confirmed: ConfirmedDate[] | undefined): T {
+  const merged = { ...(existing ?? {}), ...definedMembers(members) } as T & { confirmed_dates?: ConfirmedDate[] };
+  if (confirmed === undefined) delete merged.confirmed_dates;
+  else merged.confirmed_dates = confirmed;
+  return merged;
 }
 
 // deep-time stage 1 (ruling 7): the confirmed dates a record holds after a
-// write. a list the write sends replaces the stored one; otherwise a stored
-// entry survives only while its date is in the record before and after the
-// write, so a changed date loses its confirmation and a restored date needs a
-// new one
+// write. a list the write sends replaces the stored one (its writer's roles
+// were checked); otherwise a stored entry survives only while every field
+// that holds its date kept that date for the same purpose, so a changed date
+// loses its confirmation, a restored date needs a new one, and the same text
+// set in another field needs a fresh confirmation
 function effectiveConfirmations(
-  existing: { confirmed_dates?: ConfirmedDate[]; source_date_or_capture_date?: string; lifecycle_date?: string } | null,
-  incoming: { confirmed_dates?: ConfirmedDate[]; source_date_or_capture_date?: string; lifecycle_date?: string },
+  existing: Parameters<typeof evidenceDateFields>[0] & { confirmed_dates?: ConfirmedDate[] } | null,
+  incoming: Parameters<typeof evidenceDateFields>[0] & { confirmed_dates?: ConfirmedDate[] },
 ): ConfirmedDate[] | undefined {
   if (incoming.confirmed_dates !== undefined) return incoming.confirmed_dates;
   if (existing === null) return undefined;
-  return carriedConfirmations(existing.confirmed_dates, draftDates(existing), draftDates({ ...existing, ...definedMembers(incoming) }));
+  return carriedConfirmations(
+    existing.confirmed_dates,
+    evidenceDateFields(existing),
+    evidenceDateFields({ ...existing, ...definedMembers(incoming) }),
+  );
+}
+
+// a save may not write the year 0000 into a date field it changes
+function assertNoNewYearZero(
+  existing: { source_date_or_capture_date?: string; lifecycle_date?: string } | null,
+  incoming: { source_date_or_capture_date?: string; lifecycle_date?: string },
+): void {
+  for (const [field, label] of [["source_date_or_capture_date", "The source or capture date"], ["lifecycle_date", "The lifecycle date"]] as const) {
+    if (incoming[field] !== undefined && incoming[field] !== existing?.[field]) assertNoYearZero(label, incoming[field]);
+  }
 }
 
 async function importSubmittedSpreadsheetDraft(
@@ -573,11 +594,20 @@ async function importSubmittedSpreadsheetDraft(
     return "skipped_final";
   }
   // the record as this import leaves it: the patch keeps a stored member the
-  // row omits, and keeps a stored confirmation only while its date is unchanged
+  // row omits, and keeps a stored confirmation only while its date and
+  // purpose are unchanged. the merged record is what the rules check; an
+  // exact re-import of a record's current version is a replay, which keeps
+  // every rule except the stage 1 date rules
   const confirmed = effectiveConfirmations(existing, item.draft);
   const floorYear = dateFloorYear(task.country_code);
-  assertEvidenceDraftSubmission({ ...item.draft, confirmed_dates: confirmed }, false, floorYear);
-  assertEvidenceDraftDates({ ...(existing ?? {}), ...definedMembers(item.draft), confirmed_dates: confirmed }, floorYear);
+  const merged = mergedRecord(existing, {
+    draft_status: "submitted",
+    privacy_flag: item.draft.privacy_flag ?? existing?.privacy_flag ?? "clear",
+    licence_flag: item.draft.licence_flag ?? existing?.licence_flag ?? "needs_review",
+    ...item.draft,
+  }, confirmed);
+  const replay = existing !== null && await matchesCurrentVersion(ctx, merged);
+  assertEvidenceDraftSubmission(merged, false, floorYear, { dates: !replay });
   assertWideEvidenceRowFields(item.draft.generated_wide_row, taskTargetYears(task));
   const actorRole = chooseActorRole(user, ["service", "admin"]);
   // the task-level intake gate (pi ruling 2026-09-11) covers the import
@@ -677,13 +707,21 @@ export async function saveEvidenceDraftHandler(ctx: MutationCtx, args: typeof sa
       .withIndex("by_evidence_draft_id", (q) => q.eq("evidence_draft_id", draftId))
       .unique();
 
-    // deep-time stage 1 (ruling 7): the confirmed dates the record holds after
-    // this save. a list the caller sends replaces the stored one; otherwise
-    // an entry survives only while its date is unchanged, so an edit cannot
-    // carry an earlier confirmation to a changed or restored date. either way
-    // the list must match the record as saved
+    // an edit is bound to the task its record belongs to: that task's country
+    // sets the floor, its status the gate, and its history takes the event
+    if (existing !== null && existing.task_id !== args.taskId) {
+      throw new Error("This evidence record belongs to another task; save it under its own task.");
+    }
+    // deep-time stage 1: a date field this save changes may not name the year
+    // 0000. the confirmed dates the record holds after the save follow
+    // effectiveConfirmations, and the list must match the record as saved
+    assertNoNewYearZero(existing, args.draft);
     const confirmed = effectiveConfirmations(existing, args.draft);
-    assertConfirmedDates(confirmed, draftDates({ ...(existing ?? {}), ...definedMembers(args.draft) }));
+    const merged = mergedRecord(existing, {
+      ...args.draft,
+      observation_contract_version: args.draft.observation_contract_version ?? existing?.observation_contract_version ?? "guided_observation_v1",
+    }, confirmed);
+    assertConfirmedDates(confirmed, evidenceDateFields(merged).map((field) => field.value));
     if (existing === null) {
       await ctx.db.insert("evidence_drafts", {
         evidence_draft_id: draftId,
@@ -717,9 +755,10 @@ export async function saveEvidenceDraftHandler(ctx: MutationCtx, args: typeof sa
       }
       const staysSubmitted = existing.draft_status === "submitted" || existing.draft_status === "unresolved_note";
       // a reviewer's edit of a submitted record becomes a new version, so it
-      // meets the date rules first
-      if (staysSubmitted) {
-        assertEvidenceDraftDates({ ...existing, ...definedMembers(args.draft), confirmed_dates: confirmed }, dateFloorYear(task.country_code));
+      // meets the date rules first; a save of the current version's own
+      // content is a replay and resolves against that version
+      if (staysSubmitted && !(await matchesCurrentVersion(ctx, merged))) {
+        assertEvidenceDraftDates(merged, dateFloorYear(task.country_code));
       }
       await ctx.db.patch(existing._id, {
         ...args.draft,
@@ -1055,6 +1094,11 @@ export async function submitEvidenceDraftHandler(ctx: MutationCtx, args: typeof 
     ) {
       throw new Error("Assigned guided tasks must submit evidence and periods together. Reload the portal and try again.");
     }
+    // the submission contract; a draft that holds its current version's own
+    // content is a replay, which keeps every rule except the deep-time date
+    // rules (a receipted retry answered above)
+    const replay = await matchesCurrentVersion(ctx, draft);
+    assertEvidenceDraftSubmission(draft, false, dateFloorYear(task.country_code), { dates: !replay });
     const now = Date.now();
     // the version captures the row's content, which the status change
     // below does not touch; an unchanged resubmission returns the existing
@@ -1069,10 +1113,6 @@ export async function submitEvidenceDraftHandler(ctx: MutationCtx, args: typeof 
     if (!version.created && draft.draft_status === "submitted") {
       return { task_id: draft.task_id, evidence_draft_id: args.evidenceDraftId, task_status: "needs_review" as const, evidence_version_hash: version.object_hash, deduped: true };
     }
-    // a fresh submission meets the contract, including the deep-time date
-    // rules, after the replays above have answered: a receipted or unchanged
-    // submission keeps its outcome (a refusal here rolls back the version)
-    assertEvidenceDraftSubmission(draft, false, dateFloorYear(task.country_code));
     await markDraftSubmitted(ctx, draft, task, user, now, args.note, undefined, version.object_hash);
     return { task_id: draft.task_id, evidence_draft_id: args.evidenceDraftId, task_status: "needs_review" as const, evidence_version_hash: version.object_hash, deduped: false };
   }
@@ -1283,7 +1323,10 @@ export const submitUnresolvedNote = mutation({
     }
     assertNotRapidContract(draft, "the unresolved-note route");
     const task = await getTaskOrThrow(ctx, draft.task_id);
-    assertEvidenceDraftSubmission(draft, true, dateFloorYear(task.country_code));
+    // a draft that holds its current version's own content is a replay,
+    // which keeps every rule except the deep-time date rules
+    const replay = await matchesCurrentVersion(ctx, draft);
+    assertEvidenceDraftSubmission(draft, true, dateFloorYear(task.country_code), { dates: !replay });
     const gateRefusal = evidenceIntakeRefusal(task.status);
     if (gateRefusal !== null) {
       throw new Error(gateRefusal);

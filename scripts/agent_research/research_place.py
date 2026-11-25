@@ -329,9 +329,11 @@ def assemble_dossier(place: dict, output: dict, backend: str, model_requested: s
             if value is not None and not re.fullmatch(r"[0-9]{4}(-[0-9]{2}(-[0-9]{2})?)?", value):
                 claim["note"] = f"{claim['note']} [{field} as given: {value}]".strip()
                 claim[field] = None
-        # deep-time stage 1 (ruling 7): the agent's confirmations of the claim's own dates, a
-        # date bound before the country's floor or a source date before 1000. an entry that
-        # names another confirmer or no date of the claim is dropped, and so is an empty list
+        # deep-time stage 1 (ruling 7): a confirmation supplied with the claim of one of its own
+        # dates, a date bound before the country's floor or a source date before 1000. the
+        # production reader's output schema (reader-output.v1) cannot yet carry one, so this
+        # keeps only what another caller supplies. an entry that names another confirmer or
+        # no date of the claim is dropped, and so is an empty list
         source_date = source.get("source_date")
         own = {claim["date_start"], claim["date_end"], source_date.split("T")[0] if isinstance(source_date, str) and source_date else None}
         kept = []
