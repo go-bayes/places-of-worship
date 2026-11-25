@@ -1,11 +1,13 @@
-// replays across every write route of convex/ that can receive content
-// already stored, for stage 1 of the deep-time dates (pull request #240).
-// each stored record here carries a date the stage 1 rules refuse for a fresh
-// write (a Vanuatu lifecycle date of 1590, a New Zealand claim from 1590, an
-// observation in 0920); a replay must answer as it did before the change.
-// these tests pass on main and on the change's head. the receipt-based routes
-// of submissionReceipts.ts, internalAgentIntake:ingestBundle and
-// firstPassReceipts:ingestFirstPass are covered by their own suites
+// replays across the write routes of convex/ that can receive content already
+// stored, for stage 1 of the deep-time dates (pull request #240). the rule
+// under test: every date check main makes stays, on every write; the checks
+// stage 1 adds apply to a date field only on a record's first submission, or
+// when the write sets or changes that field's value. each stored record here
+// carries a date the added checks refuse for a fresh write (a Vanuatu
+// lifecycle date of 1590, a New Zealand claim from 1590, an observation in
+// 0920). every test passes on main and on the change's head with the same
+// outcome. the receipt routes of submissionReceipts.ts and the two agent
+// intakes keep their own replay tests in their suites
 import assert from "node:assert/strict";
 import test from "node:test";
 
@@ -23,7 +25,7 @@ const VU = { country_code: "VU", target_years: [1989, 1999, 2009, 2020], geometr
 const id = (n) => `44444444-4444-4444-8444-${String(n).padStart(12, "0")}`;
 
 function stored(overrides = {}) {
-  return {
+  const record = {
     observation_contract_version: "guided_observation_v1",
     source_type: "denominational_directory",
     source_title: "Mission yearbook",
@@ -37,6 +39,8 @@ function stored(overrides = {}) {
     licence_flag: "needs_review",
     ...overrides,
   };
+  for (const [key, value] of Object.entries(record)) if (value === undefined) delete record[key];
+  return record;
 }
 
 async function setup() {
@@ -49,21 +53,16 @@ async function setup() {
   return { w, ra, reviewer, service, curator };
 }
 
-// a stored record with its evidence version, as a submission before the change left it
-async function versioned(w, author, draftId, status, overrides = {}, idempotencyKey) {
+// a record as an earlier submission left it, with or without an evidence version
+async function seed(w, author, draftId, status, { hash = true, overrides = {}, idempotencyKey } = {}) {
   const row = await w.addDraft({ ...stored(overrides), evidence_draft_id: draftId, task_id: "task-vu-1", draft_status: status, created_by: author._id });
+  // a key given as undefined is absent from the stored row, whatever the harness defaults
+  for (const [key, value] of Object.entries(overrides)) if (value === undefined) delete row[key];
+  if (!hash) return { row, version: null };
   const version = await recordEvidenceVersion(w.as(author), { draftRowId: row._id, actor: author, kind: "submitted", now: Date.now(), idempotencyKey });
   return { row, version };
 }
-
-test("evidence:saveEvidenceDraft — a reviewer's save of a submitted record's own content", async () => {
-  const { w, ra, reviewer } = await setup();
-  const { version } = await versioned(w, ra, "d1", "submitted");
-  const versions = w.rows.evidence_versions.length;
-  await evidence.saveEvidenceDraftHandler(w.as(reviewer), { taskId: "task-vu-1", evidenceDraftId: "d1", draft: stored() });
-  assert.equal(w.rows.evidence_versions.length, versions);
-  assert.equal(w.row("evidence_drafts", "evidence_draft_id", "d1").evidence_version_hash, version.object_hash);
-});
+const draft = (w, draftId) => w.row("evidence_drafts", "evidence_draft_id", draftId);
 
 function spreadsheet(w, user, drafts) {
   return evidence.importSubmittedEvidenceDrafts._handler(w.as(user), {
@@ -72,44 +71,116 @@ function spreadsheet(w, user, drafts) {
     drafts,
   });
 }
+const saveAs = (w, user, draftId, content) => evidence.saveEvidenceDraftHandler(w.as(user), { taskId: "task-vu-1", evidenceDraftId: draftId, draft: content });
 
-test("evidence:importSubmittedEvidenceDrafts — an exact re-import of a submitted row, and a decided row", async () => {
+// the third review's inputs (findings 4, 10 and 11)
+
+test("review finding 4: exact replays of older records keep main's outcome", async () => {
+  const { w, ra, reviewer, service } = await setup();
+  await seed(w, service, "s1", "submitted", { hash: false });
+  assert.equal((await spreadsheet(w, service, [{ task_id: "task-vu-1", evidence_draft_id: "s1", draft: stored() }])).drafts.updated, 1);
+  await seed(w, ra, "u1", "unresolved_note", { hash: false, overrides: { uncertainty_note: "The founding year needs a second source." } });
+  const note = await evidence.submitUnresolvedNote._handler(w.as(ra), { evidenceDraftId: "u1" });
+  assert.match(note.evidence_version_hash, /^sha256:[0-9a-f]{64}$/);
+  const { version } = await seed(w, service, "t1", "submitted", { overrides: { observation_contract_version: undefined, source_type: "field_observation", source_date_or_capture_date: "2020-01-01T12:34:56Z" } });
+  await saveAs(w, reviewer, "t1", {});
+  assert.equal(draft(w, "t1").evidence_version_hash, version.object_hash);
+  assert.equal(draft(w, "t1").observation_contract_version, undefined);
+});
+
+test("review finding 10: a spreadsheet re-import that changes the record meets main's date check", async () => {
   const { w, service } = await setup();
-  const { version } = await versioned(w, service, "s1", "submitted");
-  const result = await spreadsheet(w, service, [{ task_id: "task-vu-1", evidence_draft_id: "s1", draft: stored() }]);
-  assert.equal(result.drafts.updated, 1);
-  assert.equal(w.row("evidence_drafts", "evidence_draft_id", "s1").evidence_version_hash, version.object_hash);
-  await versioned(w, service, "s2", "accepted_for_export");
-  assert.equal((await spreadsheet(w, service, [{ task_id: "task-vu-1", evidence_draft_id: "s2", draft: stored() }])).drafts.skipped_final, 1);
+  await seed(w, service, "s1", "submitted", { overrides: { privacy_flag: "restricted", source_date_or_capture_date: "2020-02-30" } });
+  const versions = w.rows.evidence_versions.length;
+  await assert.rejects(spreadsheet(w, service, [{ task_id: "task-vu-1", evidence_draft_id: "s1", draft: stored({ privacy_flag: undefined, source_date_or_capture_date: "2020-02-30" }) }]), /source and capture dates|source or capture date/);
+  assert.equal(w.rows.evidence_versions.length, versions);
+  assert.equal(draft(w, "s1").privacy_flag, "restricted");
 });
 
-test("evidence:submitEvidenceDraft — a receipted retry, and an unchanged resubmission", async () => {
+test("review finding 11: an unchanged resubmission keeps main's date check", async () => {
   const { w, ra } = await setup();
-  const { version } = await versioned(w, ra, "d1", "submitted", {}, `submit:${ra._id}:${id(1)}`);
-  const retry = await evidence.submitEvidenceDraftHandler(w.as(ra), { evidenceDraftId: "d1", clientSubmissionId: id(1) });
-  assert.equal(retry.deduped, true);
-  assert.equal(retry.evidence_version_hash, version.object_hash);
-  const { version: second } = await versioned(w, ra, "d2", "submitted");
-  const again = await evidence.submitEvidenceDraftHandler(w.as(ra), { evidenceDraftId: "d2" });
-  assert.equal(again.deduped, true);
-  assert.equal(again.evidence_version_hash, second.object_hash);
+  // as a reviewer's edit before stage 1 could leave it
+  await seed(w, ra, "d1", "submitted", { overrides: { source_date_or_capture_date: "2020-02-30" } });
+  await assert.rejects(evidence.submitEvidenceDraftHandler(w.as(ra), { evidenceDraftId: "d1" }), /source and capture dates|source or capture date/);
 });
 
-test("evidence:submitEvidenceDraftWithOccupancies — a retry under its own submission key", async () => {
-  const { w, ra } = await setup();
-  await w.addDraft({ ...stored(), evidence_draft_id: "g1", task_id: "task-vu-1", draft_status: "submitted", created_by: ra._id, guided_submission_key: `${ra._id}:${id(2)}` });
-  const retry = await evidence.submitEvidenceDraftWithOccupanciesHandler(w.as(ra), { evidenceDraftId: "g1", clientSubmissionId: id(2), segments: [] });
-  assert.equal(retry.deduped, true);
+// per route: an unchanged write to a submitted record without a version
+// hash, the same with a hash, and a write that changes a non-date field
+// while a stored date would fail the added checks
+
+for (const hash of [false, true]) {
+  test(`evidence:saveEvidenceDraft — a reviewer's unchanged save of a submitted record ${hash ? "with" : "without"} a version`, async () => {
+    const { w, ra, reviewer } = await setup();
+    const { version } = await seed(w, ra, "d1", "submitted", { hash });
+    await saveAs(w, reviewer, "d1", stored());
+    assert.equal(draft(w, "d1").lifecycle_date, "1590");
+    if (hash) assert.equal(draft(w, "d1").evidence_version_hash, version.object_hash);
+  });
+  test(`evidence:importSubmittedEvidenceDrafts — an exact re-import ${hash ? "with" : "without"} a version`, async () => {
+    const { w, service } = await setup();
+    await seed(w, service, "s1", "submitted", { hash });
+    assert.equal((await spreadsheet(w, service, [{ task_id: "task-vu-1", evidence_draft_id: "s1", draft: stored() }])).drafts.updated, 1);
+  });
+  test(`evidence:submitEvidenceDraft — an unchanged resubmission ${hash ? "with" : "without"} a version`, async () => {
+    const { w, ra } = await setup();
+    await seed(w, ra, "d1", "submitted", { hash });
+    const again = await evidence.submitEvidenceDraftHandler(w.as(ra), { evidenceDraftId: "d1" });
+    assert.match(again.evidence_version_hash, /^sha256:[0-9a-f]{64}$/);
+    assert.equal(again.deduped, hash);
+  });
+  test(`evidence:submitEvidenceDraftWithOccupancies — a retry under its own key ${hash ? "with" : "without"} a version`, async () => {
+    const { w, ra } = await setup();
+    const { row } = await seed(w, ra, "g1", "submitted", { hash });
+    await w.db.patch(row._id, { guided_submission_key: `${ra._id}:${id(2)}` });
+    const retry = await evidence.submitEvidenceDraftWithOccupanciesHandler(w.as(ra), { evidenceDraftId: "g1", clientSubmissionId: id(2), segments: [] });
+    assert.equal(retry.deduped, true);
+  });
+  test(`evidence:submitUnresolvedNote — an unchanged note ${hash ? "with" : "without"} a version`, async () => {
+    const { w, ra } = await setup();
+    const { version } = await seed(w, ra, "u1", "unresolved_note", { hash, overrides: { uncertainty_note: "The founding year needs a second source." } });
+    const again = await evidence.submitUnresolvedNote._handler(w.as(ra), { evidenceDraftId: "u1" });
+    if (hash) assert.equal(again.evidence_version_hash, version.object_hash);
+  });
+}
+
+test("evidence:saveEvidenceDraft — a reviewer's change to a non-date field", async () => {
+  const { w, ra, reviewer } = await setup();
+  await seed(w, ra, "d1", "submitted");
+  const versions = w.rows.evidence_versions.length;
+  await saveAs(w, reviewer, "d1", stored({ evidence_note: "The yearbook records the station's founding." }));
+  assert.equal(w.rows.evidence_versions.length, versions + 1);
 });
 
-test("evidence:submitUnresolvedNote — an unchanged unresolved note", async () => {
+test("evidence:importSubmittedEvidenceDrafts — a re-import that changes a non-date field", async () => {
+  const { w, service } = await setup();
+  await seed(w, service, "s1", "submitted");
+  assert.equal((await spreadsheet(w, service, [{ task_id: "task-vu-1", evidence_draft_id: "s1", draft: stored({ source_title: "Mission yearbook, second edition" }) }])).drafts.updated, 1);
+});
+
+test("evidence:submitEvidenceDraft — a resubmission after a reviewer changed a non-date field", async () => {
   const { w, ra } = await setup();
-  const { version } = await versioned(w, ra, "u1", "unresolved_note", { uncertainty_note: "The founding year needs a second source." });
+  const { row } = await seed(w, ra, "d1", "submitted");
+  await w.db.patch(row._id, { evidence_note: "The yearbook records the station's founding." });
+  const again = await evidence.submitEvidenceDraftHandler(w.as(ra), { evidenceDraftId: "d1" });
+  assert.equal(again.deduped, false);
+});
+
+test("evidence:submitEvidenceDraftWithOccupancies — a retry under its own key after a non-date field changed", async () => {
+  const { w, ra } = await setup();
+  const { row } = await seed(w, ra, "g1", "submitted");
+  await w.db.patch(row._id, { guided_submission_key: `${ra._id}:${id(2)}`, evidence_note: "The yearbook records the station's founding." });
+  assert.equal((await evidence.submitEvidenceDraftWithOccupanciesHandler(w.as(ra), { evidenceDraftId: "g1", clientSubmissionId: id(2), segments: [] })).deduped, true);
+});
+
+test("evidence:submitUnresolvedNote — a note resubmitted after a non-date field changed", async () => {
+  const { w, ra } = await setup();
+  const { row, version } = await seed(w, ra, "u1", "unresolved_note", { overrides: { uncertainty_note: "The founding year needs a second source." } });
+  await w.db.patch(row._id, { uncertainty_note: "The founding year needs a second, independent source." });
   const again = await evidence.submitUnresolvedNote._handler(w.as(ra), { evidenceDraftId: "u1" });
-  assert.equal(again.evidence_version_hash, version.object_hash);
+  assert.notEqual(again.evidence_version_hash, version.object_hash);
 });
 
-const claim = {
+const claim = (overrides = {}) => ({
   claim_kind: "worship_function",
   claim_timing: "state",
   claim_text: "Worship at the station.",
@@ -123,46 +194,50 @@ const claim = {
   source_reference: "https://example.org/yearbook",
   source_account: "The yearbook gives worship from 1590.",
   privacy_flag: "clear",
-};
-
-test("historicalClaims:submitHistoricalClaim — a retry under its own submission key", async () => {
-  const { w, ra } = await setup();
-  await w.db.insert("historical_claims", { ...claim, historical_claim_id: "h1", task_id: "task-vu-1", parent_evidence_draft_id: "d1", claim_status: "submitted", contract_version: "historical_claim_v1", created_by: ra._id, created_at: 1, updated_at: 1, reference_date: "2016-07", reference_date_basis: "parent_evidence_date", intake_submission_key: `${ra._id}:${id(3)}` });
-  const retry = await historical.submitHistoricalClaimHandler(w.as(ra), { clientSubmissionId: id(3), taskId: "task-vu-1", parentEvidenceDraftId: "d1", claim: { ...claim, earliest_supported_date: "1500" } });
-  assert.equal(retry.deduped, true);
+  ...overrides,
 });
 
-test("occupancies:submitOccupancies — a retry under its own submission key", async () => {
-  const { w, ra } = await setup();
-  await w.db.insert("site_occupancies", { occupancy_id: "o1", task_id: "task-vu-1", parent_evidence_draft_id: "d1", claim_status: "submitted", submission_key: `${ra._id}:${id(4)}`, segment_index: 0, created_by: ra._id });
-  const segment = { contract_version: "occupancy_v1", segment_index: 0, start_mode: "known", start_date: "1590", start_basis: "founding_stated", end_mode: "unknown", end_basis: "unknown", location_relation: "same_as_task_point", confidence: "moderate", confidence_basis: "Yearbook.", source_basis: "named_public_source", source_title: "Mission yearbook", source_account: "The yearbook gives the founding in 1590.", privacy_flag: "clear" };
-  const retry = await periods.submitOccupanciesHandler(w.as(ra), { clientSubmissionId: id(4), taskId: "task-vu-1", parentEvidenceDraftId: "d1", segments: [segment] });
-  assert.equal(retry.deduped, true);
-});
-
-test("rapidEntry:submitCurrentObservation — a retry under its own submission key", async () => {
-  const { w, ra } = await setup();
-  await w.addDraft({ ...stored(), evidence_draft_id: "r1", task_id: "task-vu-1", draft_status: "submitted", created_by: ra._id, intake_submission_key: `${ra._id}:${id(5)}` });
-  const observation = { current_status: "currently_used_for_worship", observation_basis: "local_investigator_account", observed_on: "0920-05-01", direct_observation: "Seen in use.", privacy_flag: "clear" };
-  const retry = await rapidEntry.submitCurrentObservationHandler(w.as(ra), { clientSubmissionId: id(5), taskId: "task-vu-1", observation });
-  assert.equal(retry.deduped, true);
-});
+for (const changed of [false, true]) {
+  const note = changed ? "with a non-date field changed" : "unchanged";
+  test(`historicalClaims:submitHistoricalClaim — a retry under its own key, ${note}`, async () => {
+    const { w, ra } = await setup();
+    await w.db.insert("historical_claims", { ...claim(), historical_claim_id: "h1", task_id: "task-vu-1", parent_evidence_draft_id: "d1", claim_status: "submitted", contract_version: "historical_claim_v1", created_by: ra._id, created_at: 1, updated_at: 1, reference_date: "2016-07", reference_date_basis: "parent_evidence_date", intake_submission_key: `${ra._id}:${id(3)}` });
+    const retry = await historical.submitHistoricalClaimHandler(w.as(ra), { clientSubmissionId: id(3), taskId: "task-vu-1", parentEvidenceDraftId: "d1", claim: claim(changed ? { claim_text: "Worship at the mission station." } : {}) });
+    assert.equal(retry.deduped, true);
+  });
+  test(`occupancies:submitOccupancies — a retry under its own key, ${note}`, async () => {
+    const { w, ra } = await setup();
+    await w.db.insert("site_occupancies", { occupancy_id: "o1", task_id: "task-vu-1", parent_evidence_draft_id: "d1", claim_status: "submitted", submission_key: `${ra._id}:${id(4)}`, segment_index: 0, created_by: ra._id });
+    const segment = { contract_version: "occupancy_v1", segment_index: 0, start_mode: "known", start_date: "1590", start_basis: "founding_stated", end_mode: "unknown", end_basis: "unknown", location_relation: "same_as_task_point", confidence: "moderate", confidence_basis: "Yearbook.", source_basis: "named_public_source", source_title: "Mission yearbook", source_account: changed ? "The yearbook gives the station's founding in 1590." : "The yearbook gives the founding in 1590.", privacy_flag: "clear" };
+    const retry = await periods.submitOccupanciesHandler(w.as(ra), { clientSubmissionId: id(4), taskId: "task-vu-1", parentEvidenceDraftId: "d1", segments: [segment] });
+    assert.equal(retry.deduped, true);
+  });
+  test(`rapidEntry:submitCurrentObservation — a retry under its own key, ${note}`, async () => {
+    const { w, ra } = await setup();
+    await w.addDraft({ ...stored(), evidence_draft_id: "r1", task_id: "task-vu-1", draft_status: "submitted", created_by: ra._id, intake_submission_key: `${ra._id}:${id(5)}` });
+    const observation = { current_status: "currently_used_for_worship", observation_basis: "local_investigator_account", observed_on: "0920-05-01", direct_observation: changed ? "Seen in use on a Sunday." : "Seen in use.", privacy_flag: "clear" };
+    const retry = await rapidEntry.submitCurrentObservationHandler(w.as(ra), { clientSubmissionId: id(5), taskId: "task-vu-1", observation });
+    assert.equal(retry.deduped, true);
+  });
+}
 
 const importSource = { source_type: "other", title: "Mission atlas", url_or_file: "https://example.org/atlas", consulted_date: "2026-09-01" };
-const nominationRow = (overrides = {}) => ({ row_number: 1, name: "Mission station", country_code: "VU", source_locator: "entry 1", containing_area: "Efate", culturally_sensitive: "no", claim_hash: "h1", ...overrides });
+const nominationRow = (overrides = {}) => ({ row_number: 1, name: "Mission station", country_code: "VU", source_locator: "entry 1", containing_area: "Efate", culturally_sensitive: "no", claim_hash: "h1", first_date: "1590", last_date: "1920-02-30", ...overrides });
 
-test("batchImport:importNominationBatch — a row already imported", async () => {
-  const { w, curator } = await setup();
-  await w.addDraft({ evidence_draft_id: "earlier", task_id: "task-vu-1", source_claim_key: sourceClaimKey(importSource.title, "entry 1"), claim_hash: "h1", created_by: curator._id });
-  const result = await batchImport.importNominationBatch._handler(w.as(curator), { batchId: "nom-1", countryCode: "VU", targetYears: VU.target_years, source: importSource, rows: [nominationRow({ first_date: "1590", last_date: "1920-02-30" })] });
-  assert.equal(result.skipped_existing, 1);
-});
-
-test("batchImport:adminImportOccupancyBatch — a place already imported", async () => {
-  const { w, service } = await setup();
-  await w.db.patch(service._id, { email: "service@example.org" });
-  await w.addDraft({ evidence_draft_id: "earlier", task_id: "task-vu-1", source_claim_key: sourceClaimKey(importSource.title, "entry 1"), claim_hash: "h1", created_by: service._id });
-  const row = { ...nominationRow({ first_date: "1590", last_date: "1920-02-30" }), lat: -17.74, lng: 168.32, geocoding_basis: "map_georeference", start_mode: "known", start_date: "1590", start_basis: "founding_stated", end_mode: "still_active", still_active_asof: "2010" };
-  const result = await batchImport.adminImportOccupancyBatch._handler(w.anonymous(), { actor_email: "service@example.org", batchId: "occ-1", countryCode: "VU", source: importSource, rows: [row] });
-  assert.equal(result.skipped_existing, 1);
-});
+for (const [hash, changed] of [[false, false], [true, false], [true, true]]) {
+  const note = `${hash ? "with" : "without"} a version${changed ? ", a non-date field changed" : ""}`;
+  test(`batchImport:importNominationBatch — a row already imported, ${note}`, async () => {
+    const { w, curator } = await setup();
+    await seed(w, curator, "earlier", "submitted", { hash, overrides: { source_claim_key: sourceClaimKey(importSource.title, "entry 1"), claim_hash: "h1" } });
+    const result = await batchImport.importNominationBatch._handler(w.as(curator), { batchId: "nom-1", countryCode: "VU", targetYears: VU.target_years, source: importSource, rows: [nominationRow(changed ? { notes: "Founding year from the atlas." } : {})] });
+    assert.equal(result.skipped_existing, 1);
+  });
+  test(`batchImport:adminImportOccupancyBatch — a place already imported, ${note}`, async () => {
+    const { w, service } = await setup();
+    await w.db.patch(service._id, { email: "service@example.org" });
+    await seed(w, service, "earlier", "submitted", { hash, overrides: { source_claim_key: sourceClaimKey(importSource.title, "entry 1"), claim_hash: "h1" } });
+    const row = { ...nominationRow(changed ? { notes: "Founding year from the atlas." } : {}), lat: -17.74, lng: 168.32, geocoding_basis: "map_georeference", start_mode: "known", start_date: "1590", start_basis: "founding_stated", end_mode: "still_active", still_active_asof: "2010" };
+    const result = await batchImport.adminImportOccupancyBatch._handler(w.anonymous(), { actor_email: "service@example.org", batchId: "occ-1", countryCode: "VU", source: importSource, rows: [row] });
+    assert.equal(result.skipped_existing, 1);
+  });
+}

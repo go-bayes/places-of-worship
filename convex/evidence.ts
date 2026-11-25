@@ -15,7 +15,9 @@ import {
   assertEvidenceDraftSubmission,
   assertMaxString,
   assertNoYearZero,
+  EVIDENCE_DATE_FIELD_NAMES,
   evidenceDateFields,
+  type EvidenceDateFieldName,
   assertTaskReasonLimit,
 } from "./lib/limits";
 import { assertNotRapidContract, isRapidCurrentDraft } from "./lib/rapidEntry";
@@ -32,7 +34,7 @@ import { assertWideEvidenceRowFields } from "./lib/wideEvidenceFields";
 import { resolveCitedSource } from "./lib/sources";
 import { appendTaskEvent } from "./lib/taskEvents";
 import { evidenceDraftDoc } from "./lib/validators";
-import { matchesCurrentVersion, recordEvidenceVersion, recordHeadChange, submissionReceipt } from "./evidenceVersions";
+import { recordEvidenceVersion, recordHeadChange, submissionReceipt } from "./evidenceVersions";
 import { revisionIntent } from "./model";
 
 
@@ -530,13 +532,25 @@ function definedMembers<T extends object>(value: T): Partial<T> {
   return Object.fromEntries(Object.entries(value).filter(([, member]) => member !== undefined)) as Partial<T>;
 }
 
-// the record a patch leaves: the stored row with the write's members over it,
-// and the write's confirmed-dates list, which may remove the stored one
-function mergedRecord<T extends object>(existing: T | null, members: object, confirmed: ConfirmedDate[] | undefined): T {
-  const merged = { ...(existing ?? {}), ...definedMembers(members) } as T & { confirmed_dates?: ConfirmedDate[] };
-  if (confirmed === undefined) delete merged.confirmed_dates;
-  else merged.confirmed_dates = confirmed;
-  return merged;
+// the record a write leaves: the stored row with the written object over it,
+// a member written as undefined removed, as a Convex patch removes it
+function patched<T extends object>(existing: T | null, written: object): T {
+  const record = { ...(existing ?? {}), ...written } as Record<string, unknown>;
+  for (const [key, value] of Object.entries(written)) if (value === undefined) delete record[key];
+  return record as T;
+}
+
+// deep-time stage 1: the date fields a write passes through the checks stage
+// 1 adds. a first submission (no stored record, or a stored draft) passes
+// every field; a write to an already-submitted record passes only the fields
+// it sets or changes, compared on the exact object it writes
+function datesToCheck(
+  existing: { draft_status: string; source_date_or_capture_date?: string; lifecycle_date?: string } | null,
+  written: object,
+): EvidenceDateFieldName[] {
+  if (existing === null || existing.draft_status === "draft") return [...EVIDENCE_DATE_FIELD_NAMES];
+  const members = written as Record<string, unknown>;
+  return EVIDENCE_DATE_FIELD_NAMES.filter((field) => Object.hasOwn(members, field) && members[field] !== existing[field]);
 }
 
 // deep-time stage 1 (ruling 7): the confirmed dates a record holds after a
@@ -588,39 +602,10 @@ async function importSubmittedSpreadsheetDraft(
     .withIndex("by_evidence_draft_id", (q: any) => q.eq("evidence_draft_id", draftId))
     .unique();
 
-  // a decided record is skipped before any rule for a fresh write, so a
-  // re-run of an earlier import keeps its outcome
-  if (existing !== null && finalDraftStatuses.has(existing.draft_status)) {
-    return "skipped_final";
-  }
-  // the record as this import leaves it: the patch keeps a stored member the
-  // row omits, and keeps a stored confirmation only while its date and
-  // purpose are unchanged. the merged record is what the rules check; an
-  // exact re-import of a record's current version is a replay, which keeps
-  // every rule except the stage 1 date rules
+  // the exact object this import writes, defaults included; the patch keeps a
+  // stored member the row omits, and a stored confirmation only while its
+  // date and purpose are unchanged
   const confirmed = effectiveConfirmations(existing, item.draft);
-  const floorYear = dateFloorYear(task.country_code);
-  const merged = mergedRecord(existing, {
-    draft_status: "submitted",
-    privacy_flag: item.draft.privacy_flag ?? existing?.privacy_flag ?? "clear",
-    licence_flag: item.draft.licence_flag ?? existing?.licence_flag ?? "needs_review",
-    ...item.draft,
-  }, confirmed);
-  const replay = existing !== null && await matchesCurrentVersion(ctx, merged);
-  assertEvidenceDraftSubmission(merged, false, floorYear, { dates: !replay });
-  assertWideEvidenceRowFields(item.draft.generated_wide_row, taskTargetYears(task));
-  const actorRole = chooseActorRole(user, ["service", "admin"]);
-  // the task-level intake gate (pi ruling 2026-09-11) covers the import
-  // route too: a decided draft is skipped above, but a new draft id must
-  // not land fresh evidence on a reviewed, pi-accepted, or exported task
-  // (review finding 2026-09-12). the refusal fails the whole batch, as
-  // every other gated route fails its call; reopen the task and rerun
-  const gateRefusal = evidenceIntakeRefusal(task.status);
-  if (gateRefusal !== null) {
-    throw new Error(`Task ${item.task_id}: ${gateRefusal}`);
-  }
-  assertNotRapidContract(existing, "spreadsheet import");
-
   const draftRecord = {
     evidence_draft_id: draftId,
     task_id: item.task_id,
@@ -633,6 +618,31 @@ async function importSubmittedSpreadsheetDraft(
     ...item.draft,
     confirmed_dates: confirmed,
   };
+  // deep-time stage 1: the date checks made before stage 1 apply to the
+  // incoming row on every import, as before, a decided row included; the
+  // checks stage 1 adds apply to the record the patch leaves, to every date
+  // field on a first submission and otherwise to the fields the patch changes
+  const floorYear = dateFloorYear(task.country_code);
+  if (existing !== null && finalDraftStatuses.has(existing.draft_status)) {
+    assertEvidenceDraftSubmission(item.draft, false, floorYear, { changed: [] });
+    return "skipped_final";
+  }
+  assertEvidenceDraftSubmission(item.draft, false, floorYear, {
+    record: patched(existing, draftRecord),
+    changed: datesToCheck(existing, draftRecord),
+  });
+  assertWideEvidenceRowFields(item.draft.generated_wide_row, taskTargetYears(task));
+  const actorRole = chooseActorRole(user, ["service", "admin"]);
+  // the task-level intake gate (pi ruling 2026-09-11) covers the import
+  // route too: a decided draft is skipped above, but a new draft id must
+  // not land fresh evidence on a reviewed, pi-accepted, or exported task
+  // (review finding 2026-09-12). the refusal fails the whole batch, as
+  // every other gated route fails its call; reopen the task and rerun
+  const gateRefusal = evidenceIntakeRefusal(task.status);
+  if (gateRefusal !== null) {
+    throw new Error(`Task ${item.task_id}: ${gateRefusal}`);
+  }
+  assertNotRapidContract(existing, "spreadsheet import");
 
   let draftRowId: Doc<"evidence_drafts">["_id"];
   if (existing === null) {
@@ -717,16 +727,11 @@ export async function saveEvidenceDraftHandler(ctx: MutationCtx, args: typeof sa
     // effectiveConfirmations, and the list must match the record as saved
     assertNoNewYearZero(existing, args.draft);
     const confirmed = effectiveConfirmations(existing, args.draft);
-    const merged = mergedRecord(existing, {
-      ...args.draft,
-      observation_contract_version: args.draft.observation_contract_version ?? existing?.observation_contract_version ?? "guided_observation_v1",
-    }, confirmed);
-    assertConfirmedDates(confirmed, evidenceDateFields(merged).map((field) => field.value));
     if (existing === null) {
-      await ctx.db.insert("evidence_drafts", {
+      const inserted = {
         evidence_draft_id: draftId,
         task_id: args.taskId,
-        draft_status: "draft",
+        draft_status: "draft" as const,
         created_by: user._id,
         created_at: now,
         updated_at: now,
@@ -735,7 +740,9 @@ export async function saveEvidenceDraftHandler(ctx: MutationCtx, args: typeof sa
         ...args.draft,
         confirmed_dates: confirmed,
         observation_contract_version: args.draft.observation_contract_version ?? "guided_observation_v1",
-      });
+      };
+      assertConfirmedDates(confirmed, evidenceDateFields(inserted).map((field) => field.value));
+      await ctx.db.insert("evidence_drafts", inserted);
     } else {
       assertNotRapidContract(existing, "the general draft route");
       if (existing.created_by !== user._id && !canReviewEvidence(user)) {
@@ -754,21 +761,27 @@ export async function saveEvidenceDraftHandler(ctx: MutationCtx, args: typeof sa
         throw new Error("A decided, superseded, or withdrawn record stays on record. Start a revision instead.");
       }
       const staysSubmitted = existing.draft_status === "submitted" || existing.draft_status === "unresolved_note";
-      // a reviewer's edit of a submitted record becomes a new version, so it
-      // meets the date rules first; a save of the current version's own
-      // content is a replay and resolves against that version
-      if (staysSubmitted && !(await matchesCurrentVersion(ctx, merged))) {
-        assertEvidenceDraftDates(merged, dateFloorYear(task.country_code));
-      }
-      await ctx.db.patch(existing._id, {
+      // the exact object this save writes
+      const written = {
         ...args.draft,
         confirmed_dates: confirmed,
         observation_contract_version: args.draft.observation_contract_version ?? existing.observation_contract_version,
         privacy_flag: args.draft.privacy_flag ?? existing.privacy_flag,
         licence_flag: args.draft.licence_flag ?? existing.licence_flag,
-        draft_status: staysSubmitted ? existing.draft_status : "draft",
+        draft_status: staysSubmitted ? existing.draft_status : ("draft" as const),
         updated_at: now,
-      });
+      };
+      // the list must match the record as saved. a reviewer's edit of a
+      // submitted record meets the checks stage 1 adds on each date field it
+      // sets or changes; a field it leaves as stored is not re-checked, and no
+      // other date check applied to this route before stage 1
+      const record = patched(existing, written);
+      if (staysSubmitted) {
+        assertEvidenceDraftDates(record, dateFloorYear(task.country_code), datesToCheck(existing, written));
+      } else {
+        assertConfirmedDates(confirmed, evidenceDateFields(record).map((field) => field.value));
+      }
+      await ctx.db.patch(existing._id, written);
       // only a review role reaches a submitted row here; the edit stays
       // possible but is recorded as an attributed child version of the
       // contributor's submission rather than a silent patch
@@ -1068,6 +1081,10 @@ export async function submitEvidenceDraftHandler(ctx: MutationCtx, args: typeof 
     }
     assertNotRapidContract(draft, "the general submission route");
     const task = await getTaskOrThrow(ctx, draft.task_id);
+    // the submission contract as before stage 1, on every call; the checks
+    // stage 1 adds apply on the draft's first submission, since this route
+    // writes no date of its own
+    assertEvidenceDraftSubmission(draft, false, dateFloorYear(task.country_code), { changed: datesToCheck(draft, {}) });
     // a receipt-backed retry answers from its receipt before the gate and
     // before any status write (review finding 2026-09-12: the draft and task
     // may have moved on since the receipted submission, and a retry that
@@ -1094,11 +1111,6 @@ export async function submitEvidenceDraftHandler(ctx: MutationCtx, args: typeof 
     ) {
       throw new Error("Assigned guided tasks must submit evidence and periods together. Reload the portal and try again.");
     }
-    // the submission contract; a draft that holds its current version's own
-    // content is a replay, which keeps every rule except the deep-time date
-    // rules (a receipted retry answered above)
-    const replay = await matchesCurrentVersion(ctx, draft);
-    assertEvidenceDraftSubmission(draft, false, dateFloorYear(task.country_code), { dates: !replay });
     const now = Date.now();
     // the version captures the row's content, which the status change
     // below does not touch; an unchanged resubmission returns the existing
@@ -1160,6 +1172,9 @@ export async function submitEvidenceDraftWithOccupanciesHandler(ctx: MutationCtx
     }
     assertNotRapidContract(draft, "the guided evidence-and-periods route");
     const task = await getTaskOrThrow(ctx, draft.task_id);
+    // as on the legacy route: the contract on every call, the checks stage 1
+    // adds on the draft's first submission
+    assertEvidenceDraftSubmission(draft, false, dateFloorYear(task.country_code), { changed: datesToCheck(draft, {}) });
     assertWideEvidenceRowFields(draft.generated_wide_row, taskTargetYears(task));
     const submissionKey = `${user._id}:${args.clientSubmissionId}`;
 
@@ -1194,9 +1209,6 @@ export async function submitEvidenceDraftWithOccupanciesHandler(ctx: MutationCtx
         ...(receipt !== null ? { evidence_version_hash: receipt.object_hash } : {}),
       };
     }
-    // a fresh submission meets the contract, including the deep-time date
-    // rules, after a retry under its own key has answered above
-    assertEvidenceDraftSubmission(draft, false, dateFloorYear(task.country_code));
     const gateRefusal = evidenceIntakeRefusal(task.status);
     if (gateRefusal !== null) {
       throw new Error(gateRefusal);
@@ -1323,10 +1335,9 @@ export const submitUnresolvedNote = mutation({
     }
     assertNotRapidContract(draft, "the unresolved-note route");
     const task = await getTaskOrThrow(ctx, draft.task_id);
-    // a draft that holds its current version's own content is a replay,
-    // which keeps every rule except the deep-time date rules
-    const replay = await matchesCurrentVersion(ctx, draft);
-    assertEvidenceDraftSubmission(draft, true, dateFloorYear(task.country_code), { dates: !replay });
+    // the contract on every call; the checks stage 1 adds on the draft's
+    // first submission
+    assertEvidenceDraftSubmission(draft, true, dateFloorYear(task.country_code), { changed: datesToCheck(draft, {}) });
     const gateRefusal = evidenceIntakeRefusal(task.status);
     if (gateRefusal !== null) {
       throw new Error(gateRefusal);

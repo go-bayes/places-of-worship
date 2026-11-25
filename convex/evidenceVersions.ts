@@ -208,32 +208,6 @@ export type RecordedEvidenceVersion = {
 // a keyed call always leaves a receipt naming the version it returned, so
 // the token stays bound to that version for the caller whether the call
 // created it or received an existing one by content
-// whether a record, as a write would leave it, holds the content of its
-// current evidence version (the row and its active periods). an exact replay
-// of stored content resolves against that version before any rule for a
-// fresh write (deep-time dates, stage 1); a record with no version is fresh
-export async function matchesCurrentVersion(
-  ctx: QueryCtx | MutationCtx,
-  row: Doc<"evidence_drafts">,
-): Promise<boolean> {
-  if (row.evidence_version_hash === undefined) return false;
-  const current = await versionByHash(ctx, row.evidence_version_hash);
-  if (current === null) return false;
-  const built = buildEvidenceVersion({
-    task_id: row.task_id,
-    evidence_draft_id: row.evidence_draft_id,
-    evidence_family_id: current.evidence_family_id,
-    version_index: current.version_index + 1,
-    version_kind: "submitted",
-    lineage: { relation: "child", parent_object_hash: current.object_hash },
-    actor_user_id: String(row.created_by),
-    recorded_at_ms: row.updated_at,
-    evidence_row: row,
-    occupancy_rows: await activeOccupancyRows(ctx, row.evidence_draft_id),
-  });
-  return built.content_hash === current.content_hash;
-}
-
 export async function recordEvidenceVersion(
   ctx: MutationCtx,
   args: {

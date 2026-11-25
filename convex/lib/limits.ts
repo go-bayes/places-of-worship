@@ -203,16 +203,36 @@ export function evidenceDateFields(draft: EvidenceDraftLimitInput): EvidenceDate
   return fields;
 }
 
-// the date rules of an evidence record by the purpose of each date, for every
-// contract version: an observation date keeps 1000 to 2100 outright; a
-// documentary source's own date may fall before 1000 when the record confirms
-// it; the lifecycle date is a historical date that meets the country's floor
-// unless confirmed. a fresh write applies these rules; an exact replay of
-// stored content resolves against its version before them
-export function assertEvidenceDraftDates(draft: EvidenceDraftLimitInput, floorYear: number): void {
-  const fields = evidenceDateFields(draft);
-  assertConfirmedDates(draft.confirmed_dates, fields.map((field) => field.value));
-  for (const field of fields) {
+// the date fields of an evidence record by name
+export type EvidenceDateFieldName = "source_date_or_capture_date" | "lifecycle_date";
+export const EVIDENCE_DATE_FIELD_NAMES: readonly EvidenceDateFieldName[] = ["source_date_or_capture_date", "lifecycle_date"];
+const FIELD_KEYS: Record<EvidenceDateFieldName, readonly EvidenceDateField["key"][]> = {
+  source_date_or_capture_date: ["source_date:observation", "source_date:documentary"],
+  lifecycle_date: ["lifecycle_date"],
+};
+
+// the checks stage 1 adds, by the purpose of each date and for every contract
+// version: an observation date keeps 1000 to 2100 outright; a documentary
+// source's own date may fall before 1000 when the record confirms it; the
+// lifecycle date is a historical date that meets the country's floor unless
+// confirmed. the confirmed-dates list always matches the record's dates;
+// the checks themselves run on the fields named
+export function assertEvidenceDraftDates(
+  draft: EvidenceDraftLimitInput,
+  floorYear: number,
+  fields: readonly EvidenceDateFieldName[] = EVIDENCE_DATE_FIELD_NAMES,
+): void {
+  assertConfirmedDates(draft.confirmed_dates, evidenceDateFields(draft).map((field) => field.value));
+  assertAddedDateChecks(draft, floorYear, fields);
+}
+
+function assertAddedDateChecks(
+  draft: EvidenceDraftLimitInput,
+  floorYear: number,
+  fields: readonly EvidenceDateFieldName[],
+): void {
+  const keys = new Set(fields.flatMap((name) => FIELD_KEYS[name]));
+  for (const field of evidenceDateFields(draft).filter((date) => keys.has(date.key))) {
     if (field.key === "source_date:observation" && !isValidObservationDate(field.value)) {
       throw new Error("Use YYYY, YYYY-MM, or YYYY-MM-DD from 1000 to 2100 for an observation or capture date.");
     }
@@ -223,6 +243,33 @@ export function assertEvidenceDraftDates(draft: EvidenceDraftLimitInput, floorYe
       assertHistoricalDate("The lifecycle date", field.value, floorYear, draft.confirmed_dates);
     }
   }
+}
+
+// the guided record's date check before stage 1, kept on every write: a year
+// or year-month from 1000 to 2100, or a real full date. a value the stage 1
+// checks accept passes too, since stage 1 widens historical dates (ruling 3).
+// partialDates.node-test.mjs lets this one function keep its old pattern
+function isValidPartialDateBeforeStage1(value: string): boolean {
+  if (/^(?:1\d{3}|20\d{2}|2100)$/.test(value)) return true;
+  if (/^(?:1\d{3}|20\d{2}|2100)-(?:0[1-9]|1[0-2])$/.test(value)) return true;
+  const parts = value.match(/^(\d{4})-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/);
+  if (!parts) return false;
+  const parsed = new Date(`${value}T00:00:00Z`);
+  return parsed.getUTCFullYear() === Number(parts[1])
+    && parsed.getUTCMonth() + 1 === Number(parts[2])
+    && parsed.getUTCDate() === Number(parts[3]);
+}
+
+function assertDateBeforeStage1(
+  draft: EvidenceDraftLimitInput,
+  field: EvidenceDateFieldName,
+  floorYear: number,
+  confirmed: ConfirmedDate[] | undefined,
+): void {
+  const value = draft[field]?.trim() ?? "";
+  if (!value || isValidPartialDateBeforeStage1(value)) return;
+  // the stage 1 check decides, and its refusal names the reason
+  assertAddedDateChecks({ ...draft, confirmed_dates: confirmed }, floorYear, [field]);
 }
 
 // a date a save writes may not name the year 0000, which stage 2 reserves;
@@ -236,13 +283,20 @@ export function assertNoYearZero(label: string, value: string | undefined): void
 // validate a persisted draft against the versioned scientific submission
 // contract. floorYear is the task country's date floor (countryYears.ts),
 // which the lifecycle date meets unless the draft confirms it (ruling 5)
-// options.dates false: an exact replay of stored content, which resolved
-// against its version, keeps every rule except the stage 1 date rules
+// the date rules of a write (deep-time stage 1): every date check made before
+// stage 1 applies to the incoming draft on every write, a value stage 1
+// accepts also passing it (the ruled widenings); the checks stage 1 adds apply
+// to the record the write leaves, for the date fields in written.changed. a
+// first submission passes every field; a write to an already-submitted record
+// passes only the fields it sets or changes. by default the draft is the
+// record and every field is checked
+export type WrittenDates = { record?: EvidenceDraftLimitInput; changed?: readonly EvidenceDateFieldName[] };
+
 export function assertEvidenceDraftSubmission(
   draft: EvidenceDraftLimitInput,
   unresolved: boolean,
   floorYear: number,
-  options: { dates?: boolean } = {},
+  written: WrittenDates = {},
 ): void {
   if (
     draft.observation_contract_version !== undefined
@@ -306,7 +360,8 @@ export function assertEvidenceDraftSubmission(
   if (isGuidedObservation && !unresolved && draft.source_type !== "field_observation" && !sourceReference) {
     throw new Error("Add a source URL or agreed file reference before submitting for review.");
   }
-  if (options.dates !== false) assertEvidenceDraftDates(draft, floorYear);
+  const record = written.record ?? draft;
+  if (isGuidedObservation) assertDateBeforeStage1(draft, "source_date_or_capture_date", floorYear, record.confirmed_dates);
   const hasLifecycleDetail = Boolean(draft.lifecycle_event || lifecycleDate || draft.lifecycle_note?.trim() || lifecyclePrecision);
   if (isGuidedObservation && hasLifecycleDetail && !draft.lifecycle_event) {
     throw new Error("Choose a lifecycle event or remove its date, precision, and note.");
@@ -314,6 +369,8 @@ export function assertEvidenceDraftSubmission(
   if (isGuidedObservation && draft.lifecycle_event && !lifecycleDate) {
     throw new Error("A lifecycle event requires a date or bounded date.");
   }
+  if (isGuidedObservation) assertDateBeforeStage1(draft, "lifecycle_date", floorYear, record.confirmed_dates);
+  assertEvidenceDraftDates(record, floorYear, written.changed ?? EVIDENCE_DATE_FIELD_NAMES);
   if (isGuidedObservation && draft.lifecycle_event && !["day", "month", "year", "bounded", "unknown"].includes(lifecyclePrecision)) {
     throw new Error("A lifecycle event requires a recognised date precision.");
   }
