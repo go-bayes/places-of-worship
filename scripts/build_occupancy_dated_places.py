@@ -32,8 +32,10 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import re
 import sys
 from collections import defaultdict
+from datetime import date
 from pathlib import Path
 from typing import Any
 
@@ -59,14 +61,22 @@ def read_jsonl(path: Path) -> list[dict[str, Any]]:
     return rows
 
 
-# The year of a partial date (YYYY, YYYY-MM, or YYYY-MM-DD); None for blanks.
+# The year of a real partial date (YYYY, YYYY-MM, or YYYY-MM-DD, ASCII digits, a year from 0001,
+# a year below 1000 written with four digits); None for blanks and anything else, such as 0000,
+# other digits or an impossible day (deep-time dates, stage 1). The backend validated each date
+# when it was written; the builder reads no year from a value that is not one.
 def year_of(value: Any) -> int | None:
     if value is None:
         return None
-    text = str(value).strip()
-    if len(text) < 4 or not text[:4].isdigit():
+    match = re.fullmatch(r"([0-9]{4})(?:-([0-9]{2})(?:-([0-9]{2}))?)?", str(value).strip())
+    if match is None or int(match.group(1)) < 1:
         return None
-    return int(text[:4])
+    year, month, day = int(match.group(1)), int(match.group(2) or 1), int(match.group(3) or 1)
+    try:
+        date(year, month, day)
+    except ValueError:
+        return None
+    return year
 
 
 # Year bounds of one occupancy: where its start and end can fall, by the entry mode.

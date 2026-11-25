@@ -13,9 +13,9 @@ import { assertConfirmedDates, assertConfirmers, confirmersForRoles } from "./pa
 import { assertFunctionChain } from "./functionChain.ts";
 import { assertOccupancySegment } from "./occupancies.ts";
 import { dateFloorYear } from "./countryYears.ts";
-import { confirmedDateProblems, curatorConfirmations, validateImportRow } from "./importRow.ts";
+import { curatorConfirmations, importRowDateProblems, NOMINATION_CONFIRMABLE_COLUMNS, validateImportRow } from "./importRow.ts";
 import { segmentFromImportRow } from "./occupancyImport.ts";
-import { validateAgentReviewBundle } from "./agentIntake.ts";
+import { agentConfirmedDates, validateAgentReviewBundle } from "./agentIntake.ts";
 
 // evidenceVersions.ts imports extensionless local modules, which convex
 // resolves when bundling; resolve them here as evidenceVersions.node-test.mjs does
@@ -78,7 +78,7 @@ test("a documentary source's date below 1000 takes a confirmation; a field obser
   // a full observation date outside the range is refused, as a year was before
   assert.throws(() => assertEvidenceDraftSubmission({ ...guided, source_date_or_capture_date: "2105-01-01" }, false, NZ), /from 1000 to 2100/);
   const field = { ...guided, source_type: "field_observation", source_date_or_capture_date: "0920-05-01" };
-  assert.throws(() => assertEvidenceDraftSubmission({ ...field, confirmed_dates: confirm("0920-05-01") }, false, NZ), /field observation date/);
+  assert.throws(() => assertEvidenceDraftSubmission({ ...field, confirmed_dates: confirm("0920-05-01") }, false, NZ), /observation or capture date/);
 });
 
 test("a rapid current observation refuses a date outside 1000 to 2100 outright", () => {
@@ -137,7 +137,9 @@ test("a period and a function chain pass the floor with a confirmed date", () =>
 test("the import file carries the curator's confirmation for each such row", () => {
   const base = { row_number: 1, name: "St Example", country_code: "VU", source_locator: "entry 1", containing_area: "Efate", claim_hash: "0", first_date: "1590" };
   assert.deepEqual(validateImportRow({ ...base, confirmed_dates: ["1590"] }, "VU"), []);
-  assert.deepEqual(confirmedDateProblems({ ...base, confirmed_dates: ["1591"] }), ["The confirmed date 1591 matches no date in this row."]);
+  assert.deepEqual(importRowDateProblems({ ...base, confirmed_dates: ["1590"] }, 1600, NOMINATION_CONFIRMABLE_COLUMNS), []);
+  assert.match(importRowDateProblems(base, 1600, NOMINATION_CONFIRMABLE_COLUMNS).join(" "), /first_date 1590 is earlier than 1600/);
+  assert.match(importRowDateProblems({ ...base, confirmed_dates: ["1591"] }, 1600, NOMINATION_CONFIRMABLE_COLUMNS).join(" "), /1591 is not a date this import stores/);
   assert.deepEqual(curatorConfirmations(["1590", "1700"], [undefined, "1590"]), [{ date: "1590", confirmed_by: "curator" }]);
   assert.equal(curatorConfirmations(["1700"], ["1590"]), undefined, "no list when no date of the record is confirmed");
   const read = segmentFromImportRow(
@@ -168,6 +170,24 @@ test("an agent's dated claim meets the same floor, and an agent may confirm it",
   assert.throws(() => validateAgentReviewBundle(byPerson, JSON.stringify(byPerson)), /invalid constant/);
   const orphan = withDate((claim) => { claim.confirmed_dates = [{ date: "1591", confirmed_by: "agent" }]; });
   assert.throws(() => validateAgentReviewBundle(orphan, JSON.stringify(orphan)), /matches no date/);
+});
+
+test("finding 6: an agent's documentary source date keeps 1000 to 2100, or falls before 1000 with the agent's confirmation", () => {
+  const fixture = JSON.parse(fs.readFileSync(new URL("../../scripts/agent_research/fixtures/internal-review-bundle.json", import.meta.url), "utf8"));
+  const withSource = (sourceDate, confirmed) => {
+    const value = structuredClone(fixture);
+    Object.assign(value.dossier.claims[0], { date_start: null, date_end: null, date_precision: "unknown" });
+    value.dossier.claims[0].source.source_date = sourceDate;
+    if (confirmed) value.dossier.claims[0].confirmed_dates = confirmed;
+    return value;
+  };
+  const early = withSource("0731");
+  assert.throws(() => validateAgentReviewBundle(early, JSON.stringify(early)), /source_date is earlier than 1000/);
+  const confirmed = withSource("0731", [{ date: "0731", confirmed_by: "agent" }]);
+  assert.doesNotThrow(() => validateAgentReviewBundle(confirmed, JSON.stringify(confirmed)));
+  assert.deepEqual(agentConfirmedDates(confirmed.dossier), [{ claim_id: confirmed.dossier.claims[0].claim_id, date: "0731" }]);
+  const late = withSource("2101-01-01");
+  assert.throws(() => validateAgentReviewBundle(late, JSON.stringify(late)), /source_date is later than 2100/);
 });
 
 test("a record without a confirmed date hashes as before", () => {

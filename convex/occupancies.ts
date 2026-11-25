@@ -13,7 +13,7 @@ import { mutation, query } from "./_generated/server";
 import { assertOwnsOrCanReview, canReview, chooseActorRole, requireUser, type ProjectRole } from "./lib/auth";
 import { dateFloorYear, targetYearsOrEmpty } from "./lib/countryYears";
 import { isHistoricalClaimParentContract } from "./lib/historicalClaims";
-import { assertConfirmers, confirmersForRoles } from "./lib/partialDates";
+import { assertConfirmers, confirmationsFor, confirmersForRoles } from "./lib/partialDates";
 import {
   assertChainAgreesWithPeriods,
   assertFunctionChain,
@@ -597,6 +597,8 @@ export async function recordFunctionChain(
       claim_text: `${label} from ${from}${to ? ` until ${to} (${String(state.ended_by).replaceAll("_", " ")})` : ""}`,
       ...(fromBounds.earliest ? { earliest_supported_date: fromBounds.earliest } : {}),
       ...(toBounds.latest ? { latest_supported_date: toBounds.latest } : {}),
+      // the chain's confirmations of this claim's own bounds travel with it
+      confirmed_dates: confirmationsFor(chain.confirmed_dates, [fromBounds.earliest, toBounds.latest]),
       continues_through_observation: state.to === undefined,
       chain_index: claimIndex,
       chain_change: state.began_by,
@@ -623,6 +625,7 @@ export async function recordFunctionChain(
       claim_text: words,
       ...(claimBounds(event.date).earliest ? { earliest_supported_date: claimBounds(event.date).earliest } : {}),
       ...(claimBounds(event.date).latest ? { latest_supported_date: claimBounds(event.date).latest } : {}),
+      confirmed_dates: confirmationsFor(chain.confirmed_dates, [claimBounds(event.date).earliest, claimBounds(event.date).latest]),
       continues_through_observation: false,
       chain_index: claimIndex,
       chain_change: event.change,

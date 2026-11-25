@@ -421,9 +421,9 @@ Fields:
 - `source_url_or_file`.
 - `source_date_or_capture_date`: optional partial date string, an observation
   date from 1000 to 2100. A documentary source's own date before 1000 is
-  accepted when `confirmed_dates` holds it; a field observation and a rapid
-  current observation keep the range outright (deep-time dates, stage 1,
-  rulings 3 and 4).
+  accepted when `confirmed_dates` holds it; the date of a field observation,
+  street or aerial imagery or a rapid current observation keeps the range
+  outright (deep-time dates, stage 1, rulings 3 and 4).
 - `source_notes`.
 - `action`: map action value.
 - `target_year_statuses`: object keyed by the task batch's target years.

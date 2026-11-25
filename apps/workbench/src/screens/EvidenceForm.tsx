@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { CountryConfig } from "../config";
-import { isHistoricalDate, isObservationDate } from "../data/partialDates";
+import { isHistoricalDate, isObservationDate, isSourceDate } from "../data/partialDates";
 import { markHumanEdits } from "../data/provenance";
 import type { WorkbenchProvider } from "../data/provider";
 import type {
@@ -276,11 +276,12 @@ export function DraftEvidenceEditor(props: {
       if (source.archiveRef && !source.archiveRef.consultedDate.trim()) {
         found.push("Add the date you consulted the archive, so the citation is complete.");
       }
-      // a source's own date is historical in form and may fall before 1000
+      // a source's own date by its purpose: a field or imagery capture keeps
+      // 1000 to 2100, and a documentary source's date may fall before 1000
       // (the backend asks for a confirmation there); a consulted date is an
       // observation date, from 1000 to 2100
-      if (source.sourceDate && !isHistoricalDate(source.sourceDate)) {
-        found.push("Write the source date as YYYY, YYYY-MM, or YYYY-MM-DD, with a year before 1000 written with four digits, as 0920.");
+      if (source.sourceDate && !isSourceDate(source.sourceType, source.sourceDate)) {
+        found.push("Write the source date as YYYY, YYYY-MM, or YYYY-MM-DD, from 1000 to 2100; a documentary source's date before 1000 is written with four digits, as 0920.");
       }
       for (const [label, value] of [
         ["consulted date", source.consultedDate],

@@ -2,7 +2,10 @@
 // moved here from convex/batchImport.ts so the shared date test
 // (partialDates.node-test.mjs) can reach them. the workbench module
 // apps/workbench/src/data/batchImport.ts applies the same rules
-import { isValidHistoricalDate, type ConfirmedDate } from "./partialDates.ts";
+import { isValidHistoricalDate, isValidObservationDate, type ConfirmedDate } from "./partialDates.ts";
+
+// the shape of a partial date the import accepted before stage 1
+const PARTIAL_DATE_FORM = /^[0-9]{4}(-[0-9]{2})?(-[0-9]{2})?$/;
 
 export const GEOCODING_BASES = new Set([
   "exact_address",
@@ -41,11 +44,14 @@ export type ImportRow = {
 };
 
 
-// the date columns an import row may carry: the nomination dates and, on an
-// occupancy row, the period dates
-export const IMPORT_ROW_DATE_COLUMNS = [
+// the date columns each import route stores as a date, and so may carry a
+// curator's confirmation: the nomination import writes first_date as the
+// lifecycle date (last_date goes into a note); the occupancy import also
+// stores each period's dates. the source's consulted date is file-level
+// register text, never a row's confirmed date
+export const NOMINATION_CONFIRMABLE_COLUMNS = ["first_date"] as const;
+export const OCCUPANCY_CONFIRMABLE_COLUMNS = [
   "first_date",
-  "last_date",
   "start_date",
   "start_not_earlier_than",
   "start_not_later_than",
@@ -55,31 +61,56 @@ export const IMPORT_ROW_DATE_COLUMNS = [
   "still_active_asof",
 ] as const;
 
-export function importRowDates(row: object): string[] {
-  const record = row as Record<string, unknown>;
-  return IMPORT_ROW_DATE_COLUMNS
-    .map((column) => record[column])
-    .filter((value): value is string => typeof value === "string" && value.trim() !== "")
-    .map((value) => value.trim());
-}
-
-// every date a row confirms is a real date written as one of its own columns
-export function confirmedDateProblems(row: { confirmed_dates?: string[] }): string[] {
+// the deep-time stage 1 rules for a row's own dates, applied to a fresh
+// import after its duplicate check: first_date and last_date are real
+// historical dates; first_date, stored as the lifecycle date, meets the
+// country's floor unless the row confirms it; each confirmed date is a real
+// date the route stores from this row, listed once
+export function importRowDateProblems(
+  row: { first_date?: string; last_date?: string; confirmed_dates?: string[] },
+  floorYear: number,
+  confirmable: readonly string[],
+): string[] {
   const problems: string[] = [];
-  const dates = new Set(importRowDates(row));
+  const confirmed = new Set((row.confirmed_dates ?? []).map((value) => value.trim()));
+  for (const [label, value] of [["first_date", row.first_date], ["last_date", row.last_date]] as const) {
+    // the value as the route stores it, untrimmed
+    const date = value ?? "";
+    if (!date) continue;
+    if (!isValidHistoricalDate(date)) {
+      problems.push(`Write ${label} as a real date, YYYY, YYYY-MM, or YYYY-MM-DD, with a year before 1000 written with four digits, as 0920.`);
+    } else if (label === "first_date" && Number(date.slice(0, 4)) < floorYear && !confirmed.has(date)) {
+      problems.push(`first_date ${date} is earlier than ${floorYear}, the earliest year this country accepts without a confirmed date. Check the year, or list it in confirmed_dates.`);
+    }
+  }
+  const record = row as Record<string, unknown>;
+  const storable = new Set(
+    confirmable
+      .map((column) => record[column])
+      .filter((value): value is string => typeof value === "string" && value.trim() !== "")
+      .map((value) => value.trim()),
+  );
   const seen = new Set<string>();
   for (const value of row.confirmed_dates ?? []) {
     const date = value.trim();
     if (!isValidHistoricalDate(date)) {
-      problems.push(`Write each confirmed date as YYYY, YYYY-MM, or YYYY-MM-DD, with a year before 1000 written with four digits, as 0920.`);
-    } else if (!dates.has(date)) {
-      problems.push(`The confirmed date ${date} matches no date in this row.`);
+      problems.push("Write each confirmed date as YYYY, YYYY-MM, or YYYY-MM-DD, with a year before 1000 written with four digits, as 0920.");
     } else if (seen.has(date)) {
       problems.push(`The confirmed date ${date} is listed twice.`);
+    } else if (!storable.has(date)) {
+      problems.push(`The confirmed date ${date} is not a date this import stores from the row; confirm ${confirmable.join(", ")} only.`);
     }
     seen.add(date);
   }
   return problems;
+}
+
+// an evidence record's source date from the file's consulted date: only a
+// real observation date, from 1000 to 2100. the register keeps the
+// consulted date as the curator wrote it
+export function evidenceSourceDate(consultedDate: string | undefined): string | undefined {
+  const date = consultedDate?.trim() ?? "";
+  return isValidObservationDate(date) ? date : undefined;
 }
 
 // the curator's confirmations that cover a record's own dates, or undefined
@@ -137,11 +168,12 @@ export function validateImportRow(row: ImportRow, countryCode: string): string[]
     ["first_date", row.first_date],
     ["last_date", row.last_date],
   ] as const) {
-    if (value && !isValidHistoricalDate(value)) {
-      problems.push(`Write ${label} as YYYY, YYYY-MM, or YYYY-MM-DD, with a year before 1000 written with four digits, as 0920.`);
+    // the form only, as before stage 1: a row already imported keeps its
+    // duplicate skip; importRowDateProblems applies the date rules after it
+    if (value && !PARTIAL_DATE_FORM.test(value)) {
+      problems.push(`Write ${label} as YYYY, YYYY-MM, or YYYY-MM-DD.`);
     }
   }
-  problems.push(...confirmedDateProblems(row));
   if (row.source_url && !/^https?:\/\//i.test(row.source_url)) {
     problems.push("source_url must be an http(s) URL.");
   }
@@ -150,4 +182,3 @@ export function validateImportRow(row: ImportRow, countryCode: string): string[]
   }
   return problems;
 }
-

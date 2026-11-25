@@ -3,6 +3,7 @@ import {
   assertConfirmedDates,
   assertHistoricalDate,
   assertSourceDate,
+  isCaptureSource,
   isValidObservationDate,
   type ConfirmedDate,
 } from "./partialDates.ts";
@@ -176,6 +177,36 @@ export function assertRapidCurrentObservation(draft: EvidenceDraftLimitInput): v
   }
 }
 
+// the date rules of a draft by the purpose of each date, for every contract
+// version (deep-time stage 1, rulings 3 to 7): the source date of a capture
+// (a field observation, street or aerial imagery, a rapid observation) keeps
+// 1000 to 2100 outright; a documentary source's own date may fall before
+// 1000 when the draft confirms it; the lifecycle date is a historical date
+// that meets the country's floor unless confirmed. every fresh submission and
+// every reviewer edit of a submitted record applies these rules; a replay of
+// a receipted submission answers before them
+export function assertEvidenceDraftDates(draft: EvidenceDraftLimitInput, floorYear: number): void {
+  const written = draft.source_date_or_capture_date?.trim() ?? "";
+  // an unversioned spreadsheet record may carry a capture timestamp; its day is the date
+  const sourceDate = draft.observation_contract_version === undefined && /^[0-9]{4}-[0-9]{2}-[0-9]{2}T/.test(written)
+    ? written.slice(0, 10)
+    : written;
+  const lifecycleDate = draft.lifecycle_date?.trim() ?? "";
+  assertConfirmedDates(draft.confirmed_dates, [sourceDate, lifecycleDate]);
+  if (sourceDate) {
+    if (draft.observation_contract_version === "rapid_current_v1" || isCaptureSource(draft.source_type)) {
+      if (!isValidObservationDate(sourceDate)) {
+        throw new Error("Use YYYY, YYYY-MM, or YYYY-MM-DD from 1000 to 2100 for an observation or capture date.");
+      }
+    } else {
+      assertSourceDate("The source or capture date", sourceDate, draft.confirmed_dates);
+    }
+  }
+  if (lifecycleDate) {
+    assertHistoricalDate("The lifecycle date", lifecycleDate, floorYear, draft.confirmed_dates);
+  }
+}
+
 // validate a persisted draft against the versioned scientific submission
 // contract. floorYear is the task country's date floor (countryYears.ts),
 // which the lifecycle date meets unless the draft confirms it (ruling 5)
@@ -242,25 +273,13 @@ export function assertEvidenceDraftSubmission(draft: EvidenceDraftLimitInput, un
   if (isGuidedObservation && !unresolved && draft.source_type !== "field_observation" && !sourceReference) {
     throw new Error("Add a source URL or agreed file reference before submitting for review.");
   }
-  assertConfirmedDates(draft.confirmed_dates, [sourceDate, lifecycleDate]);
-  // a field observation's date keeps the observation range outright; a
-  // documentary source's own date may fall below 1000 when the draft
-  // confirms it (rulings 3 and 4)
-  if (isGuidedObservation && sourceDate && draft.source_type === "field_observation" && !isValidObservationDate(sourceDate)) {
-    throw new Error("Use YYYY, YYYY-MM, or YYYY-MM-DD from 1000 to 2100 for a field observation date.");
-  }
-  if (isGuidedObservation && sourceDate && draft.source_type !== "field_observation") {
-    assertSourceDate("The source or capture date", sourceDate, draft.confirmed_dates);
-  }
+  assertEvidenceDraftDates(draft, floorYear);
   const hasLifecycleDetail = Boolean(draft.lifecycle_event || lifecycleDate || draft.lifecycle_note?.trim() || lifecyclePrecision);
   if (isGuidedObservation && hasLifecycleDetail && !draft.lifecycle_event) {
     throw new Error("Choose a lifecycle event or remove its date, precision, and note.");
   }
   if (isGuidedObservation && draft.lifecycle_event && !lifecycleDate) {
     throw new Error("A lifecycle event requires a date or bounded date.");
-  }
-  if (isGuidedObservation && lifecycleDate) {
-    assertHistoricalDate("The lifecycle date", lifecycleDate, floorYear, draft.confirmed_dates);
   }
   if (isGuidedObservation && draft.lifecycle_event && !["day", "month", "year", "bounded", "unknown"].includes(lifecyclePrecision)) {
     throw new Error("A lifecycle event requires a recognised date precision.");

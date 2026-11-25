@@ -17,7 +17,15 @@ import {
 import { assertLocationAssertion } from "./lib/locationAssertions";
 import { assertOccupancySet, type OccupancySegmentInput } from "./lib/occupancies";
 import { groupImportRows, rowHasOccupancy, segmentFromImportRow } from "./lib/occupancyImport";
-import { confirmedDateProblems, curatorConfirmations, validateImportRow, type ImportRow } from "./lib/importRow";
+import {
+  curatorConfirmations,
+  evidenceSourceDate,
+  importRowDateProblems,
+  NOMINATION_CONFIRMABLE_COLUMNS,
+  OCCUPANCY_CONFIRMABLE_COLUMNS,
+  validateImportRow,
+  type ImportRow,
+} from "./lib/importRow";
 import { appendTaskEvent } from "./lib/taskEvents";
 import { recordEvidenceVersion } from "./evidenceVersions";
 import { recordOccupancySet } from "./occupancies";
@@ -329,7 +337,6 @@ export const adminImportOccupancyBatch = internalMutation({
       const base = rows[0];
       const rowNumber = base.row_number;
       const problems = validateImportRow(base, countryCode);
-      for (const row of rows.slice(1)) problems.push(...confirmedDateProblems(row));
       const inconsistent = rows.filter((row) => row.name !== base.name || row.row_number !== base.row_number);
       if (inconsistent.length > 0) {
         problems.push("Rows of one place must repeat its name and row_number and differ only in their period columns.");
@@ -363,6 +370,19 @@ export const adminImportOccupancyBatch = internalMutation({
           status: "skipped_existing",
           problems: ["Already imported in an earlier upload of this source; not duplicated."],
         });
+        continue;
+      }
+      // deep-time stage 1, for a fresh import after its duplicate check: the
+      // rows' own dates and the curator's confirmations. a place's first_date
+      // is read from its first row, so its confirmation goes on that row
+      const dateProblems = rows.flatMap((row, index) => importRowDateProblems(
+        index === 0 ? row : { ...row, first_date: undefined },
+        floorYear,
+        index === 0 ? OCCUPANCY_CONFIRMABLE_COLUMNS : OCCUPANCY_CONFIRMABLE_COLUMNS.filter((column) => column !== "first_date"),
+      ));
+      if (dateProblems.length > 0) {
+        rejected += 1;
+        rowReports.push({ row_number: rowNumber, status: "rejected", problems: dateProblems });
         continue;
       }
 
@@ -422,6 +442,65 @@ export const adminImportOccupancyBatch = internalMutation({
         suggested_action: "read_before_deciding",
       }));
 
+      const evidenceNote = [
+        `Compiled record imported with ${segments.length} period${segments.length === 1 ? "" : "s"}; see the occupancy panel.`,
+        base.religion ? `religion: ${base.religion}` : undefined,
+        base.denomination_code ? `denomination: ${base.denomination_code} (taxonomy ${base.taxonomy_version})` : undefined,
+        base.culturally_sensitive ? `culturally_sensitive: ${base.culturally_sensitive}` : undefined,
+        base.notes,
+      ].filter(Boolean).join("\n");
+      // the curator's confirmation of the record's lifecycle date; a period's
+      // confirmations travel on its segment (segmentFromImportRow)
+      const draftConfirmations = curatorConfirmations(base.confirmed_dates, [base.first_date]);
+      const draftRecord = {
+        evidence_draft_id: draftId,
+        task_id: taskId,
+        draft_status: "submitted" as const,
+        created_by: user._id,
+        created_at: now,
+        updated_at: now,
+        observation_contract_version: "guided_observation_v1" as const,
+        source_type: args.source.source_type,
+        source_title: args.source.title,
+        source_url_or_file: args.source.url_or_file ?? args.source.archive_ref,
+        source_date_or_capture_date: evidenceSourceDate(args.source.consulted_date),
+        source_id: registerSource.source_id,
+        source_locator: locator,
+        locality_raw: base.locality,
+        source_notes: [
+          args.source.licence ? `Licence: ${args.source.licence}` : undefined,
+          base.source_url ? `${args.source.title}, entry ${locator}: ${base.source_url}` : undefined,
+        ].filter(Boolean).join("\n") || undefined,
+        related_ids_or_note: `entry ${locator}`,
+        target_year_statuses: Object.fromEntries(targetYears.map((year) => [String(year), "not_assessed" as const])),
+        ...(base.first_date ? { lifecycle_event: "first_seen", lifecycle_date: base.first_date, lifecycle_date_precision: base.first_date.length === 4 ? "year" : base.first_date.length === 7 ? "month" : "day" } : {}),
+        ...(base.last_date ? { lifecycle_note: `last_seen ${base.last_date} (${base.date_confidence ?? "medium"})` } : {}),
+        ...(draftConfirmations !== undefined ? { confirmed_dates: draftConfirmations } : {}),
+        evidence_note: evidenceNote,
+        privacy_flag: privacyFlag,
+        licence_flag: args.source.licence ? ("clear" as const) : ("needs_review" as const),
+        validation_summary: {
+          status: "server_validated",
+          contract: "guided_observation_v1",
+          origin: "occupancy_import",
+          historical_target_years_assessed: false,
+        },
+        source_claim_key: claimKey,
+        claim_hash: base.claim_hash,
+        import_batch_id: args.batchId,
+      };
+      // the evidence record meets the submission contract before anything is
+      // written, so a refused place is a rejected row, never a failed batch
+      try {
+        assertEvidenceDraftLimits(draftRecord);
+        assertEvidenceDraftSubmission(draftRecord, false, floorYear);
+      } catch (error) {
+        rejected += 1;
+        rowReports.push({ row_number: rowNumber, status: "rejected", problems: [error instanceof Error ? error.message : String(error)] });
+        continue;
+      }
+
+
       await ctx.db.insert("tasks", {
         task_id: taskId,
         batch_id: args.batchId,
@@ -451,58 +530,6 @@ export const adminImportOccupancyBatch = internalMutation({
         last_event_at: now,
       });
 
-      const evidenceNote = [
-        `Compiled record imported with ${segments.length} period${segments.length === 1 ? "" : "s"}; see the occupancy panel.`,
-        base.religion ? `religion: ${base.religion}` : undefined,
-        base.denomination_code ? `denomination: ${base.denomination_code} (taxonomy ${base.taxonomy_version})` : undefined,
-        base.culturally_sensitive ? `culturally_sensitive: ${base.culturally_sensitive}` : undefined,
-        base.notes,
-      ].filter(Boolean).join("\n");
-      // the curator's confirmations of the record's own dates; a period's
-      // confirmations travel on its segment (segmentFromImportRow)
-      const draftConfirmations = curatorConfirmations(
-        rows.flatMap((row) => row.confirmed_dates ?? []),
-        [args.source.consulted_date, base.first_date],
-      );
-      const draftRecord = {
-        evidence_draft_id: draftId,
-        task_id: taskId,
-        draft_status: "submitted" as const,
-        created_by: user._id,
-        created_at: now,
-        updated_at: now,
-        observation_contract_version: "guided_observation_v1" as const,
-        source_type: args.source.source_type,
-        source_title: args.source.title,
-        source_url_or_file: args.source.url_or_file ?? args.source.archive_ref,
-        source_date_or_capture_date: args.source.consulted_date,
-        source_id: registerSource.source_id,
-        source_locator: locator,
-        locality_raw: base.locality,
-        source_notes: [
-          args.source.licence ? `Licence: ${args.source.licence}` : undefined,
-          base.source_url ? `${args.source.title}, entry ${locator}: ${base.source_url}` : undefined,
-        ].filter(Boolean).join("\n") || undefined,
-        related_ids_or_note: `entry ${locator}`,
-        target_year_statuses: Object.fromEntries(targetYears.map((year) => [String(year), "not_assessed" as const])),
-        ...(base.first_date ? { lifecycle_event: "first_seen", lifecycle_date: base.first_date, lifecycle_date_precision: base.first_date.length === 4 ? "year" : base.first_date.length === 7 ? "month" : "day" } : {}),
-        ...(base.last_date ? { lifecycle_note: `last_seen ${base.last_date} (${base.date_confidence ?? "medium"})` } : {}),
-        ...(draftConfirmations !== undefined ? { confirmed_dates: draftConfirmations } : {}),
-        evidence_note: evidenceNote,
-        privacy_flag: privacyFlag,
-        licence_flag: args.source.licence ? ("clear" as const) : ("needs_review" as const),
-        validation_summary: {
-          status: "server_validated",
-          contract: "guided_observation_v1",
-          origin: "occupancy_import",
-          historical_target_years_assessed: false,
-        },
-        source_claim_key: claimKey,
-        claim_hash: base.claim_hash,
-        import_batch_id: args.batchId,
-      };
-      assertEvidenceDraftLimits(draftRecord);
-      assertEvidenceDraftSubmission(draftRecord, false, floorYear);
       const draftRowId = await ctx.db.insert("evidence_drafts", draftRecord);
       await appendTaskEvent(ctx, {
         taskId,
@@ -616,6 +643,7 @@ export const importNominationBatch = mutation({
     const user = await requireUser(ctx, ["curator", "admin"]);
     const actorRole = chooseActorRole(user, ["curator", "admin"]);
     const countryCode = args.countryCode.toUpperCase();
+    const floorYear = dateFloorYear(countryCode);
     const now = Date.now();
 
     if (args.rows.length === 0) {
@@ -666,6 +694,13 @@ export const importNominationBatch = mutation({
         });
         continue;
       }
+      // deep-time stage 1, for a fresh import after its duplicate check
+      const dateProblems = importRowDateProblems(row, floorYear, NOMINATION_CONFIRMABLE_COLUMNS);
+      if (dateProblems.length > 0) {
+        rejected += 1;
+        rowReports.push({ row_number: row.row_number, status: "rejected" as const, problems: dateProblems });
+        continue;
+      }
 
       const taskId = `batch-claim:${countryCode.toLowerCase()}:${args.batchId}:${row.row_number}`;
       const draftId = `${taskId}:draft`;
@@ -710,7 +745,9 @@ export const importNominationBatch = mutation({
         source_type: args.source.source_type,
         source_title: args.source.title,
         source_url_or_file: args.source.url_or_file ?? args.source.archive_ref,
-        source_date_or_capture_date: args.source.consulted_date,
+        // the register keeps the consulted date as written; the evidence date
+        // takes it only when it is a real observation date
+        source_date_or_capture_date: evidenceSourceDate(args.source.consulted_date),
         source_id: registerSource.source_id,
         source_locator: row.source_locator,
         locality_raw: row.locality,
@@ -724,7 +761,7 @@ export const importNominationBatch = mutation({
         lifecycle_event: row.first_date ? "first_seen" : undefined,
         lifecycle_date: row.first_date,
         lifecycle_note: row.last_date ? `last_seen ${row.last_date} (${row.date_confidence ?? "medium"})` : undefined,
-        confirmed_dates: curatorConfirmations(row.confirmed_dates, [args.source.consulted_date, row.first_date]),
+        confirmed_dates: curatorConfirmations(row.confirmed_dates, [row.first_date]),
         evidence_note: [
           row.religion ? `religion: ${row.religion}` : undefined,
           row.denomination_code ? `denomination: ${row.denomination_code} (taxonomy ${row.taxonomy_version})` : undefined,

@@ -83,7 +83,47 @@ export function partialDateBounds(value: string): { lower: string; upper: string
 export type DateConfirmer = "contributor" | "curator" | "agent";
 export const DATE_CONFIRMERS: readonly DateConfirmer[] = ["contributor", "curator", "agent"];
 export type ConfirmedDate = { date: string; confirmed_by: DateConfirmer };
-export const MAX_CONFIRMED_DATES = 40;
+// every entry names a distinct date the record holds, so a record's list is
+// bounded by its date fields; the most any record holds is a function chain's
+// 42 (a bounded start and 20 bounded changes)
+export const MAX_CONFIRMED_DATES = 42;
+
+// the source types whose date is a capture date: an observation outright,
+// with no documentary exception below 1000 (rulings 3 and 4)
+export const CAPTURE_SOURCE_TYPES: ReadonlySet<string> = new Set([
+  "field_observation",
+  "street_imagery",
+  "aerial_imagery",
+  "aerial_or_street_imagery",
+]);
+
+export function isCaptureSource(sourceType: string | undefined): boolean {
+  return sourceType !== undefined && CAPTURE_SOURCE_TYPES.has(sourceType);
+}
+
+// the entries of a list whose dates are among the given ones, or undefined
+// when none is, so a record without a confirmed date carries no list
+export function confirmationsFor(
+  list: readonly ConfirmedDate[] | undefined,
+  dates: readonly (string | undefined)[],
+): ConfirmedDate[] | undefined {
+  const present = new Set(dates.map((value) => value?.trim() ?? "").filter((value) => value !== ""));
+  const kept = (list ?? []).filter((entry) => present.has(entry.date));
+  return kept.length > 0 ? kept : undefined;
+}
+
+// the confirmations an edit that sends no list leaves on a record: an entry
+// survives only while its date is in the record both before and after the
+// edit, so a changed date loses its confirmation and a restored date needs a
+// new one; an edit never carries another writer's confirmation to a new date
+export function carriedConfirmations(
+  stored: readonly ConfirmedDate[] | undefined,
+  previousDates: readonly (string | undefined)[],
+  nextDates: readonly (string | undefined)[],
+): ConfirmedDate[] | undefined {
+  const before = confirmationsFor(stored, previousDates);
+  return confirmationsFor(before, nextDates);
+}
 
 export function isConfirmedDate(list: readonly ConfirmedDate[] | undefined, value: string): boolean {
   return (list ?? []).some((entry) => entry.date === value);
@@ -101,10 +141,11 @@ export function assertConfirmedDates(
   if (!Array.isArray(list) || list.length === 0) {
     throw new Error("A record without a confirmed date carries no list of confirmed dates; omit the empty list.");
   }
-  if (list.length > MAX_CONFIRMED_DATES) {
-    throw new Error(`A record carries at most ${MAX_CONFIRMED_DATES} confirmed dates.`);
-  }
   const present = new Set(recordDates.map((value) => value?.trim() ?? "").filter((value) => value !== ""));
+  // distinct entries that each match a date of the record cannot outnumber its dates
+  if (list.length > MAX_CONFIRMED_DATES) {
+    throw new Error("A record carries at most one confirmed date for each date it holds.");
+  }
   const seen = new Set<string>();
   for (const entry of list) {
     if (!isValidHistoricalDate(entry.date)) {

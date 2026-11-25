@@ -39,3 +39,16 @@ export function isObservationDate(value: string): boolean {
   const year = realDateYear(value);
   return year !== null && year >= 1000 && year <= 2100;
 }
+
+// the source types whose date is a capture date (convex/lib/partialDates.ts)
+const CAPTURE_SOURCE_TYPES: ReadonlySet<string> = new Set(["field_observation", "street_imagery", "aerial_imagery"]);
+
+// a source's own date by its purpose: a field or imagery capture keeps 1000 to
+// 2100; a documentary source's date may also fall before 1000, where the
+// backend asks for a confirmation
+export function isSourceDate(sourceType: string, value: string): boolean {
+  if (isObservationDate(value)) return true;
+  if (CAPTURE_SOURCE_TYPES.has(sourceType)) return false;
+  const year = realDateYear(value);
+  return year !== null && year >= 1 && year < 1000;
+}
