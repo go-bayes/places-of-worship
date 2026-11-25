@@ -1,4 +1,12 @@
 import { assertRapidDerivedConsistency } from "./rapidEntry.ts";
+import {
+  assertConfirmedDates,
+  assertHistoricalDate,
+  assertSourceDate,
+  isCaptureSource,
+  isValidObservationDate,
+  type ConfirmedDate,
+} from "./partialDates.ts";
 export const SHORT_TEXT_MAX = 256;
 export const MEDIUM_TEXT_MAX = 2_048;
 export const LONG_TEXT_MAX = 8_000;
@@ -52,6 +60,7 @@ type EvidenceDraftLimitInput = {
   validation_summary?: unknown;
   target_year_entry_reason?: string;
   pending_occupancy_cards?: unknown;
+  confirmed_dates?: ConfirmedDate[];
 };
 
 export function assertMaxString(label: string, value: string | undefined, maxLength: number): void {
@@ -120,20 +129,10 @@ export function assertEvidenceDraftLimits(draft: EvidenceDraftLimitInput): void 
   assertMaxJson("validation summary", draft.validation_summary, VALIDATION_SUMMARY_MAX);
   assertMaxString("target-year entry reason", draft.target_year_entry_reason, MEDIUM_TEXT_MAX);
   assertMaxJson("pending occupancy cards", draft.pending_occupancy_cards, VALIDATION_SUMMARY_MAX);
+  assertMaxJson("confirmed dates", draft.confirmed_dates, VALIDATION_SUMMARY_MAX);
   if (Array.isArray(draft.pending_occupancy_cards) && draft.pending_occupancy_cards.length > PENDING_OCCUPANCY_CARD_MAX) {
     throw new Error(`A draft may hold at most ${PENDING_OCCUPANCY_CARD_MAX} pending occupancy cards.`);
   }
-}
-
-export function isValidPartialDate(value: string): boolean {
-  if (/^(?:1\d{3}|20\d{2}|2100)$/.test(value)) return true;
-  if (/^(?:1\d{3}|20\d{2}|2100)-(?:0[1-9]|1[0-2])$/.test(value)) return true;
-  const parts = value.match(/^(\d{4})-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/);
-  if (!parts) return false;
-  const parsed = new Date(`${value}T00:00:00Z`);
-  return parsed.getUTCFullYear() === Number(parts[1])
-    && parsed.getUTCMonth() + 1 === Number(parts[2])
-    && parsed.getUTCDate() === Number(parts[3]);
 }
 
 export function assertRapidCurrentObservation(draft: EvidenceDraftLimitInput): void {
@@ -147,7 +146,8 @@ export function assertRapidCurrentObservation(draft: EvidenceDraftLimitInput): v
   if (!status || !basis) {
     throw new Error("Choose what you can confirm and how you know it.");
   }
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(observedOn) || !isValidPartialDate(observedOn)) {
+  // ruling 3: an observation date keeps 1000 to 2100, with no confirmation
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(observedOn) || !isValidObservationDate(observedOn)) {
     throw new Error("A rapid current observation requires a valid YYYY-MM-DD observation date.");
   }
   if (Date.parse(`${observedOn}T00:00:00Z`) > Date.now() + 36 * 60 * 60 * 1_000) {
@@ -177,8 +177,127 @@ export function assertRapidCurrentObservation(draft: EvidenceDraftLimitInput): v
   }
 }
 
-// validate a persisted draft against the versioned scientific submission contract
-export function assertEvidenceDraftSubmission(draft: EvidenceDraftLimitInput, unresolved: boolean): void {
+// the date fields of an evidence record, each keyed by its field and the
+// purpose of its date (deep-time stage 1, rulings 3 to 7). the source date is
+// an observation date for a capture (a field observation, street or aerial
+// imagery, a rapid observation) and for a record with no source type, and a
+// documentary date for every other source type. an unversioned spreadsheet
+// record may carry a full capture timestamp, read by its day; anything else
+// after the day is kept whole, so it fails the date check. confirmation
+// matching and the date rules read the same values
+const LEGACY_CAPTURE_TIMESTAMP = /^([0-9]{4}-[0-9]{2}-[0-9]{2})T(?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\.[0-9]{1,3})?Z$/;
+export type EvidenceDateField = { key: "source_date:observation" | "source_date:documentary" | "lifecycle_date"; value: string };
+
+export function evidenceDateFields(draft: EvidenceDraftLimitInput): EvidenceDateField[] {
+  const fields: EvidenceDateField[] = [];
+  const written = draft.source_date_or_capture_date?.trim() ?? "";
+  if (written) {
+    const timestamp = draft.observation_contract_version === undefined ? LEGACY_CAPTURE_TIMESTAMP.exec(written) : null;
+    const documentary = draft.observation_contract_version !== "rapid_current_v1"
+      && typeof draft.source_type === "string" && draft.source_type.trim() !== ""
+      && !isCaptureSource(draft.source_type);
+    fields.push({ key: documentary ? "source_date:documentary" : "source_date:observation", value: timestamp !== null ? timestamp[1] : written });
+  }
+  const lifecycle = draft.lifecycle_date?.trim() ?? "";
+  if (lifecycle) fields.push({ key: "lifecycle_date", value: lifecycle });
+  return fields;
+}
+
+// the date fields of an evidence record by name
+export type EvidenceDateFieldName = "source_date_or_capture_date" | "lifecycle_date";
+export const EVIDENCE_DATE_FIELD_NAMES: readonly EvidenceDateFieldName[] = ["source_date_or_capture_date", "lifecycle_date"];
+const FIELD_KEYS: Record<EvidenceDateFieldName, readonly EvidenceDateField["key"][]> = {
+  source_date_or_capture_date: ["source_date:observation", "source_date:documentary"],
+  lifecycle_date: ["lifecycle_date"],
+};
+
+// the checks stage 1 adds, by the purpose of each date and for every contract
+// version: an observation date keeps 1000 to 2100 outright; a documentary
+// source's own date may fall before 1000 when the record confirms it; the
+// lifecycle date is a historical date that meets the country's floor unless
+// confirmed. the confirmed-dates list always matches the record's dates;
+// the checks themselves run on the fields named
+export function assertEvidenceDraftDates(
+  draft: EvidenceDraftLimitInput,
+  floorYear: number,
+  fields: readonly EvidenceDateFieldName[] = EVIDENCE_DATE_FIELD_NAMES,
+): void {
+  assertConfirmedDates(draft.confirmed_dates, evidenceDateFields(draft).map((field) => field.value));
+  assertAddedDateChecks(draft, floorYear, fields);
+}
+
+function assertAddedDateChecks(
+  draft: EvidenceDraftLimitInput,
+  floorYear: number,
+  fields: readonly EvidenceDateFieldName[],
+): void {
+  const keys = new Set(fields.flatMap((name) => FIELD_KEYS[name]));
+  for (const field of evidenceDateFields(draft).filter((date) => keys.has(date.key))) {
+    if (field.key === "source_date:observation" && !isValidObservationDate(field.value)) {
+      throw new Error("Use YYYY, YYYY-MM, or YYYY-MM-DD from 1000 to 2100 for an observation or capture date.");
+    }
+    if (field.key === "source_date:documentary") {
+      assertSourceDate("The source or capture date", field.value, draft.confirmed_dates);
+    }
+    if (field.key === "lifecycle_date") {
+      assertHistoricalDate("The lifecycle date", field.value, floorYear, draft.confirmed_dates);
+    }
+  }
+}
+
+// the guided record's date check before stage 1, kept on every write: a year
+// or year-month from 1000 to 2100, or a real full date. a value the stage 1
+// checks accept passes too, since stage 1 widens historical dates (ruling 3).
+// partialDates.node-test.mjs lets this one function keep its old pattern
+function isValidPartialDateBeforeStage1(value: string): boolean {
+  if (/^(?:1\d{3}|20\d{2}|2100)$/.test(value)) return true;
+  if (/^(?:1\d{3}|20\d{2}|2100)-(?:0[1-9]|1[0-2])$/.test(value)) return true;
+  const parts = value.match(/^(\d{4})-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/);
+  if (!parts) return false;
+  const parsed = new Date(`${value}T00:00:00Z`);
+  return parsed.getUTCFullYear() === Number(parts[1])
+    && parsed.getUTCMonth() + 1 === Number(parts[2])
+    && parsed.getUTCDate() === Number(parts[3]);
+}
+
+function assertDateBeforeStage1(
+  draft: EvidenceDraftLimitInput,
+  field: EvidenceDateFieldName,
+  floorYear: number,
+  confirmed: ConfirmedDate[] | undefined,
+): void {
+  const value = draft[field]?.trim() ?? "";
+  if (!value || isValidPartialDateBeforeStage1(value)) return;
+  // the stage 1 check decides, and its refusal names the reason
+  assertAddedDateChecks({ ...draft, confirmed_dates: confirmed }, floorYear, [field]);
+}
+
+// a date a save writes may not name the year 0000, which stage 2 reserves;
+// an incomplete draft otherwise saves as it stands
+export function assertNoYearZero(label: string, value: string | undefined): void {
+  if (/^0000(?:-|T|$)/.test(value?.trim() ?? "")) {
+    throw new Error(`${label} cannot be in the year 0000; write a year from 0001, with four digits.`);
+  }
+}
+
+// validate a persisted draft against the versioned scientific submission
+// contract. floorYear is the task country's date floor (countryYears.ts),
+// which the lifecycle date meets unless the draft confirms it (ruling 5)
+// the date rules of a write (deep-time stage 1): every date check made before
+// stage 1 applies to the incoming draft on every write, a value stage 1
+// accepts also passing it (the ruled widenings); the checks stage 1 adds apply
+// to the record the write leaves, for the date fields in written.changed. a
+// first submission passes every field; a write to an already-submitted record
+// passes only the fields it sets or changes. by default the draft is the
+// record and every field is checked
+export type WrittenDates = { record?: EvidenceDraftLimitInput; changed?: readonly EvidenceDateFieldName[] };
+
+export function assertEvidenceDraftSubmission(
+  draft: EvidenceDraftLimitInput,
+  unresolved: boolean,
+  floorYear: number,
+  written: WrittenDates = {},
+): void {
   if (
     draft.observation_contract_version !== undefined
     && !["guided_observation_v1", "rapid_current_v1"].includes(draft.observation_contract_version)
@@ -241,9 +360,8 @@ export function assertEvidenceDraftSubmission(draft: EvidenceDraftLimitInput, un
   if (isGuidedObservation && !unresolved && draft.source_type !== "field_observation" && !sourceReference) {
     throw new Error("Add a source URL or agreed file reference before submitting for review.");
   }
-  if (isGuidedObservation && sourceDate && !isValidPartialDate(sourceDate)) {
-    throw new Error("Use YYYY, YYYY-MM, or YYYY-MM-DD for source and capture dates.");
-  }
+  const record = written.record ?? draft;
+  if (isGuidedObservation) assertDateBeforeStage1(draft, "source_date_or_capture_date", floorYear, record.confirmed_dates);
   const hasLifecycleDetail = Boolean(draft.lifecycle_event || lifecycleDate || draft.lifecycle_note?.trim() || lifecyclePrecision);
   if (isGuidedObservation && hasLifecycleDetail && !draft.lifecycle_event) {
     throw new Error("Choose a lifecycle event or remove its date, precision, and note.");
@@ -251,9 +369,8 @@ export function assertEvidenceDraftSubmission(draft: EvidenceDraftLimitInput, un
   if (isGuidedObservation && draft.lifecycle_event && !lifecycleDate) {
     throw new Error("A lifecycle event requires a date or bounded date.");
   }
-  if (isGuidedObservation && lifecycleDate && !isValidPartialDate(lifecycleDate)) {
-    throw new Error("Use YYYY, YYYY-MM, or YYYY-MM-DD for lifecycle dates.");
-  }
+  if (isGuidedObservation) assertDateBeforeStage1(draft, "lifecycle_date", floorYear, record.confirmed_dates);
+  assertEvidenceDraftDates(record, floorYear, written.changed ?? EVIDENCE_DATE_FIELD_NAMES);
   if (isGuidedObservation && draft.lifecycle_event && !["day", "month", "year", "bounded", "unknown"].includes(lifecyclePrecision)) {
     throw new Error("A lifecycle event requires a recognised date precision.");
   }

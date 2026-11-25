@@ -1,4 +1,6 @@
 import { canonicalJson, sha256 } from "./sha256.ts";
+import { dateFloorYear } from "./countryYears.ts";
+import { isConfirmedDate, type ConfirmedDate } from "./partialDates.ts";
 import bundleSchema from "../../scripts/agent_research/schemas/agent-review-bundle.v1.json" with { type: "json" };
 import allowlistNzV1 from "../../scripts/agent_research/fixtures/allowlist-nz-v1.json" with { type: "json" };
 import screenPolicy from "../../scripts/agent_research/schemas/screen-policy.v1.json" with { type: "json" };
@@ -297,6 +299,9 @@ export function validateDossierRecord(d: Record<string, any>): Map<string, strin
   assertScreened(d, (bundleSchema as any).$defs.dossier, bundleSchema, SCREEN_HASH_FIELDS["agent-review-bundle.v1"], { prefix: "dossier" });
   if (d.run_manifest.idempotency_key !== sha256([d.place.place_ref, d.run_manifest.prompt_version, d.run_manifest.model_id_requested, d.place.seed_source].join("|"))) throw new Error("dossier run manifest idempotency_key does not match its inputs");
   const locators = new Map<string, string>();
+  // deep-time stage 1 (ruling 7): an agent's dated claim meets the country's
+  // floor as a contributor's does, unless the agent confirmed the date
+  const floorYear = dateFloorYear(d.place.country_code);
   for (const claim of d.claims) {
     if (locators.has(claim.claim_id)) throw new Error("duplicate claim ID");
     publicUrl(claim.source.locator); canonicalHost(claim.source.locator); locators.set(claim.claim_id, claim.source.locator);
@@ -309,6 +314,7 @@ export function validateDossierRecord(d: Record<string, any>): Map<string, strin
     }
     if (claim.date_end && (!claim.date_start || dateBounds(claim.date_start)[0] > dateBounds(claim.date_end)[1])) throw new Error("invalid date interval");
     for (const key of ["source_date", "retrieved_at"]) if (claim.source[key]) dateBounds(claim.source[key].split("T")[0]);
+    assertAgentClaimDates(claim, floorYear);
   }
   // a bundle's quarantine block records only the kind and claim of each withheld detail;
   // the schema refuses values and hashes, and the count must equal the items.
@@ -319,6 +325,45 @@ export function validateDossierRecord(d: Record<string, any>): Map<string, strin
   for (const id of d.status_assessment.supporting_claim_ids) if (!locators.has(id)) throw new Error("unknown status claim");
   for (const row of d.osm_version_chain) { publicUrl(row.locator); canonicalHost(row.locator); }
   return locators;
+}
+
+// deep-time stage 1 for one dossier claim (docs/development/deep-time-date-format-brief-2026-11-24.md,
+// rulings 3, 4 and 7): the date bounds meet the country's floor unless the agent confirmed them;
+// the source's own date keeps 1000 to 2100, or falls before 1000 when confirmed; every
+// confirmation matches a date of the claim, once. intake.py and pow validate-agent apply the
+// same rules. diagnostics name an entry by position, never by its value
+function assertAgentClaimDates(claim: Record<string, any>, floorYear: number): void {
+  const sourceDay = typeof claim.source?.source_date === "string" && claim.source.source_date ? claim.source.source_date.split("T")[0] : undefined;
+  const own = [claim.date_start ?? undefined, claim.date_end ?? undefined, sourceDay];
+  const confirmed = claim.confirmed_dates as ConfirmedDate[] | undefined;
+  if (confirmed !== undefined) {
+    if (!Array.isArray(confirmed) || confirmed.length === 0) throw new Error("claim confirmed_dates must be omitted when empty");
+    const seen = new Set<string>();
+    confirmed.forEach((entry, index) => {
+      if (entry.confirmed_by !== "agent") throw new Error(`claim confirmed_dates[${index}] must be confirmed by an agent`);
+      if (seen.has(entry.date)) throw new Error(`claim confirmed_dates[${index}] is listed twice`);
+      seen.add(entry.date);
+      if (!own.includes(entry.date)) throw new Error(`claim confirmed_dates[${index}] matches no date of the claim`);
+    });
+  }
+  for (const key of ["date_start", "date_end"]) {
+    const value = claim[key];
+    if (value != null && Number(value.slice(0, 4)) < floorYear && !isConfirmedDate(confirmed, value)) {
+      throw new Error(`claim ${key} is earlier than ${floorYear}, the earliest year this country accepts without a confirmed date`);
+    }
+  }
+  if (sourceDay !== undefined) {
+    const year = Number(sourceDay.slice(0, 4));
+    if (year > 2100) throw new Error("claim source_date is later than 2100");
+    if (year < 1000 && !isConfirmedDate(confirmed, sourceDay)) throw new Error("claim source_date is earlier than 1000 without a confirmed date");
+  }
+}
+
+// the dates an agent alone confirmed, by claim: the review queue treats each as unconfirmed
+// until a person confirms it (brief section 6)
+export function agentConfirmedDates(dossier: Record<string, any>): Array<{ claim_id: string; date: string }> {
+  return (dossier.claims ?? []).flatMap((claim: Record<string, any>) =>
+    ((claim.confirmed_dates ?? []) as ConfirmedDate[]).map((entry) => ({ claim_id: claim.claim_id, date: entry.date })));
 }
 
 // a dossier carried without a review bundle (inside a first-pass record):

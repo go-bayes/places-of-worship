@@ -1317,19 +1317,12 @@ function tsvRowFromObject(row) {
     return WIDE_EVIDENCE_FIELDS.map(field => cleanCell(row[field])).join("\t");
 }
 
+// the observation-date check lives in partial-date.js (PowPartialDate), where
+// the shared date test reaches it; a blank date is left to the caller
 function isValidPartialDateText(value) {
     const text = String(value || "").trim();
     if (!text) return true;
-    const year = Number(text.slice(0, 4));
-    if (!Number.isInteger(year) || year < 1000 || year > 2100) return false;
-    if (/^\d{4}$/.test(text)) return true;
-    if (/^\d{4}-(0[1-9]|1[0-2])$/.test(text)) return true;
-    const fullDate = text.match(/^(\d{4})-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/);
-    if (!fullDate) return false;
-    const date = new Date(`${text}T00:00:00Z`);
-    return date.getUTCFullYear() === Number(fullDate[1])
-        && date.getUTCMonth() + 1 === Number(fullDate[2])
-        && date.getUTCDate() === Number(fullDate[3]);
+    return window.PowPartialDate.isObservationDate(text);
 }
 
 function precisionForPartialDate(value) {

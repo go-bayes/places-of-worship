@@ -453,6 +453,8 @@
     }
 
     window.PowFunctionChain = Object.freeze({
+        // exported for the shared date test (convex/lib/partialDates.node-test.mjs)
+        isValidPartialDate,
         chainFromPayload,
         CONTRACT_VERSION,
         CHANGES,

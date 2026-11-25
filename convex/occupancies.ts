@@ -13,6 +13,7 @@ import { mutation, query } from "./_generated/server";
 import { assertOwnsOrCanReview, canReview, chooseActorRole, requireUser, type ProjectRole } from "./lib/auth";
 import { dateFloorYear, targetYearsOrEmpty } from "./lib/countryYears";
 import { isHistoricalClaimParentContract } from "./lib/historicalClaims";
+import { assertConfirmers, confirmationsFor, confirmersForRoles } from "./lib/partialDates";
 import {
   assertChainAgreesWithPeriods,
   assertFunctionChain,
@@ -551,6 +552,7 @@ export async function recordFunctionChain(
   },
 ): Promise<{ states: number; changes: number; derivedYears: number[] }> {
   const { task, parent, user, actorRole, chain, now } = args;
+  assertConfirmers(chain.confirmed_dates, confirmersForRoles(user.roles));
   assertFunctionChain(chain, args.referenceDate, dateFloorYear(task.country_code));
   if (args.segments.length === 0) {
     throw new Error("The function chain rests on the periods' source; record at least one period with it.");
@@ -595,6 +597,8 @@ export async function recordFunctionChain(
       claim_text: `${label} from ${from}${to ? ` until ${to} (${String(state.ended_by).replaceAll("_", " ")})` : ""}`,
       ...(fromBounds.earliest ? { earliest_supported_date: fromBounds.earliest } : {}),
       ...(toBounds.latest ? { latest_supported_date: toBounds.latest } : {}),
+      // the chain's confirmations of this claim's own bounds travel with it
+      confirmed_dates: confirmationsFor(chain.confirmed_dates, [fromBounds.earliest, toBounds.latest]),
       continues_through_observation: state.to === undefined,
       chain_index: claimIndex,
       chain_change: state.began_by,
@@ -621,6 +625,7 @@ export async function recordFunctionChain(
       claim_text: words,
       ...(claimBounds(event.date).earliest ? { earliest_supported_date: claimBounds(event.date).earliest } : {}),
       ...(claimBounds(event.date).latest ? { latest_supported_date: claimBounds(event.date).latest } : {}),
+      confirmed_dates: confirmationsFor(chain.confirmed_dates, [claimBounds(event.date).earliest, claimBounds(event.date).latest]),
       continues_through_observation: false,
       chain_index: claimIndex,
       chain_change: event.change,
@@ -699,6 +704,7 @@ export async function recordOccupancySet(
   },
 ): Promise<{ occupancyIds: string[]; derived: { years: number[]; conflicts: number[] } }> {
   const { task, parent, user, actorRole, now } = args;
+  for (const segment of args.segments) assertConfirmers(segment.confirmed_dates, confirmersForRoles(user.roles));
   const point = args.segments.length > 0 ? taskPoint(task) : null;
   // the author's earlier set for this parent is superseded, never rewritten
   for (const row of await activeOccupancies(ctx, parent.evidence_draft_id)) {
@@ -801,6 +807,7 @@ export async function recordOccupancySet(
       created_by: user._id,
       created_at: now,
       updated_at: now,
+      ...(segment.confirmed_dates !== undefined ? { confirmed_dates: segment.confirmed_dates } : {}),
     });
   }
   const derived = await rederive(ctx, task, parent, user._id, actorRole, now);

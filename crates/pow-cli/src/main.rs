@@ -8,7 +8,7 @@ use std::process::ExitCode;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use anyhow::{Context, Result, bail};
-use chrono::{DateTime, Days, NaiveDate, Utc};
+use chrono::{DateTime, NaiveDate, Utc};
 use clap::{Parser, Subcommand, ValueEnum};
 use jsonschema::{Registry, Validator};
 use rusqlite::{Connection, params};
@@ -20,6 +20,9 @@ use sha2::{Digest, Sha256};
 
 mod canonical;
 mod export;
+mod partial_date;
+
+use partial_date::PartialDateBounds;
 
 const PROPOSE_VERSION: &str = "pow-propose.v1";
 const AGENT_REVIEW_SCHEMA_VERSION: &str = "agent-review-bundle.v1";
@@ -615,6 +618,13 @@ fn validate_agent_semantics(value: &Value, errors: &mut Vec<String>) {
         .and_then(Value::as_array)
         .cloned()
         .unwrap_or_default();
+    let floor_year = agent_floor_year(
+        dossier
+            .get("place")
+            .and_then(Value::as_object)
+            .and_then(|place| place.get("country_code"))
+            .and_then(Value::as_str),
+    );
     let mut claim_ids = BTreeSet::new();
     let mut claim_locators = BTreeMap::new();
     for (index, claim) in claims.iter().enumerate() {
@@ -659,6 +669,7 @@ fn validate_agent_semantics(value: &Value, errors: &mut Vec<String>) {
             }
         }
         validate_claim_dates(claim_object, &path, errors);
+        validate_agent_date_rules(claim_object, &path, floor_year, errors);
         for field in ["value", "quoted_support", "note"] {
             if claim_object
                 .get(field)
@@ -1073,6 +1084,84 @@ fn validate_run_times(run: &serde_json::Map<String, Value>, path: &str, errors: 
     }
 }
 
+/// The date floors the agent intake applies, as convex/lib/countryYears.ts sets them; the
+/// internal pilot takes New Zealand bundles only. A test ties the values to the backend.
+const AGENT_DATE_FLOOR_YEARS: &[(&str, i32)] = &[("NZ", 1600)];
+const AGENT_DEFAULT_DATE_FLOOR_YEAR: i32 = 1600;
+
+fn agent_floor_year(country_code: Option<&str>) -> i32 {
+    AGENT_DATE_FLOOR_YEARS
+        .iter()
+        .find(|(code, _)| Some(*code) == country_code)
+        .map_or(AGENT_DEFAULT_DATE_FLOOR_YEAR, |(_, floor)| *floor)
+}
+
+/// Deep-time stage 1, as the agent intake applies it (convex/lib/agentIntake.ts): a claim's
+/// date bounds meet the country's floor unless the claim lists them in confirmed_dates; the
+/// source's own date keeps 1000 to 2100, or falls before 1000 when confirmed; every entry
+/// matches a date of the claim, once.
+fn validate_agent_date_rules(
+    claim: &serde_json::Map<String, Value>,
+    path: &str,
+    floor_year: i32,
+    errors: &mut Vec<String>,
+) {
+    use chrono::Datelike;
+    let start = claim.get("date_start").and_then(Value::as_str);
+    let end = claim.get("date_end").and_then(Value::as_str);
+    let source_day = claim
+        .get("source")
+        .and_then(Value::as_object)
+        .and_then(|source| source.get("source_date"))
+        .and_then(Value::as_str)
+        .filter(|value| !value.is_empty())
+        .map(|value| value.split('T').next().unwrap_or(value));
+    let mut confirmed = BTreeSet::new();
+    if let Some(list) = claim.get("confirmed_dates") {
+        let entries = list.as_array().cloned().unwrap_or_default();
+        if entries.is_empty() {
+            errors.push(format!("{path}/confirmed_dates: omit an empty list"));
+        }
+        // diagnostics name the entry by position, never by its value
+        for (index, entry) in entries.iter().enumerate() {
+            let Some(date) = entry.get("date").and_then(Value::as_str) else {
+                continue;
+            };
+            if !confirmed.insert(date.to_owned()) {
+                errors.push(format!("{path}/confirmed_dates/{index}: listed twice"));
+            }
+            if Some(date) != start && Some(date) != end && Some(date) != source_day {
+                errors.push(format!(
+                    "{path}/confirmed_dates/{index}: matches no date of the claim"
+                ));
+            }
+        }
+    }
+    for (field, value) in [("date_start", start), ("date_end", end)] {
+        if let Some(value) = value
+            && let Some(bounds) = parse_partial_date(value)
+            && bounds.lower.year() < floor_year
+            && !confirmed.contains(value)
+        {
+            errors.push(format!(
+                "{path}/{field}: earlier than {floor_year}, the earliest year this country accepts without a confirmed date"
+            ));
+        }
+    }
+    if let Some(day) = source_day
+        && let Some(bounds) = parse_partial_date(day)
+    {
+        let year = bounds.lower.year();
+        if year > 2100 {
+            errors.push(format!("{path}/source/source_date: later than 2100"));
+        } else if year < 1000 && !confirmed.contains(day) {
+            errors.push(format!(
+                "{path}/source/source_date: earlier than 1000 without a confirmed date"
+            ));
+        }
+    }
+}
+
 fn validate_claim_dates(
     claim: &serde_json::Map<String, Value>,
     path: &str,
@@ -1282,48 +1371,12 @@ struct ParsedPartialDate {
     upper: NaiveDate,
 }
 
+// an agent dossier's date: a historical partial date (partial_date.rs)
 fn parse_partial_date(value: &str) -> Option<ParsedPartialDate> {
-    let parts: Vec<_> = value.split('-').collect();
-    if !matches!(parts.len(), 1..=3) || parts.iter().any(|part| part.is_empty()) {
-        return None;
-    }
-    if parts[0].len() != 4 || !parts[0].chars().all(|character| character.is_ascii_digit()) {
-        return None;
-    }
-    let year = parts[0].parse::<i32>().ok()?;
-    if year < 1 {
-        return None;
-    }
-    let month = match parts.get(1) {
-        None => None,
-        Some(part) if part.len() == 2 && part.chars().all(|c| c.is_ascii_digit()) => {
-            Some(part.parse::<u32>().ok()?)
-        }
-        Some(_) => return None,
-    };
-    let day = match parts.get(2) {
-        None => None,
-        Some(part) if part.len() == 2 && part.chars().all(|c| c.is_ascii_digit()) => {
-            Some(part.parse::<u32>().ok()?)
-        }
-        Some(_) => return None,
-    };
-    let month = month.unwrap_or(1);
-    let lower = NaiveDate::from_ymd_opt(year, month, day.unwrap_or(1))?;
-    let upper = match (day, parts.len()) {
-        (Some(_), _) => lower,
-        (None, 2) => {
-            let next = if month == 12 {
-                NaiveDate::from_ymd_opt(year.checked_add(1)?, 1, 1)?
-            } else {
-                NaiveDate::from_ymd_opt(year, month + 1, 1)?
-            };
-            next.pred_opt()?
-        }
-        (None, 1) => NaiveDate::from_ymd_opt(year, 12, 31)?,
-        _ => return None,
-    };
-    Some(ParsedPartialDate { lower, upper })
+    partial_date::parse_historical(value).map(|bounds| ParsedPartialDate {
+        lower: bounds.earliest,
+        upper: bounds.latest,
+    })
 }
 
 fn validate_source_locator(locator: &str) -> std::result::Result<(), String> {
@@ -2137,7 +2190,7 @@ fn optional_probability(row: &serde_json::Map<String, Value>, field: &str) -> Re
 
 fn target_year_to_snapshot_date(value: &str) -> Result<String> {
     let value = value.trim();
-    if value.len() == 4 && value.chars().all(|ch| ch.is_ascii_digit()) {
+    if value.len() == 4 && partial_date::parse_historical(value).is_some() {
         return Ok(format!("{value}-09-01"));
     }
     if parse_full_date(value).is_some() {
@@ -3978,12 +4031,6 @@ fn validate_bounded_date_object(
     }
 }
 
-#[derive(Clone, Copy)]
-struct PartialDateBounds {
-    earliest: NaiveDate,
-    latest: NaiveDate,
-}
-
 fn bounded_date_field(
     object: &serde_json::Map<String, Value>,
     field: &str,
@@ -4006,34 +4053,9 @@ fn bounded_date_field(
     }
 }
 
+// a change event's partial date: a historical partial date (partial_date.rs)
 fn parse_partial_date_bounds(value: &str) -> Option<PartialDateBounds> {
-    if value.len() == 4 && value.chars().all(|ch| ch.is_ascii_digit()) {
-        let year = value.parse::<i32>().ok()?;
-        return Some(PartialDateBounds {
-            earliest: NaiveDate::from_ymd_opt(year, 1, 1)?,
-            latest: NaiveDate::from_ymd_opt(year, 12, 31)?,
-        });
-    }
-    if value.len() == 7 {
-        let (year, month) = value.split_once('-')?;
-        if year.len() != 4 || !year.chars().all(|ch| ch.is_ascii_digit()) {
-            return None;
-        }
-        let year = year.parse::<i32>().ok()?;
-        let month = month.parse::<u32>().ok()?;
-        let earliest = NaiveDate::from_ymd_opt(year, month, 1)?;
-        let first_next_month = if month == 12 {
-            NaiveDate::from_ymd_opt(year + 1, 1, 1)?
-        } else {
-            NaiveDate::from_ymd_opt(year, month + 1, 1)?
-        };
-        let latest = first_next_month.checked_sub_days(Days::new(1))?;
-        return Some(PartialDateBounds { earliest, latest });
-    }
-    parse_full_date(value).map(|date| PartialDateBounds {
-        earliest: date,
-        latest: date,
-    })
+    partial_date::parse_historical(value)
 }
 
 fn join_json_pointer(parent: &str, child: &str) -> String {
@@ -4671,29 +4693,18 @@ fn should_parse_timestamp(field: &str) -> bool {
     )
 }
 
+// a historical partial date (partial_date.rs)
 fn is_valid_partial_date(value: &str) -> bool {
-    if value.len() == 4 && value.chars().all(|ch| ch.is_ascii_digit()) {
-        return true;
-    }
-    if value.len() == 7 {
-        let Some((year, month)) = value.split_once('-') else {
-            return false;
-        };
-        return year.len() == 4
-            && year.chars().all(|ch| ch.is_ascii_digit())
-            && month
-                .parse::<u32>()
-                .is_ok_and(|month| (1..=12).contains(&month));
-    }
-    parse_full_date(value).is_some()
+    partial_date::parse_historical(value).is_some()
 }
 
 fn is_valid_timestamp_or_date(value: &str) -> bool {
     DateTime::parse_from_rfc3339(value).is_ok() || is_valid_partial_date(value)
 }
 
+// a full date, YYYY-MM-DD, from the year 0001 (partial_date.rs)
 fn parse_full_date(value: &str) -> Option<NaiveDate> {
-    NaiveDate::parse_from_str(value, "%Y-%m-%d").ok()
+    partial_date::parse_historical_day(value)
 }
 
 fn is_iso2_country_code(value: &str) -> bool {
@@ -5096,6 +5107,115 @@ mod tests {
         assert!(is_valid_partial_date("2013-09-01"));
         assert!(!is_valid_partial_date("2013-99"));
         assert!(!is_valid_partial_date("2013-02-31"));
+    }
+
+    // deep-time stage 1 in pow validate-agent, as ingestion applies it
+    // (convex/lib/agentIntake.ts): an agent's dated claim meets the country's
+    // floor unless the agent confirmed it; a documentary source's own date
+    // keeps 1000 to 2100, or falls before 1000 with the agent's confirmation
+    #[test]
+    fn agent_claim_dates_meet_the_floor_and_the_source_date_range() {
+        let check = |changes: &dyn Fn(&mut Value)| {
+            let mut bundle = valid_agent_bundle();
+            let claim = &mut bundle["dossier"]["claims"][0];
+            claim["date_start"] = Value::Null;
+            claim["date_end"] = Value::Null;
+            claim["date_precision"] = json!("unknown");
+            changes(claim);
+            let mut errors = Vec::new();
+            validate_agent_semantics(&bundle, &mut errors);
+            errors
+        };
+        let below = check(&|claim| {
+            claim["date_start"] = json!("1590");
+            claim["date_precision"] = json!("year");
+        });
+        assert!(
+            below.iter().any(|e| e.contains("earlier than 1600")),
+            "{below:?}"
+        );
+        let mismatched = check(&|claim| {
+            claim["date_start"] = json!("1590");
+            claim["date_precision"] = json!("year");
+            claim["confirmed_dates"] = json!([{ "date": "1591", "confirmed_by": "agent" }]);
+        });
+        assert!(!mismatched.is_empty());
+        let confirmed = check(&|claim| {
+            claim["date_start"] = json!("1590");
+            claim["date_precision"] = json!("year");
+            claim["confirmed_dates"] = json!([{ "date": "1590", "confirmed_by": "agent" }]);
+        });
+        assert!(confirmed.is_empty(), "{confirmed:?}");
+        let early_source = check(&|claim| claim["source"]["source_date"] = json!("0731"));
+        assert!(
+            early_source.iter().any(|e| e.contains("source_date")),
+            "{early_source:?}"
+        );
+        let confirmed_source = check(&|claim| {
+            claim["source"]["source_date"] = json!("0731");
+            claim["confirmed_dates"] = json!([{ "date": "0731", "confirmed_by": "agent" }]);
+        });
+        assert!(confirmed_source.is_empty(), "{confirmed_source:?}");
+        let late_source = check(&|claim| claim["source"]["source_date"] = json!("2101-01-01"));
+        assert!(
+            late_source.iter().any(|e| e.contains("source_date")),
+            "{late_source:?}"
+        );
+    }
+
+    // the floor table pow validate-agent applies is the backend's
+    #[test]
+    fn agent_floor_table_matches_the_backend() {
+        let source = include_str!("../../../convex/lib/countryYears.ts");
+        let table = &source[source.find("DATE_FLOOR_YEARS").unwrap()..];
+        for (code, floor) in AGENT_DATE_FLOOR_YEARS {
+            let line = table
+                .lines()
+                .find(|line| line.trim().starts_with(&format!("{code}:")))
+                .unwrap();
+            let value: i32 = line.trim()[3..]
+                .trim()
+                .trim_end_matches(',')
+                .parse()
+                .unwrap();
+            assert_eq!(value, *floor, "{code}");
+        }
+    }
+
+    // deep-time stage 1: every rust check of a partial date runs against the
+    // shared fixture, schemas/fixtures/partial-dates.v1.json
+    #[test]
+    fn date_checks_match_the_shared_fixture() {
+        use crate::partial_date::tests::{expected_bounds, fixture_rows};
+        let text = |date: NaiveDate| date.format("%Y-%m-%d").to_string();
+        for row in fixture_rows() {
+            let value = row["value"].as_str().unwrap();
+            let historical = row["historical"].as_bool().unwrap();
+            let bounds = expected_bounds(&row);
+            let agent = parse_partial_date(value).map(|date| (text(date.lower), text(date.upper)));
+            assert_eq!(agent, bounds, "parse_partial_date {value:?}");
+            let event = parse_partial_date_bounds(value)
+                .map(|date| (text(date.earliest), text(date.latest)));
+            assert_eq!(event, bounds, "parse_partial_date_bounds {value:?}");
+            assert_eq!(
+                is_valid_partial_date(value),
+                historical,
+                "is_valid_partial_date {value:?}"
+            );
+            assert_eq!(
+                parse_full_date(value).is_some(),
+                historical && value.len() == 10,
+                "parse_full_date {value:?}"
+            );
+            // the census target year trims its input first
+            if value == value.trim() {
+                assert_eq!(
+                    target_year_to_snapshot_date(value).is_ok(),
+                    historical && (value.len() == 4 || value.len() == 10),
+                    "target_year_to_snapshot_date {value:?}"
+                );
+            }
+        }
     }
 
     #[test]

@@ -176,7 +176,7 @@ test("a field observation rejects text that merely begins with a year", () => {
 test("any supplied source date must use the partial-date contract", () => {
   assert.throws(
     () => assertEvidenceDraftSubmission({ ...validDraft, source_date_or_capture_date: "yesterday" }, false),
-    /Use YYYY, YYYY-MM, or YYYY-MM-DD for source and capture dates/,
+    /source or capture date must be a real date written YYYY, YYYY-MM or YYYY-MM-DD from 1000 to 2100/,
   );
 });
 

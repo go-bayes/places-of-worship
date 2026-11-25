@@ -65,7 +65,7 @@ const context = vm.createContext({
   window, document, localStorage, sessionStorage: localStorage, navigator, L,
   URLSearchParams, Map, Set, Date, Number, String, Boolean, Object, Array, Math, JSON, RegExp, Intl, console, setTimeout, clearTimeout, Promise, Error, Uint8Array,
 });
-for (const file of ["../../../shared/data/country-registry.js", "../../../shared/region-resolve.js", "rapid-entry-contract.js", "location-assertion-contract.js", "occupancy-contract.js", "function-chain-contract.js", "task-presentation.js", "verification-map.js"]) {
+for (const file of ["../../../shared/data/country-registry.js", "../../../shared/region-resolve.js", "partial-date.js", "rapid-entry-contract.js", "location-assertion-contract.js", "occupancy-contract.js", "function-chain-contract.js", "task-presentation.js", "verification-map.js"]) {
   vm.runInContext(fs.readFileSync(path.join(__dirname, file), "utf8"), context, { filename: file });
 }
 

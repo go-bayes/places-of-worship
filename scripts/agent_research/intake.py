@@ -209,9 +209,10 @@ def allowlist_violations(dossier):
     return violations
 
 
-# convert a partial calendar date into its earliest/latest represented date.
+# convert a partial calendar date into its earliest/latest represented date. ASCII digits only,
+# as the backend and pow read them (a bare \d would take full-width and other Unicode digits).
 def date_bounds(value):
-    if not isinstance(value, str) or not re.fullmatch(r'\d{4}(-\d{2}(-\d{2})?)?', value):
+    if not isinstance(value, str) or not re.fullmatch(r'[0-9]{4}(-[0-9]{2}(-[0-9]{2})?)?', value):
         raise ValueError('invalid partial ISO date')
     parts = [int(p) for p in value.split('-')]
     year, month = parts[0], parts[1] if len(parts) > 1 else 1
@@ -219,6 +220,54 @@ def date_bounds(value):
     last_month = month if len(parts) > 1 else 12
     end = date(year, last_month, parts[2] if len(parts) > 2 else calendar.monthrange(year, last_month)[1])
     return start, end
+
+
+# deep-time stage 1 (docs/development/deep-time-date-format-brief-2026-11-24.md, ruling 7): the
+# date floors the agent intake applies, as convex/lib/countryYears.ts sets them. the internal pilot
+# takes NZ only; test_agent_dates.py ties the values to the backend.
+DATE_FLOOR_YEARS = {'NZ': 1600}
+DEFAULT_DATE_FLOOR_YEAR = 1600
+
+
+def _year(value):
+    try:
+        return date_bounds(value)[0].year
+    except (ValueError, TypeError):
+        return None
+
+
+# the stage 1 rules for one claim, as convex/lib/agentIntake.ts applies them at ingestion: the date
+# bounds meet the floor unless confirmed; the source's own date keeps 1000 to 2100, or falls before
+# 1000 when confirmed; each confirmation matches a date of the claim, once. diagnostics name the
+# entry by position, never by its value.
+def claim_date_rule_errors(claim, cid, floor):
+    errors = []
+    start, end = claim.get('date_start'), claim.get('date_end')
+    source_date = (claim.get('source') or {}).get('source_date')
+    source_day = source_date.split('T')[0] if isinstance(source_date, str) and source_date else None
+    confirmed = set()
+    if 'confirmed_dates' in claim:
+        entries = claim.get('confirmed_dates') or []
+        if not entries:
+            errors.append(f'{cid}: omit an empty confirmed_dates list')
+        for index, entry in enumerate(entries):
+            value = entry.get('date') if isinstance(entry, dict) else None
+            if value in confirmed:
+                errors.append(f'{cid}: confirmed_dates[{index}] is listed twice')
+            confirmed.add(value)
+            if value not in (start, end, source_day):
+                errors.append(f'{cid}: confirmed_dates[{index}] matches no date of the claim')
+    for key, value in (('date_start', start), ('date_end', end)):
+        year = _year(value) if value is not None else None
+        if year is not None and year < floor and value not in confirmed:
+            errors.append(f'{cid}: {key} is earlier than {floor}, the earliest year this country accepts without a confirmed date')
+    if source_day:
+        year = _year(source_day)
+        if year is not None and year > 2100:
+            errors.append(f'{cid}: source_date is later than 2100')
+        elif year is not None and year < 1000 and source_day not in confirmed:
+            errors.append(f'{cid}: source_date is earlier than 1000 without a confirmed date')
+    return errors
 
 
 # validate dossier facts as bounded, source-attributed claims, never accepted states.
@@ -294,6 +343,7 @@ def validate_dossier(dossier):
                     date_bounds(value.split('T')[0])
                 except (ValueError, TypeError):
                     errors.append(f'{cid}: invalid {field}')
+        errors += claim_date_rule_errors(claim, cid, DATE_FLOOR_YEARS.get(dossier['place']['country_code'], DEFAULT_DATE_FLOOR_YEAR))
         reader = claim['reader']
         if reader['backend'] != run['backend'] or reader['model_id'] not in {run['model_id_requested'], run['model_id_reported']}:
             errors.append(f'{cid}: inconsistent researcher provenance')

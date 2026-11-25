@@ -5,7 +5,7 @@ import type { Doc } from "./_generated/dataModel";
 import type { MutationCtx } from "./_generated/server";
 import { mutation } from "./_generated/server";
 import { assertOwnsOrCanReview, chooseActorRole, requireUser } from "./lib/auth";
-import { targetYearsOrEmpty } from "./lib/countryYears";
+import { dateFloorYear, targetYearsOrEmpty } from "./lib/countryYears";
 import {
   MEDIUM_TEXT_MAX,
   SHORT_TEXT_MAX,
@@ -495,7 +495,7 @@ export async function submitCurrentObservationHandler(ctx: MutationCtx, args: ty
     };
     const landedStatus = flagged ? ("unresolved_note" as const) : ("needs_review" as const);
     assertEvidenceDraftLimits(draftRecord);
-    assertEvidenceDraftSubmission(draftRecord, flagged);
+    assertEvidenceDraftSubmission(draftRecord, flagged, dateFloorYear(task.country_code));
     const draftRowId = await ctx.db.insert("evidence_drafts", draftRecord);
     const version = await recordEvidenceVersion(ctx, {
       draftRowId,

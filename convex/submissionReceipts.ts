@@ -494,7 +494,7 @@ async function assertFreshRapidObservation(
     current_observation_basis: observation.observation_basis,
   };
   assertEvidenceDraftLimits(draft);
-  assertEvidenceDraftSubmission(draft, args.flagForDiscussion === true);
+  assertEvidenceDraftSubmission(draft, args.flagForDiscussion === true, dateFloorYear(args.countryCode));
   if (args.chain !== undefined && !args.segments?.length)
     throw new Error("A function chain requires periods.");
   if (args.segments?.length) {
@@ -884,7 +884,7 @@ async function writeDraft(
       args.draft.source_url_or_file ?? source.snapshot?.url ?? source.snapshot?.archive_ref,
   };
   assertEvidenceDraftLimits(content);
-  assertEvidenceDraftSubmission(content, false);
+  assertEvidenceDraftSubmission(content, false, dateFloorYear(task.country_code));
   if (segments !== undefined) assertDraftPeriods(task, content, segments, chain);
   await chargeCreation(ctx, user, "general");
   // clear omitted input members so save A/save B/restore A submits exactly A

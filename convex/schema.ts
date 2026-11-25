@@ -70,6 +70,7 @@ import {
   evidenceVersionKind,
   evidenceHeadChangeKind,
   revisionIntent,
+  confirmedDates,
 } from "./model";
 import {
   judgmentAccessMethod,
@@ -320,6 +321,10 @@ export default defineSchema({
     // version when the revision opened (a pre-contract submission)
     revision_of_version_hash: v.optional(v.string()),
     revision_intent: v.optional(revisionIntent),
+    // deep-time stage 1 (ruling 7): the dates of this record a contributor
+    // or curator confirmed below the floor or the observation range; absent
+    // on every record without one, so existing hashes are unchanged
+    confirmed_dates: v.optional(confirmedDates),
   })
     .index("by_evidence_draft_id", ["evidence_draft_id"])
     .index("by_task_status", ["task_id", "draft_status"])
@@ -363,6 +368,8 @@ export default defineSchema({
     chain_index: v.optional(v.number()),
     chain_change: v.optional(v.union(v.literal("start"), functionChainChange)),
     chain_label: v.optional(v.string()),
+    // deep-time stage 1 (ruling 7): confirmed dates below the floor
+    confirmed_dates: v.optional(confirmedDates),
   })
     .index("by_historical_claim_id", ["historical_claim_id"])
     .index("by_parent_evidence_draft_id", ["parent_evidence_draft_id"])
@@ -416,6 +423,8 @@ export default defineSchema({
     created_by: v.id("users"),
     created_at: v.number(),
     updated_at: v.number(),
+    // deep-time stage 1 (ruling 7): confirmed dates below the floor
+    confirmed_dates: v.optional(confirmedDates),
   })
     .index("by_occupancy_id", ["occupancy_id"])
     .index("by_parent_evidence_draft_id", ["parent_evidence_draft_id"])

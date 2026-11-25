@@ -17,6 +17,7 @@ import {
   SHORT_TEXT_MAX,
 } from "./lib/limits";
 import { dateFloorYear } from "./lib/countryYears";
+import { assertConfirmers, confirmersForRoles } from "./lib/partialDates";
 import { intakeRateLimiter } from "./lib/rateLimits";
 import { assertRapidSubmissionId } from "./lib/rapidEntry";
 import { appendTaskEvent } from "./lib/taskEvents";
@@ -137,6 +138,7 @@ export async function submitHistoricalClaimHandler(ctx: MutationCtx, args: typeo
       parent.source_date_or_capture_date,
       new Date().toISOString().slice(0, 10),
     );
+    assertConfirmers(args.claim.confirmed_dates, confirmersForRoles(user.roles));
     assertHistoricalClaim(args.claim, referenceDate, dateFloorYear(task.country_code));
 
     await intakeRateLimiter.limit(ctx, "historicalClaimPerUser", { key: user._id, throws: true });
@@ -178,6 +180,7 @@ export async function submitHistoricalClaimHandler(ctx: MutationCtx, args: typeo
         : {}),
       privacy_flag: args.claim.privacy_flag,
       intake_submission_key: submissionKey,
+      ...(args.claim.confirmed_dates !== undefined ? { confirmed_dates: args.claim.confirmed_dates } : {}),
     });
 
     const actorRole = chooseActorRole(user, ["ra", "reviewer", "curator", "admin"]);

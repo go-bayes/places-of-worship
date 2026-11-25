@@ -91,7 +91,9 @@ const stamps = {
     "region-map.js": "20261124e", // accept only the expected override rule and count
     "datamaps-switcher.js": "20261013a", // switcher rows prerender; warming waits for activation
     "unvalidated-places.js": "20261124f", // september archives; theme edge redraw at the rounded zoom
-    "verification-map.js": "20261124h", // street view is a reality check on a recorded place
+    "verification-map.js": "20261125a", // the observation-date check moves to partial-date.js
+    "partial-date.js": "20261125a", // the portal's observation-date check, reached by the shared date test
+    "rapid-entry-contract.js": "20261125a", // the observation date is a real date from 1000 to 2100
     "occupancy-contract.js": "20261019a", // relocation rules follow definition 0.1.6
     "occupancy-review.js": "20261019a", // move wording and successor in the reviewer's period summary
     "task-presentation.js": "20261015c", // decided-status and reopen-flag helpers

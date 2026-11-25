@@ -232,7 +232,7 @@ test("mode and date fields must agree", () => {
   assert.throws(() => assertOccupancySegment(input({ start_mode: "between", start_date: undefined, start_not_earlier_than: "1990", start_not_later_than: "1985" }), REF), /earliest possible start must not be after/);
   assert.throws(() => assertOccupancySegment(input({ still_active_asof: "2030" }), REF), /cannot be later than the evidence reference date/);
   assert.throws(() => assertOccupancySegment(input({ end_mode: "known", end_date: "1970", end_basis: "closure_stated", end_reason: "closed", still_active_asof: undefined }), REF), /cannot end before it begins/);
-  assert.throws(() => assertOccupancySegment(input({ start_date: "1500" }), REF), /from 1600 onward/);
+  assert.throws(() => assertOccupancySegment(input({ start_date: "1500" }), REF), /start date 1500 is earlier than 1600/);
 });
 
 test("still-active periods carry an as-of date and no end reason", () => {

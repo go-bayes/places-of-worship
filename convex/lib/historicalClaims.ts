@@ -3,9 +3,9 @@ import {
   MEDIUM_TEXT_MAX,
   URL_OR_FILE_MAX,
   assertMaxString,
-  isValidPartialDate,
 } from "./limits.ts";
 import { DEFAULT_DATE_FLOOR_YEAR } from "./countryYears.ts";
+import { assertConfirmedDates, assertHistoricalDate, isValidHistoricalDate, type ConfirmedDate } from "./partialDates.ts";
 
 export type HistoricalClaimShape = {
   claim_kind: "structure" | "worship_function" | "denomination_or_affiliation" | "leadership" | "shared_use" | "other";
@@ -22,6 +22,7 @@ export type HistoricalClaimShape = {
   source_account: string;
   uncertainty_note?: string;
   privacy_flag: "clear" | "needs_review" | "restricted";
+  confirmed_dates?: ConfirmedDate[];
 };
 
 export type HistoricalClaimReference = {
@@ -35,12 +36,14 @@ export function isHistoricalClaimParentContract(value: string | undefined): bool
 }
 
 // uses the parent evidence date when available and otherwise records the claim date.
+// a stored parent date has already met its own check, so any real date counts,
+// including a documentary source's confirmed date before 1000
 export function historicalClaimReferenceDate(
   parentEvidenceDate: string | undefined,
   claimRecordedDate: string,
 ): HistoricalClaimReference {
   const parentDate = parentEvidenceDate?.trim() ?? "";
-  if (parentDate && isValidPartialDate(parentDate)) {
+  if (parentDate && isValidHistoricalDate(parentDate)) {
     return {
       referenceDate: parentDate,
       referenceDateBasis: "parent_evidence_date",
@@ -117,11 +120,10 @@ export function assertHistoricalClaim(
     throw new Error("Add supported date bounds or explain why the dates remain unresolved.");
   }
 
+  assertConfirmedDates(claim.confirmed_dates, [earliest, latest]);
   for (const [label, value] of [["earliest", earliest], ["latest", latest]] as const) {
     if (!value) continue;
-    if (!isValidPartialDate(value) || Number(value.slice(0, 4)) < floorYear) {
-      throw new Error(`Use YYYY, YYYY-MM, or YYYY-MM-DD from ${floorYear} onward for the ${label} supported date.`);
-    }
+    assertHistoricalDate(`The ${label} supported date`, value, floorYear, claim.confirmed_dates);
     if (partialDateLower(value) > partialDateUpper(referenceDate)) {
       throw new Error(`The ${label} supported date cannot be after the evidence reference date.`);
     }

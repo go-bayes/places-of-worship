@@ -7,6 +7,7 @@
 // scripts and the server agree on one reading of the columns.
 import type { LocationAssertionInput } from "./locationAssertions.ts";
 import type { OccupancySegmentInput } from "./occupancies.ts";
+import { curatorConfirmations } from "./importRow.ts";
 
 export const OCCUPANCY_IMPORT_COLUMNS = [
   "segment_index",
@@ -68,6 +69,9 @@ export type OccupancyImportRow = {
   occupancy_source_reference?: string;
   occupancy_source_account?: string;
   occupancy_uncertainty_note?: string;
+  // deep-time stage 1 (ruling 7): dates the curator who prepared the file
+  // confirmed; those that are this period's dates travel on its segment
+  confirmed_dates?: string[];
 };
 
 export type OccupancyImportDefaults = {
@@ -241,6 +245,11 @@ export function segmentFromImportRow(
     ...(text(row.occupancy_uncertainty_note) ? { uncertainty_note: text(row.occupancy_uncertainty_note) } : {}),
     privacy_flag: defaults.privacyFlag,
   };
+  const confirmed = curatorConfirmations(row.confirmed_dates, [
+    segment.start_date, segment.start_not_earlier_than, segment.start_not_later_than,
+    segment.end_date, segment.end_not_earlier_than, segment.end_not_later_than, segment.still_active_asof,
+  ]);
+  if (confirmed !== undefined) segment.confirmed_dates = confirmed;
   return { segment, problems: [] };
 }
 

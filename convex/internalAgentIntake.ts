@@ -4,7 +4,7 @@ import { requireUser } from "./lib/auth";
 import { applyReviewDecision } from "./reviews";
 import { appendTaskEvent } from "./lib/taskEvents";
 import { sha256 } from "./lib/sha256";
-import { assertNoDuplicateJsonKeys, validateAgentReviewBundle } from "./lib/agentIntake";
+import { agentConfirmedDates, assertNoDuplicateJsonKeys, validateAgentReviewBundle } from "./lib/agentIntake";
 import { recordEvidenceVersion } from "./evidenceVersions";
 import { costBasisOf, recordJudgments, type JudgmentInput } from "./lib/agentJudgments";
 
@@ -85,7 +85,8 @@ export const ingestBundle = internalMutation({
       evidence_draft_id: draftId, task_id: taskId, draft_status: "submitted", created_by: service._id, created_at: now, updated_at: now,
       source_type: firstClaim.source.source_type, source_title: firstClaim.source.source_name, source_url_or_file: firstClaim.source.locator, source_locator: firstClaim.source.locator,
       evidence_note: summary, privacy_flag: checked.bundle.review.cultural_sensitivity.flagged ? "needs_review" : "clear", licence_flag: "needs_review",
-      validation_summary: { status: "internal_agent_intake", bundle_hash: args.bundleHash }, source_claim_key: checked.bundle.submission_key, claim_hash: args.bundleHash,
+      // deep-time stage 1: the dates only the agent confirmed, which need a person's confirmation
+      validation_summary: { status: "internal_agent_intake", bundle_hash: args.bundleHash, ...(agentConfirmedDates(dossier).length > 0 ? { agent_confirmed_dates: agentConfirmedDates(dossier) } : {}) }, source_claim_key: checked.bundle.submission_key, claim_hash: args.bundleHash,
       agent_intake_only: true, agent_intake_hash: args.bundleHash,
     });
     // r-j7: the source-level summary says what was done. a claim the reviewer

@@ -1,6 +1,8 @@
 const fs = require("fs");
 const path = require("path").join(__dirname, "rapid-entry-contract.js");
 global.window = {};
+// the observation-date check the contract calls (partial-date.js) loads first, as on the page
+eval(fs.readFileSync(require("path").join(__dirname, "partial-date.js"), "utf8"));
 eval(fs.readFileSync(path, "utf8"));
 const rapid = global.window.PowRapidEntry;
 
