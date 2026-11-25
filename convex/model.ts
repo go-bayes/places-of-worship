@@ -355,6 +355,15 @@ export const occupancyDatePrecision = v.union(
 export const occupancyLocationRelation = v.union(
   v.literal("same_as_task_point"), v.literal("distinct"),
 );
+// stage 1 of the deep-time dates (ruling 7, option c): a date below the
+// country's floor, or a documentary source's date below 1000, is accepted
+// when the record lists it as written with who confirmed it. a record
+// without a confirmed date carries no list (convex/lib/partialDates.ts)
+export const dateConfirmer = v.union(v.literal("contributor"), v.literal("curator"), v.literal("agent"));
+export const confirmedDates = v.array(v.object({
+  date: v.string(),
+  confirmed_by: dateConfirmer,
+}));
 export const occupancySegmentInput = v.object({
   contract_version: occupancyContractVersion,
   segment_index: v.number(),
@@ -382,6 +391,7 @@ export const occupancySegmentInput = v.object({
   source_account: v.string(),
   uncertainty_note: v.optional(v.string()),
   privacy_flag: privacyFlag,
+  confirmed_dates: v.optional(confirmedDates),
 });
 
 // pr-f function_chain_v1 (docs/development/function-chain-brief-2026-09-02.md,
@@ -415,6 +425,7 @@ export const functionChainInput = v.object({
     date: functionChainDateInput,
   }),
   changes: v.array(functionChainChangeInput),
+  confirmed_dates: v.optional(confirmedDates),
 });
 // the chain as typed in the form, saved with the draft beside the cards
 const pendingFunctionChainDate = {
@@ -717,6 +728,7 @@ export const evidenceDraftInput = v.object({
   // pr-e: period cards typed in the guided form and saved with the draft;
   // cleared by recordOccupancySet once the periods are rows
   pending_occupancy_cards: v.optional(pendingOccupancyCards),
+  confirmed_dates: v.optional(confirmedDates),
 });
 
 export const rapidCurrentObservationInput = v.object({
@@ -749,6 +761,7 @@ export const historicalClaimInput = v.object({
   source_account: v.string(),
   uncertainty_note: v.optional(v.string()),
   privacy_flag: privacyFlag,
+  confirmed_dates: v.optional(confirmedDates),
 });
 
 // batch-review lane (docs/portal-claude-batch-review.md): AI review

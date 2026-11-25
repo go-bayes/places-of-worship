@@ -7,6 +7,7 @@ import type {
   SourceRecord,
   SourceReference,
 } from "./types";
+import { isHistoricalDate } from "./partialDates";
 
 // pure batch-import machinery per docs/portal-batch-import-and-corrections.md:
 // CSV parsing, the row rules (the submit-path rules plus import's two
@@ -15,7 +16,6 @@ import type {
 
 export const IMPORT_MAX_ROWS = 200;
 
-const PARTIAL_DATE = /^\d{4}(-\d{2})?(-\d{2})?$/;
 const REQUIRED_HEADERS = ["name", "country_code", "source_locator"] as const;
 const KNOWN_HEADERS = new Set([
   "name",
@@ -179,8 +179,8 @@ export function validateImportRow(row: ImportRow, countryCode: string): string[]
     }
   }
   for (const key of ["first_date", "last_date"] as const) {
-    if (value(key) && !PARTIAL_DATE.test(value(key))) {
-      problems.push(`Write ${key} as YYYY, YYYY-MM, or YYYY-MM-DD.`);
+    if (value(key) && !isHistoricalDate(value(key))) {
+      problems.push(`Write ${key} as YYYY, YYYY-MM, or YYYY-MM-DD, with a year before 1000 written with four digits, as 0920.`);
     }
   }
   if (value("source_url") && !/^https?:\/\//i.test(value("source_url"))) {

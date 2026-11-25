@@ -7,7 +7,8 @@
 // proposal; only a reviewer action writes it onto the parent draft.
 import { partialDateLower, partialDateUpper } from "./historicalClaims.ts";
 import { DEFAULT_DATE_FLOOR_YEAR } from "./countryYears.ts";
-import { isValidPartialDate, SHORT_TEXT_MAX } from "./limits.ts";
+import { SHORT_TEXT_MAX } from "./limits.ts";
+import { assertConfirmedDates, assertHistoricalDate, type ConfirmedDate } from "./partialDates.ts";
 import { canonicalJson, sha256 } from "./sha256.ts";
 import { segmentBounds, USE_FREQUENCIES, type OccupancySegmentInput, type UseFrequency } from "./occupancies.ts";
 
@@ -62,6 +63,7 @@ export type FunctionChainInput = {
     date: ChainDateInput;
   };
   changes: ChainChangeInput[];
+  confirmed_dates?: ConfirmedDate[];
 };
 
 export type DateBounds = { lower?: string; upper?: string };
@@ -98,12 +100,16 @@ export function chainDateText(date: ChainDateInput): string {
   }
 }
 
-function assertChainDate(label: string, date: ChainDateInput, referenceDate: string, floorYear: number): void {
+function assertChainDate(
+  label: string,
+  date: ChainDateInput,
+  referenceDate: string,
+  floorYear: number,
+  confirmed: readonly ConfirmedDate[] | undefined,
+): void {
   const check = (name: string, value: string | undefined) => {
     const text = t(value);
-    if (!isValidPartialDate(text) || Number(text.slice(0, 4)) < floorYear) {
-      throw new Error(`${label}: ${name} must be a real date as YYYY, YYYY-MM, or YYYY-MM-DD from ${floorYear} onward.`);
-    }
+    assertHistoricalDate(`${label}: ${name}`, text, floorYear, confirmed);
     if (partialDateLower(text) > partialDateUpper(referenceDate)) {
       throw new Error(`${label}: ${name} cannot be later than the evidence reference date (${referenceDate}).`);
     }
@@ -163,7 +169,12 @@ export function assertFunctionChain(
   if (startLabel.length > SHORT_TEXT_MAX) {
     throw new Error(`The starting label must be ${SHORT_TEXT_MAX} characters or fewer.`);
   }
-  assertChainDate("The start of the chain", chain.start.date, referenceDate, floorYear);
+  const chainDates = (date: ChainDateInput | undefined) => [date?.date, date?.not_earlier_than, date?.not_later_than];
+  assertConfirmedDates(chain.confirmed_dates, [
+    ...chainDates(chain.start?.date),
+    ...(Array.isArray(chain.changes) ? chain.changes.flatMap((change) => chainDates(change?.date)) : []),
+  ]);
+  assertChainDate("The start of the chain", chain.start.date, referenceDate, floorYear, chain.confirmed_dates);
   if (!Array.isArray(chain.changes)) {
     throw new Error("The chain's changes must be a list.");
   }
@@ -178,7 +189,7 @@ export function assertFunctionChain(
     if (!CHAIN_CHANGES.includes(change.change)) {
       throw new Error(`${label}: choose a listed change.`);
     }
-    assertChainDate(label, change.date, referenceDate, floorYear);
+    assertChainDate(label, change.date, referenceDate, floorYear, chain.confirmed_dates);
     const bounds = chainDateBounds(change.date);
     const ordering = bounds.lower ?? bounds.upper ?? "";
     if (ordering < previousLower) {

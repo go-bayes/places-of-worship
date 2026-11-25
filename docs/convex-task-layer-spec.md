@@ -419,7 +419,11 @@ Fields:
 - `provider`.
 - `source_title`.
 - `source_url_or_file`.
-- `source_date_or_capture_date`: optional partial date string.
+- `source_date_or_capture_date`: optional partial date string, an observation
+  date from 1000 to 2100. A documentary source's own date before 1000 is
+  accepted when `confirmed_dates` holds it; a field observation and a rapid
+  current observation keep the range outright (deep-time dates, stage 1,
+  rulings 3 and 4).
 - `source_notes`.
 - `action`: map action value.
 - `target_year_statuses`: object keyed by the task batch's target years.
@@ -440,9 +444,18 @@ Fields:
 - `interpretation_note`: optional claim the observation might support.
 - `uncertainty_note`: optional limit or follow-up need.
 - `lifecycle_event`: optional.
-- `lifecycle_date`: optional partial date string. Country protocols may allow
-  early historical dates; the Vanuatu protocol accepts valid dates from 1600
-  onward.
+- `lifecycle_date`: optional partial date string, a historical date: `YYYY`,
+  `YYYY-MM`, or `YYYY-MM-DD` from the year 0001, with a year before 1000
+  written with four digits (`0920`). On guided evidence it meets the task
+  country's date floor (`convex/lib/countryYears.ts`; 1600 for Vanuatu and
+  New Zealand) unless `confirmed_dates` holds it (deep-time dates, stage 1,
+  rulings 5 and 7).
+- `confirmed_dates`: optional list of `{ date, confirmed_by }` entries, one per
+  date of the record confirmed below the floor or the observation range, the
+  date exactly as written and `confirmed_by` one of `contributor`, `curator`,
+  or `agent`. A record without a confirmed date carries no list, so its hashes
+  are unchanged. Every entry must match a date the record holds; a date edited
+  after it was confirmed needs a new entry.
 - `lifecycle_date_precision`: optional.
 - `lifecycle_note`: optional.
 - `related_ids_or_note`.
@@ -478,7 +491,7 @@ Fields:
 - `claim_timing`: `event` or `state`.
 - `claim_text`: the event or state the source supports.
 - `reference_date` and `reference_date_basis`: the parent evidence date when one is available, otherwise the claim-recording date.
-- `earliest_supported_date` and `latest_supported_date`: optional `YYYY`, `YYYY-MM`, or `YYYY-MM-DD` bounds from 1600 onward.
+- `earliest_supported_date` and `latest_supported_date`: optional `YYYY`, `YYYY-MM`, or `YYYY-MM-DD` bounds from the year 0001 (a year before 1000 written with four digits, as `0920`), each from the task country's date floor unless the claim's optional `confirmed_dates` holds it.
 - `continues_through_observation`: permitted only for a state with no latest supported date.
 - `confidence` and `confidence_basis`.
 - `source_basis`, `source_title`, optional `source_reference`, and `source_account`; `source_account` retains the source wording or the RA's confirmed dictated text.

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { CountryConfig } from "../config";
+import { isHistoricalDate, isObservationDate } from "../data/partialDates";
 import { markHumanEdits } from "../data/provenance";
 import type { WorkbenchProvider } from "../data/provider";
 import type {
@@ -22,7 +23,6 @@ import type {
 // Controlled vocabulary lives in dropdowns (style-guide rule); free
 // text is for source-specific detail only.
 
-const PARTIAL_DATE = /^\d{4}(-\d{2})?(-\d{2})?$/;
 const NO_BUILDING = "no_building_present";
 
 type WorshipUseChoice = WorshipUseStatus | typeof NO_BUILDING | "";
@@ -276,20 +276,25 @@ export function DraftEvidenceEditor(props: {
       if (source.archiveRef && !source.archiveRef.consultedDate.trim()) {
         found.push("Add the date you consulted the archive, so the citation is complete.");
       }
+      // a source's own date is historical in form and may fall before 1000
+      // (the backend asks for a confirmation there); a consulted date is an
+      // observation date, from 1000 to 2100
+      if (source.sourceDate && !isHistoricalDate(source.sourceDate)) {
+        found.push("Write the source date as YYYY, YYYY-MM, or YYYY-MM-DD, with a year before 1000 written with four digits, as 0920.");
+      }
       for (const [label, value] of [
-        ["source date", source.sourceDate],
         ["consulted date", source.consultedDate],
         ["archive consulted date", source.archiveRef?.consultedDate],
       ] as const) {
-        if (value && !PARTIAL_DATE.test(value)) {
-          found.push(`Write the source ${label} as YYYY, YYYY-MM, or YYYY-MM-DD.`);
+        if (value && !isObservationDate(value)) {
+          found.push(`Write the source ${label} as YYYY, YYYY-MM, or YYYY-MM-DD, from 1000 to 2100.`);
         }
       }
     }
     for (const claim of candidate.lifecycle) {
       for (const value of [claim.date.value, claim.date.notEarlierThan, claim.date.notLaterThan]) {
-        if (value && !PARTIAL_DATE.test(value)) {
-          found.push("Write lifecycle dates as YYYY, YYYY-MM, or YYYY-MM-DD.");
+        if (value && !isHistoricalDate(value)) {
+          found.push("Write lifecycle dates as YYYY, YYYY-MM, or YYYY-MM-DD, with a year before 1000 written with four digits, as 0920.");
         }
       }
     }

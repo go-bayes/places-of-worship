@@ -1,4 +1,11 @@
 import { assertRapidDerivedConsistency } from "./rapidEntry.ts";
+import {
+  assertConfirmedDates,
+  assertHistoricalDate,
+  assertSourceDate,
+  isValidObservationDate,
+  type ConfirmedDate,
+} from "./partialDates.ts";
 export const SHORT_TEXT_MAX = 256;
 export const MEDIUM_TEXT_MAX = 2_048;
 export const LONG_TEXT_MAX = 8_000;
@@ -52,6 +59,7 @@ type EvidenceDraftLimitInput = {
   validation_summary?: unknown;
   target_year_entry_reason?: string;
   pending_occupancy_cards?: unknown;
+  confirmed_dates?: ConfirmedDate[];
 };
 
 export function assertMaxString(label: string, value: string | undefined, maxLength: number): void {
@@ -120,20 +128,10 @@ export function assertEvidenceDraftLimits(draft: EvidenceDraftLimitInput): void 
   assertMaxJson("validation summary", draft.validation_summary, VALIDATION_SUMMARY_MAX);
   assertMaxString("target-year entry reason", draft.target_year_entry_reason, MEDIUM_TEXT_MAX);
   assertMaxJson("pending occupancy cards", draft.pending_occupancy_cards, VALIDATION_SUMMARY_MAX);
+  assertMaxJson("confirmed dates", draft.confirmed_dates, VALIDATION_SUMMARY_MAX);
   if (Array.isArray(draft.pending_occupancy_cards) && draft.pending_occupancy_cards.length > PENDING_OCCUPANCY_CARD_MAX) {
     throw new Error(`A draft may hold at most ${PENDING_OCCUPANCY_CARD_MAX} pending occupancy cards.`);
   }
-}
-
-export function isValidPartialDate(value: string): boolean {
-  if (/^(?:1\d{3}|20\d{2}|2100)$/.test(value)) return true;
-  if (/^(?:1\d{3}|20\d{2}|2100)-(?:0[1-9]|1[0-2])$/.test(value)) return true;
-  const parts = value.match(/^(\d{4})-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/);
-  if (!parts) return false;
-  const parsed = new Date(`${value}T00:00:00Z`);
-  return parsed.getUTCFullYear() === Number(parts[1])
-    && parsed.getUTCMonth() + 1 === Number(parts[2])
-    && parsed.getUTCDate() === Number(parts[3]);
 }
 
 export function assertRapidCurrentObservation(draft: EvidenceDraftLimitInput): void {
@@ -147,7 +145,8 @@ export function assertRapidCurrentObservation(draft: EvidenceDraftLimitInput): v
   if (!status || !basis) {
     throw new Error("Choose what you can confirm and how you know it.");
   }
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(observedOn) || !isValidPartialDate(observedOn)) {
+  // ruling 3: an observation date keeps 1000 to 2100, with no confirmation
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(observedOn) || !isValidObservationDate(observedOn)) {
     throw new Error("A rapid current observation requires a valid YYYY-MM-DD observation date.");
   }
   if (Date.parse(`${observedOn}T00:00:00Z`) > Date.now() + 36 * 60 * 60 * 1_000) {
@@ -177,8 +176,10 @@ export function assertRapidCurrentObservation(draft: EvidenceDraftLimitInput): v
   }
 }
 
-// validate a persisted draft against the versioned scientific submission contract
-export function assertEvidenceDraftSubmission(draft: EvidenceDraftLimitInput, unresolved: boolean): void {
+// validate a persisted draft against the versioned scientific submission
+// contract. floorYear is the task country's date floor (countryYears.ts),
+// which the lifecycle date meets unless the draft confirms it (ruling 5)
+export function assertEvidenceDraftSubmission(draft: EvidenceDraftLimitInput, unresolved: boolean, floorYear: number): void {
   if (
     draft.observation_contract_version !== undefined
     && !["guided_observation_v1", "rapid_current_v1"].includes(draft.observation_contract_version)
@@ -241,8 +242,15 @@ export function assertEvidenceDraftSubmission(draft: EvidenceDraftLimitInput, un
   if (isGuidedObservation && !unresolved && draft.source_type !== "field_observation" && !sourceReference) {
     throw new Error("Add a source URL or agreed file reference before submitting for review.");
   }
-  if (isGuidedObservation && sourceDate && !isValidPartialDate(sourceDate)) {
-    throw new Error("Use YYYY, YYYY-MM, or YYYY-MM-DD for source and capture dates.");
+  assertConfirmedDates(draft.confirmed_dates, [sourceDate, lifecycleDate]);
+  // a field observation's date keeps the observation range outright; a
+  // documentary source's own date may fall below 1000 when the draft
+  // confirms it (rulings 3 and 4)
+  if (isGuidedObservation && sourceDate && draft.source_type === "field_observation" && !isValidObservationDate(sourceDate)) {
+    throw new Error("Use YYYY, YYYY-MM, or YYYY-MM-DD from 1000 to 2100 for a field observation date.");
+  }
+  if (isGuidedObservation && sourceDate && draft.source_type !== "field_observation") {
+    assertSourceDate("The source or capture date", sourceDate, draft.confirmed_dates);
   }
   const hasLifecycleDetail = Boolean(draft.lifecycle_event || lifecycleDate || draft.lifecycle_note?.trim() || lifecyclePrecision);
   if (isGuidedObservation && hasLifecycleDetail && !draft.lifecycle_event) {
@@ -251,8 +259,8 @@ export function assertEvidenceDraftSubmission(draft: EvidenceDraftLimitInput, un
   if (isGuidedObservation && draft.lifecycle_event && !lifecycleDate) {
     throw new Error("A lifecycle event requires a date or bounded date.");
   }
-  if (isGuidedObservation && lifecycleDate && !isValidPartialDate(lifecycleDate)) {
-    throw new Error("Use YYYY, YYYY-MM, or YYYY-MM-DD for lifecycle dates.");
+  if (isGuidedObservation && lifecycleDate) {
+    assertHistoricalDate("The lifecycle date", lifecycleDate, floorYear, draft.confirmed_dates);
   }
   if (isGuidedObservation && draft.lifecycle_event && !["day", "month", "year", "bounded", "unknown"].includes(lifecyclePrecision)) {
     throw new Error("A lifecycle event requires a recognised date precision.");

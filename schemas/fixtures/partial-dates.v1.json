@@ -1,0 +1,468 @@
+{
+  "schema_version": "partial-dates.v1",
+  "description": "Shared test dates for every copy of the partial-date validators, under stage 1 of the deep-time date format (docs/development/deep-time-date-format-brief-2026-11-24.md, rulings 1 to 8 of section 10). A partial date is YYYY, YYYY-MM or YYYY-MM-DD with ASCII digits and a real Gregorian calendar date. Each row says whether the value is valid as a historical date and as an observation date, whether it has the digit shape the JSON schemas check (form), and, when it is a valid historical date, the first and last calendar day it covers.",
+  "kinds": {
+    "historical": "A date when something happened at a place: the bounds of a dated claim, the start and end of a period, a date in a function chain, the lifecycle date. Any real date from the year 0001; the country's floor applies on top, with a confirmation below it.",
+    "observation": "A date when evidence was made: an observation, a photograph, a source's own date. A real date from 1000 to 2100; a documentary source's date below 1000 takes a confirmation.",
+    "form": "The digit shape alone, as the JSON schema patterns check it: four digits, then optionally two and two, joined by hyphens. Year, month and day ranges are left to the validators."
+  },
+  "dates": [
+    {
+      "value": "0001",
+      "historical": true,
+      "observation": false,
+      "form": true,
+      "note": "the first year a historical date accepts",
+      "bounds": [
+        "0001-01-01",
+        "0001-12-31"
+      ]
+    },
+    {
+      "value": "0004-02-29",
+      "historical": true,
+      "observation": false,
+      "form": true,
+      "note": "year 4 is a leap year in the proleptic Gregorian calendar",
+      "bounds": [
+        "0004-02-29",
+        "0004-02-29"
+      ]
+    },
+    {
+      "value": "0019",
+      "historical": true,
+      "observation": false,
+      "form": true,
+      "note": "a two-digit year written with four digits",
+      "bounds": [
+        "0019-01-01",
+        "0019-12-31"
+      ]
+    },
+    {
+      "value": "0099-12",
+      "historical": true,
+      "observation": false,
+      "form": true,
+      "note": "a year and month below 100",
+      "bounds": [
+        "0099-12-01",
+        "0099-12-31"
+      ]
+    },
+    {
+      "value": "0100-02-29",
+      "historical": false,
+      "observation": false,
+      "form": true,
+      "note": "100 is not a leap year"
+    },
+    {
+      "value": "0597",
+      "historical": true,
+      "observation": false,
+      "form": true,
+      "note": "St Martin's Church, Canterbury, before 597",
+      "bounds": [
+        "0597-01-01",
+        "0597-12-31"
+      ]
+    },
+    {
+      "value": "0731-05-26",
+      "historical": true,
+      "observation": false,
+      "form": true,
+      "note": "a full date below 1000",
+      "bounds": [
+        "0731-05-26",
+        "0731-05-26"
+      ]
+    },
+    {
+      "value": "0920",
+      "historical": true,
+      "observation": false,
+      "form": true,
+      "note": "St George's Basilica, Prague, c. 920",
+      "bounds": [
+        "0920-01-01",
+        "0920-12-31"
+      ]
+    },
+    {
+      "value": "0920-05",
+      "historical": true,
+      "observation": false,
+      "form": true,
+      "note": "a year and month below 1000",
+      "bounds": [
+        "0920-05-01",
+        "0920-05-31"
+      ]
+    },
+    {
+      "value": "0920-05-01",
+      "historical": true,
+      "observation": false,
+      "form": true,
+      "note": "a full date below 1000",
+      "bounds": [
+        "0920-05-01",
+        "0920-05-01"
+      ]
+    },
+    {
+      "value": "0999",
+      "historical": true,
+      "observation": false,
+      "form": true,
+      "note": "the last year below the observation range",
+      "bounds": [
+        "0999-01-01",
+        "0999-12-31"
+      ]
+    },
+    {
+      "value": "0999-12-31",
+      "historical": true,
+      "observation": false,
+      "form": true,
+      "note": "the last day below the observation range",
+      "bounds": [
+        "0999-12-31",
+        "0999-12-31"
+      ]
+    },
+    {
+      "value": "1000",
+      "historical": true,
+      "observation": true,
+      "form": true,
+      "note": "the first year of the observation range",
+      "bounds": [
+        "1000-01-01",
+        "1000-12-31"
+      ]
+    },
+    {
+      "value": "1000-01-01",
+      "historical": true,
+      "observation": true,
+      "form": true,
+      "note": "the first day of the observation range",
+      "bounds": [
+        "1000-01-01",
+        "1000-01-01"
+      ]
+    },
+    {
+      "value": "1344",
+      "historical": true,
+      "observation": true,
+      "form": true,
+      "note": "a year below every floor but inside the observation range",
+      "bounds": [
+        "1344-01-01",
+        "1344-12-31"
+      ]
+    },
+    {
+      "value": "1600-02-29",
+      "historical": true,
+      "observation": true,
+      "form": true,
+      "note": "1600 is a leap year",
+      "bounds": [
+        "1600-02-29",
+        "1600-02-29"
+      ]
+    },
+    {
+      "value": "1880-02-29",
+      "historical": true,
+      "observation": true,
+      "form": true,
+      "note": "1880 is a leap year",
+      "bounds": [
+        "1880-02-29",
+        "1880-02-29"
+      ]
+    },
+    {
+      "value": "1900-02-29",
+      "historical": false,
+      "observation": false,
+      "form": true,
+      "note": "1900 is not a leap year"
+    },
+    {
+      "value": "1945-02-30",
+      "historical": false,
+      "observation": false,
+      "form": true,
+      "note": "February has no 30th"
+    },
+    {
+      "value": "1945-04-31",
+      "historical": false,
+      "observation": false,
+      "form": true,
+      "note": "April has 30 days"
+    },
+    {
+      "value": "1945-08",
+      "historical": true,
+      "observation": true,
+      "form": true,
+      "note": "a year and month",
+      "bounds": [
+        "1945-08-01",
+        "1945-08-31"
+      ]
+    },
+    {
+      "value": "1880-00",
+      "historical": false,
+      "observation": false,
+      "form": true,
+      "note": "month 00"
+    },
+    {
+      "value": "1880-13",
+      "historical": false,
+      "observation": false,
+      "form": true,
+      "note": "month 13"
+    },
+    {
+      "value": "1880-01-00",
+      "historical": false,
+      "observation": false,
+      "form": true,
+      "note": "day 00"
+    },
+    {
+      "value": "1880-01-32",
+      "historical": false,
+      "observation": false,
+      "form": true,
+      "note": "day 32"
+    },
+    {
+      "value": "2000-02-29",
+      "historical": true,
+      "observation": true,
+      "form": true,
+      "note": "2000 is a leap year",
+      "bounds": [
+        "2000-02-29",
+        "2000-02-29"
+      ]
+    },
+    {
+      "value": "2023",
+      "historical": true,
+      "observation": true,
+      "form": true,
+      "note": "a census year",
+      "bounds": [
+        "2023-01-01",
+        "2023-12-31"
+      ]
+    },
+    {
+      "value": "2100",
+      "historical": true,
+      "observation": true,
+      "form": true,
+      "note": "the last year of the observation range",
+      "bounds": [
+        "2100-01-01",
+        "2100-12-31"
+      ]
+    },
+    {
+      "value": "2100-12",
+      "historical": true,
+      "observation": true,
+      "form": true,
+      "note": "the last month of the observation range",
+      "bounds": [
+        "2100-12-01",
+        "2100-12-31"
+      ]
+    },
+    {
+      "value": "2100-12-31",
+      "historical": true,
+      "observation": true,
+      "form": true,
+      "note": "the last day of the observation range",
+      "bounds": [
+        "2100-12-31",
+        "2100-12-31"
+      ]
+    },
+    {
+      "value": "2101",
+      "historical": true,
+      "observation": false,
+      "form": true,
+      "note": "above the observation range; a historical date has no cap below four digits",
+      "bounds": [
+        "2101-01-01",
+        "2101-12-31"
+      ]
+    },
+    {
+      "value": "2101-01-01",
+      "historical": true,
+      "observation": false,
+      "form": true,
+      "note": "above the observation range",
+      "bounds": [
+        "2101-01-01",
+        "2101-01-01"
+      ]
+    },
+    {
+      "value": "9999-12-31",
+      "historical": true,
+      "observation": false,
+      "form": true,
+      "note": "the last four-digit day",
+      "bounds": [
+        "9999-12-31",
+        "9999-12-31"
+      ]
+    },
+    {
+      "value": "0000",
+      "historical": false,
+      "observation": false,
+      "form": true,
+      "note": "refused in stage 1; stage 2 gives 0000 the meaning 1 BCE"
+    },
+    {
+      "value": "0000-01",
+      "historical": false,
+      "observation": false,
+      "form": true,
+      "note": "the year 0000 is refused in every form"
+    },
+    {
+      "value": "0000-01-01",
+      "historical": false,
+      "observation": false,
+      "form": true,
+      "note": "the year 0000 is refused in every form"
+    },
+    {
+      "value": "-0000",
+      "historical": false,
+      "observation": false,
+      "form": false,
+      "note": "a signed year is a stage 2 form"
+    },
+    {
+      "value": "-0018",
+      "historical": false,
+      "observation": false,
+      "form": false,
+      "note": "19 BCE in the stage 2 form"
+    },
+    {
+      "value": "Y-11999",
+      "historical": false,
+      "observation": false,
+      "form": false,
+      "note": "12000 BCE in the stage 2 long form"
+    },
+    {
+      "value": "920",
+      "historical": false,
+      "observation": false,
+      "form": false,
+      "note": "three digits: write 0920"
+    },
+    {
+      "value": "92",
+      "historical": false,
+      "observation": false,
+      "form": false,
+      "note": "two digits"
+    },
+    {
+      "value": "19200",
+      "historical": false,
+      "observation": false,
+      "form": false,
+      "note": "five digits"
+    },
+    {
+      "value": "1880-1",
+      "historical": false,
+      "observation": false,
+      "form": false,
+      "note": "a one-digit month"
+    },
+    {
+      "value": "1880-01-1",
+      "historical": false,
+      "observation": false,
+      "form": false,
+      "note": "a one-digit day"
+    },
+    {
+      "value": "1880/01/01",
+      "historical": false,
+      "observation": false,
+      "form": false,
+      "note": "slashes"
+    },
+    {
+      "value": "1880-01-01T00:00:00Z",
+      "historical": false,
+      "observation": false,
+      "form": false,
+      "note": "a timestamp is not a partial date"
+    },
+    {
+      "value": "+1880",
+      "historical": false,
+      "observation": false,
+      "form": false,
+      "note": "a leading plus sign"
+    },
+    {
+      "value": " 1880",
+      "historical": false,
+      "observation": false,
+      "form": false,
+      "note": "a leading space; callers trim before validating"
+    },
+    {
+      "value": "1880 ",
+      "historical": false,
+      "observation": false,
+      "form": false,
+      "note": "a trailing space"
+    },
+    {
+      "value": "",
+      "historical": false,
+      "observation": false,
+      "form": false,
+      "note": "an empty string"
+    },
+    {
+      "value": "c. 1880",
+      "historical": false,
+      "observation": false,
+      "form": false,
+      "note": "prose belongs in a note"
+    }
+  ]
+}

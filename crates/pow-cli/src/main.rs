@@ -8,7 +8,7 @@ use std::process::ExitCode;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use anyhow::{Context, Result, bail};
-use chrono::{DateTime, Days, NaiveDate, Utc};
+use chrono::{DateTime, NaiveDate, Utc};
 use clap::{Parser, Subcommand, ValueEnum};
 use jsonschema::{Registry, Validator};
 use rusqlite::{Connection, params};
@@ -20,6 +20,9 @@ use sha2::{Digest, Sha256};
 
 mod canonical;
 mod export;
+mod partial_date;
+
+use partial_date::PartialDateBounds;
 
 const PROPOSE_VERSION: &str = "pow-propose.v1";
 const AGENT_REVIEW_SCHEMA_VERSION: &str = "agent-review-bundle.v1";
@@ -1282,48 +1285,12 @@ struct ParsedPartialDate {
     upper: NaiveDate,
 }
 
+// an agent dossier's date: a historical partial date (partial_date.rs)
 fn parse_partial_date(value: &str) -> Option<ParsedPartialDate> {
-    let parts: Vec<_> = value.split('-').collect();
-    if !matches!(parts.len(), 1..=3) || parts.iter().any(|part| part.is_empty()) {
-        return None;
-    }
-    if parts[0].len() != 4 || !parts[0].chars().all(|character| character.is_ascii_digit()) {
-        return None;
-    }
-    let year = parts[0].parse::<i32>().ok()?;
-    if year < 1 {
-        return None;
-    }
-    let month = match parts.get(1) {
-        None => None,
-        Some(part) if part.len() == 2 && part.chars().all(|c| c.is_ascii_digit()) => {
-            Some(part.parse::<u32>().ok()?)
-        }
-        Some(_) => return None,
-    };
-    let day = match parts.get(2) {
-        None => None,
-        Some(part) if part.len() == 2 && part.chars().all(|c| c.is_ascii_digit()) => {
-            Some(part.parse::<u32>().ok()?)
-        }
-        Some(_) => return None,
-    };
-    let month = month.unwrap_or(1);
-    let lower = NaiveDate::from_ymd_opt(year, month, day.unwrap_or(1))?;
-    let upper = match (day, parts.len()) {
-        (Some(_), _) => lower,
-        (None, 2) => {
-            let next = if month == 12 {
-                NaiveDate::from_ymd_opt(year.checked_add(1)?, 1, 1)?
-            } else {
-                NaiveDate::from_ymd_opt(year, month + 1, 1)?
-            };
-            next.pred_opt()?
-        }
-        (None, 1) => NaiveDate::from_ymd_opt(year, 12, 31)?,
-        _ => return None,
-    };
-    Some(ParsedPartialDate { lower, upper })
+    partial_date::parse_historical(value).map(|bounds| ParsedPartialDate {
+        lower: bounds.earliest,
+        upper: bounds.latest,
+    })
 }
 
 fn validate_source_locator(locator: &str) -> std::result::Result<(), String> {
@@ -2137,7 +2104,7 @@ fn optional_probability(row: &serde_json::Map<String, Value>, field: &str) -> Re
 
 fn target_year_to_snapshot_date(value: &str) -> Result<String> {
     let value = value.trim();
-    if value.len() == 4 && value.chars().all(|ch| ch.is_ascii_digit()) {
+    if value.len() == 4 && partial_date::parse_historical(value).is_some() {
         return Ok(format!("{value}-09-01"));
     }
     if parse_full_date(value).is_some() {
@@ -3978,12 +3945,6 @@ fn validate_bounded_date_object(
     }
 }
 
-#[derive(Clone, Copy)]
-struct PartialDateBounds {
-    earliest: NaiveDate,
-    latest: NaiveDate,
-}
-
 fn bounded_date_field(
     object: &serde_json::Map<String, Value>,
     field: &str,
@@ -4006,34 +3967,9 @@ fn bounded_date_field(
     }
 }
 
+// a change event's partial date: a historical partial date (partial_date.rs)
 fn parse_partial_date_bounds(value: &str) -> Option<PartialDateBounds> {
-    if value.len() == 4 && value.chars().all(|ch| ch.is_ascii_digit()) {
-        let year = value.parse::<i32>().ok()?;
-        return Some(PartialDateBounds {
-            earliest: NaiveDate::from_ymd_opt(year, 1, 1)?,
-            latest: NaiveDate::from_ymd_opt(year, 12, 31)?,
-        });
-    }
-    if value.len() == 7 {
-        let (year, month) = value.split_once('-')?;
-        if year.len() != 4 || !year.chars().all(|ch| ch.is_ascii_digit()) {
-            return None;
-        }
-        let year = year.parse::<i32>().ok()?;
-        let month = month.parse::<u32>().ok()?;
-        let earliest = NaiveDate::from_ymd_opt(year, month, 1)?;
-        let first_next_month = if month == 12 {
-            NaiveDate::from_ymd_opt(year + 1, 1, 1)?
-        } else {
-            NaiveDate::from_ymd_opt(year, month + 1, 1)?
-        };
-        let latest = first_next_month.checked_sub_days(Days::new(1))?;
-        return Some(PartialDateBounds { earliest, latest });
-    }
-    parse_full_date(value).map(|date| PartialDateBounds {
-        earliest: date,
-        latest: date,
-    })
+    partial_date::parse_historical(value)
 }
 
 fn join_json_pointer(parent: &str, child: &str) -> String {
@@ -4671,29 +4607,18 @@ fn should_parse_timestamp(field: &str) -> bool {
     )
 }
 
+// a historical partial date (partial_date.rs)
 fn is_valid_partial_date(value: &str) -> bool {
-    if value.len() == 4 && value.chars().all(|ch| ch.is_ascii_digit()) {
-        return true;
-    }
-    if value.len() == 7 {
-        let Some((year, month)) = value.split_once('-') else {
-            return false;
-        };
-        return year.len() == 4
-            && year.chars().all(|ch| ch.is_ascii_digit())
-            && month
-                .parse::<u32>()
-                .is_ok_and(|month| (1..=12).contains(&month));
-    }
-    parse_full_date(value).is_some()
+    partial_date::parse_historical(value).is_some()
 }
 
 fn is_valid_timestamp_or_date(value: &str) -> bool {
     DateTime::parse_from_rfc3339(value).is_ok() || is_valid_partial_date(value)
 }
 
+// a full date, YYYY-MM-DD, from the year 0001 (partial_date.rs)
 fn parse_full_date(value: &str) -> Option<NaiveDate> {
-    NaiveDate::parse_from_str(value, "%Y-%m-%d").ok()
+    partial_date::parse_historical_day(value)
 }
 
 fn is_iso2_country_code(value: &str) -> bool {
@@ -5096,6 +5021,42 @@ mod tests {
         assert!(is_valid_partial_date("2013-09-01"));
         assert!(!is_valid_partial_date("2013-99"));
         assert!(!is_valid_partial_date("2013-02-31"));
+    }
+
+    // deep-time stage 1: every rust check of a partial date runs against the
+    // shared fixture, schemas/fixtures/partial-dates.v1.json
+    #[test]
+    fn date_checks_match_the_shared_fixture() {
+        use crate::partial_date::tests::{expected_bounds, fixture_rows};
+        let text = |date: NaiveDate| date.format("%Y-%m-%d").to_string();
+        for row in fixture_rows() {
+            let value = row["value"].as_str().unwrap();
+            let historical = row["historical"].as_bool().unwrap();
+            let bounds = expected_bounds(&row);
+            let agent = parse_partial_date(value).map(|date| (text(date.lower), text(date.upper)));
+            assert_eq!(agent, bounds, "parse_partial_date {value:?}");
+            let event = parse_partial_date_bounds(value)
+                .map(|date| (text(date.earliest), text(date.latest)));
+            assert_eq!(event, bounds, "parse_partial_date_bounds {value:?}");
+            assert_eq!(
+                is_valid_partial_date(value),
+                historical,
+                "is_valid_partial_date {value:?}"
+            );
+            assert_eq!(
+                parse_full_date(value).is_some(),
+                historical && value.len() == 10,
+                "parse_full_date {value:?}"
+            );
+            // the census target year trims its input first
+            if value == value.trim() {
+                assert_eq!(
+                    target_year_to_snapshot_date(value).is_ok(),
+                    historical && (value.len() == 4 || value.len() == 10),
+                    "target_year_to_snapshot_date {value:?}"
+                );
+            }
+        }
     }
 
     #[test]

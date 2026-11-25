@@ -1,4 +1,6 @@
 import { canonicalJson, sha256 } from "./sha256.ts";
+import { dateFloorYear } from "./countryYears.ts";
+import { assertConfirmedDates, isConfirmedDate, type ConfirmedDate } from "./partialDates.ts";
 import bundleSchema from "../../scripts/agent_research/schemas/agent-review-bundle.v1.json" with { type: "json" };
 import allowlistNzV1 from "../../scripts/agent_research/fixtures/allowlist-nz-v1.json" with { type: "json" };
 import screenPolicy from "../../scripts/agent_research/schemas/screen-policy.v1.json" with { type: "json" };
@@ -297,6 +299,9 @@ export function validateDossierRecord(d: Record<string, any>): Map<string, strin
   assertScreened(d, (bundleSchema as any).$defs.dossier, bundleSchema, SCREEN_HASH_FIELDS["agent-review-bundle.v1"], { prefix: "dossier" });
   if (d.run_manifest.idempotency_key !== sha256([d.place.place_ref, d.run_manifest.prompt_version, d.run_manifest.model_id_requested, d.place.seed_source].join("|"))) throw new Error("dossier run manifest idempotency_key does not match its inputs");
   const locators = new Map<string, string>();
+  // deep-time stage 1 (ruling 7): an agent's dated claim meets the country's
+  // floor as a contributor's does, unless the agent confirmed the date
+  const floorYear = dateFloorYear(d.place.country_code);
   for (const claim of d.claims) {
     if (locators.has(claim.claim_id)) throw new Error("duplicate claim ID");
     publicUrl(claim.source.locator); canonicalHost(claim.source.locator); locators.set(claim.claim_id, claim.source.locator);
@@ -308,6 +313,14 @@ export function validateDossierRecord(d: Record<string, any>): Map<string, strin
       if (precision && claim[key].length !== precision) throw new Error("date precision mismatch");
     }
     if (claim.date_end && (!claim.date_start || dateBounds(claim.date_start)[0] > dateBounds(claim.date_end)[1])) throw new Error("invalid date interval");
+    const confirmed = claim.confirmed_dates as ConfirmedDate[] | undefined;
+    assertConfirmedDates(confirmed, [claim.date_start ?? undefined, claim.date_end ?? undefined], ["agent"]);
+    for (const key of ["date_start", "date_end"]) {
+      const value = claim[key];
+      if (value != null && Number(value.slice(0, 4)) < floorYear && !isConfirmedDate(confirmed, value)) {
+        throw new Error(`claim ${key} is earlier than ${floorYear}, the earliest year this country accepts without a confirmed date`);
+      }
+    }
     for (const key of ["source_date", "retrieved_at"]) if (claim.source[key]) dateBounds(claim.source[key].split("T")[0]);
   }
   // a bundle's quarantine block records only the kind and claim of each withheld detail;

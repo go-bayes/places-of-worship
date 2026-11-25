@@ -33,7 +33,8 @@
         if (!flagged && !values.observationBasis) {
             return fail("Choose how you know this.", "ObservationBasis");
         }
-        if (!/^\d{4}-\d{2}-\d{2}$/.test(values.observedOn || "")) {
+        // a real date from 1000 to 2100 (partial-date.js), as the server requires
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(values.observedOn || "") || !window.PowPartialDate.isObservationDate(values.observedOn)) {
             return fail("Enter the observation date.", "ObservedOn");
         }
         if (values.observedOn > localIsoDate()) {

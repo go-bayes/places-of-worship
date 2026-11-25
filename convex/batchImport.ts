@@ -17,6 +17,7 @@ import {
 import { assertLocationAssertion } from "./lib/locationAssertions";
 import { assertOccupancySet, type OccupancySegmentInput } from "./lib/occupancies";
 import { groupImportRows, rowHasOccupancy, segmentFromImportRow } from "./lib/occupancyImport";
+import { confirmedDateProblems, curatorConfirmations, validateImportRow, type ImportRow } from "./lib/importRow";
 import { appendTaskEvent } from "./lib/taskEvents";
 import { recordEvidenceVersion } from "./evidenceVersions";
 import { recordOccupancySet } from "./occupancies";
@@ -31,16 +32,6 @@ import { recordOccupancySet } from "./occupancies";
 // an earlier import.
 
 const IMPORT_MAX_ROWS = 200;
-const PARTIAL_DATE = /^\d{4}(-\d{2})?(-\d{2})?$/;
-const GEOCODING_BASES = new Set([
-  "exact_address",
-  "historical_address_matched",
-  "described_locality",
-  "map_georeference",
-  "regional_only",
-  "unknown",
-]);
-const CONFIDENCES = new Set(["high", "medium", "low"]);
 
 const importRow = v.object({
   row_number: v.number(),
@@ -63,86 +54,9 @@ const importRow = v.object({
   culturally_sensitive: v.optional(v.union(v.literal("yes"), v.literal("no"))),
   notes: v.optional(v.string()),
   claim_hash: v.string(),
+  // deep-time stage 1 (ruling 7): the row's dates the curator confirmed
+  confirmed_dates: v.optional(v.array(v.string())),
 });
-
-type ImportRow = {
-  row_number: number;
-  name: string;
-  country_code: string;
-  religion?: string;
-  denomination_code?: string;
-  taxonomy_version?: string;
-  lat?: number;
-  lng?: number;
-  locality?: string;
-  containing_area?: string;
-  geocoding_basis?: string;
-  location_confidence?: string;
-  source_locator: string;
-  source_url?: string;
-  first_date?: string;
-  last_date?: string;
-  date_confidence?: string;
-  culturally_sensitive?: "yes" | "no";
-  notes?: string;
-  claim_hash: string;
-};
-
-// same rules as the workbench module, server-side: the mutation is the
-// last line of defence once clients other than the workbench exist
-function validateRow(row: ImportRow, countryCode: string): string[] {
-  const problems: string[] = [];
-  if (!row.name.trim()) {
-    problems.push("Give the place a name as the source states it; a batch row without a name is unreviewable.");
-  }
-  if (row.country_code.toUpperCase() !== countryCode.toUpperCase()) {
-    problems.push(`Row country ${row.country_code || "(blank)"} does not match the file's country ${countryCode}.`);
-  }
-  if (row.denomination_code && !row.taxonomy_version) {
-    problems.push("Add the taxonomy version that goes with the denomination code.");
-  }
-  const hasLat = row.lat !== undefined;
-  const hasLng = row.lng !== undefined;
-  if (hasLat !== hasLng) {
-    problems.push("Enter both latitude and longitude, or leave both blank.");
-  }
-  if (hasLat && hasLng) {
-    if (Math.abs(row.lat!) > 90 || Math.abs(row.lng!) > 180) {
-      problems.push("Latitude and longitude must be numeric and in range.");
-    }
-    if (!row.geocoding_basis) {
-      problems.push("Choose a geocoding basis so reviewers know how the point was placed.");
-    }
-  } else if (!row.containing_area?.trim()) {
-    problems.push("A row without coordinates must name its containing area, even when a locality is given.");
-  }
-  if (row.geocoding_basis && !GEOCODING_BASES.has(row.geocoding_basis)) {
-    problems.push(`Unknown geocoding basis: ${row.geocoding_basis}.`);
-  }
-  for (const [label, value] of [
-    ["location_confidence", row.location_confidence],
-    ["date_confidence", row.date_confidence],
-  ] as const) {
-    if (value && !CONFIDENCES.has(value)) {
-      problems.push(`${label} must be high, medium, or low.`);
-    }
-  }
-  for (const [label, value] of [
-    ["first_date", row.first_date],
-    ["last_date", row.last_date],
-  ] as const) {
-    if (value && !PARTIAL_DATE.test(value)) {
-      problems.push(`Write ${label} as YYYY, YYYY-MM, or YYYY-MM-DD.`);
-    }
-  }
-  if (row.source_url && !/^https?:\/\//i.test(row.source_url)) {
-    problems.push("source_url must be an http(s) URL.");
-  }
-  if (!row.source_locator.trim()) {
-    problems.push("Every row needs a source_locator: a stable entry reference into the file's source record.");
-  }
-  return problems;
-}
 
 // a VU row must answer the kastom prompt or park for individual handling
 function isParkedSensitive(row: ImportRow, countryCode: string): boolean {
@@ -313,6 +227,8 @@ const occupancyImportRow = v.object({
   occupancy_source_reference: v.optional(v.string()),
   occupancy_source_account: v.optional(v.string()),
   occupancy_uncertainty_note: v.optional(v.string()),
+  // deep-time stage 1 (ruling 7): the row's dates the curator confirmed
+  confirmed_dates: v.optional(v.array(v.string())),
 });
 type OccupancyImportRowInput = typeof occupancyImportRow.type;
 
@@ -412,7 +328,8 @@ export const adminImportOccupancyBatch = internalMutation({
     for (const [locator, rows] of places) {
       const base = rows[0];
       const rowNumber = base.row_number;
-      const problems = validateRow(base, countryCode);
+      const problems = validateImportRow(base, countryCode);
+      for (const row of rows.slice(1)) problems.push(...confirmedDateProblems(row));
       const inconsistent = rows.filter((row) => row.name !== base.name || row.row_number !== base.row_number);
       if (inconsistent.length > 0) {
         problems.push("Rows of one place must repeat its name and row_number and differ only in their period columns.");
@@ -541,6 +458,12 @@ export const adminImportOccupancyBatch = internalMutation({
         base.culturally_sensitive ? `culturally_sensitive: ${base.culturally_sensitive}` : undefined,
         base.notes,
       ].filter(Boolean).join("\n");
+      // the curator's confirmations of the record's own dates; a period's
+      // confirmations travel on its segment (segmentFromImportRow)
+      const draftConfirmations = curatorConfirmations(
+        rows.flatMap((row) => row.confirmed_dates ?? []),
+        [args.source.consulted_date, base.first_date],
+      );
       const draftRecord = {
         evidence_draft_id: draftId,
         task_id: taskId,
@@ -564,6 +487,7 @@ export const adminImportOccupancyBatch = internalMutation({
         target_year_statuses: Object.fromEntries(targetYears.map((year) => [String(year), "not_assessed" as const])),
         ...(base.first_date ? { lifecycle_event: "first_seen", lifecycle_date: base.first_date, lifecycle_date_precision: base.first_date.length === 4 ? "year" : base.first_date.length === 7 ? "month" : "day" } : {}),
         ...(base.last_date ? { lifecycle_note: `last_seen ${base.last_date} (${base.date_confidence ?? "medium"})` } : {}),
+        ...(draftConfirmations !== undefined ? { confirmed_dates: draftConfirmations } : {}),
         evidence_note: evidenceNote,
         privacy_flag: privacyFlag,
         licence_flag: args.source.licence ? ("clear" as const) : ("needs_review" as const),
@@ -578,7 +502,7 @@ export const adminImportOccupancyBatch = internalMutation({
         import_batch_id: args.batchId,
       };
       assertEvidenceDraftLimits(draftRecord);
-      assertEvidenceDraftSubmission(draftRecord, false);
+      assertEvidenceDraftSubmission(draftRecord, false, floorYear);
       const draftRowId = await ctx.db.insert("evidence_drafts", draftRecord);
       await appendTaskEvent(ctx, {
         taskId,
@@ -716,7 +640,7 @@ export const importNominationBatch = mutation({
     const rowReports = [];
 
     for (const row of args.rows) {
-      const problems = validateRow(row, countryCode);
+      const problems = validateImportRow(row, countryCode);
       if (problems.length > 0) {
         rejected += 1;
         rowReports.push({ row_number: row.row_number, status: "rejected" as const, problems });
@@ -800,6 +724,7 @@ export const importNominationBatch = mutation({
         lifecycle_event: row.first_date ? "first_seen" : undefined,
         lifecycle_date: row.first_date,
         lifecycle_note: row.last_date ? `last_seen ${row.last_date} (${row.date_confidence ?? "medium"})` : undefined,
+        confirmed_dates: curatorConfirmations(row.confirmed_dates, [args.source.consulted_date, row.first_date]),
         evidence_note: [
           row.religion ? `religion: ${row.religion}` : undefined,
           row.denomination_code ? `denomination: ${row.denomination_code} (taxonomy ${row.taxonomy_version})` : undefined,

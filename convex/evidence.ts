@@ -18,6 +18,7 @@ import {
 import { assertNotRapidContract, isRapidCurrentDraft } from "./lib/rapidEntry";
 import { evidenceIntakeRefusal, isDecidedTaskStatus } from "./lib/intakeGate";
 import { dateFloorYear, targetYearsOrEmpty } from "./lib/countryYears";
+import { assertConfirmers, confirmersForRoles } from "./lib/partialDates";
 import { assignedTaskPeriodProblem } from "./lib/assignedTaskPeriods";
 import { assertOccupancySet, occupancyReferenceDate } from "./lib/occupancies";
 import { assertChainAgreesWithPeriods, assertFunctionChain } from "./lib/functionChain";
@@ -531,10 +532,11 @@ async function importSubmittedSpreadsheetDraft(
   assertTaskReasonLimit("submission note", item.submit_note);
   assertNotRapidContract(item.draft, "spreadsheet import");
   assertEvidenceDraftLimits(item.draft);
-  assertEvidenceDraftSubmission(item.draft, false);
+  assertConfirmers(item.draft.confirmed_dates, confirmersForRoles(user.roles));
+  const task = await getTaskOrThrow(ctx, item.task_id);
+  assertEvidenceDraftSubmission(item.draft, false, dateFloorYear(task.country_code));
 
   const draftId = item.evidence_draft_id ?? `${item.task_id}:spreadsheet:${now}`;
-  const task = await getTaskOrThrow(ctx, item.task_id);
   assertWideEvidenceRowFields(item.draft.generated_wide_row, taskTargetYears(task));
   const actorRole = chooseActorRole(user, ["service", "admin"]);
   const existing = await ctx.db
@@ -628,6 +630,7 @@ export async function saveEvidenceDraftHandler(ctx: MutationCtx, args: typeof sa
     }
     assertNotRapidContract(args.draft, "the general draft route");
     assertEvidenceDraftLimits(args.draft);
+    assertConfirmers(args.draft.confirmed_dates, confirmersForRoles(user.roles));
     assertWideEvidenceRowFields(args.draft.generated_wide_row, taskTargetYears(task));
     assertClientContextLimit(args.clientContext);
     // a cited register source must exist and be active before it is stored
@@ -977,8 +980,8 @@ export async function submitEvidenceDraftHandler(ctx: MutationCtx, args: typeof 
       throw new Error("Evidence draft belongs to another user.");
     }
     assertNotRapidContract(draft, "the general submission route");
-    assertEvidenceDraftSubmission(draft, false);
     const task = await getTaskOrThrow(ctx, draft.task_id);
+    assertEvidenceDraftSubmission(draft, false, dateFloorYear(task.country_code));
     // a receipt-backed retry answers from its receipt before the gate and
     // before any status write (review finding 2026-09-12: the draft and task
     // may have moved on since the receipted submission, and a retry that
@@ -1065,8 +1068,8 @@ export async function submitEvidenceDraftWithOccupanciesHandler(ctx: MutationCtx
       throw new Error("Only the contributor who saved this evidence can submit its periods.");
     }
     assertNotRapidContract(draft, "the guided evidence-and-periods route");
-    assertEvidenceDraftSubmission(draft, false);
     const task = await getTaskOrThrow(ctx, draft.task_id);
+    assertEvidenceDraftSubmission(draft, false, dateFloorYear(task.country_code));
     assertWideEvidenceRowFields(draft.generated_wide_row, taskTargetYears(task));
     const submissionKey = `${user._id}:${args.clientSubmissionId}`;
 
@@ -1226,8 +1229,8 @@ export const submitUnresolvedNote = mutation({
       throw new Error("Evidence draft belongs to another user.");
     }
     assertNotRapidContract(draft, "the unresolved-note route");
-    assertEvidenceDraftSubmission(draft, true);
     const task = await getTaskOrThrow(ctx, draft.task_id);
+    assertEvidenceDraftSubmission(draft, true, dateFloorYear(task.country_code));
     const gateRefusal = evidenceIntakeRefusal(task.status);
     if (gateRefusal !== null) {
       throw new Error(gateRefusal);

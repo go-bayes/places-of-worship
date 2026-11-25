@@ -293,6 +293,19 @@ training lane closes.
 | --- | --- | --- | --- | --- |
 | `seedGuyTrainingWorkpack` | internal mutation | `admin key` | Seed the fixed VU training batch `guy-vu-training-001` with its training-case tasks, all excluded from exports. Idempotent: skips entirely when the batch already exists. | `task_batches`, `tasks`, `task_events` |
 
+## Dates: deep-time stage 1
+
+Stage 1 of the deep-time date format (`docs/development/deep-time-date-format-brief-2026-11-24.md`, rulings 1 to 8 of section 10) sets one reading of a partial date (`YYYY`, `YYYY-MM` or `YYYY-MM-DD`, a real Gregorian date) across the functions above. `convex/lib/partialDates.ts` holds both validators.
+
+- A historical date (the bounds of a historical claim, a period's dates, a function chain's dates, the lifecycle date) accepts any year from 0001, written with four digits (`0920`). It must also reach the task country's date floor (`convex/lib/countryYears.ts`), checked when the record is written.
+- An observation date (a source's date or capture date, a rapid observation's date) keeps 1000 to 2100. A field observation and a rapid current observation refuse a date outside that range outright.
+- The year `0000` is refused in every form until stage 2 gives it a meaning.
+- A date below the floor, or a documentary source's date below 1000, is accepted when the record lists it in `confirmed_dates`: one `{ date, confirmed_by }` entry per date, the date exactly as written and `confirmed_by` one of `contributor`, `curator` or `agent`. The field is optional on `evidenceDraftInput`, `historicalClaimInput`, `occupancySegmentInput` and `functionChainInput`, and is stored on `evidence_drafts`, `historical_claims`, `site_occupancies` and the draft's `function_chain`. A record without a confirmed date carries no list, so its evidence version and other hashes are unchanged. Every entry must match a date the record holds, once.
+- Who may be named: a person writing through `saveEvidenceDraft`, `submitHistoricalClaim`, the periods and chain routes or the atomic submission routes names a `contributor`; a `curator`, `admin` or `service` user may also name a `curator`. No person names an `agent`.
+- Imports: an import row (`importNominationBatch`, `adminImportOccupancyBatch`) may carry `confirmed_dates`, a list of the row's own dates that the curator who prepared the file confirmed. Each becomes a `curator` entry on the record that holds the date: the draft for `first_date` and the source's consulted date, the period for its own dates.
+- Agent intake: `internalAgentIntake:ingestBundle` and `firstPassReceipts:ingestFirstPass` refuse a dossier claim whose `date_start` or `date_end` falls below the country's floor, unless the claim lists it in `confirmed_dates` with `confirmed_by: "agent"` (the dossier schemas gain the optional field). The review queue should treat a date that only an agent confirmed as unconfirmed until a person confirms it.
+- Four checks are stricter for new records (brief section 9): `0000` in a full date; a full observation date outside 1000 to 2100; the lifecycle date below the floor; an agent's dated claim below the floor. Stored records are not re-checked.
+
 ## Update Rules
 
 When adding or changing a public Convex function:

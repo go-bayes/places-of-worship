@@ -8,6 +8,7 @@ import { fileURLToPath } from "node:url";
 import { DATE_FLOOR_YEARS, DEFAULT_DATE_FLOOR_YEAR, DEFAULT_TARGET_YEARS, dateFloorYear, defaultTargetYears, targetYearsOrEmpty } from "./countryYears.ts";
 import { assertHistoricalClaim } from "./historicalClaims.ts";
 import { assertOccupancySegment } from "./occupancies.ts";
+import { HISTORICAL_MIN_YEAR } from "./partialDates.ts";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, "..", "..");
@@ -83,7 +84,9 @@ test("portal and Convex date floors match for explicit floors and census countri
     assert.ok(Object.hasOwn(mirror.DATE_FLOOR_YEARS, code), `${code} has census waves but no explicit portal floor`);
   }
   for (const [code, floor] of Object.entries(DATE_FLOOR_YEARS)) {
-    assert.ok(floor >= 1000 && floor <= DEFAULT_DATE_FLOOR_YEAR, `${code} floor ${floor} outside 1000..${DEFAULT_DATE_FLOOR_YEAR}`);
+    // deep-time stage 1 (ruling 3): a historical date may name any year from
+    // 0001, so a floor may lie anywhere from there to the default
+    assert.ok(floor >= HISTORICAL_MIN_YEAR && floor <= DEFAULT_DATE_FLOOR_YEAR, `${code} floor ${floor} outside ${HISTORICAL_MIN_YEAR}..${DEFAULT_DATE_FLOOR_YEAR}`);
     assert.equal(mirror.yearFor(code.toLowerCase()), floor);
   }
 });
@@ -114,14 +117,19 @@ const claim = {
 };
 
 test("a historical claim before the floor is refused with the floor named", () => {
-  assert.throws(() => assertHistoricalClaim(claim, "2026-09-02"), /from 1600 onward/);
-  assert.throws(() => assertHistoricalClaim(claim, "2026-09-02", dateFloorYear("NZ")), /from 1600 onward/);
+  assert.throws(() => assertHistoricalClaim(claim, "2026-09-02"), /earlier than 1600, the earliest year this country accepts without a confirmed date/);
+  assert.throws(() => assertHistoricalClaim(claim, "2026-09-02", dateFloorYear("NZ")), /earlier than 1600, the earliest year this country accepts without a confirmed date/);
   assert.doesNotThrow(() => assertHistoricalClaim(claim, "2026-09-02", dateFloorYear("IE")));
   // the 1450 claim is accepted in the 1000-tier countries added on 2026-11-24
   for (const code of ["AL", "CZ", "GH", "KE"]) {
     assert.doesNotThrow(() => assertHistoricalClaim(claim, "2026-09-02", dateFloorYear(code)), code);
   }
-  assert.throws(() => assertHistoricalClaim(claim, "2026-09-02", dateFloorYear("ZA")), /from 1500 onward/);
+  assert.throws(() => assertHistoricalClaim(claim, "2026-09-02", dateFloorYear("ZA")), /earlier than 1500/);
+  // ruling 7, option c: the floor stays, and a confirmed date passes it
+  const confirmed = { ...claim, confirmed_dates: [{ date: "1450", confirmed_by: "contributor" }, { date: "1452", confirmed_by: "contributor" }] };
+  assert.doesNotThrow(() => assertHistoricalClaim(confirmed, "2026-09-02", dateFloorYear("NZ")));
+  const halfConfirmed = { ...claim, confirmed_dates: [{ date: "1450", confirmed_by: "contributor" }] };
+  assert.throws(() => assertHistoricalClaim(halfConfirmed, "2026-09-02", dateFloorYear("NZ")), /latest supported date 1452 is earlier than 1600/);
 });
 
 test("an occupancy segment honours the country floor", () => {
@@ -143,9 +151,11 @@ test("an occupancy segment honours the country floor", () => {
     source_account: "The register lists the congregation here from 1520.",
     privacy_flag: "clear",
   };
-  assert.throws(() => assertOccupancySegment(segment, "2026-09-02"), /from 1600 onward/);
-  assert.throws(() => assertOccupancySegment(segment, "2026-09-02", dateFloorYear("VU")), /from 1600 onward/);
+  assert.throws(() => assertOccupancySegment(segment, "2026-09-02"), /earlier than 1600, the earliest year this country accepts without a confirmed date/);
+  assert.throws(() => assertOccupancySegment(segment, "2026-09-02", dateFloorYear("VU")), /earlier than 1600, the earliest year this country accepts without a confirmed date/);
   assert.doesNotThrow(() => assertOccupancySegment(segment, "2026-09-02", dateFloorYear("MX")));
+  const confirmed = { ...segment, confirmed_dates: [{ date: "1520", confirmed_by: "curator" }] };
+  assert.doesNotThrow(() => assertOccupancySegment(confirmed, "2026-09-02", dateFloorYear("VU")));
 });
 
 test("a registry country carries no census years until one is ruled (r-h1)", () => {
