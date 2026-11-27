@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-KLPwO3lD3PR2k/nlMUO3UaT/Pr8N66f8nxdjIdiXMFA='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-VCloQ26u/og0VfKt4OadmUJ4Vr0O265qUCHhc48W2O4='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>religionmap.org · Romania</title>
   <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet" integrity="sha384-p5cy4wHtKSqjnLUNjQ+8ffCwUp0vlLS+6lg1lc3qqXax2E1EmVCMCAimU+R0MOZH" crossorigin="anonymous">
@@ -28,7 +28,7 @@
           summary: "data/area_summary_judet.json",
           codeProp: "area_code",
           nameProp: "area_name",
-          credit: "Boundaries © Eurostat GISCO NUTS3 2021 · source county rows from INS RPL tables"
+          credit: "Boundaries from Eurostat GISCO NUTS3 2021, © EuroGeographics for the administrative boundaries · source county rows from INS RPL tables"
         },
         lau_2021: {
           label: "LAU 2021 (detail)",
@@ -36,7 +36,7 @@
           summary: "data/area_summary_lau_2021.json",
           codeProp: "area_code",
           nameProp: "area_name",
-          credit: "Boundaries © Eurostat GISCO LAU 2021 · 2011 rows bridged from GISCO LAU 2011 by LAU_ID"
+          credit: "Boundaries from Eurostat GISCO LAU 2021, © EuroGeographics for the administrative boundaries · 2011 rows bridged from GISCO LAU 2011 by LAU_ID"
         }
       },
       defaultLevel: "judet",
@@ -88,7 +88,7 @@
         { id: "review-link", label: "Review evidence", href: "review.html", title: "Review submitted evidence" }
       ],
       datedPlaces: "data/dated_places.geojson",
-      censusSourceAttribution: 'Census religion from <a href="https://www.recensamantromania.ro/rezultate-rpl-2021/rezultate-definitive/" target="_blank" rel="noopener">INS RPL 2021 final results, Tabel 2.04.2</a> and <a href="https://www.recensamantromania.ro/istoric/rpl-2011/" target="_blank" rel="noopener">INS RPL 2011 sR_TAB_13</a> &middot; Boundaries from <a href="https://gisco-services.ec.europa.eu/distribution/v2/lau/" target="_blank" rel="noopener">Eurostat GISCO LAU</a> and <a href="https://gisco-services.ec.europa.eu/distribution/v2/nuts/" target="_blank" rel="noopener">NUTS</a> &middot; INS reuse statement not located during build; attribution retained',
+      censusSourceAttribution: 'Census religion from <a href="https://www.recensamantromania.ro/rezultate-rpl-2021/rezultate-definitive/" target="_blank" rel="noopener">INS RPL 2021 final results, Tabel 2.04.2</a> and <a href="https://www.recensamantromania.ro/istoric/rpl-2011/" target="_blank" rel="noopener">INS RPL 2011 sR_TAB_13</a> &middot; Boundaries from <a href="https://gisco-services.ec.europa.eu/distribution/v2/lau/" target="_blank" rel="noopener">Eurostat GISCO LAU</a> and <a href="https://gisco-services.ec.europa.eu/distribution/v2/nuts/" target="_blank" rel="noopener">NUTS</a>, &copy; EuroGeographics for the administrative boundaries &middot; INS reuse statement not located during build; attribution retained',
       censusFlagNote: "* The denominator excludes Informatie nedisponibila: 6.26% nationally in 2011 and 13.95% nationally in 2021. 2021 Agnostic is not counted as no religion. Commune-level cells are suppressed for small counts; the county view is complete for headline percentages."
     };
   </script>

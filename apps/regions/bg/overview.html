@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-/EgyHDLOtWbv8IPxjfZ14ZL2WQfUl75GW45re5IR7x0='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-jlIJR8knU9LhTdjk5R1hTLeUb0FVr06/8Ak0MY7RY+g='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>religionmap.org · Bulgaria · Map overview</title>
   <link href="../../shared/map-shell.css" rel="stylesheet">
@@ -46,11 +46,11 @@
           href: "https://ec.europa.eu/eurostat/web/gisco",
           construct: "Boundary geometry (28 districts)",
           years: "2021 frame",
-          licence: "Eurostat GISCO material, reusable with source acknowledgement and a modification disclaimer"
+          licence: "Eurostat GISCO material, reusable with source acknowledgement and a modification disclaimer; © EuroGeographics for the administrative boundaries"
         }
       ],
       accessData: {
-        sourceOfRecord: "National Statistical Institute (NSI), <a href=\"https://www.nsi.bg/en\" target=\"_blank\" rel=\"noopener\">census dissemination tables</a>; boundaries from <a href=\"https://ec.europa.eu/eurostat/web/gisco\" target=\"_blank\" rel=\"noopener\">Eurostat GISCO</a> NUTS 3 (2021 frame).",
+        sourceOfRecord: "National Statistical Institute (NSI), <a href=\"https://www.nsi.bg/en\" target=\"_blank\" rel=\"noopener\">census dissemination tables</a>; boundaries from <a href=\"https://ec.europa.eu/eurostat/web/gisco\" target=\"_blank\" rel=\"noopener\">Eurostat GISCO</a> NUTS 3 (2021 frame), © EuroGeographics for the administrative boundaries.",
         tables: "District religion tables for 2001, 2011 and 2021. The area-summary religious_affiliation fields sum the published mutually exclusive categories and the no_religion fields carry NSI's no-religion category (2011 and 2021; null for 2001, which offered no such category); each wave uses NSI's own published basis. Per-row quality flags carry each district-wave's non-response share.",
         licence: "NSI data follow NSI Licence v2.0 (use with attribution; the licence's derivative-works clause is recorded in the manifest); GISCO geometry is reusable with source acknowledgement and a modification disclaimer.",
         script: "scripts/build_bg_area_summary.R",
