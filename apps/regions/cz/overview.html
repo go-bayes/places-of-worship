@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-4dLaTvHnj+2OIlqUqmZATmPlqchwdzTmFURuacZjfls='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js https://accounts.google.com/gsi/client 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-ceiAP3HYC6mtRNbeX2erDaSrJK523o+q25t4bA8wLL4='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev; font-src 'self'; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/ https://www.google.com/maps/embed/; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>religionmap.org · Czechia · Map overview</title>
   <link href="../../shared/map-shell.css" rel="stylesheet">
@@ -30,7 +30,7 @@
         "Percentages use a stated-response denominator: total population minus neuvedeno (not stated). Neuvedeno is large in Czechia — 30.05% nationally in 2021 — and is excluded from the denominator, not counted as no religion.",
         "Religious affiliation combines believers with a church (věřící – hlásící se k církvi) and believers without a church (věřící – nehlásící se k církvi); no religion is bez náboženské víry.",
         "The 2021 census asked religion as a voluntary write-in question, which affects comparability with earlier census lists. Earlier waves (1991, 2001, 2011) are not retrievable at kraj level through the DataStat table and are deferred.",
-        "Boundaries are Eurostat GISCO NUTS3 2021 polygons (kraje are NUTS3 in Czechia), © EuroGeographics."
+        "Boundaries are Eurostat GISCO NUTS3 2021 polygons (kraje are NUTS3 in Czechia), © EuroGeographics for the administrative boundaries."
       ],
       sources: [
         {
@@ -58,7 +58,7 @@
       accessData: {
         sourceOfRecord: "CZSO DataStat API: catalogue <a href=\"https://scitani.gov.cz/datastat/api/katalog/vybery/SLD008T02?jazyk=cs\" target=\"_blank\" rel=\"noopener\">SLD008T02</a> and its <a href=\"https://scitani.gov.cz/datastat/api/dotaz/data/vybery/SLD008T02?jazyk=cs\" target=\"_blank\" rel=\"noopener\">data endpoint</a>.",
         tables: "<code>SLD008T02</code> (population by religious faith and region, census 2021); reconciliation workbook <code>sldb2021_pv_obyvatelstvo_podle_cirkvi_a_kraju.xlsx</code> from the CZSO religion page. The 14 kraj rows reconcile exactly against the national row.",
-        licence: "CZSO open data, reuse with attribution; boundaries under Eurostat GISCO download provisions with attribution to © EuroGeographics.",
+        licence: "CZSO open data, reuse with attribution; boundaries under Eurostat GISCO download provisions with the notice © EuroGeographics for the administrative boundaries.",
         script: "scripts/build_cz_area_summary.R",
         manifests: [
           { label: "cz-census-religion-2021", href: "docs/manifests/cz-census-religion-2021.json" }

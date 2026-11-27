@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-11-27 (EuroGeographics notice on six country maps)
+
+- The country maps for Bulgaria, Czechia, Hungary, Poland, Romania and Serbia draw their area outlines from Eurostat GISCO boundary files, whose terms ask for the notice "© EuroGeographics for the administrative boundaries" wherever the outlines are shown. The Romania and Poland pages did not carry the notice, the Czechia pages carried a shortened form, and Bulgaria's overview page lacked it. Each map page now carries the full notice in its source attribution and in the credit line of every area popup, and each overview page carries it in its sources table. For Poland the notice applies to the 17 dioceses drawn from GISCO municipal outlines. Wording only: no data, boundary file or behaviour changes. The inline configuration scripts changed, so the content-security-policy hashes were restamped. Files: `index.html` and `overview.html` under `apps/regions/{bg,cz,hu,pl,ro,rs}/`.
+
 ### 2026-11-24 (Street View is a reality check)
 
 - The contributor portal's instructions now describe Street View and Google Maps as a reality check on a place that an independent source, such as OpenStreetMap, already records, and tell a contributor not to add a place from Street View alone (JB, 2026-11-24). The instructions had told contributors to look around the site in Street View and to treat it as evidence. The instruction to treat the OSM record as context for identity, not proof of current use, stays. The same rule now sits beside the nomination form's one-click source buttons. Wording only: the *Google Street View* button and every form are unchanged, and no stored record changes. The RA guide states the rule in its nomination paragraph and rewords its pin-drop paragraph. No inline script changed; `stamp_csp.mjs --check` and the 46 portal test files pass. Files: `apps/regions/nz/js/verification-map.js` (stamp `20261124h`), `apps/regions/nz/verification.html`, `apps/regions/_shared/tiles-v2-client.test.cjs`, `apps/guides/ra.html`.
